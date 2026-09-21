@@ -1,0 +1,9 @@
+name: environmentAAP
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+  - freecad
+variables:
+  PYTHONPATH: C:\Users\danie\miniconda3\envs\environmentAAP\Library\bin
+prefix: C:\Users\danie\miniconda3\envs\environmentAAP
