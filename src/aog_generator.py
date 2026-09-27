@@ -12,11 +12,16 @@ the sub-assembly "already analyzed" state representation.
 
 from __future__ import annotations
 
+from interference_identification import InterferenceResult
 from preprocessing import StanderRecord
 
 
-def build_aog(interference_matrix: dict, stander_records: dict[str, StanderRecord]):
+def build_aog(interference_result: InterferenceResult, stander_records: dict[str, StanderRecord]):
     """Return the assembly-oriented graph (AND/OR graph) of feasible disassembly sequences.
+
+    Free removal directions come from `interference_result` queries (free_directions,
+    removable, blockers) with no geometry calls; stander records are keyed by the same
+    obj.Name IDs as `interference_result.component_ids`.
 
     Not yet implemented — the AoG generator has not been design-reviewed yet; see
     CLAUDE.md's "Current status" section.

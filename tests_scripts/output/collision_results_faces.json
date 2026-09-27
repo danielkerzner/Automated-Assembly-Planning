@@ -1,0 +1,425 @@
+{
+  "params": {
+    "volume_epsilon": 1e-06,
+    "fuzzy_tol": 1e-05,
+    "margin": 1.0,
+    "sweep": "faces",
+    "use_broad_phase": true
+  },
+  "results": {
+    "A1": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "common(tool) works, volume=500.000000",
+          "passed": true
+        },
+        {
+          "label": "common(tool, tolerance) accepted, volume=500.000000",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "FreeCAD version: 1.1.0 (20260325 (Git shallow))"
+      ],
+      "seconds": 0.01
+    },
+    "A2": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "Part.OCCError: Solids are not Processed",
+      "seconds": 0.001
+    },
+    "A3": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "sweep (0.7071, 0.7071, 0): volume=3828.427125, expected=3828.427125, rel err=3.56e-16",
+          "passed": true
+        },
+        {
+          "label": "sweep (0.5774, 0.5774, 0.5774): volume=4464.101615, expected=4464.101615, rel err=0.00e+00",
+          "passed": true
+        },
+        {
+          "label": "sweep (0.5612, -0.8277, 0): volume=3777.746421, expected=3777.746421, rel err=0.00e+00",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.062
+    },
+    "A4": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "A vs B at x=30 along (1, 0, 0): expected blocked, got blocked (exact, L=41.000, vol=1.000e+03)",
+          "passed": true
+        },
+        {
+          "label": "A vs B at y=30 along (1, 0, 0): expected free, got free (broad, L=0.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "A vs B at y=30 (no broad phase) along (1, 0, 0): expected free, got free (exact, L=11.000, vol=0.000e+00)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.011
+    },
+    "B1": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "B1 A along (0, 0, 1): expected free, got free (exact, L=1.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B1 A along (-0, -0, -1): expected blocked, got blocked (exact, L=21.000, vol=1.000e+03)",
+          "passed": true
+        },
+        {
+          "label": "B1 A along (1, 0, 0): expected free, got free (exact, L=11.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B1 A along (-1, -0, -0): expected free, got free (exact, L=11.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B1 A along (0, 1, 0): expected free, got free (exact, L=11.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B1 A along (-0, -1, -0): expected free, got free (exact, L=11.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B1 B along (-0, -0, -1): expected free, got free (exact, L=1.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B1 B along (0, 0, 1): expected blocked, got blocked (exact, L=21.000, vol=1.000e+03)",
+          "passed": true
+        },
+        {
+          "label": "B1 A along (0, 0, 1): expected free, got free (exact, L=1.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B1 A along (-0, -0, -1): expected blocked, got blocked (exact, L=21.000, vol=1.000e+03)",
+          "passed": true
+        },
+        {
+          "label": "B1 A along (1, 0, 0): expected free, got free (exact, L=11.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B1 A along (-1, -0, -0): expected free, got free (exact, L=11.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B1 A along (0, 1, 0): expected free, got free (exact, L=11.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B1 A along (-0, -1, -0): expected free, got free (exact, L=11.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B1 B along (-0, -0, -1): expected free, got free (exact, L=1.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B1 B along (0, 0, 1): expected blocked, got blocked (exact, L=21.000, vol=1.000e+03)",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "-- fuzzy_tol = 0.0 (broad phase off, every case goes through the boolean)",
+        "-- fuzzy_tol = 1e-05 (broad phase off, every case goes through the boolean)"
+      ],
+      "seconds": 0.143
+    },
+    "B2": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "B2 A along (0, 1, 0): expected free, got free (broad, L=0.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B2 A along (-0, -1, -0): expected free, got free (broad, L=0.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B2 A along (0, 0, 1): expected free, got free (broad, L=0.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B2 A along (-0, -0, -1): expected free, got free (broad, L=0.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B2 A along (1, 0, 0): expected blocked, got blocked (exact, L=21.000, vol=1.000e+03)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.022
+    },
+    "B3": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "B3 pin along (0, 0, 1): expected free, got free (exact, L=21.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (-0, -0, -1): expected free, got free (exact, L=21.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (1, 0, 0): expected blocked, got blocked (exact, L=26.000, vol=8.037e+02)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (-1, -0, -0): expected blocked, got blocked (exact, L=26.000, vol=8.037e+02)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (0, 1, 0): expected blocked, got blocked (exact, L=26.000, vol=1.607e+03)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (-0, -1, -0): expected blocked, got blocked (exact, L=26.000, vol=1.607e+03)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (0.7071, 0, 0.7071): expected blocked, got blocked (exact, L=32.820, vol=7.083e+02)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (0, 0, 1): expected free, got free (exact, L=21.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (-0, -0, -1): expected free, got free (exact, L=21.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (1, 0, 0): expected blocked, got blocked (exact, L=26.000, vol=8.037e+02)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (-1, -0, -0): expected blocked, got blocked (exact, L=26.000, vol=8.037e+02)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (0, 1, 0): expected blocked, got blocked (exact, L=26.000, vol=1.607e+03)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (-0, -1, -0): expected blocked, got blocked (exact, L=26.000, vol=1.607e+03)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (0.7071, 0, 0.7071): expected blocked, got blocked (exact, L=32.820, vol=7.083e+02)",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "-- repeated with fuzzy_tol = 0 (zero-clearance bore is the case most likely to need it)"
+      ],
+      "seconds": 0.426
+    },
+    "B4": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "B4 pin along (0, 0, 1): expected free, got free (exact, L=21.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B4 pin along (-0, -0, -1): expected free, got free (exact, L=21.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B4 pin along (1, 0, 0): expected blocked, got blocked (exact, L=25.900, vol=7.843e+02)",
+          "passed": true
+        },
+        {
+          "label": "B4 pin along (-1, -0, -0): expected blocked, got blocked (exact, L=25.900, vol=7.843e+02)",
+          "passed": true
+        },
+        {
+          "label": "B4 pin along (0, 1, 0): expected blocked, got blocked (exact, L=25.900, vol=1.569e+03)",
+          "passed": true
+        },
+        {
+          "label": "B4 pin along (-0, -1, -0): expected blocked, got blocked (exact, L=25.900, vol=1.569e+03)",
+          "passed": true
+        },
+        {
+          "label": "B4 pin along (0.7071, 0, 0.7071): expected blocked, got blocked (exact, L=32.749, vol=6.887e+02)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.188
+    },
+    "B5": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "B5 headed pin along (0, 0, 1): expected free, got free (exact, L=21.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B5 headed pin along (-0, -0, -1): expected blocked, got blocked (exact, L=14.000, vol=1.225e+03)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.064
+    },
+    "C1": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "C1 A along (1, -4.6e-15, 0): expected free, got free (broad, L=0.000, vol=0.000e+00)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.011
+    },
+    "C2": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "C2 A tilt into B along (1, 0, -0.001): expected blocked, got blocked (exact, L=11.020, vol=5.000e-01)",
+          "passed": true
+        },
+        {
+          "label": "C2 A tilt away along (1, 0, 0.001): expected free, got free (exact, L=11.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "intrusion volume well above volume_epsilon",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "intrusion volume along tilt = 0.5000 mm^3 (expected ~0.5), epsilon=1e-06"
+      ],
+      "seconds": 0.032
+    },
+    "C3": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "C3 A vs thin plate along (1, 0, 0): expected blocked, got blocked (exact, L=101.100, vol=1.000e+01)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.017
+    },
+    "C4": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "B behind A: free by broad phase, booleans called = 0",
+          "passed": true
+        },
+        {
+          "label": "A vs B in front, half-overlapping in projection along (1, 0, 0): expected blocked, got blocked (exact, L=41.000, vol=5.000e+02)",
+          "passed": true
+        },
+        {
+          "label": "A's final bbox beyond B along d: A.min=41.000 > B.max=40.000",
+          "passed": true
+        },
+        {
+          "label": "oblique (0.9759, 0.1952, 0.09759): A.min=43.940 > B.max=42.940",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.007
+    },
+    "C5": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "C5 L along (-1, -0, -0): expected free, got free (exact, L=11.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "C5 L along (-0, -1, -0): expected free, got free (exact, L=11.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "C5 L along (1, 0, 0): expected blocked, got blocked (exact, L=21.000, vol=1.000e+03)",
+          "passed": true
+        },
+        {
+          "label": "C5 L along (0, 1, 0): expected blocked, got blocked (exact, L=21.000, vol=1.000e+03)",
+          "passed": true
+        },
+        {
+          "label": "C5 L along (0, 0, 1): expected free, got free (exact, L=11.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "C5 L along (-0, -0, -1): expected free, got free (exact, L=11.000, vol=0.000e+00)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.078
+    },
+    "D1": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "antisymmetry over 39 cases, mismatches=0",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 1.133
+    },
+    "D2": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "broad phase never contradicts exact test (contradictions=0)",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "137/200 pairs settled by broad phase"
+      ],
+      "seconds": 3.323
+    },
+    "D3": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "0.1 mm overlap flagged, volume=10.0000",
+          "passed": true
+        },
+        {
+          "label": "B1 touching not flagged, volume=0.000e+00",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.009
+    }
+  }
+}

@@ -1,0 +1,61 @@
+PATH_TO_FREECAD_LIBDIR not specified, using default FreeCAD version in C:/Users/danie/miniconda3/envs/environmentAAP/Library/bin
+CollisionConfig: CollisionConfig(step=2.0, volume_epsilon=1e-06, overlap_tol=1.0, margin=1.0, gap_skip=True, use_broad_phase=True)
+
+=== I1 ===
+  [PASS] test_collision.py --groups A B C D: exit code 0, 20 tests, 0 failed
+
+=== I8 ===
+  note: 2 pair(s) overlap statically by more than overlap_tol=1.0 mm^3 (fix the model or mark the part as stander): A / B (V0=10.0000 mm^3); B / C (V0=10.0000 mm^3)
+  [PASS] one error naming both overlapping pairs (A/B and B/C), not A/C
+  [PASS] no files written
+
+=== I10 ===
+  (running preprocessing on industrial_fastner)
+    aap.interference WARNING: Tolerance pair industrial_fastner_part2 / industrial_fastner_part5 (Part__Feature001 / Part__Feature006): static overlap V0=0.0922 mm^3, blocking threshold=0.1844
+    aap.interference WARNING: Tolerance pair industrial_fastner_part5 / industrial_fastner_part6 (Part__Feature006 / Part__Feature007): static overlap V0=0.4200 mm^3, blocking threshold=0.8400
+    aap.interference INFO: Pair 1/10 industrial_fastner_part3 / industrial_fastner_part2: 107.2 s, 8/26 directions free
+    aap.interference INFO: Pair 2/10 industrial_fastner_part3 / industrial_fastner_part1: 10.9 s, 1/26 directions free
+    aap.interference INFO: Pair 3/10 industrial_fastner_part3 / industrial_fastner_part5: 75.5 s, 16/26 directions free
+    aap.interference INFO: Pair 4/10 industrial_fastner_part3 / industrial_fastner_part6: 6.0 s, 2/26 directions free
+    aap.interference INFO: Pair 5/10 industrial_fastner_part2 / industrial_fastner_part1: 6.9 s, 1/26 directions free
+    aap.interference INFO: Pair 6/10 industrial_fastner_part2 / industrial_fastner_part5: 33.8 s, 10/26 directions free
+    aap.interference INFO: Pair 7/10 industrial_fastner_part2 / industrial_fastner_part6: 1.9 s, 2/26 directions free
+    aap.interference INFO: Pair 8/10 industrial_fastner_part1 / industrial_fastner_part5: 3.2 s, 25/26 directions free
+    aap.interference INFO: Pair 9/10 industrial_fastner_part1 / industrial_fastner_part6: 0.4 s, 24/26 directions free
+    aap.interference INFO: Pair 10/10 industrial_fastner_part5 / industrial_fastner_part6: 3.5 s, 1/26 directions free
+    aap.interference INFO: Interference matrix: n=5, D=26, pairs=10, total 250.0 s
+    aap.interference INFO: Tolerance pairs: industrial_fastner_part2/industrial_fastner_part5 (V0=0.0922), industrial_fastner_part5/industrial_fastner_part6 (V0=0.4200)
+    aap.interference INFO: Exception cells: none
+    aap.interference INFO: Broad-phase share 18.1%, mean iterations per stepped test 3.4
+    aap.interference INFO: Removable with all components present: industrial_fastner_part1: [6], industrial_fastner_part5: [0], industrial_fastner_part6: [1]
+  [PASS] CSV starts with a UTF-8 BOM (Excel shows the diagonal correctly)
+  [PASS] CSV is (n+1) x (n+1) with n=5 (header row and column)
+  [PASS] diagonal is the em dash and each (j, i) cell is the negation of (i, j) (0 bad cells)
+
+=== I11 ===
+    aap.interference INFO: Pair 1/3 A / B: 0.0 s, 5/6 directions free
+    aap.interference INFO: Pair 2/3 A / C: 0.0 s, 5/6 directions free
+    aap.interference INFO: Pair 3/3 B / C: 0.0 s, 5/6 directions free
+    aap.interference INFO: Interference matrix: n=3, D=6, pairs=3, total 0.1 s
+    aap.interference INFO: Tolerance pairs: none
+    aap.interference INFO: Exception cells: none
+    aap.interference INFO: Broad-phase share 83.3%, mean iterations per stepped test 1.3
+    aap.interference INFO: Removable with all components present: A: [0, 1, 2, 3, 4], B: [0, 1, 2, 3], C: [0, 1, 2, 3, 5]
+  [PASS] free_directions(A, all) = {'-x', '+x', '+z', '+y', '-y'} (expected {'+x', '-x', '+z', '+y', '-y'})
+  [PASS] free_directions(B, all) = {'+x', '-y', '-x', '+y'} (expected {'+x', '+y', '-x', '-y'})
+  [PASS] free_directions(C, all) = {'-x', '-z', '+x', '+y', '-y'} (expected {'+x', '-x', '+y', '-z', '-y'})
+  [PASS] removable(all) = {'A': {'-x', '+x', '+z', '+y', '-y'}, 'B': {'+x', '-y', '-x', '+y'}, 'C': {'-x', '-z', '+x', '+y', '-y'}} (expected {'A': {'+x', '-x', '+z', '+y', '-y'}, 'B': {'+x', '+y', '-x', '-y'}, 'C': {'+x', '-x', '+y', '-z', '-y'}})
+  [PASS] blockers(B, +z, all) = [0] (expected [0])
+  [PASS] blockers(B, -z, all) = [2] (expected [2])
+  [PASS] blockers(A, -z, all) = [1, 2] (expected [1, 2])
+  [PASS] free_directions(B, {B, C}) after removing A = {'-x', '+x', '+z', '+y', '-y'} (expected {'+x', '-x', '+z', '+y', '-y'})
+  [PASS] removable({B, C}) after removing A = {'B': {'-x', '+x', '+z', '+y', '-y'}, 'C': {'-x', '-z', '+x', '+y', '-y'}} (expected {'B': {'+x', '-x', '+z', '+y', '-y'}, 'C': {'+x', '-x', '+y', '-z', '-y'}})
+
+| Test | Result | Notes |
+|---|---|---|
+| I1 | PASS |  |
+| I8 | PASS | 2 pair(s) overlap statically by more than overlap_tol=1.0 mm^3 (fix the model or mark the part as stander): A / B (V0=10.0000 mm^3); B / C (V0=10.0000 mm^3) |
+| I10 | PASS |  |
+| I11 | PASS |  |
+
+Details written to C:\Users\danie\Documents\documentosprincipal\Master Thesis\AAP\tests_scripts\output\interference_results.json

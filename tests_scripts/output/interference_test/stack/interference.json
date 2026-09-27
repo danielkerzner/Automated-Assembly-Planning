@@ -1,0 +1,173 @@
+{
+ "cache_key": "cded7804814595ded68c2381567757f33dd0cc44d738b8a7e7523df77fc7be4b",
+ "component_ids": [
+  "A",
+  "B",
+  "C"
+ ],
+ "component_labels": [
+  "A",
+  "B",
+  "C"
+ ],
+ "pair_info": {
+  "0,1": {
+   "kind": "normal",
+   "V0": 0.0,
+   "threshold": 1e-06
+  },
+  "0,2": {
+   "kind": "normal",
+   "V0": 0.0,
+   "threshold": 1e-06
+  },
+  "1,2": {
+   "kind": "normal",
+   "V0": 0.0,
+   "threshold": 1e-06
+  }
+ },
+ "exception_cells": [],
+ "caught_exceptions": [],
+ "outcome_detail": {
+  "0,1,0": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,1,1": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,1,2": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,1,3": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,1,4": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,1,5": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 2.0,
+   "volume": 199.99999999999994
+  },
+  "0,2,0": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,2,1": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,2,2": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,2,3": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,2,4": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,2,5": {
+   "phase": "step",
+   "iterations": 2,
+   "t_block": 12.0,
+   "volume": 199.99999999999994
+  },
+  "1,2,0": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "1,2,1": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "1,2,2": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "1,2,3": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "1,2,4": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "1,2,5": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 2.0,
+   "volume": 199.99999999999994
+  }
+ },
+ "config": {
+  "step": 2.0,
+  "volume_epsilon": 1e-06,
+  "overlap_tol": 1.0,
+  "margin": 1.0,
+  "gap_skip": true,
+  "use_broad_phase": true
+ },
+ "stats": {
+  "tests": 18,
+  "broad_phase_settled": 15,
+  "broad_phase_share": 0.8333333333333334,
+  "stepped_tests": 3,
+  "mean_test_time_s": 0.009406966671425229,
+  "max_test_time_s": 0.010828400001628324,
+  "iterations": 4,
+  "mean_iterations": 1.3333333333333333,
+  "max_iterations": 2,
+  "common_calls": 3,
+  "distToShape_calls": 4,
+  "gap_travel_share": 0.625,
+  "pair_times_s": {
+   "0,1": 0.008649800001876429,
+   "0,2": 0.011228399991523474,
+   "1,2": 0.009649300016462803
+  },
+  "matrix_time_s": 0.029527500009862706,
+  "total_time_s": 0.05008549999911338
+ },
+ "freecad_version": "1.1.0",
+ "date": "2026-09-27T19:13:07"
+}

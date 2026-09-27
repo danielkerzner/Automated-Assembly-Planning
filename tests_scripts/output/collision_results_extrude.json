@@ -1,0 +1,789 @@
+{
+  "params": {
+    "volume_epsilon": 1e-06,
+    "fuzzy_tol": 1e-05,
+    "margin": 1.0,
+    "sweep": "extrude",
+    "use_broad_phase": true
+  },
+  "results": {
+    "A1": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "common(tool) works, volume=500.000000",
+          "passed": true
+        },
+        {
+          "label": "common(tool, tolerance) accepted, volume=500.000000",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "FreeCAD version: 1.1.0 (20260325 (Git shallow))"
+      ],
+      "seconds": 0.036
+    },
+    "A2": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "Part.OCCError: Solids are not Processed",
+      "seconds": 0.004
+    },
+    "A3": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "Part.OCCError: Solids are not Processed",
+      "seconds": 0.0
+    },
+    "A4": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "Part.OCCError: Solids are not Processed",
+      "seconds": 0.001
+    },
+    "B1": {
+      "passed": false,
+      "checks": [],
+      "notes": [
+        "-- fuzzy_tol = 0.0 (broad phase off, every case goes through the boolean)"
+      ],
+      "error": "Part.OCCError: Solids are not Processed",
+      "seconds": 0.027
+    },
+    "B2": {
+      "passed": false,
+      "checks": [
+        {
+          "label": "B2 A along (0, 1, 0): expected free, got free (broad, L=0.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B2 A along (-0, -1, -0): expected free, got free (broad, L=0.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B2 A along (0, 0, 1): expected free, got free (broad, L=0.000, vol=0.000e+00)",
+          "passed": true
+        },
+        {
+          "label": "B2 A along (-0, -0, -1): expected free, got free (broad, L=0.000, vol=0.000e+00)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "error": "Part.OCCError: Solids are not Processed",
+      "seconds": 0.011
+    },
+    "B3": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "Part.OCCError: Solids are not Processed",
+      "seconds": 0.011
+    },
+    "B4": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "Part.OCCError: Solids are not Processed",
+      "seconds": 0.011
+    },
+    "B5": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "Part.OCCError: Solids are not Processed",
+      "seconds": 0.011
+    },
+    "C1": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "C1 A along (1, -4.6e-15, 0): expected free, got free (broad, L=0.000, vol=0.000e+00)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.011
+    },
+    "C2": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "Part.OCCError: Solids are not Processed",
+      "seconds": 0.011
+    },
+    "C3": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "Part.OCCError: Solids are not Processed",
+      "seconds": 0.011
+    },
+    "C4": {
+      "passed": false,
+      "checks": [
+        {
+          "label": "B behind A: free by broad phase, booleans called = 0",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "error": "Part.OCCError: Solids are not Processed",
+      "seconds": 0.001
+    },
+    "C5": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "Part.OCCError: Solids are not Processed",
+      "seconds": 0.011
+    },
+    "D1": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "Part.OCCError: Solids are not Processed",
+      "seconds": 0.011
+    },
+    "D2": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "Part.OCCError: Solids are not Processed",
+      "seconds": 0.001
+    },
+    "D3": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "0.1 mm overlap flagged, volume=10.0000",
+          "passed": true
+        },
+        {
+          "label": "B1 touching not flagged, volume=0.000e+00",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.005
+    },
+    "E1": {
+      "passed": false,
+      "checks": [
+        {
+          "label": "industrial_fastner_part3 dir 0 (-1, 4.626e-15, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 1 (1, -4.626e-15, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 2 (0.5612, -0.8277, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 3 (-0.5612, 0.8277, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 4 (-0.2674, 0.9636, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 5 (0.2674, -0.9636, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 6 (0, 0, -1): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 7 (-0, -0, 1): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 8 (-0.4784, 0.8782, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 9 (0.4784, -0.8782, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 10 (0, -1, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 11 (-0, 1, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 12 (-6.692e-17, 0.5, -0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 13 (6.692e-17, -0.5, 0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 14 (-6.692e-17, 0.5, 0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 15 (6.692e-17, -0.5, -0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 16 (0.9636, 0.2674, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 17 (-0.9636, -0.2674, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 18 (0.8782, 0.4784, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 19 (-0.8782, -0.4784, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 20 (-0.8277, -0.5612, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 21 (0.8277, 0.5612, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 22 (-0.7071, -0.7071, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 23 (0.7071, 0.7071, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 24 (0.7071, -0.7071, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 25 (-0.7071, 0.7071, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 26 (0, 0.9607, -0.2777): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part3 dir 27 (-0, -0.9607, 0.2777): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 0 (-1, 4.626e-15, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 1 (1, -4.626e-15, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 2 (0.5612, -0.8277, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 3 (-0.5612, 0.8277, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 4 (-0.2674, 0.9636, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 5 (0.2674, -0.9636, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 6 (0, 0, -1): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 7 (-0, -0, 1): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 8 (-0.4784, 0.8782, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 9 (0.4784, -0.8782, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 10 (0, -1, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 11 (-0, 1, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 12 (-6.692e-17, 0.5, -0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 13 (6.692e-17, -0.5, 0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 14 (-6.692e-17, 0.5, 0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 15 (6.692e-17, -0.5, -0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 16 (0.9636, 0.2674, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 17 (-0.9636, -0.2674, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 18 (0.8782, 0.4784, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 19 (-0.8782, -0.4784, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 20 (-0.8277, -0.5612, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 21 (0.8277, 0.5612, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 22 (-0.7071, -0.7071, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 23 (0.7071, 0.7071, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 24 (0.7071, -0.7071, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 25 (-0.7071, 0.7071, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 26 (0, 0.9607, -0.2777): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part2 dir 27 (-0, -0.9607, 0.2777): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 0 (-1, 4.626e-15, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 1 (1, -4.626e-15, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 2 (0.5612, -0.8277, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 3 (-0.5612, 0.8277, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 4 (-0.2674, 0.9636, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 5 (0.2674, -0.9636, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 6 (0, 0, -1): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 7 (-0, -0, 1): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 8 (-0.4784, 0.8782, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 9 (0.4784, -0.8782, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 10 (0, -1, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 11 (-0, 1, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 12 (-6.692e-17, 0.5, -0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 13 (6.692e-17, -0.5, 0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 14 (-6.692e-17, 0.5, 0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 15 (6.692e-17, -0.5, -0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 16 (0.9636, 0.2674, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 17 (-0.9636, -0.2674, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 18 (0.8782, 0.4784, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 19 (-0.8782, -0.4784, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 20 (-0.8277, -0.5612, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 21 (0.8277, 0.5612, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 22 (-0.7071, -0.7071, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 23 (0.7071, 0.7071, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 24 (0.7071, -0.7071, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 25 (-0.7071, 0.7071, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 26 (0, 0.9607, -0.2777): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part1 dir 27 (-0, -0.9607, 0.2777): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 0 (-1, 4.626e-15, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 1 (1, -4.626e-15, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 2 (0.5612, -0.8277, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 3 (-0.5612, 0.8277, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 4 (-0.2674, 0.9636, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 5 (0.2674, -0.9636, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 6 (0, 0, -1): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 7 (-0, -0, 1): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 8 (-0.4784, 0.8782, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 9 (0.4784, -0.8782, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 10 (0, -1, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 11 (-0, 1, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 12 (-6.692e-17, 0.5, -0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 13 (6.692e-17, -0.5, 0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 14 (-6.692e-17, 0.5, 0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 15 (6.692e-17, -0.5, -0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 16 (0.9636, 0.2674, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 17 (-0.9636, -0.2674, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 18 (0.8782, 0.4784, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 19 (-0.8782, -0.4784, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 20 (-0.8277, -0.5612, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 21 (0.8277, 0.5612, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 22 (-0.7071, -0.7071, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 23 (0.7071, 0.7071, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 24 (0.7071, -0.7071, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 25 (-0.7071, 0.7071, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 26 (0, 0.9607, -0.2777): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part5 dir 27 (-0, -0.9607, 0.2777): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 0 (-1, 4.626e-15, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 1 (1, -4.626e-15, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 2 (0.5612, -0.8277, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 3 (-0.5612, 0.8277, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 4 (-0.2674, 0.9636, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 5 (0.2674, -0.9636, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 6 (0, 0, -1): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 7 (-0, -0, 1): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 8 (-0.4784, 0.8782, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 9 (0.4784, -0.8782, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 10 (0, -1, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 11 (-0, 1, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 12 (-6.692e-17, 0.5, -0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 13 (6.692e-17, -0.5, 0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 14 (-6.692e-17, 0.5, 0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 15 (6.692e-17, -0.5, -0.866): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 16 (0.9636, 0.2674, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 17 (-0.9636, -0.2674, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 18 (0.8782, 0.4784, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 19 (-0.8782, -0.4784, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 20 (-0.8277, -0.5612, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 21 (0.8277, 0.5612, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 22 (-0.7071, -0.7071, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 23 (0.7071, 0.7071, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 24 (0.7071, -0.7071, 0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 25 (-0.7071, 0.7071, -0): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 26 (0, 0.9607, -0.2777): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "industrial_fastner_part6 dir 27 (-0, -0.9607, 0.2777): OCCError: Solids are not Processed",
+          "passed": false
+        },
+        {
+          "label": "all sweeps valid and booleans ran, failures=140",
+          "passed": false
+        }
+      ],
+      "notes": [
+        "5 reduced components x 28 candidate directions"
+      ],
+      "seconds": 7.175
+    },
+    "E2": {
+      "passed": false,
+      "checks": [
+        {
+          "label": "every candidate direction has its negation in the list (missing: [])",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "error": "Part.OCCError: Solids are not Processed",
+      "seconds": 0.003
+    },
+    "E3": {
+      "passed": false,
+      "checks": [
+        {
+          "label": "no static overlaps (found 2)",
+          "passed": false
+        }
+      ],
+      "notes": [
+        "overlap: industrial_fastner_part3 / industrial_fastner_part1 (0.1787 mm^3)",
+        "overlap: industrial_fastner_part5 / industrial_fastner_part6 (276.3728 mm^3)"
+      ],
+      "seconds": 0.535
+    },
+    "E4": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "Part.OCCError: Solids are not Processed",
+      "seconds": 0.003
+    },
+    "E5": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "Part.OCCError: Solids are not Processed",
+      "seconds": 0.003
+    }
+  }
+}

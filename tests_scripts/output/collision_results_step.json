@@ -1,0 +1,465 @@
+{
+  "params": {
+    "step": 0.5,
+    "volume_epsilon": 1e-06,
+    "overlap_tol": 1.0,
+    "margin": 1.0,
+    "gap_skip": true,
+    "use_broad_phase": true
+  },
+  "results": {
+    "A1": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "import freecad; import FreeCAD, Part succeeded",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "FreeCAD version: 1.1.0 (20260325 (Git shallow))"
+      ],
+      "seconds": 0.0
+    },
+    "A2": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "original unchanged: XMin=0.0",
+          "passed": true
+        },
+        {
+          "label": "translated copy: XMin=5.0",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.001
+    },
+    "A3": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "5 mm apart: distance=5.0",
+          "passed": true
+        },
+        {
+          "label": "touching: distance=0.000e+00",
+          "passed": true
+        },
+        {
+          "label": "overlapping: distance=0.000e+00",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.011
+    },
+    "A4": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "touching: common volume=0.000e+00",
+          "passed": true
+        },
+        {
+          "label": "1 mm overlap: volume=100.000000000000, rel err=2.84e-16",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.008
+    },
+    "A5": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "B1-B5 with distToShape failing every 3rd call: results identical (0 of 29 differ)",
+          "passed": true
+        },
+        {
+          "label": "every forced distToShape exception logged (74 logged / 74 raised)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along bore (0, 0, 1): common fails once -> retry ok=True, result free (expected free)",
+          "passed": true
+        },
+        {
+          "label": "B2 A into B (1, 0, 0): common fails once -> retry ok=True, result blocked (expected blocked)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along bore (normally free) (0, 0, 1): common fails twice -> blocked, exception_cell=True, logged=2",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 1.789
+    },
+    "B1": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "B1 A along (0, 0, 1): expected free, got free (broad, L=0.000, iters=0)",
+          "passed": true
+        },
+        {
+          "label": "B1 A along (-0, -0, -1): expected blocked, got blocked (step, L=21.000, iters=1, blocked at t=0.500 vol=5.000e+01)",
+          "passed": true
+        },
+        {
+          "label": "B1 A along (1, 0, 0): expected free, got free (broad, L=0.000, iters=0)",
+          "passed": true
+        },
+        {
+          "label": "B1 A along (-1, -0, -0): expected free, got free (broad, L=0.000, iters=0)",
+          "passed": true
+        },
+        {
+          "label": "B1 A along (0, 1, 0): expected free, got free (broad, L=0.000, iters=0)",
+          "passed": true
+        },
+        {
+          "label": "B1 A along (-0, -1, -0): expected free, got free (broad, L=0.000, iters=0)",
+          "passed": true
+        },
+        {
+          "label": "B1 B along (-0, -0, -1): expected free, got free (broad, L=0.000, iters=0)",
+          "passed": true
+        },
+        {
+          "label": "B1 B along (0, 0, 1): expected blocked, got blocked (step, L=21.000, iters=1, blocked at t=0.500 vol=5.000e+01)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.04
+    },
+    "B2": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "B2 A along (0, 1, 0): expected free, got free (broad, L=0.000, iters=0)",
+          "passed": true
+        },
+        {
+          "label": "B2 A along (-0, -1, -0): expected free, got free (broad, L=0.000, iters=0)",
+          "passed": true
+        },
+        {
+          "label": "B2 A along (0, 0, 1): expected free, got free (broad, L=0.000, iters=0)",
+          "passed": true
+        },
+        {
+          "label": "B2 A along (-0, -0, -1): expected free, got free (broad, L=0.000, iters=0)",
+          "passed": true
+        },
+        {
+          "label": "B2 A along (1, 0, 0): expected blocked, got blocked (step, L=21.000, iters=1, blocked at t=0.500 vol=5.000e+01)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.025
+    },
+    "B3": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "B3 pin along (0, 0, 1): expected free, got free (step, L=21.000, iters=42)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (-0, -0, -1): expected free, got free (step, L=21.000, iters=42)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (1, 0, 0): expected blocked, got blocked (step, L=26.000, iters=1, blocked at t=0.500 vol=4.998e+01)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (-1, -0, -0): expected blocked, got blocked (step, L=26.000, iters=1, blocked at t=0.500 vol=4.998e+01)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (0, 1, 0): expected blocked, got blocked (step, L=26.000, iters=1, blocked at t=0.500 vol=4.998e+01)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (-0, -1, -0): expected blocked, got blocked (step, L=26.000, iters=1, blocked at t=0.500 vol=4.998e+01)",
+          "passed": true
+        },
+        {
+          "label": "B3 pin along (0.7071, 0, 0.7071): expected blocked, got blocked (step, L=32.820, iters=1, blocked at t=0.500 vol=3.535e+01)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.362
+    },
+    "B4": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "B4 pin along (0, 0, 1): expected free, got free (step, L=21.000, iters=42)",
+          "passed": true
+        },
+        {
+          "label": "B4 pin along (-0, -0, -1): expected free, got free (step, L=21.000, iters=42)",
+          "passed": true
+        },
+        {
+          "label": "B4 pin along (1, 0, 0): expected blocked, got blocked (step, L=25.900, iters=1, blocked at t=0.500 vol=3.492e+01)",
+          "passed": true
+        },
+        {
+          "label": "B4 pin along (-1, -0, -0): expected blocked, got blocked (step, L=25.900, iters=1, blocked at t=0.500 vol=3.492e+01)",
+          "passed": true
+        },
+        {
+          "label": "B4 pin along (0, 1, 0): expected blocked, got blocked (step, L=25.900, iters=1, blocked at t=0.500 vol=3.492e+01)",
+          "passed": true
+        },
+        {
+          "label": "B4 pin along (-0, -1, -0): expected blocked, got blocked (step, L=25.900, iters=1, blocked at t=0.500 vol=3.492e+01)",
+          "passed": true
+        },
+        {
+          "label": "B4 pin along (0.7071, 0, 0.7071): expected blocked, got blocked (step, L=32.749, iters=1, blocked at t=0.500 vol=2.085e+01)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.349
+    },
+    "B5": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "B5 headed pin along (0, 0, 1): expected free, got free (step, L=21.000, iters=42)",
+          "passed": true
+        },
+        {
+          "label": "B5 headed pin along (-0, -0, -1): expected blocked, got blocked (step, L=14.000, iters=1, blocked at t=0.500 vol=6.126e+01)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.17
+    },
+    "C1": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "C1 A along (1, -4.6e-15, 0): expected free, got free (broad, L=0.000, iters=0)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.011
+    },
+    "C2": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "C2 tilt into B (h=0.5) along (1, 0, -0.001): expected blocked, got blocked (step, L=11.020, iters=1, blocked at t=0.500 vol=4.750e-02)",
+          "passed": true
+        },
+        {
+          "label": "C2 tilt into B (h=1.0) along (1, 0, -0.001): expected blocked, got blocked (step, L=11.020, iters=1, blocked at t=1.000 vol=9.000e-02)",
+          "passed": true
+        },
+        {
+          "label": "C2 tilt away along (1, 0, 0.001): expected free, got free (step, L=11.000, iters=22)",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "h=0.5: first blocking t=0.5000, volume=0.047500, formula 0.01*t*(10-t)=0.047500",
+        "h=1.0: first blocking t=1.0000, volume=0.090000, formula 0.01*t*(10-t)=0.090000"
+      ],
+      "seconds": 0.089
+    },
+    "C3": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "C3 A vs thin plate along (1, 0, 0): expected blocked, got blocked (step, L=101.100, iters=2, blocked at t=90.500 vol=1.000e+01)",
+          "passed": true
+        },
+        {
+          "label": "gap skipping keeps iterations small (2 <= 10)",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "iterations=2, distToShape calls=2, common calls=1, gap travel=90.00 mm"
+      ],
+      "seconds": 0.009
+    },
+    "C4": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "C4 h=0.25 -> blocked along (1, 0, 0): expected blocked, got blocked (step, L=6.400, iters=2, blocked at t=4.750 vol=2.500e+01)",
+          "passed": true
+        },
+        {
+          "label": "C4 h=0.5 -> blocked along (1, 0, 0): expected blocked, got blocked (step, L=6.400, iters=2, blocked at t=5.000 vol=4.000e+01)",
+          "passed": true
+        },
+        {
+          "label": "C4 h=0.8 -> blocked along (1, 0, 0): expected blocked, got blocked (step, L=6.400, iters=2, blocked at t=5.300 vol=1.000e+01)",
+          "passed": true
+        },
+        {
+          "label": "C4 h=1.0 -> missed (reported free, expected limitation) along (1, 0, 0): expected free, got free (step, L=6.400, iters=3)",
+          "passed": true
+        },
+        {
+          "label": "C4 h=2.0 -> missed (reported free, expected limitation) along (1, 0, 0): expected free, got free (step, L=6.400, iters=2)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.044
+    },
+    "C5": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "B behind A: free by broad phase, common calls=0, distToShape calls=0",
+          "passed": true
+        },
+        {
+          "label": "(1, 0, 0): at t=L=41.000, A.min=41.000 > B.max=40.000",
+          "passed": true
+        },
+        {
+          "label": "(0.9759, 0.1952, 0.09759): at t=L=43.940, A.min=43.940 > B.max=42.940",
+          "passed": true
+        },
+        {
+          "label": "C5 B in front, half-overlapping in projection along (1, 0, 0): expected blocked, got blocked (step, L=41.000, iters=2, blocked at t=20.500 vol=2.500e+01)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.009
+    },
+    "C6": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "every gap-skip/plain mismatch has an overlap window < h (1 mismatches, 0 real failures)",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "B/C cases: iterations gap-skip=341, plain=528",
+        "mismatch D2 pair 152 (0.9355, 0.2011, -0.2906): gap-skip=True, plain=False, overlap window=0.260 mm (< h, known limitation)",
+        "D2 set: 7 pairs skipped as hard overlaps; iterations gap-skip=325, plain=2318"
+      ],
+      "seconds": 8.194
+    },
+    "C7": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "C7 L along (-1, -0, -0): expected free, got free (step, L=11.000, iters=22)",
+          "passed": true
+        },
+        {
+          "label": "C7 L along (-0, -1, -0): expected free, got free (step, L=11.000, iters=22)",
+          "passed": true
+        },
+        {
+          "label": "C7 L along (1, 0, 0): expected blocked, got blocked (step, L=21.000, iters=1, blocked at t=0.500 vol=5.000e+01)",
+          "passed": true
+        },
+        {
+          "label": "C7 L along (0, 1, 0): expected blocked, got blocked (step, L=21.000, iters=1, blocked at t=0.500 vol=5.000e+01)",
+          "passed": true
+        },
+        {
+          "label": "C7 L along (0, 0, 1): expected free, got free (step, L=11.000, iters=22)",
+          "passed": true
+        },
+        {
+          "label": "C7 L along (-0, -0, -1): expected free, got free (step, L=11.000, iters=22)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.565
+    },
+    "D1": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "antisymmetry over 40 cases, mismatches=0",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 3.492
+    },
+    "D2": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "broad phase never contradicts stepping (contradictions=0)",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "137/200 pairs settled by broad phase"
+      ],
+      "seconds": 2.919
+    },
+    "D3": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "0.1 mm overlap raises hard error: static overlap 10.0000 mm^3 > overlap_tol 1.0",
+          "passed": true
+        },
+        {
+          "label": "0.005 mm overlap: kind=tolerance, V0=0.500000, threshold=1.000000",
+          "passed": true
+        },
+        {
+          "label": "D3 tolerance pair, sliding along (0, 1, 0): expected free, got free (step, L=11.000, iters=22)",
+          "passed": true
+        },
+        {
+          "label": "D3 tolerance pair, sliding along (-0, -1, -0): expected free, got free (step, L=11.000, iters=22)",
+          "passed": true
+        },
+        {
+          "label": "D3 tolerance pair, sliding along (0, 0, 1): expected free, got free (step, L=11.000, iters=22)",
+          "passed": true
+        },
+        {
+          "label": "D3 tolerance pair, sliding along (-0, -0, -1): expected free, got free (step, L=11.000, iters=22)",
+          "passed": true
+        },
+        {
+          "label": "D3 tolerance pair, away along (-1, -0, -0): expected free, got free (step, L=1.005, iters=3)",
+          "passed": true
+        },
+        {
+          "label": "D3 tolerance pair, into B along (1, 0, 0): expected blocked, got blocked (step, L=20.995, iters=1, blocked at t=0.500 vol=5.050e+01)",
+          "passed": true
+        },
+        {
+          "label": "B2 touching: kind=normal, V0=0.000e+00",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 1.789
+    }
+  }
+}

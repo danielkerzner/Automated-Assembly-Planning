@@ -50,6 +50,10 @@ class PreprocessingResult:
     reduced_assembly: "FreeCAD.Document"
     stander_records: dict[str, StanderRecord]
     candidate_directions: list[FreeCAD.Vector]
+    # Input files, so later stages can key caches on their contents. None for assemblies
+    # built in code (tests).
+    step_path: Path | None = None
+    bom_path: Path | None = None
 
 
 def load_assembly(step_path: str | Path) -> "FreeCAD.Document":
@@ -260,4 +264,7 @@ def run_preprocessing(
     stander_records, stander_ids = process_standers(doc, bom_labels, config)
     reduced_assembly = build_stander_reduced_assembly(doc, stander_ids)
     candidate_directions = discover_candidate_directions(reduced_assembly)
-    return PreprocessingResult(reduced_assembly, stander_records, candidate_directions)
+    return PreprocessingResult(
+        reduced_assembly, stander_records, candidate_directions,
+        step_path=Path(step_path), bom_path=Path(bom_path),
+    )

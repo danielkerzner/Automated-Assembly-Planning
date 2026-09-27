@@ -1,0 +1,161 @@
+PATH_TO_FREECAD_LIBDIR not specified, using default FreeCAD version in C:/Users/danie/miniconda3/envs/environmentAAP/Library/bin
+CollisionConfig: CollisionConfig(step=2.0, volume_epsilon=1e-06, overlap_tol=1.0, margin=1.0, gap_skip=True, use_broad_phase=True)
+
+=== I1 ===
+  [PASS] test_collision.py --groups A B C D: exit code 0, 20 tests, 0 failed
+
+=== I2 ===
+  (running preprocessing on industrial_fastner)
+    brute force industrial_fastner_part3 vs industrial_fastner_part2: 76.3 s
+    brute force industrial_fastner_part3 vs industrial_fastner_part1: 9.6 s
+    brute force industrial_fastner_part3 vs industrial_fastner_part5: 69.3 s
+    brute force industrial_fastner_part3 vs industrial_fastner_part6: 5.4 s
+    brute force industrial_fastner_part2 vs industrial_fastner_part3: 85.6 s
+    brute force industrial_fastner_part2 vs industrial_fastner_part1: 6.2 s
+    brute force industrial_fastner_part2 vs industrial_fastner_part5: 31.0 s
+    brute force industrial_fastner_part2 vs industrial_fastner_part6: 1.6 s
+    brute force industrial_fastner_part1 vs industrial_fastner_part3: 10.0 s
+    brute force industrial_fastner_part1 vs industrial_fastner_part2: 6.7 s
+    brute force industrial_fastner_part1 vs industrial_fastner_part5: 3.0 s
+    brute force industrial_fastner_part1 vs industrial_fastner_part6: 0.4 s
+    brute force industrial_fastner_part5 vs industrial_fastner_part3: 71.8 s
+    brute force industrial_fastner_part5 vs industrial_fastner_part2: 33.6 s
+    brute force industrial_fastner_part5 vs industrial_fastner_part1: 2.7 s
+    brute force industrial_fastner_part5 vs industrial_fastner_part6: 3.0 s
+    brute force industrial_fastner_part6 vs industrial_fastner_part3: 6.0 s
+    brute force industrial_fastner_part6 vs industrial_fastner_part2: 1.8 s
+    brute force industrial_fastner_part6 vs industrial_fastner_part1: 0.3 s
+    brute force industrial_fastner_part6 vs industrial_fastner_part5: 2.8 s
+    aap.interference WARNING: Tolerance pair Part__Feature001 / Part__Feature006: static overlap V0=0.0922 mm^3, blocking threshold=0.1844
+    aap.interference WARNING: Tolerance pair Part__Feature006 / Part__Feature007: static overlap V0=0.4200 mm^3, blocking threshold=0.8400
+    aap.interference INFO: Pair 1/10 industrial_fastner_part3 / industrial_fastner_part2: 86.3 s, 8/26 directions free
+    aap.interference INFO: Pair 2/10 industrial_fastner_part3 / industrial_fastner_part1: 10.9 s, 1/26 directions free
+    aap.interference INFO: Pair 3/10 industrial_fastner_part3 / industrial_fastner_part5: 74.5 s, 16/26 directions free
+    aap.interference INFO: Pair 4/10 industrial_fastner_part3 / industrial_fastner_part6: 5.7 s, 2/26 directions free
+    aap.interference INFO: Pair 5/10 industrial_fastner_part2 / industrial_fastner_part1: 6.4 s, 1/26 directions free
+    aap.interference INFO: Pair 6/10 industrial_fastner_part2 / industrial_fastner_part5: 31.9 s, 10/26 directions free
+    aap.interference INFO: Pair 7/10 industrial_fastner_part2 / industrial_fastner_part6: 1.7 s, 2/26 directions free
+    aap.interference INFO: Pair 8/10 industrial_fastner_part1 / industrial_fastner_part5: 3.1 s, 25/26 directions free
+    aap.interference INFO: Pair 9/10 industrial_fastner_part1 / industrial_fastner_part6: 0.4 s, 24/26 directions free
+    aap.interference INFO: Pair 10/10 industrial_fastner_part5 / industrial_fastner_part6: 3.1 s, 1/26 directions free
+    aap.interference INFO: Interference matrix: n=5, D=26, pairs=10, total 224.4 s
+    aap.interference INFO: Tolerance pairs: industrial_fastner_part2/industrial_fastner_part5 (V0=0.0922), industrial_fastner_part5/industrial_fastner_part6 (V0=0.4200)
+    aap.interference INFO: Exception cells: none
+    aap.interference INFO: Broad-phase share 18.1%, mean iterations per stepped test 3.4
+    aap.interference INFO: Removable with all components present: industrial_fastner_part1: [6], industrial_fastner_part5: [0], industrial_fastner_part6: [1]
+  [PASS] module vs brute force: 0 differences in free (650 cells)
+
+=== I3 ===
+  [PASS] free[j, i, neg[k]] == free[i, j, k] for all 650 cells (0 mismatches)
+
+=== I4 ===
+  note: industrial_fastner_part1: [6] -> [(0.0, 0.0, -1.0)]
+  note: industrial_fastner_part5: [0] -> [(-1.0, 0.0, 0.0)]
+  note: industrial_fastner_part6: [1] -> [(1.0, 0.0, 0.0)]
+  [PASS] removable(all) == {'industrial_fastner_part1': [6], 'industrial_fastner_part5': [0], 'industrial_fastner_part6': [1]}
+
+=== I5 ===
+  note: brute force (both triangles) 427.8 s, module (one triangle) 224.4 s, ratio 0.52; module matrix-only time 224.0 s
+  [PASS] module takes about half the brute-force time (ratio 0.52 < 0.7)
+
+=== I6 ===
+    aap.interference INFO: Loaded cached interference matrix from C:\Users\danie\Documents\documentosprincipal\Master Thesis\AAP\tests_scripts\output\interference_test\module (5 components x 26 directions)
+  [PASS] second run loads from cache in 0.04 s (< 2 s), arrays identical=True
+    aap.interference INFO: Cached interference matrix is stale (key mismatch); recomputing
+  [PASS] changing step changes the cache key and misses the cache
+    aap.interference INFO: Cached interference matrix is stale (key mismatch); recomputing
+  [PASS] modifying the STEP file changes the cache key and misses the cache
+
+=== I7 ===
+    aap.interference WARNING: Tolerance pair Part__Feature001 / Part__Feature006: static overlap V0=0.0922 mm^3, blocking threshold=0.1844
+    aap.interference WARNING: Tolerance pair Part__Feature006 / Part__Feature007: static overlap V0=0.4200 mm^3, blocking threshold=0.8400
+    aap.interference INFO: Pair 1/10 industrial_fastner_part3 / industrial_fastner_part2: 86.8 s, 8/26 directions free
+    aap.interference INFO: Pair 2/10 industrial_fastner_part3 / industrial_fastner_part1: 10.8 s, 1/26 directions free
+    aap.interference INFO: Pair 3/10 industrial_fastner_part3 / industrial_fastner_part5: 79.8 s, 16/26 directions free
+  note: simulated interrupt after pair (0, 3)
+  [PASS] checkpoint holds 3 completed pairs, no final result written
+    aap.interference WARNING: Tolerance pair Part__Feature001 / Part__Feature006: static overlap V0=0.0922 mm^3, blocking threshold=0.1844
+    aap.interference WARNING: Tolerance pair Part__Feature006 / Part__Feature007: static overlap V0=0.4200 mm^3, blocking threshold=0.8400
+    aap.interference INFO: Resuming from checkpoint: 3 of 10 pairs already done
+    aap.interference INFO: Pair 4/10 industrial_fastner_part3 / industrial_fastner_part6: 6.8 s, 2/26 directions free
+    aap.interference INFO: Pair 5/10 industrial_fastner_part2 / industrial_fastner_part1: 6.9 s, 1/26 directions free
+    aap.interference INFO: Pair 6/10 industrial_fastner_part2 / industrial_fastner_part5: 35.9 s, 10/26 directions free
+    aap.interference INFO: Pair 7/10 industrial_fastner_part2 / industrial_fastner_part6: 1.9 s, 2/26 directions free
+    aap.interference INFO: Pair 8/10 industrial_fastner_part1 / industrial_fastner_part5: 3.3 s, 25/26 directions free
+    aap.interference INFO: Pair 9/10 industrial_fastner_part1 / industrial_fastner_part6: 0.4 s, 24/26 directions free
+    aap.interference INFO: Pair 10/10 industrial_fastner_part5 / industrial_fastner_part6: 3.5 s, 1/26 directions free
+    aap.interference INFO: Interference matrix: n=5, D=26, pairs=10, total 59.1 s
+    aap.interference INFO: Tolerance pairs: industrial_fastner_part2/industrial_fastner_part5 (V0=0.0922), industrial_fastner_part5/industrial_fastner_part6 (V0=0.4200)
+    aap.interference INFO: Exception cells: none
+    aap.interference INFO: Broad-phase share 18.1%, mean iterations per stepped test 3.4
+    aap.interference INFO: Removable with all components present: industrial_fastner_part1: [6], industrial_fastner_part5: [0], industrial_fastner_part6: [1]
+  [PASS] resumed at pair 4 (expected 4)
+  [PASS] final free identical to the brute-force matrix (I2)
+  [PASS] checkpoint deleted on success
+
+=== I8 ===
+  note: 2 pair(s) overlap statically by more than overlap_tol=1.0 mm^3 (fix the model or mark the part as stander): A / B (V0=10.0000 mm^3); B / C (V0=10.0000 mm^3)
+  [PASS] one error naming both overlapping pairs (A/B and B/C), not A/C
+  [PASS] no files written
+
+=== I9 ===
+    aap.interference WARNING: Tolerance pair Part__Feature001 / Part__Feature006: static overlap V0=0.0922 mm^3, blocking threshold=0.1844
+    aap.interference WARNING: Tolerance pair Part__Feature006 / Part__Feature007: static overlap V0=0.4200 mm^3, blocking threshold=0.8400
+    aap.interference WARNING: Exception cell Part__Feature / Part__Feature001 dir 11: common failed twice, reported blocked
+    aap.interference INFO: Pair 1/10 industrial_fastner_part3 / industrial_fastner_part2: 76.0 s, 7/26 directions free
+    aap.interference INFO: Pair 2/10 industrial_fastner_part3 / industrial_fastner_part1: 10.8 s, 1/26 directions free
+    aap.interference INFO: Pair 3/10 industrial_fastner_part3 / industrial_fastner_part5: 78.9 s, 16/26 directions free
+    aap.interference INFO: Pair 4/10 industrial_fastner_part3 / industrial_fastner_part6: 6.6 s, 2/26 directions free
+    aap.interference INFO: Pair 5/10 industrial_fastner_part2 / industrial_fastner_part1: 7.1 s, 1/26 directions free
+    aap.interference INFO: Pair 6/10 industrial_fastner_part2 / industrial_fastner_part5: 38.4 s, 10/26 directions free
+    aap.interference INFO: Pair 7/10 industrial_fastner_part2 / industrial_fastner_part6: 2.9 s, 2/26 directions free
+    aap.interference INFO: Pair 8/10 industrial_fastner_part1 / industrial_fastner_part5: 3.5 s, 25/26 directions free
+    aap.interference INFO: Pair 9/10 industrial_fastner_part1 / industrial_fastner_part6: 0.9 s, 24/26 directions free
+    aap.interference INFO: Pair 10/10 industrial_fastner_part5 / industrial_fastner_part6: 4.3 s, 1/26 directions free
+    aap.interference INFO: Interference matrix: n=5, D=26, pairs=10, total 232.9 s
+    aap.interference INFO: Tolerance pairs: industrial_fastner_part2/industrial_fastner_part5 (V0=0.0922), industrial_fastner_part5/industrial_fastner_part6 (V0=0.4200)
+    aap.interference INFO: Exception cells: [(0, 1, 11)]
+    aap.interference INFO: Broad-phase share 18.1%, mean iterations per stepped test 3.3
+    aap.interference INFO: Removable with all components present: industrial_fastner_part1: [6], industrial_fastner_part5: [0], industrial_fastner_part6: [1]
+  note: chosen cell: industrial_fastner_part3 vs industrial_fastner_part2 dir 11 (0.0, 1.0, 0.0) (free in the base run)
+  [PASS] cell reported blocked (and its antisymmetric twin) and listed in exception_cells [(0, 1, 11)]
+  [PASS] rest of the matrix unchanged (0 other cells differ)
+
+=== I10 ===
+  [PASS] CSV is (n+1) x (n+1) with n=5 (header row and column)
+  [PASS] diagonal is '—' and each (j, i) cell is the negation of (i, j) (0 bad cells)
+
+=== I11 ===
+    aap.interference INFO: Pair 1/3 A / B: 0.0 s, 5/6 directions free
+    aap.interference INFO: Pair 2/3 A / C: 0.0 s, 5/6 directions free
+    aap.interference INFO: Pair 3/3 B / C: 0.0 s, 5/6 directions free
+    aap.interference INFO: Interference matrix: n=3, D=6, pairs=3, total 0.1 s
+    aap.interference INFO: Tolerance pairs: none
+    aap.interference INFO: Exception cells: none
+    aap.interference INFO: Broad-phase share 83.3%, mean iterations per stepped test 1.3
+    aap.interference INFO: Removable with all components present: A: [0, 1, 2, 3, 4], B: [0, 1, 2, 3], C: [0, 1, 2, 3, 5]
+  [PASS] free_directions(A, all) = {'+y', '-y', '+x', '+z', '-x'} (expected {'+y', '+z', '-y', '-x', '+x'})
+  [PASS] free_directions(B, all) = {'+y', '-x', '+x', '-y'} (expected {'+y', '-x', '+x', '-y'})
+  [PASS] free_directions(C, all) = {'+y', '-y', '-z', '+x', '-x'} (expected {'+y', '-y', '-z', '-x', '+x'})
+  [PASS] removable(all) = {'A': {'+y', '-y', '+x', '+z', '-x'}, 'B': {'+y', '-x', '+x', '-y'}, 'C': {'+y', '-y', '-z', '+x', '-x'}} (expected {'A': {'+y', '+z', '-y', '-x', '+x'}, 'B': {'+y', '-x', '+x', '-y'}, 'C': {'+y', '-y', '-z', '-x', '+x'}})
+  [PASS] blockers(B, +z, all) = [0] (expected [0])
+  [PASS] blockers(B, -z, all) = [2] (expected [2])
+  [PASS] blockers(A, -z, all) = [1, 2] (expected [1, 2])
+  [PASS] free_directions(B, {B, C}) after removing A = {'+y', '-y', '+x', '+z', '-x'} (expected {'+y', '+z', '-y', '-x', '+x'})
+  [PASS] removable({B, C}) after removing A = {'B': {'+y', '-y', '+x', '+z', '-x'}, 'C': {'+y', '-y', '-z', '+x', '-x'}} (expected {'B': {'+y', '+z', '-y', '-x', '+x'}, 'C': {'+y', '-y', '-z', '-x', '+x'}})
+
+| Test | Result | Notes |
+|---|---|---|
+| I1 | PASS |  |
+| I2 | PASS |  |
+| I3 | PASS |  |
+| I4 | PASS | industrial_fastner_part1: [6] -> [(0.0, 0.0, -1.0)] |
+| I5 | PASS | brute force (both triangles) 427.8 s, module (one triangle) 224.4 s, ratio 0.52; module matrix-only time 224.0 s |
+| I6 | PASS |  |
+| I7 | PASS | simulated interrupt after pair (0, 3) |
+| I8 | PASS | 2 pair(s) overlap statically by more than overlap_tol=1.0 mm^3 (fix the model or mark the part as stander): A / B (V0=10.0000 mm^3); B / C (V0=10.0000 mm^3) |
+| I9 | PASS | chosen cell: industrial_fastner_part3 vs industrial_fastner_part2 dir 11 (0.0, 1.0, 0.0) (free in the base run) |
+| I10 | PASS |  |
+| I11 | PASS |  |
+
+Details written to C:\Users\danie\Documents\documentosprincipal\Master Thesis\AAP\tests_scripts\output\interference_results.json
