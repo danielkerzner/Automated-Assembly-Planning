@@ -1,0 +1,62 @@
+{
+ "cache_key": "ec5f6db55dc27588e814c6c08edbb180cc781128a2abc8b22a65e88e2c57edd2",
+ "component_ids": [
+  "Part__Feature",
+  "Part__Feature001",
+  "Part__Feature002",
+  "Part__Feature006",
+  "Part__Feature007",
+  "Part__Feature003",
+  "Part__Feature004",
+  "Part__Feature005"
+ ],
+ "component_labels": [
+  "industrial_fastner_part3",
+  "industrial_fastner_part2",
+  "industrial_fastner_part1",
+  "industrial_fastner_part5",
+  "industrial_fastner_part6",
+  "industrial_fastner_part7",
+  "industrial_fastner_part4",
+  "industrial_fastner_part001"
+ ],
+ "config": {
+  "stander_gate": "prerequisites+contacts",
+  "margin": 1.0,
+  "max_nodes": 4000000
+ },
+ "stats": {
+  "N": 8,
+  "n_movable": 5,
+  "n_standers": 3,
+  "D": 26,
+  "D_prime": 26,
+  "V": 60,
+  "E": 135,
+  "nodes_per_level": [
+   1,
+   5,
+   10,
+   12,
+   11,
+   9,
+   6,
+   5,
+   1
+  ],
+  "connectivity_rule": true,
+  "disconnected_dropped": 21,
+  "dead_ends": 1,
+  "live_nodes": 48,
+  "complete": true,
+  "time_s": 0.015575500001432374,
+  "array_bytes": 5975
+ },
+ "complete": true,
+ "root": 0,
+ "terminal": 59,
+ "dead_ends": [
+  42
+ ],
+ "date": "2026-10-11T12:09:45"
+}

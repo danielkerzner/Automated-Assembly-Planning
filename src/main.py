@@ -11,8 +11,9 @@ sequence. The second group (AIG) turns that sequence into output for a human ass
 Illustration Generator and Written Instructions both consume the same optimized sequence
 independently, not sequentially.
 
-Preprocessing (docs/preprocessing-spec.md) and Interference Identification
-(docs/interference-spec.md) are implemented. The remaining stages are wired in through their
+Preprocessing (docs/preprocessing-spec.md), Interference Identification
+(docs/interference-spec.md) and the AoG generator (docs/aog-spec.md) are implemented. The
+remaining stages are wired in through their
 stub modules, each of which raises NotImplementedError until it gets its own design review —
 see CLAUDE.md's "Current status" section.
 """
@@ -51,7 +52,7 @@ def run_pipeline(
         output_dir / "interference",
         force=force_interference,
     )
-    aog = build_aog(interference_result, preprocessing_result.stander_records)
+    aog = build_aog(interference_result, preprocessing_result, cache_dir=output_dir / "aog")
     sequence = optimize_sequence(aog)
 
     # AIG: turn the optimized sequence into output for a human assembler.

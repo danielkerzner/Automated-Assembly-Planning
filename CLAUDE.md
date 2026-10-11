@@ -6,7 +6,8 @@ optimize it with ACO, then generate illustrated + written assembly instructions.
 
 Conda env: `environmentAAP` (see `environment.yml`). `test.py` is a leftover conda-env smoke test — ignore it,
 not part of the real implementation. Validation case study: the "Vulkan" part assembly, STEP files under
-`../vulkan parts/step/` (one level up from this repo).
+`../vulkan parts/step/` (one level up from this repo). "Vulkan" and `industrial_fastner` are the same
+assembly (the file was renamed to avoid a proprietary name). Design target: assemblies of up to 20 components.
 
 ## Pipeline
 
@@ -35,24 +36,25 @@ reviewed modules live in `docs/`; read the relevant one before touching that mod
   I1–I11 in `tests_scripts/test_interference.py`. The collision test it uses (stepping with gap-skipping,
   contact counts as free, 1 mm³ static-overlap rule) is verified by `docs/collisiontest.md` /
   `tests_scripts/test_collision.py`, which imports the production core.
-- AoG generator, Optimization, Illustration Generator, Written Instructions — not yet design-reviewed in
-  detail. Rough sketch only (see below); do not implement ahead of a dedicated review — bring design
-  questions back to conversation before coding, the way Preprocessing and Interference Identification were
-  handled.
+- **AoG generator** — design-reviewed 2026-09-29, spec'd and implemented (`src/aog_generator.py`). Spec:
+  `docs/aog-spec.md` (iterative level-by-level generation over bitmask states; standers are ordinary
+  components with a precedence rule; all free directions kept on each edge; no graph reduction; dead ends
+  reported only). Travel distance is measured to the constant whole-assembly bounding box
+  (`PreprocessingResult.assembly_bbox`); a stander's gate set is `prerequisites ∪ contact_neighbors`.
+  States whose parts do not touch as one group are dropped (spec D11; movable contacts come from
+  `InterferenceResult.contact`, gap ≤ 0.1 mm).
+  Acceptance tests A1–A12 in `tests_scripts/test_aog.py` (`--groups core real scale`).
+- Optimization, Illustration Generator, Written Instructions — not yet design-reviewed in detail. Rough
+  sketch only (see below); do not implement ahead of a dedicated review — bring design questions back to
+  conversation before coding, the way the other modules were handled.
 
 ## Rough sketch of not-yet-reviewed modules (do not treat as final)
 
-- **AoG generator** (AoG = AND/OR graph, same thing, no need to distinguish them in the writeup): recursive —
-  given a component with a free removal vector (or search the matrix for one on first call), pick its
-  smallest-separation-distance direction if multiple exist, remove it from the matrix, dedupe/create AoG
-  nodes for the resulting sub-assembly state, check whether removing it frees any stander component (query
-  that stander's `prerequisites` from `docs/preprocessing-spec.md`) and release it if so, recurse
-  until the matrix is empty. Input is the `InterferenceResult` from `docs/interference-spec.md` (free
-  directions of a part in a sub-assembly are pure set intersections over its rows; standers are not in the
-  matrix and are released via their `StanderRecord`s). Flagged as the highest-uncertainty module — needs its own dedicated design pass,
-  especially the sub-assembly "already analyzed" state representation.
 - **Optimization**: ACO over the AoG; edges start evenly weighted, penalize (reduce weight of) consecutive
-  steps that reuse the same removal direction; run ACO, extract shortest path as the final sequence.
+  steps that reuse the same removal direction; run ACO, extract shortest path as the final sequence. The
+  AoG hands it every free direction per edge and chooses none; the ACO picks the direction (a longer move
+  is acceptable if it continues the previous direction). The "penalize reuse" wording is probably inverted
+  (continuity should be favoured); settle it in the Optimization design pass (see `docs/aog-spec.md`).
 - **Illustration Generator**: per step, get the trajectory of the added component, render it; if start/end
   points aren't both visible, slightly rotate the assembly view and retry; highlight path, footnote
   component+tool, save frame.

@@ -1,0 +1,23 @@
+Example disassembly (cheapest total travel; each step along its shortest direction).
+The ACO will choose directions itself; this only illustrates the graph.
+
+   1. remove industrial_fastner_part7 along (1.0, 0.0, 0.0)  travel    34.24 mm   (1 free direction)
+   2. remove industrial_fastner_part6 along (1.0, 0.0, 0.0)  travel    71.24 mm   (1 free direction)
+   3. remove industrial_fastner_part5 along (0.0, -1.0, 0.0)  travel    34.50 mm   (10 free directions)
+   4. remove industrial_fastner_part2 along (0.0, 0.0, 1.0)  travel    37.90 mm   (1 free direction)
+   5. remove industrial_fastner_part4 along (0.0, -1.0, 0.0)  travel    87.76 mm   (1 free direction)
+   6. remove industrial_fastner_part001 along (0.0, -1.0, 0.0)  travel    87.76 mm   (1 free direction)
+   7. remove industrial_fastner_part3 along (0.0, 0.0, 1.0)  travel    37.80 mm   (1 free direction)
+   8. remove industrial_fastner_part1 along (0.0, 1.0, 0.0)  travel    17.54 mm   (26 free directions)
+
+Total travel: 408.74 mm
+
+Assembly order (reverse of the above):
+   1. insert industrial_fastner_part1 along (0.0, -1.0, 0.0)  starting 17.54 mm outside
+   2. insert industrial_fastner_part3 along (0.0, 0.0, -1.0)  starting 37.80 mm outside
+   3. insert industrial_fastner_part001 along (0.0, 1.0, 0.0)  starting 87.76 mm outside
+   4. insert industrial_fastner_part4 along (0.0, 1.0, 0.0)  starting 87.76 mm outside
+   5. insert industrial_fastner_part2 along (0.0, 0.0, -1.0)  starting 37.90 mm outside
+   6. insert industrial_fastner_part5 along (0.0, 1.0, 0.0)  starting 34.50 mm outside
+   7. insert industrial_fastner_part6 along (-1.0, 0.0, 0.0)  starting 71.24 mm outside
+   8. insert industrial_fastner_part7 along (-1.0, 0.0, 0.0)  starting 34.24 mm outside

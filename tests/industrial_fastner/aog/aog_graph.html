@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AoG graph</title>
+<style>
+  :root {
+    --bg: #ffffff; --panel: #f6f7f9; --line: #d5d9e0; --text: #1c2330; --muted: #5d677a;
+    --node: #8792a6; --node-stroke: #ffffff; --root: #1c2330; --terminal: #1f8a4c; --dead: #c8382e;
+    --accent: #2a6fdb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12161d; --panel: #1b212b; --line: #2f3846; --text: #e6eaf1; --muted: #93a0b5;
+      --node: #7f8ba0; --node-stroke: #12161d; --root: #e6eaf1; --terminal: #4cc383; --dead: #ff7166;
+      --accent: #6aa3ff;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+         display: flex; flex-direction: column; }
+  header { padding: 10px 16px; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap;
+           gap: 6px 20px; align-items: baseline; }
+  header h1 { font-size: 16px; margin: 0; font-weight: 650; }
+  header .stats { color: var(--muted); font-size: 13px; }
+  header .bad { color: var(--dead); font-weight: 600; }
+  main { flex: 1; display: flex; min-height: 0; }
+  #stage { flex: 1; position: relative; min-width: 0; overflow: hidden; }
+  svg { width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+  svg.dragging { cursor: grabbing; }
+  aside { width: 320px; border-left: 1px solid var(--line); background: var(--panel); overflow-y: auto;
+          padding: 12px 14px; }
+  aside h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
+             margin: 14px 0 6px; font-weight: 600; }
+  aside h2:first-child { margin-top: 0; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 6px; }
+  button { font: inherit; padding: 4px 10px; border: 1px solid var(--line); border-radius: 6px;
+           background: var(--bg); color: var(--text); cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .legend { display: flex; flex-direction: column; gap: 3px; }
+  .chip { display: flex; align-items: center; gap: 8px; padding: 2px 6px; border-radius: 5px; cursor: pointer;
+          user-select: none; }
+  .chip:hover { background: var(--bg); }
+  .chip.off { opacity: .35; }
+  .chip .sw { width: 22px; height: 0; border-top: 3px solid; flex: none; }
+  .chip .sw.st { border-top-style: dashed; }
+  .chip .n { margin-left: auto; color: var(--muted); font-size: 12px; }
+  #detail { font-size: 13px; }
+  #detail .k { color: var(--muted); }
+  #detail ul, #steps { margin: 4px 0 0; padding-left: 18px; }
+  #steps li { cursor: default; padding: 1px 0; }
+  #steps li:hover { color: var(--accent); }
+  .lvl { fill: var(--muted); font-size: 12px; }
+  .node { stroke: var(--node-stroke); stroke-width: 1.5; cursor: pointer; }
+  .edge { fill: none; }
+  #tip { position: absolute; pointer-events: none; background: var(--panel); border: 1px solid var(--line);
+         border-radius: 6px; padding: 6px 9px; font-size: 12px; max-width: 340px; display: none; z-index: 5;
+         box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+  .hint { color: var(--muted); font-size: 12px; }
+  @media (max-width: 760px) { main { flex-direction: column; } aside { width: auto; max-height: 40%;
+      border-left: 0; border-top: 1px solid var(--line); } }
+</style>
+</head>
+<body>
+<header>
+  <h1>AoG graph</h1>
+  <span class="stats" id="stats"></span>
+</header>
+<main>
+  <div id="stage"><svg id="svg"><g id="vp"><g id="lvl"></g><g id="eg"></g><g id="ng"></g></g></svg><div id="tip"></div></div>
+  <aside>
+    <h2>View</h2>
+    <div class="toolbar">
+      <button id="bFit">Fit</button>
+      <button id="bSeq">Example sequence</button>
+      <button id="bClear">Clear selection</button>
+    </div>
+    <p class="hint">Wheel: zoom &middot; drag: pan &middot; click a node: highlight all paths through it &middot; click a legend row: hide that component's edges.</p>
+    <h2>Removed component (edge colour)</h2>
+    <div class="legend" id="legend"></div>
+    <h2>Selection</h2>
+    <div id="detail"><span class="hint">Nothing selected.</span></div>
+    <h2>Example sequence</h2>
+    <ol id="steps"></ol>
+    <p class="hint">Cheapest total travel, each step along its shortest free direction. Only an illustration: direction choice belongs to the ACO.</p>
+  </aside>
+</main>
+<script id="data" type="application/json">{"comps":[{"label":"industrial_fastner_part3","stander":false},{"label":"industrial_fastner_part2","stander":false},{"label":"industrial_fastner_part1","stander":false},{"label":"industrial_fastner_part5","stander":false},{"label":"industrial_fastner_part6","stander":false},{"label":"industrial_fastner_part7","stander":true},{"label":"industrial_fastner_part4","stander":true},{"label":"industrial_fastner_part001","stander":true}],"dirs":[[-1.0,0.0,0.0],[1.0,0.0,0.0],[0.561178,-0.827695,0.0],[-0.561178,0.827695,0.0],[-0.267382,0.963591,0.0],[0.267382,-0.963591,0.0],[0.0,0.0,-1.0],[0.0,0.0,1.0],[-0.47838,0.878153,0.0],[0.47838,-0.878153,0.0],[0.0,-1.0,0.0],[0.0,1.0,0.0],[0.0,0.5,-0.866025],[0.0,-0.5,0.866025],[0.0,0.5,0.866025],[0.0,-0.5,-0.866025],[0.963591,0.267382,0.0],[-0.963591,-0.267382,0.0],[0.878153,0.47838,0.0],[-0.878153,-0.47838,0.0],[-0.827695,-0.561178,0.0],[0.827695,0.561178,0.0],[-0.707107,-0.707107,0.0],[0.707107,0.707107,0.0],[0.707107,-0.707107,0.0],[-0.707107,0.707107,0.0]],"levelSizes":[1,5,10,12,11,9,6,5,1],"nodes":[[0,0,1,0,"ff"],[1,1,1,0,"7f"],[1,3,1,0,"bf"],[1,0,1,0,"df"],[1,4,0,0,"f7"],[1,2,1,0,"fb"],[2,5,1,0,"3f"],[2,2,1,0,"5f"],[2,7,0,0,"77"],[2,4,1,0,"7b"],[2,3,1,0,"9f"],[2,8,0,0,"b7"],[2,6,1,0,"bb"],[2,0,1,0,"cf"],[2,1,1,0,"db"],[2,9,0,0,"f3"],[3,6,1,0,"1f"],[3,8,0,0,"37"],[3,7,1,0,"3b"],[3,2,1,0,"4f"],[3,3,1,0,"5b"],[3,9,0,0,"73"],[3,4,1,0,"8f"],[3,5,1,0,"9b"],[3,10,0,0,"b3"],[3,0,1,0,"c7"],[3,1,1,0,"cb"],[3,11,0,0,"f1"],[4,6,1,0,"f"],[4,7,1,0,"1b"],[4,8,0,0,"33"],[4,2,1,0,"47"],[4,3,1,0,"4b"],[4,9,0,0,"71"],[4,4,1,0,"87"],[4,5,1,0,"8b"],[4,10,0,0,"b1"],[4,0,1,0,"c3"],[4,1,1,0,"c5"],[5,5,1,0,"7"],[5,6,1,0,"b"],[5,8,1,0,"1a"],[5,7,0,1,"31"],[5,1,1,0,"43"],[5,2,1,0,"45"],[5,3,1,0,"83"],[5,4,1,0,"85"],[5,0,1,0,"c1"],[6,2,1,0,"3"],[6,3,1,0,"5"],[6,4,1,0,"a"],[6,5,1,0,"18"],[6,0,1,0,"41"],[6,1,1,0,"81"],[7,0,1,0,"1"],[7,1,1,0,"2"],[7,2,1,0,"4"],[7,3,1,0,"8"],[7,4,1,0,"10"],[8,0,1,0,"0"]],"edges":[[0,5,2,[6],[46.5]],[0,4,3,[0],[43.0]],[0,3,5,[1],[34.24]],[0,2,6,[10],[87.76]],[0,1,7,[10],[87.76]],[1,9,2,[6],[46.5]],[1,8,3,[0],[43.0]],[1,7,5,[1],[34.24]],[1,6,6,[10],[87.76]],[2,12,2,[6],[46.5]],[2,11,3,[0],[43.0]],[2,10,5,[1],[34.24]],[2,6,7,[10],[87.76]],[3,14,2,[6],[46.5]],[3,13,4,[1],[71.24]],[3,10,6,[10],[87.76]],[3,7,7,[10],[87.76]],[4,15,2,[6],[46.5]],[4,11,6,[10],[87.76]],[4,8,7,[10],[87.76]],[5,15,3,[0],[43.0]],[5,14,5,[1],[34.24]],[5,12,6,[10],[87.76]],[5,9,7,[10],[87.76]],[6,18,2,[6],[46.5]],[6,17,3,[0],[43.0]],[6,16,5,[1],[34.24]],[7,20,2,[6],[46.5]],[7,19,4,[1],[71.24]],[7,16,6,[10],[87.76]],[8,21,2,[6],[46.5]],[8,17,6,[10],[87.76]],[9,21,3,[0],[43.0]],[9,20,5,[1],[34.24]],[9,18,6,[10],[87.76]],[10,23,2,[6],[46.5]],[10,22,4,[1],[71.24]],[10,16,7,[10],[87.76]],[11,24,2,[6],[46.5]],[11,17,7,[10],[87.76]],[12,24,3,[0],[43.0]],[12,23,5,[1],[34.24]],[12,18,7,[10],[87.76]],[13,26,2,[6],[46.5]],[13,25,3,[0,6,7,10,13,15,17,19,20,22],[43.0,44.75,37.85,34.5,43.55,51.52,44.59,48.83,51.74,48.37]],[13,22,6,[10],[87.76]],[13,19,7,[10],[87.76]],[14,26,4,[1],[71.24]],[14,23,6,[10],[87.76]],[14,20,7,[10],[87.76]],[15,27,1,[0],[49.0]],[15,24,6,[10],[87.76]],[15,21,7,[10],[87.76]],[16,29,2,[6],[46.5]],[16,28,4,[1],[71.24]],[17,30,2,[6],[46.5]],[18,30,3,[0],[43.0]],[18,29,5,[1],[34.24]],[19,32,2,[6],[46.5]],[19,31,3,[0,6,7,10,13,15,17,19,20,22],[43.0,44.75,37.85,34.5,43.55,51.52,44.59,48.83,51.74,48.37]],[19,28,6,[10],[87.76]],[20,32,4,[1],[71.24]],[20,29,6,[10],[87.76]],[21,33,1,[0],[49.0]],[21,30,6,[10],[87.76]],[22,35,2,[6],[46.5]],[22,34,3,[0,6,7,10,13,15,17,19,20,22],[43.0,44.75,37.85,34.5,43.55,51.52,44.59,48.83,51.74,48.37]],[22,28,7,[10],[87.76]],[23,35,4,[1],[71.24]],[23,29,7,[10],[87.76]],[24,36,1,[0],[49.0]],[24,30,7,[10],[87.76]],[25,38,1,[7],[37.9]],[25,37,2,[6],[46.5]],[25,34,6,[10],[87.76]],[25,31,7,[10],[87.76]],[26,37,3,[0,6,7,10,13,15,17,19,20,22],[43.0,44.75,37.85,34.5,43.55,51.52,44.59,48.83,51.74,48.37]],[26,35,6,[10],[87.76]],[26,32,7,[10],[87.76]],[27,36,6,[10],[87.76]],[27,33,7,[10],[87.76]],[28,40,2,[6],[46.5]],[28,39,3,[0,6,7,10,13,15,17,19,20,22],[43.0,44.75,37.85,34.5,43.55,51.52,44.59,48.83,51.74,48.37]],[29,41,0,[1],[66.34]],[29,40,4,[1],[71.24]],[30,42,1,[0],[49.0]],[31,44,1,[7],[37.9]],[31,43,2,[6],[46.5]],[31,39,6,[10],[87.76]],[32,43,3,[0,6,7,10,13,15,17,19,20,22],[43.0,44.75,37.85,34.5,43.55,51.52,44.59,48.83,51.74,48.37]],[32,40,6,[10],[87.76]],[33,42,6,[10],[87.76]],[34,46,1,[7],[37.9]],[34,45,2,[6],[46.5]],[34,39,7,[10],[87.76]],[35,45,3,[0,6,7,10,13,15,17,19,20,22],[43.0,44.75,37.85,34.5,43.55,51.52,44.59,48.83,51.74,48.37]],[35,40,7,[10],[87.76]],[36,42,7,[10],[87.76]],[37,47,1,[0,7,10,13,17,19,20,22],[49.0,37.9,105.31,43.61,50.81,55.66,58.99,68.88]],[37,45,6,[10],[87.76]],[37,43,7,[10],[87.76]],[38,47,2,[6],[46.5]],[38,46,6,[10],[87.76]],[38,44,7,[10],[87.76]],[39,49,1,[7],[37.9]],[39,48,2,[6],[46.5]],[40,50,0,[1,6,11,12,16,18,21,23],[66.34,44.7,103.18,51.46,68.81,75.41,79.94,93.41]],[40,48,3,[0,6,7,10,13,15,17,19,20,22],[43.0,44.75,37.85,34.5,43.55,51.52,44.59,48.83,51.74,48.37]],[41,51,1,[1],[65.99]],[41,50,4,[1],[71.24]],[43,52,1,[0,7,10,13,17,19,20,22],[49.0,37.9,105.31,43.61,50.81,55.66,58.99,68.88]],[43,48,6,[10],[87.76]],[44,52,2,[6],[46.5]],[44,49,6,[10],[87.76]],[45,53,1,[0,7,10,13,17,19,20,22],[49.0,37.9,105.31,43.61,50.81,55.66,58.99,68.88]],[45,48,7,[10],[87.76]],[46,53,2,[6],[46.5]],[46,49,7,[10],[87.76]],[47,53,6,[10],[87.76]],[47,52,7,[10],[87.76]],[48,55,0,[1,6,11,12,16,18,21,23],[66.34,44.7,103.18,51.46,68.81,75.41,79.94,93.41]],[48,54,1,[0,7,10,13,17,19,20,22],[49.0,37.9,105.31,43.61,50.81,55.66,58.99,68.88]],[49,56,0,[7],[37.8]],[49,54,2,[6],[46.5]],[50,57,1,[1,6,7,11,12,14,16,18,21,23],[65.99,44.6,37.9,102.35,51.34,43.61,68.45,75.01,79.52,92.92]],[50,55,3,[0,6,7,10,13,15,17,19,20,22],[43.0,44.75,37.85,34.5,43.55,51.52,44.59,48.83,51.74,48.37]],[51,58,3,[0],[43.0]],[51,57,4,[1],[71.24]],[52,54,6,[10],[87.76]],[53,54,7,[10],[87.76]],[54,59,0,[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],[84.74,66.34,117.44,124.45,107.04,109.61,44.7,37.8,117.35,120.18,105.66,103.18,51.46,43.49,43.49,51.46,68.81,87.91,75.41,96.36,102.18,79.94,119.43,93.41,93.41,119.43]],[55,59,1,[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],[49.0,65.99,116.82,86.53,106.18,109.25,44.6,37.9,101.34,119.79,105.31,102.35,51.34,43.61,43.61,51.34,68.45,50.81,75.01,55.66,58.99,79.52,68.88,92.92,92.92,68.88]],[56,59,2,[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],[35.95,62.19,110.04,20.99,18.17,105.31,46.5,46.5,19.84,115.46,101.51,17.54,34.09,53.54,34.09,53.54,62.87,37.27,35.58,40.8,43.22,30.48,50.42,24.4,87.54,24.4]],[57,59,3,[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],[43.0,84.74,41.47,75.84,109.61,35.76,44.75,37.85,88.8,39.14,34.5,105.66,51.52,43.55,43.55,51.52,87.91,44.59,96.36,48.83,51.74,102.18,48.37,119.43,48.37,60.4]],[58,59,4,[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],[63.5,71.24,28.86,112.37,98.66,24.93,33.45,26.55,108.16,27.26,24.06,95.1,38.47,30.5,30.5,38.47,73.9,65.86,80.99,49.2,42.09,85.87,33.61,100.34,33.61,89.39]]],"sequence":[2,14,44,72,102,117,122,132],"stats":{"N":8,"V":60,"E":135,"dead":1,"complete":true}}</script>
+<script>
+(() => {
+  const D = JSON.parse(document.getElementById('data').textContent);
+  const NS = 'http://www.w3.org/2000/svg';
+  const N = D.comps.length, DX = 30, DY = 130, PADX = 110, PADY = 50, R = 7;
+  const svg = document.getElementById('svg'), vp = document.getElementById('vp');
+  const gL = document.getElementById('lvl'), gE = document.getElementById('eg'), gN = document.getElementById('ng');
+  const tip = document.getElementById('tip'), stage = document.getElementById('stage');
+  const maxRow = Math.max(...D.levelSizes);
+  const lastLevel = Math.max(...D.levelSizes.map((s, i) => s ? i : 0));
+  const W = maxRow * DX + PADX * 2, H = lastLevel * DY + PADY * 2;
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const color = c => `hsl(${Math.round((c * 360 / N + 12) % 360)} 62% ${matchMedia('(prefers-color-scheme: dark)').matches ? 62 : 44}%)`;
+  const esc = s => String(s).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+  const r3 = x => Math.round(x * 1000) / 1000 + 0;
+  function dirName(v) {
+    const nz = v.map((x, i) => [x, i]).filter(p => Math.abs(p[0]) > 1e-6);
+    if (nz.length === 1 && Math.abs(Math.abs(nz[0][0]) - 1) < 1e-6) return (nz[0][0] > 0 ? '+' : '−') + 'xyz'[nz[0][1]];
+    return '(' + v.map(r3).join(', ') + ')';
+  }
+  const pos = D.nodes.map(n => ({
+    x: W / 2 + (n[1] - (D.levelSizes[n[0]] - 1) / 2) * DX, y: PADY + n[0] * DY }));
+  const masks = D.nodes.map(n => BigInt('0x' + n[4]));
+  const present = v => { const p = []; for (let c = 0; c < N; c++) if ((masks[v] >> BigInt(c)) & 1n) p.push(c); return p; };
+  const out = D.nodes.map(() => []), inn = D.nodes.map(() => []);
+  D.edges.forEach((e, i) => { out[e[0]].push(i); inn[e[1]].push(i); });
+  const edgeCount = new Array(N).fill(0); D.edges.forEach(e => edgeCount[e[2]]++);
+
+  const el = (name, attrs, parent) => { const n = document.createElementNS(NS, name);
+    for (const k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; };
+
+  D.levelSizes.forEach((sz, L) => {
+    if (!sz) return;
+    const t = el('text', {x: 10, y: PADY + L * DY + 4, class: 'lvl'}, gL);
+    t.textContent = `L${L}: ${sz} state${sz > 1 ? 's' : ''}`;
+    const s = el('text', {x: 10, y: PADY + L * DY + 19, class: 'lvl'}, gL);
+    s.textContent = `${N - L} assembled`;
+  });
+
+  const edgeEls = D.edges.map((e, i) => {
+    const a = pos[e[0]], b = pos[e[1]], st = D.comps[e[2]].stander;
+    const ln = el('line', {x1: a.x, y1: a.y, x2: b.x, y2: b.y, class: 'edge', stroke: color(e[2]),
+      'stroke-width': 1.3, opacity: 0.32, 'stroke-dasharray': st ? '5 3' : ''}, gE);
+    ln.addEventListener('mousemove', ev => showEdgeTip(ev, i));
+    ln.addEventListener('mouseleave', hideTip);
+    return ln;
+  });
+  const nodeEls = D.nodes.map((n, v) => {
+    const c = el('circle', {cx: pos[v].x, cy: pos[v].y, r: R, class: 'node'}, gN);
+    c.addEventListener('mousemove', ev => showNodeTip(ev, v));
+    c.addEventListener('mouseleave', hideTip);
+    c.addEventListener('click', ev => { if (!moved) select(v); });
+    return c;
+  });
+  function paintNodes() {
+    nodeEls.forEach((c, v) => {
+      const n = D.nodes[v];
+      let fill = css('--node');
+      if (n[0] === 0) fill = css('--root');
+      else if (n[0] === N) fill = css('--terminal');
+      else if (n[3]) fill = css('--dead');
+      else if (!n[2]) fill = css('--dead');
+      c.setAttribute('fill', fill);
+      c.setAttribute('r', (n[0] === 0 || n[0] === N) ? R + 2 : R);
+    });
+  }
+  paintNodes();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    paintNodes(); edgeEls.forEach((l, i) => l.setAttribute('stroke', color(D.edges[i][2])));
+    buildLegend(); });
+
+  // ---- tooltips -----------------------------------------------------------
+  function placeTip(ev, html) {
+    tip.innerHTML = html; tip.style.display = 'block';
+    const r = stage.getBoundingClientRect();
+    let x = ev.clientX - r.left + 14, y = ev.clientY - r.top + 14;
+    if (x + tip.offsetWidth > r.width - 4) x = ev.clientX - r.left - tip.offsetWidth - 14;
+    if (y + tip.offsetHeight > r.height - 4) y = ev.clientY - r.top - tip.offsetHeight - 14;
+    tip.style.left = Math.max(4, x) + 'px'; tip.style.top = Math.max(4, y) + 'px';
+  }
+  function hideTip() { tip.style.display = 'none'; }
+  function edgeInfo(i) {
+    const e = D.edges[i];
+    return e[3].map((k, j) => `${dirName(D.dirs[k])}&nbsp;${e[4][j]}&nbsp;mm`).join(' &middot; ');
+  }
+  function showEdgeTip(ev, i) {
+    const e = D.edges[i], c = D.comps[e[2]];
+    placeTip(ev, `<b>Remove ${esc(c.label)}</b>${c.stander ? ' (stander)' : ''}<br>${e[3].length} free direction${e[3].length > 1 ? 's' : ''}: ${edgeInfo(i)}`);
+  }
+  function stateSummary(v) {
+    const p = present(v), n = D.nodes[v];
+    const flag = n[0] === 0 ? 'root' : n[0] === N ? 'fully disassembled' : (n[3] ? 'DEAD END' : (n[2] ? '' : 'cannot reach the end'));
+    return `<b>State ${v}</b> &middot; level ${n[0]}${flag ? ' &middot; ' + flag : ''}<br>` +
+      `<span class="k">assembled (${p.length}):</span> ${p.map(c => esc(D.comps[c].label)).join(', ') || '—'}`;
+  }
+  function showNodeTip(ev, v) { placeTip(ev, stateSummary(v) + `<br><span class="k">moves out:</span> ${out[v].length}`); }
+
+  // ---- highlight / filters -----------------------------------------------
+  const hidden = new Set(); let selected = null, seqOn = false, hoverStep = null;
+  const seqEdges = new Set(D.sequence), seqNodes = new Set();
+  { let v = 0; seqNodes.add(0); D.sequence.forEach(i => { seqNodes.add(D.edges[i][1]); }); }
+  function related(v) {
+    const nodes = new Set([v]), edges = new Set();
+    let stack = [v];
+    while (stack.length) { const u = stack.pop(); for (const i of inn[u]) { edges.add(i);
+      const p = D.edges[i][0]; if (!nodes.has(p)) { nodes.add(p); stack.push(p); } } }
+    stack = [v];
+    const seen = new Set([v]);
+    while (stack.length) { const u = stack.pop(); for (const i of out[u]) { edges.add(i);
+      const d = D.edges[i][1]; nodes.add(d); if (!seen.has(d)) { seen.add(d); stack.push(d); } } }
+    return {nodes, edges};
+  }
+  function refresh() {
+    const rel = selected === null ? null : related(selected);
+    D.edges.forEach((e, i) => {
+      const l = edgeEls[i];
+      l.style.display = hidden.has(e[2]) ? 'none' : '';
+      let op = 0.32, w = 1.3;
+      if (rel) { if (rel.edges.has(i)) { op = 0.85; w = 1.8; } else op = 0.04; }
+      if (seqOn && seqEdges.has(i)) { op = 1; w = 3.6; }
+      if (hoverStep === i) { op = 1; w = 5; }
+      l.setAttribute('opacity', op); l.setAttribute('stroke-width', w);
+    });
+    nodeEls.forEach((c, v) => {
+      let op = 1;
+      if (rel && !rel.nodes.has(v)) op = 0.12;
+      c.setAttribute('opacity', op);
+      const ring = v === selected || (seqOn && seqNodes.has(v));
+      c.setAttribute('stroke', ring ? css('--accent') : css('--node-stroke'));
+      c.setAttribute('stroke-width', ring ? 3 : 1.5);
+    });
+  }
+  function select(v) {
+    selected = (selected === v) ? null : v;
+    const d = document.getElementById('detail');
+    if (selected === null) { d.innerHTML = '<span class="hint">Nothing selected.</span>'; refresh(); return; }
+    const moves = out[v].map(i => { const e = D.edges[i], c = D.comps[e[2]];
+      return `<li>${esc(c.label)}${c.stander ? ' (stander)' : ''}: ${edgeInfo(i)}</li>`; }).join('');
+    d.innerHTML = stateSummary(v) + `<br><span class="k">Moves out (${out[v].length}):</span><ul>${moves || '<li>none</li>'}</ul>`;
+    refresh();
+  }
+  document.getElementById('bClear').onclick = () => { selected = null;
+    document.getElementById('detail').innerHTML = '<span class="hint">Nothing selected.</span>'; refresh(); };
+  const bSeq = document.getElementById('bSeq');
+  bSeq.onclick = () => { seqOn = !seqOn; bSeq.classList.toggle('on', seqOn); refresh(); };
+  if (!D.sequence.length) { bSeq.disabled = true; bSeq.title = 'The AoG has no complete sequence'; }
+
+  function buildLegend() {
+    const lg = document.getElementById('legend'); lg.innerHTML = '';
+    D.comps.forEach((c, i) => {
+      const row = document.createElement('div'); row.className = 'chip' + (hidden.has(i) ? ' off' : '');
+      row.innerHTML = `<span class="sw${c.stander ? ' st' : ''}" style="border-color:${color(i)}"></span>` +
+        `<span>${esc(c.label)}${c.stander ? ' <span class="k">(stander)</span>' : ''}</span><span class="n">${edgeCount[i]}</span>`;
+      row.onclick = () => { hidden.has(i) ? hidden.delete(i) : hidden.add(i); buildLegend(); refresh(); };
+      lg.appendChild(row);
+    });
+  }
+  buildLegend();
+
+  const steps = document.getElementById('steps');
+  D.sequence.forEach((i, s) => {
+    const e = D.edges[i], c = D.comps[e[2]];
+    let j = 0; e[4].forEach((t, q) => { if (t < e[4][j]) j = q; });
+    const li = document.createElement('li');
+    li.innerHTML = `${esc(c.label)} → ${dirName(D.dirs[e[3][j]])}, ${e[4][j]}&nbsp;mm`;
+    li.onmouseenter = () => { hoverStep = i; refresh(); };
+    li.onmouseleave = () => { hoverStep = null; refresh(); };
+    steps.appendChild(li);
+  });
+  if (!D.sequence.length) steps.innerHTML = '<li class="hint" style="list-style:none;margin-left:-18px">no complete sequence</li>';
+
+  // ---- header -------------------------------------------------------------
+  const S = D.stats;
+  document.getElementById('stats').innerHTML =
+    `${S.N} components &middot; ${S.V} states &middot; ${S.E} moves` +
+    (S.dead ? ` &middot; <span class="bad">${S.dead} dead end${S.dead > 1 ? 's' : ''}</span>` : '') +
+    (S.complete ? '' : ' &middot; <span class="bad">incomplete: the root cannot reach the end</span>');
+
+  // ---- pan / zoom ---------------------------------------------------------
+  let view = {x: 0, y: 0, k: 1}, moved = false;
+  const apply = () => vp.setAttribute('transform', `translate(${view.x} ${view.y}) scale(${view.k})`);
+  function fit() {
+    const r = svg.getBoundingClientRect();
+    const k = Math.min(r.width / W, r.height / H, 1.6);
+    view = {k, x: (r.width - W * k) / 2, y: (r.height - H * k) / 2}; apply();
+  }
+  document.getElementById('bFit').onclick = fit;
+  addEventListener('resize', fit);
+  svg.addEventListener('wheel', ev => {
+    ev.preventDefault();
+    const r = svg.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top;
+    const f = ev.deltaY < 0 ? 1.15 : 1 / 1.15, k = Math.min(8, Math.max(0.05, view.k * f)), g = k / view.k;
+    view.x = mx - (mx - view.x) * g; view.y = my - (my - view.y) * g; view.k = k; apply();
+  }, {passive: false});
+  let drag = null;
+  svg.addEventListener('pointerdown', ev => { drag = {x: ev.clientX, y: ev.clientY, vx: view.x, vy: view.y}; moved = false; });
+  addEventListener('pointermove', ev => {
+    if (!drag) return;
+    const dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) { moved = true; svg.classList.add('dragging'); hideTip(); }
+    if (moved) { view.x = drag.vx + dx; view.y = drag.vy + dy; apply(); }
+  });
+  addEventListener('pointerup', () => { drag = null; svg.classList.remove('dragging'); setTimeout(() => moved = false, 0); });
+  fit(); refresh();
+})();
+</script>
+</body>
+</html>

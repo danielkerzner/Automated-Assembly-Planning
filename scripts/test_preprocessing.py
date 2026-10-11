@@ -12,9 +12,10 @@ you can inspect it:
                              actually gone, nothing else is
     report.json              per-stander record (prerequisites,
                              contact_neighbors, exit_point,
-                             dismantle_direction) plus the full candidate
-                             direction list -- everything else
-                             run_preprocessing() returns
+                             dismantle_direction, bbox) plus the full
+                             candidate direction list and the whole-assembly
+                             bbox -- everything else run_preprocessing()
+                             returns
 
 Run (from repo root, environmentAPP active):
 
@@ -69,11 +70,15 @@ def main(step_path: Path, bom_path: Path, out_dir: Path) -> None:
                 "contact_neighbors": sorted(rec.contact_neighbors),
                 "exit_point": _vec(rec.exit_point),
                 "dismantle_direction": _vec(rec.dismantle_direction),
+                "bbox": [_vec(v) for v in rec.bbox] if rec.bbox else None,
             }
             for name, rec in result.stander_records.items()
         },
         "candidate_direction_count": len(result.candidate_directions),
         "candidate_directions": [_vec(d) for d in result.candidate_directions],
+        "assembly_bbox": (
+            [_vec(v) for v in result.assembly_bbox] if result.assembly_bbox else None
+        ),
     }
     report_path = out_dir / "report.json"
     report_path.write_text(json.dumps(report, indent=2))
@@ -81,16 +86,20 @@ def main(step_path: Path, bom_path: Path, out_dir: Path) -> None:
     # 3. Short console summary.
     print(f"Standers processed: {len(result.stander_records)}")
     for name, rec in result.stander_records.items():
+        bbox_str = f"{_vec(rec.bbox[0])} -> {_vec(rec.bbox[1])}" if rec.bbox else None
         print(
             f"  {name}: {len(rec.prerequisites)} prerequisite(s), "
             f"{len(rec.contact_neighbors)} contact neighbor(s), "
-            f"dismantle_direction={_vec(rec.dismantle_direction)}"
+            f"dismantle_direction={_vec(rec.dismantle_direction)}, bbox={bbox_str}"
         )
     print(
         f"Reduced assembly: {len(reduced_objs)} component(s) "
         f"-> {reduced_step}"
     )
     print(f"Candidate directions: {len(result.candidate_directions)} unique")
+    if result.assembly_bbox:
+        lo, hi = result.assembly_bbox
+        print(f"Assembly bbox: {_vec(lo)} -> {_vec(hi)}")
     print(f"Full report written to {report_path}")
 
 

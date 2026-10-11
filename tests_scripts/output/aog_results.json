@@ -1,0 +1,397 @@
+{
+  "groups": [
+    "core",
+    "real",
+    "scale"
+  ],
+  "results": {
+    "A1": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "industrial_fastner (N=8): V=60, E=135; brute force V=60, E=135; identical=True",
+          "passed": true
+        },
+        {
+          "label": "200 random synthetic tensors (N <= 12, random gates): 0 mismatches []",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "random cases: V from 1 to 512, 161 non-trivial"
+      ],
+      "seconds": 3.563
+    },
+    "A2": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "industrial_fastner: DAG/layered/one-bit edges/root/terminal/CSR (ok)",
+          "passed": true
+        },
+        {
+          "label": "all 21 graphs structurally valid",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.156
+    },
+    "A2b": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "root out-edges (cached inputs) == {'Part__Feature002': [6], 'Part__Feature006': [0], 'Part__Feature003': [1], 'Part__Feature004': [10], 'Part__Feature005': [10]}",
+          "passed": true
+        },
+        {
+          "label": "root out-edges (real FreeCAD run) match",
+          "passed": true
+        },
+        {
+          "label": "real run graph == cached-input graph (== brute force)",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "root out-edge: industrial_fastner_part1 (Part__Feature002) [(0.0, 0.0, -1.0)]",
+        "root out-edge: industrial_fastner_part5 (Part__Feature006) [(-1.0, 0.0, 0.0)]",
+        "root out-edge: Part__Feature003 (Part__Feature003) [(1.0, 0.0, 0.0)]",
+        "root out-edge: Part__Feature004 (Part__Feature004) [(0.0, -1.0, 0.0)]",
+        "root out-edge: Part__Feature005 (Part__Feature005) [(0.0, -1.0, 0.0)]",
+        "V=60, E=135, per level [1, 5, 10, 12, 11, 9, 6, 5, 1], dead ends 1, complete=True"
+      ],
+      "seconds": 5.434
+    },
+    "A3": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "[prerequisites] gate of s = {0}",
+          "passed": true
+        },
+        {
+          "label": "[prerequisites] s removable at the root",
+          "passed": true
+        },
+        {
+          "label": "[prerequisites] gate {0} not removable while s present",
+          "passed": true
+        },
+        {
+          "label": "[prerequisites] every node with s present contains its gate (0 violations)",
+          "passed": true
+        },
+        {
+          "label": "[prerequisites] complete, V=5, E=5",
+          "passed": true
+        },
+        {
+          "label": "[prerequisites+contacts] gate of s = {0, 1}",
+          "passed": true
+        },
+        {
+          "label": "[prerequisites+contacts] s removable at the root",
+          "passed": true
+        },
+        {
+          "label": "[prerequisites+contacts] gate {0, 1} not removable while s present",
+          "passed": true
+        },
+        {
+          "label": "[prerequisites+contacts] every node with s present contains its gate (0 violations)",
+          "passed": true
+        },
+        {
+          "label": "[prerequisites+contacts] complete, V=5, E=5",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.005
+    },
+    "A4": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "4 nodes, 3 edges (got 4, 3)",
+          "passed": true
+        },
+        {
+          "label": "forced order A, B, C (C alone is free everywhere): [('A', ['+z']), ('B', ['+z']), ('C', ['+x', '-x', '+y', '-y', '+z', '-z'])]",
+          "passed": true
+        },
+        {
+          "label": "complete, no dead ends",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.002
+    },
+    "A5": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "N=12: V=4096 (2^N=4096), E=24576 (N*2^(N-1)=24576)",
+          "passed": true
+        },
+        {
+          "label": "N=16: V=65536 (2^N=65536), E=524288 (N*2^(N-1)=524288)",
+          "passed": true
+        },
+        {
+          "label": "N=20: V=1048576 (2^N=1048576), E=10485760 (N*2^(N-1)=10485760)",
+          "passed": true
+        },
+        {
+          "label": "N=20 within budget (< 120 s, < 2 GB): 4.4 s, 0.47 GB",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "N=12: 0.17 s, arrays 0.5 MB, peak traced 1.2 MB",
+        "N=16: 0.41 s, arrays 10.1 MB, peak traced 23.7 MB",
+        "N=20: 4.36 s, arrays 197.1 MB, peak traced 466.6 MB"
+      ],
+      "seconds": 4.956
+    },
+    "A6": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "interlocked pair: V=1, dead ends [np.int64(0)], complete=False",
+          "passed": true
+        },
+        {
+          "label": "dead-end warning logged",
+          "passed": true
+        },
+        {
+          "label": "with free C: nodes 2, edges 1, dead-end masks [3] (nothing pruned)",
+          "passed": true
+        },
+        {
+          "label": "live False on the dead end and on the root that only reaches it; complete False",
+          "passed": true
+        },
+        {
+          "label": "incomplete warning logged",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.002
+    },
+    "A7": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "stander direction equal to a candidate reuses its index (got 4)",
+          "passed": true
+        },
+        {
+          "label": "new direction appends d and -d, and -d is then reused (D'=8, kd={6: 4, 7: 6, 8: 7})",
+          "passed": true
+        },
+        {
+          "label": "dirs[neg[k]] == -dirs[k] for all k",
+          "passed": true
+        },
+        {
+          "label": "industrial_fastner: stander directions all reuse candidates (D'=26)",
+          "passed": true
+        },
+        {
+          "label": "appended directions used only by the stander",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.001
+    },
+    "A8": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "axis-aligned +x: 9.0000 (expected 9.0000)",
+          "passed": true
+        },
+        {
+          "label": "axis-aligned -x: 5.0000 (expected 5.0000)",
+          "passed": true
+        },
+        {
+          "label": "oblique (1,1,0)/sqrt2 (y limits): 6.6569 (expected 6.6569)",
+          "passed": true
+        },
+        {
+          "label": "touching box face from inside, +x (own width): 3.0000 (expected 3.0000)",
+          "passed": true
+        },
+        {
+          "label": "touching box face from inside, -x: 11.0000 (expected 11.0000)",
+          "passed": true
+        },
+        {
+          "label": "already outside, +x: 1.0000 (expected 1.0000)",
+          "passed": true
+        },
+        {
+          "label": "already outside, +y: 1.0000 (expected 1.0000)",
+          "passed": true
+        },
+        {
+          "label": "travel >= margin everywhere",
+          "passed": true
+        },
+        {
+          "label": "travel rows unchanged when other components are removed",
+          "passed": true
+        },
+        {
+          "label": "edge_distances = travel[comp, k] on every edge",
+          "passed": true
+        },
+        {
+          "label": "industrial_fastner: assembly box [-48.25  -51.555 -26.2  ]..[35.494 53.105 19.3  ] == union of component boxes [-48.25  -51.555 -26.2  ]..[35.494 53.105 19.3  ]",
+          "passed": true
+        },
+        {
+          "label": "industrial_fastner: travel >= margin",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.006
+    },
+    "A9": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "save/load gives identical arrays and metadata",
+          "passed": true
+        },
+        {
+          "label": "load with a different key returns None (recompute)",
+          "passed": true
+        },
+        {
+          "label": "exports written",
+          "passed": true
+        },
+        {
+          "label": "changing the gate set changes cache_key",
+          "passed": true
+        },
+        {
+          "label": "changing the stander direction changes cache_key",
+          "passed": true
+        },
+        {
+          "label": "changing the AoGConfig.margin changes cache_key",
+          "passed": true
+        },
+        {
+          "label": "changing the AoGConfig.stander_gate changes cache_key",
+          "passed": true
+        },
+        {
+          "label": "same inputs, same key",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.055
+    },
+    "A10": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "industrial_fastner: 100 sampled paths replay as valid removal orders (0 bad steps); assembly sequence uses neg and places standers after their gate (0 bad steps)",
+          "passed": true
+        },
+        {
+          "label": "random N=9 (3 standers): 100 sampled paths replay as valid removal orders (0 bad steps); assembly sequence uses neg and places standers after their gate (0 bad steps)",
+          "passed": true
+        },
+        {
+          "label": "random N=9 (3 standers): 100 sampled paths replay as valid removal orders (0 bad steps); assembly sequence uses neg and places standers after their gate (0 bad steps)",
+          "passed": true
+        },
+        {
+          "label": "random N=9 (3 standers): 100 sampled paths replay as valid removal orders (0 bad steps); assembly sequence uses neg and places standers after their gate (0 bad steps)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.439
+    },
+    "A11": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "industrial_fastner: two runs give byte-identical arrays",
+          "passed": true
+        },
+        {
+          "label": "random N=12 (V=992): two runs give byte-identical arrays",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.045
+    },
+    "A12": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "chain A-B-C: state {A, C} is not in the AoG",
+          "passed": true
+        },
+        {
+          "label": "B is not removable first",
+          "passed": true
+        },
+        {
+          "label": "V=7 (7 = 8 subsets minus {A, C}), dropped 1, complete=True",
+          "passed": true
+        },
+        {
+          "label": "contact=None: rule off, V=8",
+          "passed": true
+        },
+        {
+          "label": "plate P with X, Y: state {X, Y} dropped",
+          "passed": true
+        },
+        {
+          "label": "A, B held only by stander s (gate {A, B}): root is a dead end (V=1)",
+          "passed": true
+        },
+        {
+          "label": "dead end reported, not resolved",
+          "passed": true
+        },
+        {
+          "label": "disconnected full assembly logs a warning",
+          "passed": true
+        },
+        {
+          "label": "and no other disconnected state is generated",
+          "passed": true
+        },
+        {
+          "label": "industrial_fastner: all 60 states connected (21 dropped, 0 violations)",
+          "passed": true
+        },
+        {
+          "label": "random graphs: no disconnected non-root state (0 violations)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.207
+    }
+  }
+}

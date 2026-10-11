@@ -43,8 +43,10 @@ For each stander component:
      since the head side almost always has fewer obstructions.
 4. **Store, per stander:**
    - `prerequisites`: the set of distinct components collided with along the *chosen* (winning) direction
-     only. This set is the only input the AoG generator needs later (its "did removing this component free a
-     stander?" check queries this).
+     only. Per `docs/aog-spec.md` (D4), the stander is assembled *after* these components, so in disassembly
+     it must be removed *before* them, while they are still present — not "removed once they're gone."
+     Together with `contact_neighbors`, this forms the stander's gate set the AoG generator uses for its
+     precedence rule (`docs/aog-spec.md`, "Model").
    - `exit_point`: the point where the stander's trajectory crosses the assembly's outer bounding box along
      the chosen direction. Computed once here so the Illustration Generator doesn't need to recompute it.
    - `contact_neighbors`: the set of *all* non-stander components physically touching the stander (minimum

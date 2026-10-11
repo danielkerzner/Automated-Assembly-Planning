@@ -1,1 +1,4 @@
-*.md
+CLAUDE.md
+\.vscode
+\docs
+\test_scripts

@@ -1638,6 +1638,29 @@
   "gap_skip": true,
   "use_broad_phase": true
  },
+ "contact_threshold": 0.1,
+ "contact_pairs": [
+  [
+   "Part__Feature",
+   "Part__Feature001"
+  ],
+  [
+   "Part__Feature",
+   "Part__Feature002"
+  ],
+  [
+   "Part__Feature001",
+   "Part__Feature002"
+  ],
+  [
+   "Part__Feature001",
+   "Part__Feature006"
+  ],
+  [
+   "Part__Feature006",
+   "Part__Feature007"
+  ]
+ ],
  "stats": {
   "tests": 260,
   "broad_phase_settled": 47,
@@ -1667,5 +1690,5 @@
   "total_time_s": 240.76850129998638
  },
  "freecad_version": "1.1.0",
- "date": "2026-09-27T19:22:37"
+ "date": "2026-10-11T12:07:42"
 }
