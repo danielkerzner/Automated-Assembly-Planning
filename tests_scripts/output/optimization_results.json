@@ -1,8 +1,6 @@
 {
   "groups": [
-    "core",
-    "real",
-    "scale"
+    "core"
   ],
   "results": {
     "O1": {
@@ -42,7 +40,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.079
+      "seconds": 0.043
     },
     "O2": {
       "passed": true,
@@ -100,7 +98,7 @@
         }
       ],
       "notes": [],
-      "seconds": 1.231
+      "seconds": 0.579
     },
     "O4": {
       "passed": true,
@@ -146,7 +144,7 @@
         "travel only (not asserted), use_cost_to_go=False: optimum 0.000000 found on 2/10 seeds",
         "travel only (not asserted), use_cost_to_go=True: optimum 0.000000 found on 10/10 seeds"
       ],
-      "seconds": 12.3
+      "seconds": 7.286
     },
     "O5": {
       "passed": true,
@@ -193,7 +191,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.006
+      "seconds": 0.002
     },
     "O6": {
       "passed": true,
@@ -216,7 +214,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.004
+      "seconds": 0.002
     },
     "O7": {
       "passed": true,
@@ -239,7 +237,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.005
+      "seconds": 0.002
     },
     "O8": {
       "passed": true,
@@ -262,7 +260,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.077
+      "seconds": 0.031
     },
     "O9": {
       "passed": true,
@@ -370,115 +368,12 @@
         {
           "label": "line contact, CoG 1 mm off the line, hull, g = -z: class 1 (expected 1)",
           "passed": true
-        },
-        {
-          "label": "FreeCAD: overhanging block, hull, g = -z: class 1 (expected 1)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: overhanging block, hull, g = +z: class 1 (expected 1)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: overhanging block, union, g = -z: class 1 (expected 1)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: block on a base (not overhanging), hull, g = -z: class 2 (expected 2)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: block on a base (not overhanging), hull, g = +z: class 1 (expected 1)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: block on a base (not overhanging), union, g = -z: class 2 (expected 2)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: block in U-shaped container, hull, g = -z: class 2 (expected 2)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: block in U-shaped container, hull, g = +x: class 2 (expected 2)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: block in U-shaped container, hull, g = +z: class 1 (expected 1)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: block in U-shaped container, union, g = -z: class 2 (expected 2)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: block in U-shaped container, union, g = +x: class 2 (expected 2)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: block in U-shaped container, union, g = +z: class 1 (expected 1)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: pin through one plate, hull, g = -z: class 2 (expected 2)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: pin through one plate, hull, g = +x: class 1 (expected 1)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: pin through one plate, union, g = -z: class 2 (expected 2)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: pin through one plate, union, g = +x: class 1 (expected 1)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: block on two rails, hull, g = -z: class 2 (expected 2)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: block on two rails, hull, g = +z: class 1 (expected 1)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: block on two rails, union, g = -z: class 1 (expected 1)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: pin through two separated plates, hull, g = -z: class 2 (expected 2)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: pin through two separated plates, hull, g = +x: class 1 (expected 1)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: pin through two separated plates, hull, g = +y: class 2 (expected 2)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: pin through two separated plates, union, g = -z: class 1 (expected 1)",
-          "passed": true
-        },
-        {
-          "label": "FreeCAD: pin through two separated plates, union, g = +x: class 1 (expected 1)",
-          "passed": true
         }
       ],
       "notes": [
-        "overhanging block: patches 1-0: 2 triangles, 50.0 mm^2",
-        "block on a base (not overhanging): patches 1-0: 2 triangles, 100.0 mm^2",
-        "block in U-shaped container: patches 1-0: 10 triangles, 500.0 mm^2",
-        "pin through one plate: patches 1-0: 504 triangles, 502.6 mm^2",
-        "block on two rails: patches 2-0: 2 triangles, 20.0 mm^2",
-        "block on two rails: patches 2-1: 2 triangles, 20.0 mm^2",
-        "pin through two separated plates: patches 2-0: 464 triangles, 63.8 mm^2",
-        "pin through two separated plates: patches 2-1: 464 triangles, 63.8 mm^2"
+        "FreeCAD geometry variant skipped (run with --groups real)"
       ],
-      "seconds": 1.954
+      "seconds": 0.019
     },
     "O10": {
       "passed": true,
@@ -489,7 +384,7 @@
         }
       ],
       "notes": [],
-      "seconds": 2.321
+      "seconds": 1.252
     },
     "O11": {
       "passed": true,
@@ -520,7 +415,7 @@
         }
       ],
       "notes": [],
-      "seconds": 2.735
+      "seconds": 1.626
     },
     "O12": {
       "passed": true,
@@ -551,7 +446,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.609
+      "seconds": 0.324
     },
     "O13": {
       "passed": true,
@@ -571,42 +466,26 @@
         {
           "label": "changing the gravity directions changes the term-table key",
           "passed": true
-        },
-        {
-          "label": "second run loads the cached result",
-          "passed": true
-        },
-        {
-          "label": "weight change: new result, term tables reused",
-          "passed": true
-        },
-        {
-          "label": "gravity change: term tables recomputed",
-          "passed": true
         }
       ],
       "notes": [
-        "industrial_fastner (real geometry): total 0.2969 in 17.0 s; sequence [('part3', 2), ('part2', 1), ('part5', 2), ('part6', 1), ('part7', 2), ('part1', 2), ('part001', 1), ('part4', 1)]"
+        "pipeline caching variant skipped (run with --groups real)"
       ],
-      "seconds": 371.315
+      "seconds": 0.711
     },
     "O14": {
       "passed": true,
       "checks": [
         {
-          "label": "N=12: 5.0 s < 60 s and 9.1 MB < 32.8 MB",
-          "passed": true
-        },
-        {
-          "label": "N=20: 13.1 s < 60 s and 38.0 MB < 69.7 MB",
+          "label": "N=12: 4.5 s < 60 s and 9.1 MB < 32.8 MB",
           "passed": true
         }
       ],
       "notes": [
-        "N=12: V=1376, E=6800, moves=28276, 101 iterations, 5.0 s, peak traced 9.1 MB (estimate 32.8 MB), cost 0.3019 (greedy 0.3079)",
-        "N=20: V=64105, E=393562, moves=1045562, 118 iterations, 13.1 s, peak traced 38.0 MB (estimate 69.7 MB), cost 0.3310 (greedy 0.3658)"
+        "N=12: V=1376, E=6800, moves=28276, 101 iterations, 4.5 s, peak traced 9.1 MB (estimate 32.8 MB), cost 0.3019 (greedy 0.3079)",
+        "N = 20 skipped (run with --groups scale)"
       ],
-      "seconds": 18.47
+      "seconds": 4.474
     },
     "cache": {
       "passed": true,

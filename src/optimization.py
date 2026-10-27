@@ -889,31 +889,10 @@ def _read_bom(bom_path) -> tuple[list[str], dict[str, dict], bytes]:
 
 
 def _component_shapes(aog, prep) -> list:
-    """Global shapes in AoG order: movable parts from the reduced document, standers from the
-    original document (run_preprocessing names the reduced doc '<doc>_reduced')."""
-    import FreeCAD
+    """Global shapes in AoG order (shared helper in shapes.py)."""
+    from shapes import component_shapes
 
-    reduced = prep.reduced_assembly
-    original = None
-    if reduced.Name.endswith("_reduced"):
-        try:
-            original = FreeCAD.getDocument(reduced.Name[: -len("_reduced")])
-        except Exception:  # noqa: BLE001
-            original = None
-    shapes = []
-    for cid, stander in zip(aog.component_ids, aog.is_stander):
-        if not stander:
-            obj = reduced.getObject(cid)
-            shape = None if obj is None else obj.Shape  # stored at global placement
-        else:
-            obj = None if original is None else original.getObject(cid)
-            if obj is not None:
-                shape = obj.Shape.copy()
-                shape.Placement = obj.getGlobalPlacement()
-        if obj is None:
-            raise ValueError(f"Component {cid} not found (stander shapes need the original document open)")
-        shapes.append(shape)
-    return shapes
+    return component_shapes(aog.component_ids, aog.is_stander, prep)
 
 
 def _center_of_mass(shape) -> list[float]:

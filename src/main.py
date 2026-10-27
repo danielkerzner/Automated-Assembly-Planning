@@ -12,10 +12,10 @@ Illustration Generator and Written Instructions both consume the same optimized 
 independently, not sequentially.
 
 Preprocessing (docs/preprocessing-spec.md), Interference Identification
-(docs/interference-spec.md), the AoG generator (docs/aog-spec.md) and Optimization
-(docs/optimization-spec.md) are implemented. The remaining stages are wired in through their
-stub modules, each of which raises NotImplementedError until it gets its own design review —
-see CLAUDE.md's "Current status" section.
+(docs/interference-spec.md), the AoG generator (docs/aog-spec.md), Optimization
+(docs/optimization-spec.md) and the Illustration Generator (docs/illustration-spec.md) are
+implemented. Written Instructions is wired in through its stub module, which raises
+NotImplementedError until it gets its own design review (see CLAUDE.md).
 """
 
 from __future__ import annotations
@@ -58,7 +58,7 @@ def run_pipeline(
     )
 
     # AIG: turn the optimized sequence into output for a human assembler.
-    generate_illustrations(sequence, output_dir / "illustrations")
+    generate_illustrations(sequence, preprocessing_result, output_dir / "illustrations")
     generate_written_instructions(sequence, output_dir / "instructions")
 
 
