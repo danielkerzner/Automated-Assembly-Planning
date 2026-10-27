@@ -5,7 +5,8 @@ tests in tests_scripts/test_interference.py. This script runs Preprocessing + In
 Identification end to end on one assembly and dumps everything in a form you can inspect by eye:
 
   tests/industrial_fastner/interference/
-    interference.npz            the matrix itself (free, directions, neg), written by the module
+    interference.npz            the matrix itself (free, directions, neg) and the contact matrix
+                                (contact, gaps), written by the module
     interference.json           module metadata (pair classes, exceptions, stats, cache key)
     interference_table.csv      matrix in the thesis-figure layout: cell (i, j) = directions along
                                 which row part i can leave past column part j
@@ -18,7 +19,10 @@ The report lists, with part labels and direction vectors instead of indices:
   - which parts are removable with the whole assembly present, and along which directions
   - for every part and every direction, which parts block it in the full assembly
   - pairs with no free direction at all, exception cells, timing statistics
-  - two quick consistency checks (antisymmetry, diagonal)
+  - the contact matrix: threshold used, touching pairs with their static gap, the full gap matrix,
+    contact neighbours of every part, parts touching nothing, and whether the movable parts form
+    one connected group
+  - three quick consistency checks (antisymmetry, diagonal, contact symmetry)
 
 The matrix is cached: a second run with the same STEP, BOM and settings loads it instantly.
 Use --force to recompute.
@@ -70,6 +74,34 @@ def _dirs(result, ks) -> list[list[float]]:
     return [_vec(result.directions[k]) for k in ks]
 
 
+def _gap(g: float) -> float | None:
+    # JSON has no infinity; an infinite gap only comes from a failed distToShape (bounding-box fallback)
+    return None if not np.isfinite(g) else round(float(g), 6)
+
+
+def build_contacts(result) -> dict:
+    """Contact matrix section of the report (movable parts only; standers come from their records)."""
+    if result.contact is None:
+        return {"available": False}
+    n = len(result.component_ids)
+    labels = result.component_labels
+    contact, gaps = result.contact, result.gaps
+    touching = [
+        {"pair": f"{labels[i]} / {labels[j]}", "gap_mm": _gap(gaps[i, j])}
+        for i in range(n) for j in range(i + 1, n) if contact[i, j]
+    ]
+    return {
+        "available": True,
+        "threshold_mm": result.contact_threshold,
+        "touching_pairs": touching,
+        "contact_matrix": {labels[i]: {labels[j]: bool(contact[i, j]) for j in range(n)} for i in range(n)},
+        "gap_matrix_mm": {labels[i]: {labels[j]: _gap(gaps[i, j]) for j in range(n)} for i in range(n)},
+        "neighbors": {labels[i]: [labels[j] for j in result.contact_neighbors(i)] for i in range(n)},
+        "touching_nothing": [labels[i] for i in range(n) if not contact[i].any()],
+        "movable_parts_connected": result.is_connected(range(n)),
+    }
+
+
 def build_report(result) -> dict:
     n = len(result.component_ids)
     D = len(result.directions)
@@ -118,6 +150,9 @@ def build_report(result) -> dict:
         if result.free[j, i, result.neg[k]] != result.free[i, j, k]
     )
     diagonal_ok = bool(all(result.free[i, i, :].all() for i in range(n)))
+    contact_symmetric = None if result.contact is None else bool(
+        np.array_equal(result.contact, result.contact.T) and not result.contact.diagonal().any()
+    )
 
     return {
         "component_count": n,
@@ -146,9 +181,11 @@ def build_report(result) -> dict:
             for i, j, k in result.exception_cells
         ],
         "caught_backend_exceptions": len(result.caught_exceptions),
+        "contacts": build_contacts(result),
         "checks": {
             "antisymmetry_mismatches": mismatches,
             "diagonal_all_true": diagonal_ok,
+            "contact_symmetric_diagonal_false": contact_symmetric,
         },
         "stats": {k: v for k, v in result.stats.items() if k != "pair_times_s"},
         "pair_times_s": result.stats.get("pair_times_s", {}),
@@ -186,11 +223,29 @@ def print_summary(result, report: dict, elapsed: float, cache_dir: Path, report_
         print("Pairs with NO free direction (check these):")
         for p in report["pairs_with_no_free_direction"]:
             print(f"  {p}")
+    contacts = report["contacts"]
+    if contacts["available"]:
+        print(f"Contact matrix (x = touching, static gap <= {contacts['threshold_mm']} mm):")
+        print("  " + " " * width + "  " + "  ".join(f"{j:>3}" for j in range(n)))
+        for i in range(n):
+            cells = "  ".join("  -" if i == j else ("  x" if result.contact[i, j] else "  .") for j in range(n))
+            print(f"  {labels[i]:<{width}}  {cells}   ({i})")
+        print("Touching pairs (static gap):")
+        for p in contacts["touching_pairs"]:
+            gap = "inf" if p["gap_mm"] is None else f"{p['gap_mm']:.4f} mm"
+            print(f"  {p['pair']}: {gap}")
+        if contacts["touching_nothing"]:
+            print(f"Touching no other movable part (held only by standers?): {', '.join(contacts['touching_nothing'])}")
+        print(f"Movable parts form one connected group: {contacts['movable_parts_connected']}")
+    else:
+        print("Contact matrix: not available (cached result without contacts)")
+
     print(f"Exception cells: {len(report['exception_cells'])}   "
           f"caught backend exceptions: {report['caught_backend_exceptions']}")
     chk = report["checks"]
     print(f"Checks: antisymmetry mismatches = {chk['antisymmetry_mismatches']}, "
-          f"diagonal all true = {chk['diagonal_all_true']}")
+          f"diagonal all true = {chk['diagonal_all_true']}, "
+          f"contact symmetric with empty diagonal = {chk['contact_symmetric_diagonal_false']}")
     s = report["stats"]
     print(f"Time: {elapsed:.1f} s this run, including preprocessing "
           f"(the matrix itself took {s.get('matrix_time_s', 0.0):.1f} s when it was computed; "

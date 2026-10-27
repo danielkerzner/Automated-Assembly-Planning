@@ -177,20 +177,20 @@ def is_free_detail(
     d = unit(d)
 
     # Step 0: static overlap pre-check
+    # Step 1: broad phase on bounding boxes projected onto the plane perpendicular to d.
     if config.use_broad_phase and broad_phase(shape_i, shape_j, d) is not None:
         stats.broad_free += 1
         return Outcome(True, "broad")
     if threshold is None:
         _, _, threshold = classify_pair(shape_i, shape_j, config)
 
-    # Step 1: broad phase on bounding boxes projected onto the plane perpendicular to d.
+    # Step 2: step i along d, checking overlap volume at each step.
     t0 = time.perf_counter()
     h = config.step
     length = sweep_length(shape_i, shape_j, d, config.margin)
     t, iters = 0.0, 0
     outcome = None
-
-    # Step 2: step i along d, checking overlap volume at each step.
+    
     while t < length:
         iters += 1
         delta = 0.0

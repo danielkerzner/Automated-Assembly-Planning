@@ -226,7 +226,7 @@
         6
       ],
       "directions": [
-       [
+        [
           0.0,
           0.0,
           -1.0
@@ -250,7 +250,7 @@
         1
       ],
       "directions": [
-         [
+        [
           1.0,
           0.0,
           0.0
@@ -1872,9 +1872,134 @@
   "pairs_with_no_free_direction": [],
   "exception_cells": [],
   "caught_backend_exceptions": 0,
+  "contacts": {
+    "available": true,
+    "threshold_mm": 0.1,
+    "touching_pairs": [
+      {
+        "pair": "industrial_fastner_part3 / industrial_fastner_part2",
+        "gap_mm": 0.0
+      },
+      {
+        "pair": "industrial_fastner_part3 / industrial_fastner_part1",
+        "gap_mm": 0.075
+      },
+      {
+        "pair": "industrial_fastner_part2 / industrial_fastner_part1",
+        "gap_mm": 0.075
+      },
+      {
+        "pair": "industrial_fastner_part2 / industrial_fastner_part5",
+        "gap_mm": 0.0
+      },
+      {
+        "pair": "industrial_fastner_part5 / industrial_fastner_part6",
+        "gap_mm": 0.0
+      }
+    ],
+    "contact_matrix": {
+      "industrial_fastner_part3": {
+        "industrial_fastner_part3": false,
+        "industrial_fastner_part2": true,
+        "industrial_fastner_part1": true,
+        "industrial_fastner_part5": false,
+        "industrial_fastner_part6": false
+      },
+      "industrial_fastner_part2": {
+        "industrial_fastner_part3": true,
+        "industrial_fastner_part2": false,
+        "industrial_fastner_part1": true,
+        "industrial_fastner_part5": true,
+        "industrial_fastner_part6": false
+      },
+      "industrial_fastner_part1": {
+        "industrial_fastner_part3": true,
+        "industrial_fastner_part2": true,
+        "industrial_fastner_part1": false,
+        "industrial_fastner_part5": false,
+        "industrial_fastner_part6": false
+      },
+      "industrial_fastner_part5": {
+        "industrial_fastner_part3": false,
+        "industrial_fastner_part2": true,
+        "industrial_fastner_part1": false,
+        "industrial_fastner_part5": false,
+        "industrial_fastner_part6": true
+      },
+      "industrial_fastner_part6": {
+        "industrial_fastner_part3": false,
+        "industrial_fastner_part2": false,
+        "industrial_fastner_part1": false,
+        "industrial_fastner_part5": true,
+        "industrial_fastner_part6": false
+      }
+    },
+    "gap_matrix_mm": {
+      "industrial_fastner_part3": {
+        "industrial_fastner_part3": 0.0,
+        "industrial_fastner_part2": 0.0,
+        "industrial_fastner_part1": 0.075,
+        "industrial_fastner_part5": 6.5,
+        "industrial_fastner_part6": 0.5
+      },
+      "industrial_fastner_part2": {
+        "industrial_fastner_part3": 0.0,
+        "industrial_fastner_part2": 0.0,
+        "industrial_fastner_part1": 0.075,
+        "industrial_fastner_part5": 0.0,
+        "industrial_fastner_part6": 0.4
+      },
+      "industrial_fastner_part1": {
+        "industrial_fastner_part3": 0.075,
+        "industrial_fastner_part2": 0.075,
+        "industrial_fastner_part1": 0.0,
+        "industrial_fastner_part5": 60.348438,
+        "industrial_fastner_part6": 67.429337
+      },
+      "industrial_fastner_part5": {
+        "industrial_fastner_part3": 6.5,
+        "industrial_fastner_part2": 0.0,
+        "industrial_fastner_part1": 60.348438,
+        "industrial_fastner_part5": 0.0,
+        "industrial_fastner_part6": 0.0
+      },
+      "industrial_fastner_part6": {
+        "industrial_fastner_part3": 0.5,
+        "industrial_fastner_part2": 0.4,
+        "industrial_fastner_part1": 67.429337,
+        "industrial_fastner_part5": 0.0,
+        "industrial_fastner_part6": 0.0
+      }
+    },
+    "neighbors": {
+      "industrial_fastner_part3": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1"
+      ],
+      "industrial_fastner_part2": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5"
+      ],
+      "industrial_fastner_part1": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "industrial_fastner_part5": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ],
+      "industrial_fastner_part6": [
+        "industrial_fastner_part5"
+      ]
+    },
+    "touching_nothing": [],
+    "movable_parts_connected": true
+  },
   "checks": {
     "antisymmetry_mismatches": 0,
-    "diagonal_all_true": true
+    "diagonal_all_true": true,
+    "contact_symmetric_diagonal_false": true
   },
   "stats": {
     "tests": 260,

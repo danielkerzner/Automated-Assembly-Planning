@@ -1,0 +1,2033 @@
+{
+  "component_count": 5,
+  "components": [
+    {
+      "index": 0,
+      "label": "industrial_fastner_part3",
+      "name": "Part__Feature"
+    },
+    {
+      "index": 1,
+      "label": "industrial_fastner_part2",
+      "name": "Part__Feature001"
+    },
+    {
+      "index": 2,
+      "label": "industrial_fastner_part1",
+      "name": "Part__Feature002"
+    },
+    {
+      "index": 3,
+      "label": "industrial_fastner_part5",
+      "name": "Part__Feature006"
+    },
+    {
+      "index": 4,
+      "label": "industrial_fastner_part6",
+      "name": "Part__Feature007"
+    }
+  ],
+  "direction_count": 26,
+  "directions": {
+    "0": [
+      -1.0,
+      0.0,
+      0.0
+    ],
+    "1": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "2": [
+      0.561178,
+      -0.827695,
+      0.0
+    ],
+    "3": [
+      -0.561178,
+      0.827695,
+      0.0
+    ],
+    "4": [
+      -0.267382,
+      0.963591,
+      0.0
+    ],
+    "5": [
+      0.267382,
+      -0.963591,
+      0.0
+    ],
+    "6": [
+      0.0,
+      0.0,
+      -1.0
+    ],
+    "7": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "8": [
+      -0.47838,
+      0.878153,
+      0.0
+    ],
+    "9": [
+      0.47838,
+      -0.878153,
+      0.0
+    ],
+    "10": [
+      0.0,
+      -1.0,
+      0.0
+    ],
+    "11": [
+      0.0,
+      1.0,
+      0.0
+    ],
+    "12": [
+      0.0,
+      0.5,
+      -0.866025
+    ],
+    "13": [
+      0.0,
+      -0.5,
+      0.866025
+    ],
+    "14": [
+      0.0,
+      0.5,
+      0.866025
+    ],
+    "15": [
+      0.0,
+      -0.5,
+      -0.866025
+    ],
+    "16": [
+      0.963591,
+      0.267382,
+      0.0
+    ],
+    "17": [
+      -0.963591,
+      -0.267382,
+      0.0
+    ],
+    "18": [
+      0.878153,
+      0.47838,
+      0.0
+    ],
+    "19": [
+      -0.878153,
+      -0.47838,
+      0.0
+    ],
+    "20": [
+      -0.827695,
+      -0.561178,
+      0.0
+    ],
+    "21": [
+      0.827695,
+      0.561178,
+      0.0
+    ],
+    "22": [
+      -0.707107,
+      -0.707107,
+      0.0
+    ],
+    "23": [
+      0.707107,
+      0.707107,
+      0.0
+    ],
+    "24": [
+      0.707107,
+      -0.707107,
+      0.0
+    ],
+    "25": [
+      -0.707107,
+      0.707107,
+      0.0
+    ]
+  },
+  "config": {
+    "step": 2.0,
+    "volume_epsilon": 1e-06,
+    "overlap_tol": 1.0,
+    "margin": 1.0,
+    "gap_skip": true,
+    "use_broad_phase": true
+  },
+  "pair_classes": {
+    "industrial_fastner_part3 / industrial_fastner_part2": {
+      "kind": "normal",
+      "V0": 0.0,
+      "threshold": 1e-06
+    },
+    "industrial_fastner_part3 / industrial_fastner_part1": {
+      "kind": "normal",
+      "V0": 0.0,
+      "threshold": 1e-06
+    },
+    "industrial_fastner_part3 / industrial_fastner_part5": {
+      "kind": "normal",
+      "V0": 0.0,
+      "threshold": 1e-06
+    },
+    "industrial_fastner_part3 / industrial_fastner_part6": {
+      "kind": "normal",
+      "V0": 0.0,
+      "threshold": 1e-06
+    },
+    "industrial_fastner_part2 / industrial_fastner_part1": {
+      "kind": "normal",
+      "V0": 0.0,
+      "threshold": 1e-06
+    },
+    "industrial_fastner_part2 / industrial_fastner_part5": {
+      "kind": "tolerance",
+      "V0": 0.09222405877595426,
+      "threshold": 0.1844481175519085
+    },
+    "industrial_fastner_part2 / industrial_fastner_part6": {
+      "kind": "normal",
+      "V0": 0.0,
+      "threshold": 1e-06
+    },
+    "industrial_fastner_part1 / industrial_fastner_part5": {
+      "kind": "normal",
+      "V0": 0.0,
+      "threshold": 1e-06
+    },
+    "industrial_fastner_part1 / industrial_fastner_part6": {
+      "kind": "normal",
+      "V0": 0.0,
+      "threshold": 1e-06
+    },
+    "industrial_fastner_part5 / industrial_fastner_part6": {
+      "kind": "tolerance",
+      "V0": 0.42000637422663445,
+      "threshold": 0.8400127484532689
+    }
+  },
+  "removable_with_all_parts": {
+    "industrial_fastner_part1": {
+      "direction_indices": [
+        6
+      ],
+      "directions": [
+        [
+          0.0,
+          0.0,
+          -1.0
+        ]
+      ]
+    },
+    "industrial_fastner_part5": {
+      "direction_indices": [
+        0
+      ],
+      "directions": [
+        [
+          -1.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "industrial_fastner_part6": {
+      "direction_indices": [
+        1
+      ],
+      "directions": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ]
+    }
+  },
+  "free_directions_per_pair": {
+    "industrial_fastner_part3 past industrial_fastner_part2": {
+      "count": 8,
+      "directions": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.5,
+          -0.866025
+        ],
+        [
+          0.963591,
+          0.267382,
+          0.0
+        ],
+        [
+          0.878153,
+          0.47838,
+          0.0
+        ],
+        [
+          0.827695,
+          0.561178,
+          0.0
+        ],
+        [
+          0.707107,
+          0.707107,
+          0.0
+        ]
+      ]
+    },
+    "industrial_fastner_part3 past industrial_fastner_part1": {
+      "count": 1,
+      "directions": [
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "industrial_fastner_part3 past industrial_fastner_part5": {
+      "count": 16,
+      "directions": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.561178,
+          -0.827695,
+          0.0
+        ],
+        [
+          -0.267382,
+          0.963591,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.47838,
+          -0.878153,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.5,
+          -0.866025
+        ],
+        [
+          0.0,
+          -0.5,
+          0.866025
+        ],
+        [
+          0.0,
+          0.5,
+          0.866025
+        ],
+        [
+          0.0,
+          -0.5,
+          -0.866025
+        ],
+        [
+          0.963591,
+          0.267382,
+          0.0
+        ],
+        [
+          0.878153,
+          0.47838,
+          0.0
+        ],
+        [
+          0.827695,
+          0.561178,
+          0.0
+        ],
+        [
+          0.707107,
+          0.707107,
+          0.0
+        ],
+        [
+          0.707107,
+          -0.707107,
+          0.0
+        ]
+      ]
+    },
+    "industrial_fastner_part3 past industrial_fastner_part6": {
+      "count": 2,
+      "directions": [
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "industrial_fastner_part2 past industrial_fastner_part3": {
+      "count": 8,
+      "directions": [
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ],
+        [
+          0.0,
+          -0.5,
+          0.866025
+        ],
+        [
+          -0.963591,
+          -0.267382,
+          0.0
+        ],
+        [
+          -0.878153,
+          -0.47838,
+          0.0
+        ],
+        [
+          -0.827695,
+          -0.561178,
+          0.0
+        ],
+        [
+          -0.707107,
+          -0.707107,
+          0.0
+        ]
+      ]
+    },
+    "industrial_fastner_part2 past industrial_fastner_part1": {
+      "count": 1,
+      "directions": [
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "industrial_fastner_part2 past industrial_fastner_part5": {
+      "count": 10,
+      "directions": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.5,
+          -0.866025
+        ],
+        [
+          0.0,
+          0.5,
+          0.866025
+        ],
+        [
+          0.963591,
+          0.267382,
+          0.0
+        ],
+        [
+          0.878153,
+          0.47838,
+          0.0
+        ],
+        [
+          0.827695,
+          0.561178,
+          0.0
+        ],
+        [
+          0.707107,
+          0.707107,
+          0.0
+        ]
+      ]
+    },
+    "industrial_fastner_part2 past industrial_fastner_part6": {
+      "count": 2,
+      "directions": [
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "industrial_fastner_part1 past industrial_fastner_part3": {
+      "count": 1,
+      "directions": [
+        [
+          0.0,
+          0.0,
+          -1.0
+        ]
+      ]
+    },
+    "industrial_fastner_part1 past industrial_fastner_part2": {
+      "count": 1,
+      "directions": [
+        [
+          0.0,
+          0.0,
+          -1.0
+        ]
+      ]
+    },
+    "industrial_fastner_part1 past industrial_fastner_part5": {
+      "count": 25,
+      "directions": [
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.561178,
+          -0.827695,
+          0.0
+        ],
+        [
+          -0.561178,
+          0.827695,
+          0.0
+        ],
+        [
+          -0.267382,
+          0.963591,
+          0.0
+        ],
+        [
+          0.267382,
+          -0.963591,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          -0.47838,
+          0.878153,
+          0.0
+        ],
+        [
+          0.47838,
+          -0.878153,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.5,
+          -0.866025
+        ],
+        [
+          0.0,
+          -0.5,
+          0.866025
+        ],
+        [
+          0.0,
+          0.5,
+          0.866025
+        ],
+        [
+          0.0,
+          -0.5,
+          -0.866025
+        ],
+        [
+          0.963591,
+          0.267382,
+          0.0
+        ],
+        [
+          -0.963591,
+          -0.267382,
+          0.0
+        ],
+        [
+          0.878153,
+          0.47838,
+          0.0
+        ],
+        [
+          -0.878153,
+          -0.47838,
+          0.0
+        ],
+        [
+          -0.827695,
+          -0.561178,
+          0.0
+        ],
+        [
+          0.827695,
+          0.561178,
+          0.0
+        ],
+        [
+          -0.707107,
+          -0.707107,
+          0.0
+        ],
+        [
+          0.707107,
+          0.707107,
+          0.0
+        ],
+        [
+          0.707107,
+          -0.707107,
+          0.0
+        ],
+        [
+          -0.707107,
+          0.707107,
+          0.0
+        ]
+      ]
+    },
+    "industrial_fastner_part1 past industrial_fastner_part6": {
+      "count": 24,
+      "directions": [
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.561178,
+          -0.827695,
+          0.0
+        ],
+        [
+          -0.561178,
+          0.827695,
+          0.0
+        ],
+        [
+          -0.267382,
+          0.963591,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          -0.47838,
+          0.878153,
+          0.0
+        ],
+        [
+          0.47838,
+          -0.878153,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.5,
+          -0.866025
+        ],
+        [
+          0.0,
+          -0.5,
+          0.866025
+        ],
+        [
+          0.0,
+          0.5,
+          0.866025
+        ],
+        [
+          0.0,
+          -0.5,
+          -0.866025
+        ],
+        [
+          0.963591,
+          0.267382,
+          0.0
+        ],
+        [
+          -0.963591,
+          -0.267382,
+          0.0
+        ],
+        [
+          0.878153,
+          0.47838,
+          0.0
+        ],
+        [
+          -0.878153,
+          -0.47838,
+          0.0
+        ],
+        [
+          -0.827695,
+          -0.561178,
+          0.0
+        ],
+        [
+          0.827695,
+          0.561178,
+          0.0
+        ],
+        [
+          -0.707107,
+          -0.707107,
+          0.0
+        ],
+        [
+          0.707107,
+          0.707107,
+          0.0
+        ],
+        [
+          0.707107,
+          -0.707107,
+          0.0
+        ],
+        [
+          -0.707107,
+          0.707107,
+          0.0
+        ]
+      ]
+    },
+    "industrial_fastner_part5 past industrial_fastner_part3": {
+      "count": 16,
+      "directions": [
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          -0.561178,
+          0.827695,
+          0.0
+        ],
+        [
+          0.267382,
+          -0.963591,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          -0.47838,
+          0.878153,
+          0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.5,
+          -0.866025
+        ],
+        [
+          0.0,
+          -0.5,
+          0.866025
+        ],
+        [
+          0.0,
+          0.5,
+          0.866025
+        ],
+        [
+          0.0,
+          -0.5,
+          -0.866025
+        ],
+        [
+          -0.963591,
+          -0.267382,
+          0.0
+        ],
+        [
+          -0.878153,
+          -0.47838,
+          0.0
+        ],
+        [
+          -0.827695,
+          -0.561178,
+          0.0
+        ],
+        [
+          -0.707107,
+          -0.707107,
+          0.0
+        ],
+        [
+          -0.707107,
+          0.707107,
+          0.0
+        ]
+      ]
+    },
+    "industrial_fastner_part5 past industrial_fastner_part2": {
+      "count": 10,
+      "directions": [
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ],
+        [
+          0.0,
+          -0.5,
+          0.866025
+        ],
+        [
+          0.0,
+          -0.5,
+          -0.866025
+        ],
+        [
+          -0.963591,
+          -0.267382,
+          0.0
+        ],
+        [
+          -0.878153,
+          -0.47838,
+          0.0
+        ],
+        [
+          -0.827695,
+          -0.561178,
+          0.0
+        ],
+        [
+          -0.707107,
+          -0.707107,
+          0.0
+        ]
+      ]
+    },
+    "industrial_fastner_part5 past industrial_fastner_part1": {
+      "count": 25,
+      "directions": [
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.561178,
+          -0.827695,
+          0.0
+        ],
+        [
+          -0.561178,
+          0.827695,
+          0.0
+        ],
+        [
+          -0.267382,
+          0.963591,
+          0.0
+        ],
+        [
+          0.267382,
+          -0.963591,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          -0.47838,
+          0.878153,
+          0.0
+        ],
+        [
+          0.47838,
+          -0.878153,
+          0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.5,
+          -0.866025
+        ],
+        [
+          0.0,
+          -0.5,
+          0.866025
+        ],
+        [
+          0.0,
+          0.5,
+          0.866025
+        ],
+        [
+          0.0,
+          -0.5,
+          -0.866025
+        ],
+        [
+          0.963591,
+          0.267382,
+          0.0
+        ],
+        [
+          -0.963591,
+          -0.267382,
+          0.0
+        ],
+        [
+          0.878153,
+          0.47838,
+          0.0
+        ],
+        [
+          -0.878153,
+          -0.47838,
+          0.0
+        ],
+        [
+          -0.827695,
+          -0.561178,
+          0.0
+        ],
+        [
+          0.827695,
+          0.561178,
+          0.0
+        ],
+        [
+          -0.707107,
+          -0.707107,
+          0.0
+        ],
+        [
+          0.707107,
+          0.707107,
+          0.0
+        ],
+        [
+          0.707107,
+          -0.707107,
+          0.0
+        ],
+        [
+          -0.707107,
+          0.707107,
+          0.0
+        ]
+      ]
+    },
+    "industrial_fastner_part5 past industrial_fastner_part6": {
+      "count": 1,
+      "directions": [
+        [
+          -1.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "industrial_fastner_part6 past industrial_fastner_part3": {
+      "count": 2,
+      "directions": [
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "industrial_fastner_part6 past industrial_fastner_part2": {
+      "count": 2,
+      "directions": [
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "industrial_fastner_part6 past industrial_fastner_part1": {
+      "count": 24,
+      "directions": [
+        [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.561178,
+          -0.827695,
+          0.0
+        ],
+        [
+          -0.561178,
+          0.827695,
+          0.0
+        ],
+        [
+          0.267382,
+          -0.963591,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          -0.47838,
+          0.878153,
+          0.0
+        ],
+        [
+          0.47838,
+          -0.878153,
+          0.0
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.5,
+          -0.866025
+        ],
+        [
+          0.0,
+          -0.5,
+          0.866025
+        ],
+        [
+          0.0,
+          0.5,
+          0.866025
+        ],
+        [
+          0.0,
+          -0.5,
+          -0.866025
+        ],
+        [
+          0.963591,
+          0.267382,
+          0.0
+        ],
+        [
+          -0.963591,
+          -0.267382,
+          0.0
+        ],
+        [
+          0.878153,
+          0.47838,
+          0.0
+        ],
+        [
+          -0.878153,
+          -0.47838,
+          0.0
+        ],
+        [
+          -0.827695,
+          -0.561178,
+          0.0
+        ],
+        [
+          0.827695,
+          0.561178,
+          0.0
+        ],
+        [
+          -0.707107,
+          -0.707107,
+          0.0
+        ],
+        [
+          0.707107,
+          0.707107,
+          0.0
+        ],
+        [
+          0.707107,
+          -0.707107,
+          0.0
+        ],
+        [
+          -0.707107,
+          0.707107,
+          0.0
+        ]
+      ]
+    },
+    "industrial_fastner_part6 past industrial_fastner_part5": {
+      "count": 1,
+      "directions": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ]
+      ]
+    }
+  },
+  "blockers_in_full_assembly": {
+    "industrial_fastner_part3": {
+      "0 [-1.0, 0.0, 0.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5"
+      ],
+      "1 [1.0, 0.0, 0.0]": [
+        "industrial_fastner_part1"
+      ],
+      "2 [0.561178, -0.827695, 0.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "3 [-0.561178, 0.827695, 0.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "4 [-0.267382, 0.963591, 0.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "5 [0.267382, -0.963591, 0.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "6 [0.0, 0.0, -1.0]": [
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "7 [0.0, 0.0, 1.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ],
+      "8 [-0.47838, 0.878153, 0.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "9 [0.47838, -0.878153, 0.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "10 [0.0, -1.0, 0.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "11 [0.0, 1.0, 0.0]": [
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "12 [0.0, 0.5, -0.866025]": [
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "13 [0.0, -0.5, 0.866025]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "14 [0.0, 0.5, 0.866025]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "15 [0.0, -0.5, -0.866025]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "16 [0.963591, 0.267382, 0.0]": [
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "17 [-0.963591, -0.267382, 0.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "18 [0.878153, 0.47838, 0.0]": [
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "19 [-0.878153, -0.47838, 0.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "20 [-0.827695, -0.561178, 0.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "21 [0.827695, 0.561178, 0.0]": [
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "22 [-0.707107, -0.707107, 0.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "23 [0.707107, 0.707107, 0.0]": [
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "24 [0.707107, -0.707107, 0.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "25 [-0.707107, 0.707107, 0.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ]
+    },
+    "industrial_fastner_part2": {
+      "0 [-1.0, 0.0, 0.0]": [
+        "industrial_fastner_part1",
+        "industrial_fastner_part5"
+      ],
+      "1 [1.0, 0.0, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1"
+      ],
+      "2 [0.561178, -0.827695, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "3 [-0.561178, 0.827695, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "4 [-0.267382, 0.963591, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "5 [0.267382, -0.963591, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "6 [0.0, 0.0, -1.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "7 [0.0, 0.0, 1.0]": [
+        "industrial_fastner_part6"
+      ],
+      "8 [-0.47838, 0.878153, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "9 [0.47838, -0.878153, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "10 [0.0, -1.0, 0.0]": [
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "11 [0.0, 1.0, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "12 [0.0, 0.5, -0.866025]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "13 [0.0, -0.5, 0.866025]": [
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "14 [0.0, 0.5, 0.866025]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "15 [0.0, -0.5, -0.866025]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "16 [0.963591, 0.267382, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "17 [-0.963591, -0.267382, 0.0]": [
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "18 [0.878153, 0.47838, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "19 [-0.878153, -0.47838, 0.0]": [
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "20 [-0.827695, -0.561178, 0.0]": [
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "21 [0.827695, 0.561178, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "22 [-0.707107, -0.707107, 0.0]": [
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "23 [0.707107, 0.707107, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "24 [0.707107, -0.707107, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "25 [-0.707107, 0.707107, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ]
+    },
+    "industrial_fastner_part1": {
+      "0 [-1.0, 0.0, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "1 [1.0, 0.0, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "2 [0.561178, -0.827695, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "3 [-0.561178, 0.827695, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "4 [-0.267382, 0.963591, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "5 [0.267382, -0.963591, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ],
+      "6 [0.0, 0.0, -1.0]": "free",
+      "7 [0.0, 0.0, 1.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "8 [-0.47838, 0.878153, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "9 [0.47838, -0.878153, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "10 [0.0, -1.0, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5",
+        "industrial_fastner_part6"
+      ],
+      "11 [0.0, 1.0, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "12 [0.0, 0.5, -0.866025]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "13 [0.0, -0.5, 0.866025]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "14 [0.0, 0.5, 0.866025]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "15 [0.0, -0.5, -0.866025]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "16 [0.963591, 0.267382, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "17 [-0.963591, -0.267382, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "18 [0.878153, 0.47838, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "19 [-0.878153, -0.47838, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "20 [-0.827695, -0.561178, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "21 [0.827695, 0.561178, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "22 [-0.707107, -0.707107, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "23 [0.707107, 0.707107, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "24 [0.707107, -0.707107, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "25 [-0.707107, 0.707107, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ]
+    },
+    "industrial_fastner_part5": {
+      "0 [-1.0, 0.0, 0.0]": "free",
+      "1 [1.0, 0.0, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ],
+      "2 [0.561178, -0.827695, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ],
+      "3 [-0.561178, 0.827695, 0.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ],
+      "4 [-0.267382, 0.963591, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ],
+      "5 [0.267382, -0.963591, 0.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ],
+      "6 [0.0, 0.0, -1.0]": [
+        "industrial_fastner_part6"
+      ],
+      "7 [0.0, 0.0, 1.0]": [
+        "industrial_fastner_part6"
+      ],
+      "8 [-0.47838, 0.878153, 0.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ],
+      "9 [0.47838, -0.878153, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ],
+      "10 [0.0, -1.0, 0.0]": [
+        "industrial_fastner_part6"
+      ],
+      "11 [0.0, 1.0, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part6"
+      ],
+      "12 [0.0, 0.5, -0.866025]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ],
+      "13 [0.0, -0.5, 0.866025]": [
+        "industrial_fastner_part6"
+      ],
+      "14 [0.0, 0.5, 0.866025]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ],
+      "15 [0.0, -0.5, -0.866025]": [
+        "industrial_fastner_part6"
+      ],
+      "16 [0.963591, 0.267382, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ],
+      "17 [-0.963591, -0.267382, 0.0]": [
+        "industrial_fastner_part6"
+      ],
+      "18 [0.878153, 0.47838, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ],
+      "19 [-0.878153, -0.47838, 0.0]": [
+        "industrial_fastner_part6"
+      ],
+      "20 [-0.827695, -0.561178, 0.0]": [
+        "industrial_fastner_part6"
+      ],
+      "21 [0.827695, 0.561178, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ],
+      "22 [-0.707107, -0.707107, 0.0]": [
+        "industrial_fastner_part6"
+      ],
+      "23 [0.707107, 0.707107, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ],
+      "24 [0.707107, -0.707107, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ],
+      "25 [-0.707107, 0.707107, 0.0]": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ]
+    },
+    "industrial_fastner_part6": {
+      "0 [-1.0, 0.0, 0.0]": [
+        "industrial_fastner_part5"
+      ],
+      "1 [1.0, 0.0, 0.0]": "free",
+      "2 [0.561178, -0.827695, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "3 [-0.561178, 0.827695, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "4 [-0.267382, 0.963591, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5"
+      ],
+      "5 [0.267382, -0.963591, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "6 [0.0, 0.0, -1.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "7 [0.0, 0.0, 1.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "8 [-0.47838, 0.878153, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "9 [0.47838, -0.878153, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "10 [0.0, -1.0, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "11 [0.0, 1.0, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5"
+      ],
+      "12 [0.0, 0.5, -0.866025]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "13 [0.0, -0.5, 0.866025]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "14 [0.0, 0.5, 0.866025]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "15 [0.0, -0.5, -0.866025]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "16 [0.963591, 0.267382, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "17 [-0.963591, -0.267382, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "18 [0.878153, 0.47838, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "19 [-0.878153, -0.47838, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "20 [-0.827695, -0.561178, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "21 [0.827695, 0.561178, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "22 [-0.707107, -0.707107, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "23 [0.707107, 0.707107, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "24 [0.707107, -0.707107, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ],
+      "25 [-0.707107, 0.707107, 0.0]": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2",
+        "industrial_fastner_part5"
+      ]
+    }
+  },
+  "pairs_with_no_free_direction": [],
+  "exception_cells": [],
+  "caught_backend_exceptions": 0,
+  "contacts": {
+    "available": true,
+    "threshold_mm": 0.1,
+    "touching_pairs": [
+      {
+        "pair": "industrial_fastner_part3 / industrial_fastner_part2",
+        "gap_mm": 0.0
+      },
+      {
+        "pair": "industrial_fastner_part3 / industrial_fastner_part1",
+        "gap_mm": 0.075
+      },
+      {
+        "pair": "industrial_fastner_part2 / industrial_fastner_part1",
+        "gap_mm": 0.075
+      },
+      {
+        "pair": "industrial_fastner_part2 / industrial_fastner_part5",
+        "gap_mm": 0.0
+      },
+      {
+        "pair": "industrial_fastner_part5 / industrial_fastner_part6",
+        "gap_mm": 0.0
+      }
+    ],
+    "contact_matrix": {
+      "industrial_fastner_part3": {
+        "industrial_fastner_part3": false,
+        "industrial_fastner_part2": true,
+        "industrial_fastner_part1": true,
+        "industrial_fastner_part5": false,
+        "industrial_fastner_part6": false
+      },
+      "industrial_fastner_part2": {
+        "industrial_fastner_part3": true,
+        "industrial_fastner_part2": false,
+        "industrial_fastner_part1": true,
+        "industrial_fastner_part5": true,
+        "industrial_fastner_part6": false
+      },
+      "industrial_fastner_part1": {
+        "industrial_fastner_part3": true,
+        "industrial_fastner_part2": true,
+        "industrial_fastner_part1": false,
+        "industrial_fastner_part5": false,
+        "industrial_fastner_part6": false
+      },
+      "industrial_fastner_part5": {
+        "industrial_fastner_part3": false,
+        "industrial_fastner_part2": true,
+        "industrial_fastner_part1": false,
+        "industrial_fastner_part5": false,
+        "industrial_fastner_part6": true
+      },
+      "industrial_fastner_part6": {
+        "industrial_fastner_part3": false,
+        "industrial_fastner_part2": false,
+        "industrial_fastner_part1": false,
+        "industrial_fastner_part5": true,
+        "industrial_fastner_part6": false
+      }
+    },
+    "gap_matrix_mm": {
+      "industrial_fastner_part3": {
+        "industrial_fastner_part3": 0.0,
+        "industrial_fastner_part2": 0.0,
+        "industrial_fastner_part1": 0.075,
+        "industrial_fastner_part5": 6.5,
+        "industrial_fastner_part6": 0.5
+      },
+      "industrial_fastner_part2": {
+        "industrial_fastner_part3": 0.0,
+        "industrial_fastner_part2": 0.0,
+        "industrial_fastner_part1": 0.075,
+        "industrial_fastner_part5": 0.0,
+        "industrial_fastner_part6": 0.4
+      },
+      "industrial_fastner_part1": {
+        "industrial_fastner_part3": 0.075,
+        "industrial_fastner_part2": 0.075,
+        "industrial_fastner_part1": 0.0,
+        "industrial_fastner_part5": 60.348438,
+        "industrial_fastner_part6": 67.429337
+      },
+      "industrial_fastner_part5": {
+        "industrial_fastner_part3": 6.5,
+        "industrial_fastner_part2": 0.0,
+        "industrial_fastner_part1": 60.348438,
+        "industrial_fastner_part5": 0.0,
+        "industrial_fastner_part6": 0.0
+      },
+      "industrial_fastner_part6": {
+        "industrial_fastner_part3": 0.5,
+        "industrial_fastner_part2": 0.4,
+        "industrial_fastner_part1": 67.429337,
+        "industrial_fastner_part5": 0.0,
+        "industrial_fastner_part6": 0.0
+      }
+    },
+    "neighbors": {
+      "industrial_fastner_part3": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part1"
+      ],
+      "industrial_fastner_part2": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part1",
+        "industrial_fastner_part5"
+      ],
+      "industrial_fastner_part1": [
+        "industrial_fastner_part3",
+        "industrial_fastner_part2"
+      ],
+      "industrial_fastner_part5": [
+        "industrial_fastner_part2",
+        "industrial_fastner_part6"
+      ],
+      "industrial_fastner_part6": [
+        "industrial_fastner_part5"
+      ]
+    },
+    "touching_nothing": [],
+    "movable_parts_connected": true
+  },
+  "checks": {
+    "antisymmetry_mismatches": 0,
+    "diagonal_all_true": true,
+    "contact_symmetric_diagonal_false": true
+  },
+  "stats": {
+    "tests": 260,
+    "broad_phase_settled": 47,
+    "broad_phase_share": 0.18076923076923077,
+    "stepped_tests": 213,
+    "mean_test_time_s": 1.1273550985899137,
+    "max_test_time_s": 15.23135149999871,
+    "iterations": 727,
+    "mean_iterations": 3.4131455399061035,
+    "max_iterations": 33,
+    "common_calls": 493,
+    "distToShape_calls": 727,
+    "gap_travel_share": 0.8358628314800245,
+    "matrix_time_s": 240.40342799993232,
+    "total_time_s": 240.76850129998638
+  },
+  "pair_times_s": {
+    "0,1": 86.71714999998221,
+    "0,2": 11.739728399988962,
+    "0,3": 82.40042349998839,
+    "0,4": 6.719530700007454,
+    "1,2": 7.370088499999838,
+    "1,3": 35.49688489999971,
+    "1,4": 2.3345914999954402,
+    "2,3": 3.418374600005336,
+    "2,4": 0.4699968999775592,
+    "3,4": 3.7366589999874122
+  },
+  "cache_key": "146d24028efe5b1ef9a8a2cfdb77cc888a6aabd8990cb1c79c5d8d304c402e46"
+}

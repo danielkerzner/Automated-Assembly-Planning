@@ -41,7 +41,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 NEG_TOL = 1e-6
 # Static gap (mm) up to which two movable parts count as touching. Larger than Preprocessing's
 # stander contact_threshold (0.01) so clearance fits count: industrial_fastner's part1 sits in
-# part2/part3 with a 0.075 mm gap (decided 2026-10-11).
+# part2/part3 with a 0.075 mm gap.
 CONTACT_THRESHOLD = 0.1
 
 # Called after each pair's checkpoint is written, with the

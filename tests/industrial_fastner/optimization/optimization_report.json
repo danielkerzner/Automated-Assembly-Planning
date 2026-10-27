@@ -1,0 +1,581 @@
+{
+  "mode": "real",
+  "component_count": 8,
+  "enabled_criteria": [
+    "travel",
+    "direction_change",
+    "tool_change",
+    "size_contacts",
+    "grouping",
+    "stability",
+    "gravity_change"
+  ],
+  "weights": {
+    "travel": 0.02040816326530612,
+    "direction_change": 0.08163265306122448,
+    "tool_change": 0.22448979591836735,
+    "size_contacts": 0.16326530612244897,
+    "grouping": 0.12244897959183673,
+    "stability": 0.24489795918367346,
+    "gravity_change": 0.14285714285714285
+  },
+  "config": {
+    "use_travel": true,
+    "use_direction_change": true,
+    "use_tool_change": true,
+    "use_size_contacts": true,
+    "use_grouping": true,
+    "use_stability": true,
+    "use_gravity_change": true,
+    "weights": null,
+    "dir_change_axis_ratio": 0.25,
+    "size_alpha": 0.3333333333333333,
+    "size_beta": 0.3333333333333333,
+    "size_gamma": 0.3333333333333333,
+    "gravity_dirs": [
+      [
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.0,
+        -1.0
+      ]
+    ],
+    "stability_fall_test": true,
+    "support_region": "hull",
+    "use_cost_to_go": false,
+    "alpha": 1.0,
+    "beta": 3.0,
+    "rho": 0.2,
+    "n_ants": null,
+    "n_iterations": 200,
+    "tau_min_ratio": null,
+    "stagnation_limit": 50,
+    "global_best_interval": 10,
+    "seed": 0,
+    "force": false
+  },
+  "total_cost": 0.2968615316705775,
+  "cost_breakdown": {
+    "travel": {
+      "raw": 504.2431968740669,
+      "normalized": 0.3918590163459261,
+      "weight": 0.02040816326530612,
+      "weighted": 0.007997122782569921
+    },
+    "direction_change": {
+      "raw": 2.25,
+      "normalized": 0.32142857142857145,
+      "weight": 0.08163265306122448,
+      "weighted": 0.026239067055393587
+    },
+    "tool_change": {
+      "raw": 1.0,
+      "normalized": 0.5,
+      "weight": 0.22448979591836735,
+      "weighted": 0.11224489795918367
+    },
+    "size_contacts": {
+      "raw": 2.522465486436814,
+      "normalized": 0.0014373615819033162,
+      "weight": 0.16326530612244897,
+      "weighted": 0.00023467127867809242
+    },
+    "grouping": {
+      "raw": 0.0,
+      "normalized": 0.0,
+      "weight": 0.12244897959183673,
+      "weighted": 0.0
+    },
+    "stability": {
+      "raw": 4.0,
+      "normalized": 0.5714285714285714,
+      "weight": 0.24489795918367346,
+      "weighted": 0.1399416909620991
+    },
+    "gravity_change": {
+      "raw": 0.5,
+      "normalized": 0.07142857142857142,
+      "weight": 0.14285714285714285,
+      "weighted": 0.01020408163265306
+    }
+  },
+  "steps": [
+    {
+      "step": 1,
+      "component": 0,
+      "component_id": "Part__Feature",
+      "component_label": "industrial_fastner_part3",
+      "is_stander": false,
+      "edge": 130,
+      "removal_direction_index": 0,
+      "direction_index": 1,
+      "direction": [
+        1.0,
+        -4.62592926927148e-15,
+        -0.0
+      ],
+      "travel": 84.74435320202369,
+      "start_offset": [
+        -84.74435320202369,
+        3.9202138388272163e-13,
+        0.0
+      ],
+      "gravity_index": 0,
+      "gravity": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "stability_class": 2,
+      "costs": {
+        "travel": 0.0070960833304727095,
+        "size_contacts": 0.04563121348897873,
+        "direction_change": 0.0,
+        "tool_change": 0.0,
+        "grouping": 0.0,
+        "stability": 0.0,
+        "gravity_change": 0.0
+      },
+      "tool": null,
+      "group": "part3"
+    },
+    {
+      "step": 2,
+      "component": 1,
+      "component_id": "Part__Feature001",
+      "component_label": "industrial_fastner_part2",
+      "is_stander": false,
+      "edge": 121,
+      "removal_direction_index": 0,
+      "direction_index": 1,
+      "direction": [
+        1.0,
+        -4.62592926927148e-15,
+        -0.0
+      ],
+      "travel": 49.00000000026934,
+      "start_offset": [
+        -49.00000000026934,
+        2.2667053419554845e-13,
+        0.0
+      ],
+      "gravity_index": 0,
+      "gravity": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "stability_class": 1,
+      "costs": {
+        "travel": 0.004103023624077536,
+        "size_contacts": 0.05624649738007236,
+        "direction_change": 0.0,
+        "tool_change": 0.0,
+        "grouping": 0.0,
+        "stability": 0.03498542274052478,
+        "gravity_change": 0.0
+      },
+      "tool": null,
+      "group": "part2"
+    },
+    {
+      "step": 3,
+      "component": 3,
+      "component_id": "Part__Feature006",
+      "component_label": "industrial_fastner_part5",
+      "is_stander": false,
+      "edge": 107,
+      "removal_direction_index": 0,
+      "direction_index": 1,
+      "direction": [
+        1.0,
+        -4.62592926927148e-15,
+        -0.0
+      ],
+      "travel": 43.00000000026924,
+      "start_offset": [
+        -43.00000000026924,
+        1.989149585799191e-13,
+        0.0
+      ],
+      "gravity_index": 0,
+      "gravity": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "stability_class": 2,
+      "costs": {
+        "travel": 0.0036006125680707953,
+        "size_contacts": 0.04359573633121119,
+        "direction_change": 0.0,
+        "tool_change": 0.0,
+        "grouping": 0.0,
+        "stability": 0.0,
+        "gravity_change": 0.0
+      },
+      "tool": null,
+      "group": "part5"
+    },
+    {
+      "step": 4,
+      "component": 4,
+      "component_id": "Part__Feature007",
+      "component_label": "industrial_fastner_part6",
+      "is_stander": false,
+      "edge": 84,
+      "removal_direction_index": 1,
+      "direction_index": 0,
+      "direction": [
+        -1.0,
+        4.62592926927148e-15,
+        0.0
+      ],
+      "travel": 71.24435320265225,
+      "start_offset": [
+        71.24435320265225,
+        -3.2957133875046433e-13,
+        -0.0
+      ],
+      "gravity_index": 0,
+      "gravity": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "stability_class": 1,
+      "costs": {
+        "travel": 0.005965658454510194,
+        "size_contacts": 0.032407857027628495,
+        "direction_change": 0.0029154518950437317,
+        "tool_change": 0.0,
+        "grouping": 0.0,
+        "stability": 0.03498542274052478,
+        "gravity_change": 0.0
+      },
+      "tool": null,
+      "group": "part6"
+    },
+    {
+      "step": 5,
+      "component": 5,
+      "component_id": "Part__Feature003",
+      "component_label": "industrial_fastner_part7",
+      "is_stander": true,
+      "edge": 57,
+      "removal_direction_index": 1,
+      "direction_index": 0,
+      "direction": [
+        -1.0,
+        4.62592926927148e-15,
+        0.0
+      ],
+      "travel": 34.24435368264527,
+      "start_offset": [
+        34.24435368264527,
+        -1.5841195800783334e-13,
+        -0.0
+      ],
+      "gravity_index": 2,
+      "gravity": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "stability_class": 2,
+      "costs": {
+        "travel": 0.0028674569826609756,
+        "size_contacts": 0.032462396721792026,
+        "direction_change": 0.0,
+        "tool_change": 0.0,
+        "grouping": 0.0,
+        "stability": 0.0,
+        "gravity_change": 0.01020408163265306
+      },
+      "tool": "wrench_24",
+      "group": "part7"
+    },
+    {
+      "step": 6,
+      "component": 2,
+      "component_id": "Part__Feature002",
+      "component_label": "industrial_fastner_part1",
+      "is_stander": false,
+      "edge": 24,
+      "removal_direction_index": 6,
+      "direction_index": 7,
+      "direction": [
+        -0.0,
+        -0.0,
+        1.0
+      ],
+      "travel": 46.5,
+      "start_offset": [
+        0.0,
+        0.0,
+        -46.5
+      ],
+      "gravity_index": 2,
+      "gravity": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "stability_class": 2,
+      "costs": {
+        "travel": 0.0038936856840521778,
+        "size_contacts": 0.040362903738219394,
+        "direction_change": 0.011661807580174927,
+        "tool_change": 0.0,
+        "grouping": 0.0,
+        "stability": 0.0,
+        "gravity_change": 0.0
+      },
+      "tool": null,
+      "group": "part1"
+    },
+    {
+      "step": 7,
+      "component": 7,
+      "component_id": "Part__Feature005",
+      "component_label": "industrial_fastner_part001",
+      "is_stander": true,
+      "edge": 12,
+      "removal_direction_index": 10,
+      "direction_index": 11,
+      "direction": [
+        -0.0,
+        1.0,
+        -0.0
+      ],
+      "travel": 87.75506839310353,
+      "start_offset": [
+        0.0,
+        -87.75506839310353,
+        0.0
+      ],
+      "gravity_index": 2,
+      "gravity": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "stability_class": 1,
+      "costs": {
+        "travel": 0.007348186096887032,
+        "size_contacts": 0.018124433893248717,
+        "direction_change": 0.011661807580174927,
+        "tool_change": 0.11224489795918367,
+        "grouping": 0.0,
+        "stability": 0.03498542274052478,
+        "gravity_change": 0.0
+      },
+      "tool": "wrench_10",
+      "group": "fastener_small"
+    },
+    {
+      "step": 8,
+      "component": 6,
+      "component_id": "Part__Feature004",
+      "component_label": "industrial_fastner_part4",
+      "is_stander": true,
+      "edge": 3,
+      "removal_direction_index": 10,
+      "direction_index": 11,
+      "direction": [
+        -0.0,
+        1.0,
+        -0.0
+      ],
+      "travel": 87.75506839310353,
+      "start_offset": [
+        0.0,
+        -87.75506839310353,
+        0.0
+      ],
+      "gravity_index": 2,
+      "gravity": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "stability_class": 1,
+      "costs": {
+        "travel": 0.007348186096887032,
+        "size_contacts": 0.02071363873514139,
+        "direction_change": 0.0,
+        "tool_change": 0.0,
+        "grouping": 0.0,
+        "stability": 0.03498542274052478,
+        "gravity_change": 0.0
+      },
+      "tool": "wrench_10",
+      "group": "fastener_small"
+    }
+  ],
+  "sequence_stats": {
+    "direction_changes_same_axis": 1,
+    "direction_changes_other_axis": 2,
+    "gravity_changes": 1,
+    "class1_insertions": 4,
+    "group_switches": 6,
+    "number_of_groups": 7,
+    "tool_changes_between_standers": 1,
+    "total_travel_mm": 504.243
+  },
+  "run": {
+    "best_cost": [
+      0.3071891114937254,
+      0.3071891114937254,
+      0.3071891114937254,
+      0.3071891114937254,
+      0.3071891114937254,
+      0.3071891114937254,
+      0.3071891114937254,
+      0.3051702182875299,
+      0.3051702182875299,
+      0.3051702182875299,
+      0.3051702182875299,
+      0.29823601922572485,
+      0.29823601922572485,
+      0.29823601922572485,
+      0.29823601922572485,
+      0.29823601922572485,
+      0.29823601922572485,
+      0.29823601922572485,
+      0.29823601922572485,
+      0.29823601922572485,
+      0.29823601922572485,
+      0.29823601922572485,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775,
+      0.2968615316705775
+    ],
+    "greedy_cost": 0.4121015062114036,
+    "iterations": 73,
+    "n_ants": 16,
+    "seed": 0,
+    "stopped_by": "stagnation",
+    "distinct_paths_evaluated": 653,
+    "aco_cost": 0.6203973077632402,
+    "wall_time_s": 0.23667089999980817
+  },
+  "checks": [
+    {
+      "id": "K1",
+      "name": "weights",
+      "passed": true,
+      "detail": "7 criteria on, weights sum to 1"
+    },
+    {
+      "id": "K2",
+      "name": "path",
+      "passed": true,
+      "detail": "8 edges, live nodes only, every part once, directions free"
+    },
+    {
+      "id": "K3",
+      "name": "order",
+      "passed": true,
+      "detail": "reverse of the walk, insertion = -removal, t = parts present"
+    },
+    {
+      "id": "K4",
+      "name": "cost",
+      "passed": true,
+      "detail": "total 0.2969 = sum of weighted terms, terms in [0, 1]"
+    },
+    {
+      "id": "K5",
+      "name": "direction",
+      "passed": true,
+      "detail": "normalized direction-change cost 0.3214 recomputed"
+    },
+    {
+      "id": "K6",
+      "name": "travel",
+      "passed": true,
+      "detail": "raw travel 504.24 mm = sum of the step distances"
+    },
+    {
+      "id": "K7",
+      "name": "stability",
+      "passed": true,
+      "detail": "class 1/2 and a gravity direction on every step, first part class 2"
+    }
+  ],
+  "ablation": null,
+  "config_hash": "4c8f41f4d48eb7eb9c42426bdd3869b3dbaa5b56fdea0f2f05ac67353ca783d7"
+}
