@@ -1,0 +1,6 @@
+label,is_stander,tool,group,processed,subassembly
+Assembly,False,,Assembly,true,
+component,False,,Shared,,Assembly
+component001,False,,Shared,,Assembly
+component002,False,,component002,,Assembly
+component003,False,,component003,,Assembly

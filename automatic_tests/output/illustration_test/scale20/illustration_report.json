@@ -1,0 +1,821 @@
+{
+  "frames": [
+    {
+      "step": 1,
+      "steps": [
+        1
+      ],
+      "component_id": "c0",
+      "component_label": "c0",
+      "component_ids": [
+        "c0"
+      ],
+      "component_labels": [
+        "c0"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_01_c0.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.1629520291716056,
+      "in_frame": true,
+      "footnote": [
+        "Step 1 / 20   c0   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 2,
+      "steps": [
+        2
+      ],
+      "component_id": "c1",
+      "component_label": "c1",
+      "component_ids": [
+        "c1"
+      ],
+      "component_labels": [
+        "c1"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_02_c1.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.28025586875594605,
+      "in_frame": true,
+      "footnote": [
+        "Step 2 / 20   c1   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 3,
+      "steps": [
+        3
+      ],
+      "component_id": "c2",
+      "component_label": "c2",
+      "component_ids": [
+        "c2"
+      ],
+      "component_labels": [
+        "c2"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_03_c2.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.2301130192419482,
+      "in_frame": true,
+      "footnote": [
+        "Step 3 / 20   c2   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 4,
+      "steps": [
+        4
+      ],
+      "component_id": "c3",
+      "component_label": "c3",
+      "component_ids": [
+        "c3"
+      ],
+      "component_labels": [
+        "c3"
+      ],
+      "group": null,
+      "is_stander": true,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_04_c3.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 0.57847533632287,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 0.57847533632287,
+      "trajectory_px_frac": 0.18098724838569274,
+      "in_frame": true,
+      "footnote": [
+        "Step 4 / 20   c3   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 5,
+      "steps": [
+        5
+      ],
+      "component_id": "c4",
+      "component_label": "c4",
+      "component_ids": [
+        "c4"
+      ],
+      "component_labels": [
+        "c4"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_05_c4.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.16848994784442767,
+      "in_frame": true,
+      "footnote": [
+        "Step 5 / 20   c4   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 6,
+      "steps": [
+        6
+      ],
+      "component_id": "c5",
+      "component_label": "c5",
+      "component_ids": [
+        "c5"
+      ],
+      "component_labels": [
+        "c5"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_06_c5.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.1878654774212371,
+      "in_frame": true,
+      "footnote": [
+        "Step 6 / 20   c5   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 7,
+      "steps": [
+        7
+      ],
+      "component_id": "c6",
+      "component_label": "c6",
+      "component_ids": [
+        "c6"
+      ],
+      "component_labels": [
+        "c6"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_07_c6.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.1484974972864188,
+      "in_frame": true,
+      "footnote": [
+        "Step 7 / 20   c6   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 8,
+      "steps": [
+        8
+      ],
+      "component_id": "c7",
+      "component_label": "c7",
+      "component_ids": [
+        "c7"
+      ],
+      "component_labels": [
+        "c7"
+      ],
+      "group": null,
+      "is_stander": true,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_08_c7.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.23601495038540699,
+      "in_frame": true,
+      "footnote": [
+        "Step 8 / 20   c7   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 9,
+      "steps": [
+        9
+      ],
+      "component_id": "c8",
+      "component_label": "c8",
+      "component_ids": [
+        "c8"
+      ],
+      "component_labels": [
+        "c8"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_09_c8.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 0.8232662192393736,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 0.8232662192393736,
+      "trajectory_px_frac": 0.2654625713307959,
+      "in_frame": true,
+      "footnote": [
+        "Step 9 / 20   c8   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 10,
+      "steps": [
+        10
+      ],
+      "component_id": "c9",
+      "component_label": "c9",
+      "component_ids": [
+        "c9"
+      ],
+      "component_labels": [
+        "c9"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_10_c9.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 0.6936936936936937,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 0.6936936936936937,
+      "trajectory_px_frac": 0.1902312700413844,
+      "in_frame": true,
+      "footnote": [
+        "Step 10 / 20   c9   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 11,
+      "steps": [
+        11
+      ],
+      "component_id": "c10",
+      "component_label": "c10",
+      "component_ids": [
+        "c10"
+      ],
+      "component_labels": [
+        "c10"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_11_c10.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.13065803356785946,
+      "in_frame": true,
+      "footnote": [
+        "Step 11 / 20   c10   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 12,
+      "steps": [
+        12
+      ],
+      "component_id": "c11",
+      "component_label": "c11",
+      "component_ids": [
+        "c11"
+      ],
+      "component_labels": [
+        "c11"
+      ],
+      "group": null,
+      "is_stander": true,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_12_c11.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.1888486581618009,
+      "in_frame": true,
+      "footnote": [
+        "Step 12 / 20   c11   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 13,
+      "steps": [
+        13
+      ],
+      "component_id": "c12",
+      "component_label": "c12",
+      "component_ids": [
+        "c12"
+      ],
+      "component_labels": [
+        "c12"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_13_c12.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.16261990010749922,
+      "in_frame": true,
+      "footnote": [
+        "Step 13 / 20   c12   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 14,
+      "steps": [
+        14
+      ],
+      "component_id": "c13",
+      "component_label": "c13",
+      "component_ids": [
+        "c13"
+      ],
+      "component_labels": [
+        "c13"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_14_c13.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 0.7746636771300448,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 0.7746636771300448,
+      "trajectory_px_frac": 0.21346624999080374,
+      "in_frame": true,
+      "footnote": [
+        "Step 14 / 20   c13   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 15,
+      "steps": [
+        15
+      ],
+      "component_id": "c14",
+      "component_label": "c14",
+      "component_ids": [
+        "c14"
+      ],
+      "component_labels": [
+        "c14"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_15_c14.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 0.7304250559284117,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 0.7304250559284117,
+      "trajectory_px_frac": 0.19497602777675388,
+      "in_frame": true,
+      "footnote": [
+        "Step 15 / 20   c14   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 16,
+      "steps": [
+        16
+      ],
+      "component_id": "c15",
+      "component_label": "c15",
+      "component_ids": [
+        "c15"
+      ],
+      "component_labels": [
+        "c15"
+      ],
+      "group": null,
+      "is_stander": true,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_16_c15.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.15577272291710653,
+      "in_frame": true,
+      "footnote": [
+        "Step 16 / 20   c15   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 17,
+      "steps": [
+        17
+      ],
+      "component_id": "c16",
+      "component_label": "c16",
+      "component_ids": [
+        "c16"
+      ],
+      "component_labels": [
+        "c16"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_17_c16.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.2947747192492675,
+      "in_frame": true,
+      "footnote": [
+        "Step 17 / 20   c16   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 18,
+      "steps": [
+        18
+      ],
+      "component_id": "c17",
+      "component_label": "c17",
+      "component_ids": [
+        "c17"
+      ],
+      "component_labels": [
+        "c17"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_18_c17.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.23231298702045663,
+      "in_frame": true,
+      "footnote": [
+        "Step 18 / 20   c17   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 19,
+      "steps": [
+        19
+      ],
+      "component_id": "c18",
+      "component_label": "c18",
+      "component_ids": [
+        "c18"
+      ],
+      "component_labels": [
+        "c18"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_19_c18.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 0.8901472253680635,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 0.8901472253680635,
+      "trajectory_px_frac": 0.23962784215070912,
+      "in_frame": true,
+      "footnote": [
+        "Step 19 / 20   c18   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 20,
+      "steps": [
+        20
+      ],
+      "component_id": "c19",
+      "component_label": "c19",
+      "component_ids": [
+        "c19"
+      ],
+      "component_labels": [
+        "c19"
+      ],
+      "group": null,
+      "is_stander": true,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\step_20_c19.png",
+      "view": {
+        "azimuth": 60.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 0.7746636771300448,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 0.7746636771300448,
+      "trajectory_px_frac": 0.25775148566511835,
+      "in_frame": true,
+      "footnote": [
+        "Step 20 / 20   c19   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    }
+  ],
+  "manual_path": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale20\\manual.pdf",
+  "global_view": [
+    60.0,
+    50.0
+  ],
+  "config_hash": "debc4dc66b9582a965a2f368f1d879a6abf8d43d92a6f86d4bf4538565d6ac57",
+  "stats": {
+    "layers_rasterized": 1480,
+    "raster_s": 7.30837239997345,
+    "views_evaluated": 73,
+    "view_search_s": 10.140025999979116,
+    "render_s": 12.436045499984175,
+    "total_s": 22.576100699981907
+  },
+  "config": {
+    "image_size": [
+      1600,
+      1200
+    ],
+    "search_size": [
+      480,
+      360
+    ],
+    "dpi": 200,
+    "tess_tolerance_rel": 0.002,
+    "default_view": [
+      -35.0,
+      30.0
+    ],
+    "azimuths": [
+      0,
+      15,
+      30,
+      45,
+      60,
+      75,
+      90,
+      105,
+      120,
+      135,
+      150,
+      165,
+      180,
+      195,
+      210,
+      225,
+      240,
+      255,
+      270,
+      285,
+      300,
+      315,
+      330,
+      345
+    ],
+    "elevations": [
+      20,
+      35,
+      50
+    ],
+    "vis_min_end": 0.5,
+    "vis_min_start": 0.5,
+    "min_trajectory_px_frac": 0.12,
+    "perturb_step_deg": 5.0,
+    "perturb_max_deg": 30.0,
+    "xray_alpha": 0.25,
+    "placed_color": "#bdbdbd",
+    "new_color": "#f28e2b",
+    "stander_color": "#3b75af",
+    "ghost_alpha": 0.35,
+    "show_gravity": true,
+    "mark_unstable": true,
+    "footnote_show_vector": false,
+    "group_frames": true,
+    "title": null,
+    "language": "en"
+  }
+}

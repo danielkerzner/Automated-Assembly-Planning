@@ -1074,10 +1074,18 @@ def collect_tables(aog, interference_result, prep, config: OptimizationConfig, c
         log.info("Loaded cached term tables from %s", cache_dir)
 
     tool, group = [], []
-    for label in aog.component_labels:
+    auto_group_override = getattr(prep, "auto_group_override", None) or {}
+    for cid, label in zip(aog.component_ids, aog.component_labels):
         row = rows.get(label, {})
         tool.append(row.get("tool") or None)
-        group.append(row.get("group") or None)
+        if cid in auto_group_override:
+            group.append(auto_group_override[cid])
+        else:
+            # A component with no BOM group (no row, or a blank cell) is its own group of one --
+            # same convention extra_functions/generate_bom.py uses when seeding a fresh BOM, and
+            # what lets a fused/virtual container with no row ever reach Optimization at all
+            # (docs/subassembly-spec.md section 10; was previously a hard ValueError, H10/R6).
+            group.append(row.get("group") or label)
     tables = TermTables(
         component_ids=list(aog.component_ids),
         volume=np.array(data["volume"], dtype=float),

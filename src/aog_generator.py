@@ -7,7 +7,9 @@ over all states of a level; each state is expanded exactly once. No geometry cal
 freedom comes from InterferenceResult.free via the composition property, standers follow the
 precedence (gate) rule, and travel distances are measured to the constant whole-assembly box.
 States whose components do not form one group through physical contacts (parts floating apart)
-are dropped, with the edges leading to them.
+are dropped, with the edges leading to them. Members of one BOM group are removed consecutively,
+in one order per group block (docs/aog-spec.md D12, D13). There is no node limit; the only size
+limit is MAX_COMPONENTS (one uint64 bitmask per state).
 
 `generate_aog` is pure numpy on `AoGInputs`, so tests need no FreeCAD. `collect_inputs` and
 `build_aog` connect it to the pipeline objects.
@@ -42,17 +44,19 @@ MAX_DIRECTIONS = 64  # one uint64 word per edge (W = 1)
 U64 = np.uint64
 
 
-class AoGSizeError(RuntimeError):
-    """Generation aborted because the graph exceeds AoGConfig.max_nodes (never a pruning)."""
-
 # Dataclass for the AoG configuration
 @dataclass
 class AoGConfig:
-    # Define if in the stander components, if the neighbouring comonents will also 
+    # Define if in the stander components, if the neighbouring comonents will also
     # be dealt as prerequisitesor
-    stander_gate: str = "prerequisites+contacts"  
+    stander_gate: str = "prerequisites+contacts"
     margin: float = 1.0  # mm, travel-model clearance (same default as CollisionConfig.margin)
-    max_nodes: int = 4_000_000  # maximum size of the AoG when Computing
+    # D12: members of one BOM group are removed (so also assembled) consecutively: while a group is
+    # partly removed, only its remaining members may move. Blank group = a group of one.
+    group_consecutive: bool = True
+    # D13: one order per group block: of the feasible moves removing members of the same group from a
+    # state, only the lowest-index member is kept (removes the k! orderings). Needs group_consecutive.
+    group_one_order: bool = True
 
 # Dataclass for the AoG inputs 
 @dataclass
@@ -74,6 +78,8 @@ class AoGInputs:
     # contact matrix, stander-movable from StanderRecord.contact_neighbors). States whose parts do
     # not form one connected group are dropped. None = no contact data, rule off (synthetic tests).
     contact: np.ndarray | None = None
+    # (N,) BOM `group` per component (None = blank or no BOM row: a group of one). None = no group data.
+    group: list[str | None] | None = None
 
 # Dataclass for the AoG itself
 @dataclass
@@ -100,6 +106,7 @@ class AoG:
     config: AoGConfig
     stats: dict
     cache_key: str # Cache variables
+    component_groups: list[str | None] | None = None  # BOM group per component (as in AoGInputs.group)
     _in_order: np.ndarray | None = field(default=None, repr=False, compare=False)
     _in_ptr: np.ndarray | None = field(default=None, repr=False, compare=False)
 
@@ -362,6 +369,7 @@ def compute_cache_key(inputs: AoGInputs, config: AoGConfig) -> str:
         h.update(b"contact:none")
     else:
         h.update(b"contact:" + np.ascontiguousarray(inputs.contact, dtype=bool).tobytes())
+    h.update(("groups:" + json.dumps(inputs.group)).encode())
     h.update(("config:" + json.dumps(asdict(config), sort_keys=True)).encode())
     return h.hexdigest()
 
@@ -416,6 +424,28 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
             log.warning("The full assembly is not one connected group through contacts (check the contact "
                         "threshold); no state mixing the separate groups can be reached")
 
+    # Groups (D12, D13): only groups with at least two members constrain anything.
+    if config.group_one_order and not config.group_consecutive:
+        raise ValueError("group_one_order needs group_consecutive (one order per group block)")
+    use_groups = config.group_consecutive and inputs.group is not None
+    comp_gid = np.full(N, -1, dtype=np.int64)  # group index per component, -1 = group of one
+    gmasks: list = []  # bitmask of each group with >= 2 members
+    group_names: list[str] = []
+    if use_groups:
+        if len(inputs.group) != N:
+            raise ValueError(f"group has {len(inputs.group)} entries, expected {N}")
+        members: dict[str, list[int]] = {}
+        for c, g in enumerate(inputs.group):
+            if g:
+                members.setdefault(g, []).append(c)
+        for g in sorted(members):
+            if len(members[g]) >= 2:
+                comp_gid[members[g]] = len(gmasks)
+                gmasks.append(U64(_mask_of(members[g])))
+                group_names.append(g)
+        use_groups = bool(gmasks)
+    one_order = use_groups and config.group_one_order
+
     # Define a function to check if a state is valid
     def valid(T: np.ndarray) -> np.ndarray:
         ok = np.ones(len(T), dtype=bool)
@@ -431,14 +461,21 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
     level_sizes = [1]
     edge_chunks: list[tuple[np.ndarray, ...]] = []
     offset = 0
-    total = 1
     dropped_per_level = [0]
+    order_pruned = 0
 
     # For each level of the AoG (number of compoents), generate the next level by removing one component 
     # at a time and checking if the resulting state is valid.
     for L in range(N):
         S = level
         srcs, comps, dirsets, dsts = [], [], [], []
+        # D12: the group block of each state = the group that is partly removed (at most one,
+        # because the rule below never lets a second group start while one is unfinished).
+        if use_groups:
+            block = np.zeros(len(S), dtype=U64)
+            for g in gmasks:
+                part = S & g
+                block |= np.where((part != 0) & (part != g), g, U64(0))
         # For each component, check if it is present in the current state and 
         # if it can be removed (i.e., if the resulting state is valid). 
         # If so, add the resulting state to the next level.
@@ -455,6 +492,8 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
                 ok = present & ((S & gate[c]) == gate[c])
             T = S & ~bit
             ok &= valid(T)
+            if use_groups:  # inside a group block only that group's members may move
+                ok &= (block == 0) | ((block & bit) != 0)
             idx = np.flatnonzero(ok)
             if len(idx):
                 srcs.append(idx)
@@ -483,14 +522,26 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
                 src_local, comp, dset, dst_mask = src_local[keep], comp[keep], dset[keep], dst_mask[keep]
                 nxt = nxt[conn]
         dropped_per_level.append(dropped)
+
+        # D13: of the feasible moves that remove members of the same group from the same state, keep
+        # only the lowest-index member, so each group block is walked in one order. Runs after every
+        # other filter, so the kept member is always one that can actually leave.
+        if one_order:
+            gid = comp_gid[comp.astype(np.int64)]
+            sel = np.lexsort((comp, gid, src_local))
+            sel = sel[gid[sel] >= 0]
+            if len(sel):
+                first = np.ones(len(sel), dtype=bool)
+                first[1:] = (src_local[sel][1:] != src_local[sel][:-1]) | (gid[sel][1:] != gid[sel][:-1])
+                drop = sel[~first]
+                if len(drop):
+                    keep = np.ones(len(comp), dtype=bool)
+                    keep[drop] = False
+                    src_local, comp, dset, dst_mask = src_local[keep], comp[keep], dset[keep], dst_mask[keep]
+                    nxt = np.unique(dst_mask)
+                    order_pruned += len(drop)
         if not len(nxt):
             break
-        total += len(nxt)
-
-        # Check if the total number of nodes exceeds the maximum allowed, and raise an error if it does.
-        if total > config.max_nodes:
-            raise AoGSizeError(
-                f"AoG exceeds max_nodes={config.max_nodes} at level {L + 1} ({total} nodes so far)")
 
         # Compute the offsets for the next level and store the edges and nodes for the current level.
         next_offset = offset + len(S)
@@ -566,8 +617,13 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
         config=config,
         stats={},
         cache_key=compute_cache_key(inputs, config),
+        component_groups=None if inputs.group is None else list(inputs.group),
     )
     aog.stats = {
+        "group_rule": use_groups, "group_one_order": one_order,
+        "groups": {name: [inputs.component_labels[c] for c in np.flatnonzero(comp_gid == i)]
+                   for i, name in enumerate(group_names)},
+        "group_order_pruned_edges": int(order_pruned),
         "N": N, "n_movable": n, "n_standers": N - n, "D": D, "D_prime": Dp,
         "V": V, "E": len(edge_src), "nodes_per_level": sizes,
         "connectivity_rule": adj is not None, "disconnected_dropped": int(sum(dropped_per_level)),
@@ -576,6 +632,73 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
     }
     _log_summary(aog)
     return aog
+
+
+# ---------------------------------------------------------------------------
+# Phase 2 (docs/subassembly-spec.md section 10): dead-end classification and candidate groups.
+# Pure numpy/Python, no geometry calls -- built on InterferenceResult's own query methods
+# (removable, blockers), which already implement exactly "interf.removable(S's movable members)"
+# and "i is blocked by j along k" from the spec's wording.
+# ---------------------------------------------------------------------------
+
+
+def classify_dead_ends(aog: AoG, interf) -> dict[int, str]:
+    """Classify each node in `aog.dead_ends` as "blocking" or "rule_induced" (spec section 10).
+
+    "blocking": `interf.removable(movable members present)` is empty -- no movable, non-stander
+    component present in the state has any free direction at all, judged purely from the raw
+    interference tensor -- no gates, no D11 (no-floating-parts), no D12/D13 (BOM group ordering).
+    Only blocking dead ends are candidates for a Phase 2 merge.
+
+    "rule_induced": otherwise -- some present part had a geometrically available move (a movable
+    component with at least one free direction, or any present stander, whose own direction is
+    always nominally free in this model and only ever fails on its gate) but every resulting state
+    was filtered out by a stander gate, D11, or a D12/D13 group-ordering rule. Standers never make
+    a dead end "blocking" by themselves: they are not in the interference tensor, so their presence
+    (with an unsatisfiable gate) is rule-induced, not blocking, even when every movable part present
+    is also fully blocked -- a merge cannot free a stander stuck only on its gate. A state with no
+    movable members present at all (an all-stander dead end, e.g. a stander-gate cycle) is also
+    "rule_induced": there is no movable group for Phase 2 to merge.
+    """
+    n = len(interf.component_ids)
+    kinds: dict[int, str] = {}
+    for v in aog.dead_ends:
+        S = int(aog.node_mask[v])
+        movable_present = [c for c in range(n) if (S >> c) & 1]
+        blocking = bool(movable_present) and not interf.removable(movable_present)
+        kinds[int(v)] = "blocking" if blocking else "rule_induced"
+    return kinds
+
+
+def find_candidate_groups(aog: AoG, interf, node_id: int) -> list[dict]:
+    """Candidate rigid-body groups for one blocking dead end (spec section 10): for direction k,
+    `closure_k(i)` is everything reachable from movable component i through "i is blocked by j"
+    edges (`interf.blockers(i, k, movable_present)`). By construction, nothing outside a closure
+    blocks anything inside it, so every closure with 2 <= |A| < (movable members present) is
+    automatically a valid group that could leave together along k -- no separate check needed.
+    Returns one entry per unique (direction, group), as {"direction": k, "members": [indices]}
+    (indices into `interf.component_ids`, i.e. the same space as `aog.state_components`)."""
+    n = len(interf.component_ids)
+    D = len(interf.directions)
+    S = int(aog.node_mask[node_id])
+    movable_present = [c for c in range(n) if (S >> c) & 1]
+    n_present = len(movable_present)
+    seen: set[tuple[int, frozenset]] = set()
+    out: list[dict] = []
+    for k in range(D):
+        for c in movable_present:
+            A = {c}
+            frontier = set(interf.blockers(c, k, movable_present))
+            while frontier - A:
+                new = frontier - A
+                A |= new
+                frontier = set()
+                for j in new:
+                    frontier |= set(interf.blockers(j, k, movable_present))
+            if 2 <= len(A) < n_present and (k, frozenset(A)) not in seen:
+                seen.add((k, frozenset(A)))
+                out.append({"direction": k, "members": sorted(A)})
+    return out
 
 
 def _array_bytes(aog: AoG) -> int:
@@ -604,6 +727,24 @@ def _stander_label(prep, stander_id: str) -> str:
     except Exception:  # noqa: BLE001  (label is display only)
         pass
     return stander_id
+
+
+def read_bom_groups(bom_path, labels: list[str]) -> list[str | None] | None:
+    """BOM `group` per label (rows matched on Label, as in Optimization). Blank or no row -> None
+    (a group of one). Returns None when there is no BOM or it has no `group` column."""
+    if bom_path is None or not Path(bom_path).exists():
+        return None
+    with open(bom_path, newline="", encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f)
+        columns = [(c or "").strip() for c in (reader.fieldnames or [])]
+        if "group" not in columns:
+            return None
+        groups = {}
+        for row in reader:
+            row = {(k or "").strip(): (v or "").strip() for k, v in row.items()}
+            if row.get("label"):
+                groups[row["label"]] = row.get("group") or None
+    return [groups.get(label) for label in labels]
 
 
 def collect_inputs(interference_result, prep, config: AoGConfig | None = None) -> AoGInputs:
@@ -683,6 +824,7 @@ def collect_inputs(interference_result, prep, config: AoGConfig | None = None) -
         assembly_hi=assembly_hi,
         cache_key=h.hexdigest(),
         contact=contact,
+        group=read_bom_groups(getattr(prep, "bom_path", None), labels),
     )
 
 
@@ -711,6 +853,7 @@ def save_aog(aog: AoG, cache_dir: str | Path) -> None:
         "root": aog.root,
         "terminal": aog.terminal,
         "dead_ends": [int(v) for v in aog.dead_ends],
+        "component_groups": aog.component_groups,
         "date": datetime.datetime.now().isoformat(timespec="seconds"),
     }
     tmp = cache_dir / (JSON_NAME + ".tmp")
@@ -740,6 +883,7 @@ def load_aog(cache_dir: str | Path, cache_key: str | None = None) -> AoG | None:
             config=AoGConfig(**meta["config"]),
             stats=meta["stats"],
             cache_key=meta["cache_key"],
+            component_groups=meta.get("component_groups"),
             **data,
         )
     except Exception as exc:  # noqa: BLE001  (corrupt cache: recompute rather than fail)
@@ -802,6 +946,9 @@ def _log_summary(aog: AoG) -> None:
              s["N"], s["n_movable"], s["n_standers"], s["D_prime"], s["V"], s["E"], aog.complete,
              s["time_s"], s["array_bytes"] / 1e6)
     log.info("AoG nodes per level: %s", s["nodes_per_level"])
+    if s.get("group_rule"):
+        log.info("AoG group rule on: groups %s assembled consecutively; one order per block %s "
+                 "(%d edges removed)", s["groups"], s["group_one_order"], s["group_order_pruned_edges"])
     if s.get("connectivity_rule"):
         log.info("AoG dropped %d disconnected state(s) (parts floating apart)", s["disconnected_dropped"])
     else:
@@ -812,7 +959,12 @@ def _log_summary(aog: AoG) -> None:
                     len(aog.dead_ends), "; ".join(f"{int(v)}: [{_state_label(aog, int(v))}]" for v in shown),
                     " ..." if len(aog.dead_ends) > len(shown) else "")
     if not aog.complete:
-        log.warning("AoG is incomplete: the root cannot reach the fully disassembled state")
+        if s.get("group_rule"):
+            log.warning("AoG is incomplete: the root cannot reach the fully disassembled state. The BOM group "
+                        "rule is on (D12/D13, groups %s): a group that cannot be assembled consecutively, or "
+                        "whose first feasible member leads into a dead end, also causes this", s.get("groups"))
+        else:
+            log.warning("AoG is incomplete: the root cannot reach the fully disassembled state")
 
 
 # ---------------------------------------------------------------------------

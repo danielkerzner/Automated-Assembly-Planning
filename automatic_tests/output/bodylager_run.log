@@ -1,0 +1,135 @@
+2026-10-31 09:43:27,881 aap.levels INFO: Loaded cached fused shape for container '0002-P-0909-A01-PP_2' [_0002_P_0909_A01_PP_2] from output\lunar_bodylager\fused\_0002_P_0909_A01_PP_2_be3e21150d038acb1fa0be577ea9d5d52ce08d33b4433e52d82dd04e127535c6.brep
+2026-10-31 09:43:27,894 aap.levels INFO: Loaded cached fused shape for container '0002-P-0909-A01-PP_3' [_0002_P_0909_A01_PP_3] from output\lunar_bodylager\fused\_0002_P_0909_A01_PP_3_7e64550a5a02f608bcc417770621e09b050e239e2ea4fe9c5c5eb0553d122e4b.brep
+2026-10-31 09:43:39,854 aap.interference INFO: Loaded cached interference matrix from output\lunar_bodylager\interference (6 components x 10 directions)
+2026-10-31 09:43:39,857 aap.aog INFO: Cached AoG is stale (key mismatch); recomputing
+2026-10-31 09:43:39,859 aap.aog WARNING: The full assembly is not one connected group through contacts (check the contact threshold); no state mixing the separate groups can be reached
+2026-10-31 09:43:40,033 aap.aog INFO: AoG: N=30 (n=6 movable, m=24 standers), D'=10, V=3881, E=5367, complete=True, 0.18 s, 0.2 MB
+2026-10-31 09:43:40,033 aap.aog INFO: AoG nodes per level: [1, 1, 8, 27, 55, 80, 99, 126, 168, 207, 224, 229, 243, 261, 261, 243, 231, 234, 230, 202, 165, 140, 125, 107, 82, 57, 36, 21, 11, 6, 1]
+2026-10-31 09:43:40,033 aap.aog INFO: AoG group rule on: groups {'M4nut': ['0002-P-0402-A01-M4nut', '0002-P-0402-A01-M4nut001', '0002-P-0402-A01-M4nut002', '0002-P-0402-A01-M4nut003', '0002-P-0402-A01-M4nut004', '0002-P-0402-A01-M4nut005', '0002-P-0402-A01-M4nut006', '0002-P-0402-A01-M4nut007'], 'M4x10': ['0002-P-0911-A01-SP-M4x10', '0002-P-0911-A01-SP-M4x001', '0002-P-0911-A01-SP-M4x002', '0002-P-0911-A01-SP-M4x003'], 'M4x12': ['0002-P-0904-A01-SP-M4x12', '0002-P-0904-A01-SP-M4x001', '0002-P-0904-A01-SP-M4x002', '0002-P-0904-A01-SP-M4x003'], 'M4x16': ['0002-P-0910-A01-SP-M4x16', '0002-P-0910-A01-SP-M4x001', '0002-P-0910-A01-SP-M4x002', '0002-P-0910-A01-SP-M4x003']} assembled consecutively; one order per block True (9426 edges removed)
+2026-10-31 09:43:40,035 aap.aog INFO: AoG dropped 167 disconnected state(s) (parts floating apart)
+2026-10-31 09:43:40,880 aap.optimization INFO: Extracting contact patches for 33 pair(s)
+2026-10-31 09:43:48,265 aap.optimization INFO:   patches 0002-P-0901-A01-PP - 0002-P-0908-A01-PP: 3400 triangle(s), 141.4 mm^2, 7.38 s
+2026-10-31 09:44:07,249 aap.optimization INFO:   patches 0002-P-0901-A01-PP - 0002-P-0909-A01-PP_2: 0 triangle(s), 0.0 mm^2, 18.99 s
+2026-10-31 09:44:16,171 aap.optimization INFO:   patches 0002-P-0901-A01-PP - 0002-P-0909-A01-PP_3: 0 triangle(s), 0.0 mm^2, 8.92 s
+2026-10-31 09:44:19,580 aap.optimization INFO:   patches 0002-P-0901-A01-PP - 0002-P-0902-A01-SP-M8x90: 44 triangle(s), 4.1 mm^2, 3.40 s
+2026-10-31 09:44:21,199 aap.optimization INFO:   patches 0002-P-0901-A01-PP - 0002-P-0904-A01-SP-M4x12: 1212 triangle(s), 164.6 mm^2, 1.62 s
+2026-10-31 09:44:22,927 aap.optimization INFO:   patches 0002-P-0901-A01-PP - 0002-P-0904-A01-SP-M4x001: 1212 triangle(s), 164.6 mm^2, 1.73 s
+2026-10-31 09:44:24,575 aap.optimization INFO:   patches 0002-P-0901-A01-PP - 0002-P-0904-A01-SP-M4x002: 1212 triangle(s), 164.6 mm^2, 1.65 s
+2026-10-31 09:44:26,216 aap.optimization INFO:   patches 0002-P-0901-A01-PP - 0002-P-0904-A01-SP-M4x003: 1212 triangle(s), 164.6 mm^2, 1.64 s
+2026-10-31 09:44:26,852 aap.optimization INFO:   patches 0002-P-0903-A01-AM - 0002-P-0908-A01-PP: 323 triangle(s), 78.6 mm^2, 0.64 s
+2026-10-31 09:44:34,242 aap.optimization INFO:   patches 0002-P-0906-A02-AM - 0002-P-0909-A01-PP_3: 512 triangle(s), 408.5 mm^2, 7.39 s
+2026-10-31 09:44:38,279 aap.optimization INFO:   patches 0002-P-0906-A02-AM - 0002-P-0905-A01-SP-al40x60x13: 1107 triangle(s), 2273.0 mm^2, 4.04 s
+2026-10-31 09:44:55,020 aap.optimization INFO:   patches 0002-P-0908-A01-PP - 0002-P-0909-A01-PP_2: 1426 triangle(s), 431.5 mm^2, 16.74 s
+2026-10-31 09:44:56,381 aap.optimization INFO:   patches 0002-P-0908-A01-PP - 0002-P-0907-A01-SP-al8x14x4: 327 triangle(s), 80.4 mm^2, 1.36 s
+2026-10-31 09:45:04,149 aap.optimization INFO:   patches 0002-P-0908-A01-PP - 0002-P-0402-A01-M4nut: 252 triangle(s), 25.9 mm^2, 7.77 s
+2026-10-31 09:45:05,664 aap.optimization INFO:   patches 0002-P-0908-A01-PP - 0002-P-0910-A01-SP-M4x16: 0 triangle(s), 0.0 mm^2, 1.52 s
+2026-10-31 09:45:07,290 aap.optimization INFO:   patches 0002-P-0908-A01-PP - 0002-P-0910-A01-SP-M4x001: 0 triangle(s), 0.0 mm^2, 1.63 s
+2026-10-31 09:45:08,699 aap.optimization INFO:   patches 0002-P-0908-A01-PP - 0002-P-0910-A01-SP-M4x002: 0 triangle(s), 0.0 mm^2, 1.41 s
+2026-10-31 09:45:10,097 aap.optimization INFO:   patches 0002-P-0908-A01-PP - 0002-P-0910-A01-SP-M4x003: 0 triangle(s), 0.0 mm^2, 1.40 s
+2026-10-31 09:45:17,715 aap.optimization INFO:   patches 0002-P-0908-A01-PP - 0002-P-0402-A01-M4nut001: 252 triangle(s), 25.9 mm^2, 7.62 s
+2026-10-31 09:45:25,287 aap.optimization INFO:   patches 0002-P-0908-A01-PP - 0002-P-0402-A01-M4nut002: 252 triangle(s), 25.9 mm^2, 7.57 s
+2026-10-31 09:45:32,894 aap.optimization INFO:   patches 0002-P-0908-A01-PP - 0002-P-0402-A01-M4nut003: 252 triangle(s), 25.9 mm^2, 7.61 s
+2026-10-31 09:45:35,343 aap.optimization INFO:   patches 0002-P-0909-A01-PP_2 - 0002-P-0910-A01-SP-M4x16: 549 triangle(s), 111.2 mm^2, 2.44 s
+2026-10-31 09:45:37,633 aap.optimization INFO:   patches 0002-P-0909-A01-PP_2 - 0002-P-0910-A01-SP-M4x001: 544 triangle(s), 108.7 mm^2, 2.29 s
+2026-10-31 09:45:40,042 aap.optimization INFO:   patches 0002-P-0909-A01-PP_2 - 0002-P-0910-A01-SP-M4x002: 544 triangle(s), 109.9 mm^2, 2.41 s
+2026-10-31 09:45:42,403 aap.optimization INFO:   patches 0002-P-0909-A01-PP_2 - 0002-P-0910-A01-SP-M4x003: 545 triangle(s), 111.2 mm^2, 2.36 s
+2026-10-31 09:45:44,890 aap.optimization INFO:   patches 0002-P-0909-A01-PP_3 - 0002-P-0911-A01-SP-M4x10: 546 triangle(s), 111.2 mm^2, 2.48 s
+2026-10-31 09:45:47,363 aap.optimization INFO:   patches 0002-P-0909-A01-PP_3 - 0002-P-0911-A01-SP-M4x001: 543 triangle(s), 108.7 mm^2, 2.47 s
+2026-10-31 09:45:49,810 aap.optimization INFO:   patches 0002-P-0909-A01-PP_3 - 0002-P-0911-A01-SP-M4x002: 543 triangle(s), 108.6 mm^2, 2.45 s
+2026-10-31 09:45:52,274 aap.optimization INFO:   patches 0002-P-0909-A01-PP_3 - 0002-P-0911-A01-SP-M4x003: 545 triangle(s), 111.2 mm^2, 2.47 s
+2026-10-31 09:45:55,836 aap.optimization INFO:   patches 0002-P-0909-A01-PP_3 - 0002-P-0402-A01-M4nut004: 278 triangle(s), 43.3 mm^2, 3.56 s
+2026-10-31 09:45:59,551 aap.optimization INFO:   patches 0002-P-0909-A01-PP_3 - 0002-P-0402-A01-M4nut005: 278 triangle(s), 43.3 mm^2, 3.71 s
+2026-10-31 09:46:03,091 aap.optimization INFO:   patches 0002-P-0909-A01-PP_3 - 0002-P-0402-A01-M4nut006: 278 triangle(s), 43.3 mm^2, 3.54 s
+2026-10-31 09:46:06,681 aap.optimization INFO:   patches 0002-P-0909-A01-PP_3 - 0002-P-0402-A01-M4nut007: 278 triangle(s), 43.3 mm^2, 3.59 s
+2026-10-31 09:46:16,680 aap.optimization INFO: Optimization: total cost 0.1026 (greedy 0.1107), 71 iterations x 60 ants, stopped by stagnation, 1245 distinct paths, 9.95 s
+2026-10-31 09:46:16,680 aap.optimization INFO: Cost breakdown: travel=0.085x0.020, direction_change=0.060x0.082, tool_change=0.174x0.224, size_contacts=0.021x0.163, grouping=0.000x0.122, stability=0.138x0.245, gravity_change=0.138x0.143
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 1: 0002-P-0901-A01-PP along (0, 1, 0), travel 78.3 mm, g=(0, 1, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 2: 0002-P-0909-A01-PP_3 along (0, 1, 0), travel 28.8 mm, g=(0, 1, 0), class 1
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 3: 0002-P-0906-A02-AM along (0, 1, 0), travel 22.8 mm, g=(0, 1, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 4: 0002-P-0902-A01-SP-M8x90 along (0, -1, 0), travel 96.3 mm, g=(0, 1, 0), class 1
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 5: 0002-P-0905-A01-SP-al40x60x13 along (0, 1, 0), travel 19.3 mm, g=(0, 1, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 6: 0002-P-0909-A01-PP_2 along (0, -1, 0), travel 25.0 mm, g=(1, 0, 0), class 1
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 7: 0002-P-0908-A01-PP along (0, -1, 0), travel 19.0 mm, g=(0, -1, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 8: 0002-P-0907-A01-SP-al8x14x4 along (0, -1, 0), travel 16.5 mm, g=(0, -1, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 9: 0002-P-0903-A01-AM along (0, 1, 0), travel 78.3 mm, g=(0, 1, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 10: 0002-P-0910-A01-SP-M4x003 along (0, -1, 0), travel 27.7 mm, g=(1, 0, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 11: 0002-P-0910-A01-SP-M4x002 along (0, -1, 0), travel 27.7 mm, g=(1, 0, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 12: 0002-P-0910-A01-SP-M4x001 along (0, -1, 0), travel 27.7 mm, g=(1, 0, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 13: 0002-P-0910-A01-SP-M4x16 along (0, -1, 0), travel 27.7 mm, g=(1, 0, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 14: 0002-P-0904-A01-SP-M4x003 along (0, 1, 0), travel 18.3 mm, g=(1, 0, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 15: 0002-P-0904-A01-SP-M4x002 along (0, 1, 0), travel 18.3 mm, g=(1, 0, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 16: 0002-P-0904-A01-SP-M4x001 along (0, 1, 0), travel 18.3 mm, g=(1, 0, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 17: 0002-P-0904-A01-SP-M4x12 along (0, 1, 0), travel 18.3 mm, g=(1, 0, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 18: 0002-P-0911-A01-SP-M4x003 along (0, 1, 0), travel 31.5 mm, g=(1, 0, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 19: 0002-P-0911-A01-SP-M4x002 along (0, 1, 0), travel 31.5 mm, g=(1, 0, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 20: 0002-P-0911-A01-SP-M4x001 along (0, 1, 0), travel 31.5 mm, g=(1, 0, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 21: 0002-P-0911-A01-SP-M4x10 along (0, 1, 0), travel 31.5 mm, g=(1, 0, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 22: 0002-P-0402-A01-M4nut007 along (0, 1, 0), travel 22.8 mm, g=(0, 1, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 23: 0002-P-0402-A01-M4nut006 along (0, 1, 0), travel 22.8 mm, g=(0, 1, 0), class 2
+2026-10-31 09:46:16,680 aap.optimization INFO:   step 24: 0002-P-0402-A01-M4nut005 along (0, 1, 0), travel 22.8 mm, g=(0, 1, 0), class 2
+2026-10-31 09:46:16,690 aap.optimization INFO:   step 25: 0002-P-0402-A01-M4nut004 along (0, 1, 0), travel 22.8 mm, g=(0, 1, 0), class 2
+2026-10-31 09:46:16,690 aap.optimization INFO:   step 26: 0002-P-0402-A01-M4nut003 along (0, -1, 0), travel 16.5 mm, g=(0, -1, 0), class 2
+2026-10-31 09:46:16,690 aap.optimization INFO:   step 27: 0002-P-0402-A01-M4nut002 along (0, -1, 0), travel 16.5 mm, g=(0, -1, 0), class 2
+2026-10-31 09:46:16,690 aap.optimization INFO:   step 28: 0002-P-0402-A01-M4nut001 along (0, -1, 0), travel 16.5 mm, g=(0, -1, 0), class 2
+2026-10-31 09:46:16,690 aap.optimization INFO:   step 29: 0002-P-0402-A01-M4nut along (0, -1, 0), travel 16.5 mm, g=(0, -1, 0), class 2
+2026-10-31 09:46:16,690 aap.optimization INFO:   step 30: 0002-P-0206-A03-SP-M8locknut along (0, -1, 0), travel 12.5 mm, g=(0, -1, 0), class 1
+2026-10-31 09:46:18,834 aap.illustration INFO: Meshes: 30 components, 225864 triangles, tolerance 0.308 mm, 1.9 s
+2026-10-31 09:47:34,216 aap.illustration INFO: Global view az 225.0 el 35.0: 7 / 30 steps visible
+2026-10-31 09:49:23,694 aap.illustration WARNING: step 4: no view shows the part unoccluded; x-ray fallback at az 225.0 el 35.0
+2026-10-31 09:52:26,292 aap.illustration WARNING: step 5: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 225.0 el 35.0
+2026-10-31 09:55:27,354 aap.illustration WARNING: step 7: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 45.0 el 35.0
+2026-10-31 09:58:28,692 aap.illustration WARNING: step 8: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 45.0 el 35.0
+2026-10-31 10:00:34,019 aap.illustration WARNING: step 9: no view shows the part unoccluded; x-ray fallback at az 225.0 el 35.0
+2026-10-31 10:03:58,991 aap.illustration WARNING: step 14: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 225.0 el 35.0
+2026-10-31 10:07:28,802 aap.illustration WARNING: step 15: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 315.0 el 35.0
+2026-10-31 10:10:55,062 aap.illustration WARNING: step 16: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 225.0 el 35.0
+2026-10-31 10:14:17,442 aap.illustration WARNING: step 17: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 225.0 el 35.0
+2026-10-31 10:16:37,830 aap.illustration WARNING: step 22: no view shows the part unoccluded; x-ray fallback at az 225.0 el 35.0
+2026-10-31 10:18:44,997 aap.illustration WARNING: step 23: no view shows the part unoccluded; x-ray fallback at az 225.0 el 35.0
+2026-10-31 10:22:40,470 aap.illustration WARNING: step 24: no view shows the part unoccluded; x-ray fallback at az 225.0 el 35.0
+2026-10-31 10:24:51,304 aap.illustration WARNING: step 25: no view shows the part unoccluded; x-ray fallback at az 225.0 el 35.0
+2026-10-31 10:28:25,461 aap.illustration WARNING: step 26: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 45.0 el 35.0
+2026-10-31 10:31:47,835 aap.illustration WARNING: step 27: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 45.0 el 35.0
+2026-10-31 10:35:09,674 aap.illustration WARNING: step 28: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 45.0 el 35.0
+2026-10-31 10:38:32,691 aap.illustration WARNING: step 29: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 45.0 el 35.0
+2026-10-31 10:42:00,871 aap.illustration WARNING: step 30: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 45.0 el 35.0
+2026-10-31 10:44:35,024 aap.illustration INFO: Illustrations: 30 frames (12 visible, 10 x-ray, 12 not visible), global view az 225.0 el 35.0, search 3341.5 s, render 154.1 s
+2026-10-31 10:44:40,545 aap.interference INFO: Pair 1/1 1603-0032-0032 / 1601-0039-00032: 5.1 s, 1/6 directions free
+2026-10-31 10:44:41,073 aap.interference INFO: Interference matrix: n=2, D=6, pairs=1, total 6.0 s
+2026-10-31 10:44:41,073 aap.interference INFO: Tolerance pairs: none
+2026-10-31 10:44:41,073 aap.interference INFO: Exception cells: none
+2026-10-31 10:44:41,073 aap.interference INFO: Broad-phase share 0.0%, mean iterations per stepped test 1.2
+2026-10-31 10:44:41,076 aap.interference INFO: Removable with all components present: 1603-0032-0032: [2], 1601-0039-00032: [3]
+2026-10-31 10:44:41,076 aap.interference INFO: Contacts (gap <= 0.1 mm): 1603-0032-0032/1601-0039-00032
+2026-10-31 10:44:41,078 aap.aog INFO: AoG: N=2 (n=2 movable, m=0 standers), D'=6, V=4, E=4, complete=True, 0.00 s, 0.0 MB
+2026-10-31 10:44:41,081 aap.aog INFO: AoG nodes per level: [1, 2, 1]
+2026-10-31 10:44:41,081 aap.aog INFO: AoG dropped 0 disconnected state(s) (parts floating apart)
+2026-10-31 10:44:41,155 aap.optimization INFO: Extracting contact patches for 1 pair(s)
+2026-10-31 10:44:46,067 aap.optimization INFO:   patches 1603-0032-0032 - 1601-0039-00032: 761 triangle(s), 639.4 mm^2, 4.92 s
+2026-10-31 10:44:46,119 aap.optimization INFO: Optimization: total cost 0.0000 (greedy 0.0000), 50 iterations x 10 ants, stopped by stagnation, 12 distinct paths, 0.04 s
+2026-10-31 10:44:46,119 aap.optimization INFO: Cost breakdown: travel=0.000x0.020, direction_change=0.000x0.082, tool_change=0.000x0.224, size_contacts=0.000x0.163, grouping=0.000x0.122, stability=0.000x0.245, gravity_change=0.000x0.143
+2026-10-31 10:44:46,119 aap.optimization INFO:   step 1: 1603-0032-0032 along (0, 1, 0), travel 7.0 mm, g=(1, 0, 0), class 2
+2026-10-31 10:44:46,119 aap.optimization INFO:   step 2: 1601-0039-00032 along (0, 1, 0), travel 6.0 mm, g=(1, 0, 0), class 2
+2026-10-31 10:44:46,443 aap.illustration INFO: Meshes: 2 components, 12552 triangles, tolerance 0.131 mm, 0.3 s
+2026-10-31 10:44:50,957 aap.illustration INFO: Global view az 285.0 el 50.0: 1 / 2 steps visible
+2026-10-31 10:44:54,741 aap.illustration INFO: Illustrations: 2 frames (2 visible, 0 x-ray, 0 not visible), global view az 285.0 el 50.0, search 5.3 s, render 3.0 s
+2026-10-31 10:45:00,157 aap.interference INFO: Pair 1/1 1603-0032-0033 / 1601-0039-00033: 5.1 s, 1/6 directions free
+2026-10-31 10:45:00,641 aap.interference INFO: Interference matrix: n=2, D=6, pairs=1, total 5.9 s
+2026-10-31 10:45:00,641 aap.interference INFO: Tolerance pairs: none
+2026-10-31 10:45:00,641 aap.interference INFO: Exception cells: none
+2026-10-31 10:45:00,641 aap.interference INFO: Broad-phase share 0.0%, mean iterations per stepped test 1.2
+2026-10-31 10:45:00,641 aap.interference INFO: Removable with all components present: 1603-0032-0033: [3], 1601-0039-00033: [2]
+2026-10-31 10:45:00,641 aap.interference INFO: Contacts (gap <= 0.1 mm): 1603-0032-0033/1601-0039-00033
+2026-10-31 10:45:00,641 aap.aog INFO: AoG: N=2 (n=2 movable, m=0 standers), D'=6, V=4, E=4, complete=True, 0.00 s, 0.0 MB
+2026-10-31 10:45:00,650 aap.aog INFO: AoG nodes per level: [1, 2, 1]
+2026-10-31 10:45:00,650 aap.aog INFO: AoG dropped 0 disconnected state(s) (parts floating apart)
+2026-10-31 10:45:00,696 aap.optimization INFO: Extracting contact patches for 1 pair(s)
+2026-10-31 10:45:05,684 aap.optimization INFO:   patches 1603-0032-0033 - 1601-0039-00033: 1013 triangle(s), 675.6 mm^2, 4.99 s
+2026-10-31 10:45:05,735 aap.optimization INFO: Optimization: total cost 0.0000 (greedy 0.0000), 50 iterations x 10 ants, stopped by stagnation, 12 distinct paths, 0.05 s
+2026-10-31 10:45:05,735 aap.optimization INFO: Cost breakdown: travel=0.000x0.020, direction_change=0.000x0.082, tool_change=0.000x0.224, size_contacts=0.000x0.163, grouping=0.000x0.122, stability=0.000x0.245, gravity_change=0.000x0.143
+2026-10-31 10:45:05,735 aap.optimization INFO:   step 1: 1603-0032-0033 along (0, -1, 0), travel 7.0 mm, g=(1, 0, 0), class 2
+2026-10-31 10:45:05,735 aap.optimization INFO:   step 2: 1601-0039-00033 along (0, -1, 0), travel 6.0 mm, g=(1, 0, 0), class 2
+2026-10-31 10:45:05,878 aap.illustration INFO: Meshes: 2 components, 12552 triangles, tolerance 0.131 mm, 0.1 s
+2026-10-31 10:45:10,534 aap.illustration INFO: Global view az 75.0 el 50.0: 1 / 2 steps visible
+2026-10-31 10:45:14,092 aap.illustration INFO: Illustrations: 2 frames (2 visible, 0 x-ray, 0 not visible), global view az 75.0 el 50.0, search 5.3 s, render 2.9 s
+2026-10-31 10:45:14,092 aap.main INFO: Wrote plan.json to output\lunar_bodylager (total cost 0.1026)

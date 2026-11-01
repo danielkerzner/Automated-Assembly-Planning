@@ -30,6 +30,8 @@ from pathlib import Path
 
 import numpy as np
 
+from shapes import shape_geometry_hash
+
 log = logging.getLogger("aap.illustration")
 
 FRAME_MARGIN = 0.06  # framing box margin, fraction of its larger side
@@ -43,7 +45,7 @@ OUTLINE_RGB = np.array([0.12, 0.12, 0.12])
 TRAJECTORY_COLOR = "#1a1a1a"
 MESH_VERSION = "1"
 LAYER_VERSION = "1"
-FRAMES_VERSION = "1"
+FRAMES_VERSION = "2"  # 2: group frames (spec 12)
 
 REPORT_NAME = "illustration_report.json"
 VIEWS_NAME = "view_selection.json"
@@ -55,6 +57,8 @@ MANUAL_NAME = "manual.pdf"
 STRINGS = {
     "en": {
         "step": "Step",
+        "steps_range": "Steps",
+        "parts": "Parts",
         "tool": "Tool",
         "by_hand": "by hand",
         "move": "Move",
@@ -96,6 +100,9 @@ class IllustrationConfig:
     show_gravity: bool = True
     mark_unstable: bool = True
     footnote_show_vector: bool = False
+    # Consecutive steps whose BOM `group` matches (non-blank) share one frame; only the first movement of the
+    # block must pass the visibility rule (spec 12).
+    group_frames: bool = True
     title: str | None = None  # None = assembly name
     language: str = "en"
     force: bool = False
@@ -406,6 +413,29 @@ class ViewContext:
 # ---------------------------------------------------------------------------
 
 
+def step_group(step: dict, bom: dict) -> str:
+    """BOM `group` of a step by Label (a `group` key on the step itself wins); blank = no group."""
+    return (step.get("group") or bom.get(step["component_label"], {}).get("group") or "").strip()
+
+
+def group_blocks(steps: list[dict], bom: dict, config: IllustrationConfig) -> list[tuple[int, int]]:
+    """(first, last) step indices of each frame: runs of consecutive steps sharing a non-blank group (spec 12)."""
+    blocks: list[tuple[int, int]] = []
+    for s, st in enumerate(steps):
+        g = step_group(st, bom)
+        if config.group_frames and g and blocks and step_group(steps[blocks[-1][1]], bom) == g:
+            blocks[-1] = (blocks[-1][0], s)
+        else:
+            blocks.append((s, s))
+    return blocks
+
+
+def _merge_into(buf: np.ndarray, layer: Layer) -> None:
+    cl = _clip(layer, 0, 0, buf.shape[1], buf.shape[0])
+    if cl is not None:
+        np.minimum(buf[cl[0]], layer.depth[cl[1]], out=buf[cl[0]])
+
+
 def _step_visibility(ctx: ViewContext, k: int, placed: np.ndarray) -> dict:
     """Visible fractions of step k's part (end) and ghost (start) against the placed depth buffer."""
     layer = ctx.layer(k)
@@ -427,23 +457,33 @@ def _step_visibility(ctx: ViewContext, k: int, placed: np.ndarray) -> dict:
     return out
 
 
-def evaluate_view(ctx: ViewContext, only: int | None = None) -> dict[str, np.ndarray]:
-    """Visibility figures of every step (or only step index `only`, NaN elsewhere) in one view."""
-    N = len(ctx.meshes)
-    res = {name: np.full(N, np.nan) for name in ("end", "start", "traj")}
-    res["in_frame"] = np.zeros(N, dtype=bool)
+def evaluate_view(ctx: ViewContext, only: int | None = None,
+                  blocks: list[tuple[int, int]] | None = None) -> dict[str, np.ndarray]:
+    """Visibility figures per frame (or only frame index `only`, NaN elsewhere) in one view.
+
+    Without `blocks` every step is its own frame. For a block (a, b) only step a is judged, against the
+    placed parts 0..a-1 and the other members a+1..b, which the same frame draws at their final positions.
+    """
+    blocks = blocks or [(s, s) for s in range(len(ctx.meshes))]
+    B = len(blocks)
+    res = {name: np.full(B, np.nan) for name in ("end", "start", "traj")}
+    res["in_frame"] = np.zeros(B, dtype=bool)
     placed = np.full((ctx.H, ctx.W), np.inf, dtype=np.float32)
-    last = N - 1 if only is None else only
-    for s in range(last + 1):
-        if only is None or s == only:
-            v = _step_visibility(ctx, s, placed)
+    last = B - 1 if only is None else only
+    for i in range(last + 1):
+        a, b = blocks[i]
+        if only is None or i == only:
+            occluders = placed
+            if b > a:
+                occluders = placed.copy()
+                for k in range(a + 1, b + 1):
+                    _merge_into(occluders, ctx.layer(k))
+            v = _step_visibility(ctx, a, occluders)
             for name in ("end", "start", "traj", "in_frame"):
-                res[name][s] = v[name]
-        if s < last:
-            layer = ctx.layer(s)
-            cl = _clip(layer, 0, 0, ctx.W, ctx.H)
-            if cl is not None:
-                np.minimum(placed[cl[0]], layer.depth[cl[1]], out=placed[cl[0]])
+                res[name][i] = v[name]
+        if i < last:
+            for k in range(a, b + 1):
+                _merge_into(placed, ctx.layer(k))
     return res
 
 
@@ -494,15 +534,21 @@ def _figures(ev: dict, s: int, occluded: bool = True) -> dict:
 
 
 def select_views(meshes: list[Mesh], offsets: np.ndarray, config: IllustrationConfig,
-                 stats: dict | None = None) -> tuple[tuple[float, float], list[dict]]:
-    """Spec 6.2 cascade at search resolution. Returns (global view, per-step choice)."""
+                 stats: dict | None = None, blocks: list[tuple[int, int]] | None = None
+                 ) -> tuple[tuple[float, float], list[dict]]:
+    """Spec 6.2 cascade at search resolution. Returns (global view, per-frame choice).
+
+    blocks: (first, last) step indices per frame (default: one frame per step); only the first movement
+    of a block is judged (spec 12).
+    """
     stats = stats if stats is not None else {}
-    N = len(meshes)
+    blocks = blocks or [(s, s) for s in range(len(meshes))]
+    N = len(blocks)
     cands = candidate_views(config)
     evals = []
     for view in cands:
         ctx = ViewContext(view, config.search_size, meshes, offsets, stats=stats)
-        ev = evaluate_view(ctx)
+        ev = evaluate_view(ctx, blocks=blocks)
         ev["visible"] = visible_mask(ev, config)
         evals.append(ev)
     stats["views_evaluated"] = stats.get("views_evaluated", 0) + len(cands)
@@ -516,11 +562,12 @@ def select_views(meshes: list[Mesh], offsets: np.ndarray, config: IllustrationCo
     glob = cands[g]
     by_distance = sorted((i for i in range(len(cands)) if i != g),
                          key=lambda i: (round(view_angle(cands[i], glob), 9), i))
-    log.info("Global view az %.1f el %.1f: %d / %d steps visible", *glob, int(evals[g]["visible"].sum()), N)
+    log.info("Global view az %.1f el %.1f: %d / %d frames visible", *glob, int(evals[g]["visible"].sum()), N)
 
     choices = []
     for s in range(N):
-        base = {"step_index": s, "warnings": []}
+        first = blocks[s][0]
+        base = {"step_index": first, "warnings": []}
         if evals[g]["visible"][s]:
             choices.append({**base, "view": glob, "is_global": True, "kind": "global", "visible": True,
                             "xray": False, **_figures(evals[g], s)})
@@ -539,7 +586,8 @@ def select_views(meshes: list[Mesh], offsets: np.ndarray, config: IllustrationCo
             view = (cands[best][0] + daz, cands[best][1] + dele)
             if not 0 <= view[1] <= 90:
                 continue
-            ev = evaluate_view(ViewContext(view, config.search_size, meshes, offsets, stats=stats), only=s)
+            ev = evaluate_view(ViewContext(view, config.search_size, meshes, offsets, stats=stats), only=s,
+                               blocks=blocks)
             stats["views_evaluated"] = stats.get("views_evaluated", 0) + 1
             tried.append((view, ev))
             if visible_mask(ev, config)[s]:
@@ -553,13 +601,13 @@ def select_views(meshes: list[Mesh], offsets: np.ndarray, config: IllustrationCo
         order = [(cands[i], evals[i]) for i in [g] + by_distance] + tried
         xr = next(((v, ev) for v, ev in order if visible_mask(ev, config, occlusion=False)[s]), None)
         if xr is not None:
-            msg = (f"step {s + 1}: no view shows the part unoccluded; x-ray fallback at az {xr[0][0]:.1f} "
+            msg = (f"step {first + 1}: no view shows the part unoccluded; x-ray fallback at az {xr[0][0]:.1f} "
                    f"el {xr[0][1]:.1f}")
             log.warning(msg)
             choices.append({**base, "view": xr[0], "is_global": xr[0] == glob, "kind": "xray", "visible": True,
                             "xray": True, **_figures(xr[1], s, occluded=False), "warnings": [msg]})
             continue
-        msg = (f"step {s + 1}: not visible in any view (degenerate trajectory or out of frame); using the "
+        msg = (f"step {first + 1}: not visible in any view (degenerate trajectory or out of frame); using the "
                f"best-scoring view az {cands[best][0]:.1f} el {cands[best][1]:.1f}")
         log.warning(msg)
         occluded = bool(evals[best]["end"][s] < config.vis_min_end or evals[best]["start"][s] < config.vis_min_start)
@@ -614,32 +662,37 @@ def _ghost_overlay(ctx: ViewContext, s: int, rgb: np.ndarray, scene_depth: np.nd
     rgb[line] = 0.55 * color
 
 
-def compose_frame(ctx: ViewContext, s: int | None, config: IllustrationConfig, is_stander: bool = False,
-                  xray: bool = False) -> np.ndarray:
-    """RGB image (H, W, 3) of step index s: placed parts 0..s-1, part s, its ghost. s=None: all parts placed."""
+def compose_frame(ctx: ViewContext, s: int | None, config: IllustrationConfig, is_stander=False,
+                  xray: bool = False, last: int | None = None) -> np.ndarray:
+    """RGB image (H, W, 3) of step index s: placed parts 0..s-1, parts s..last (default last = s) with their
+    ghosts. s=None: all parts placed. is_stander: one flag, or one per part s..last."""
     W, H = ctx.W, ctx.H
     N = len(ctx.meshes)
     placed_rgb = _rgb(config.placed_color)
-    new_rgb = _rgb(config.stander_color if is_stander else config.new_color)
     jump = EDGE_JUMP_REL * ctx.diag
     n_placed = N if s is None else s
-    colors = np.array([placed_rgb] * n_placed + [new_rgb] * (N - n_placed))
+    last = n_placed - 1 if s is None else (s if last is None else last)
+    members = list(range(n_placed, last + 1))
+    flags = list(is_stander) if isinstance(is_stander, (list, tuple)) else [bool(is_stander)] * len(members)
+    member_rgb = {k: _rgb(config.stander_color if f else config.new_color) for k, f in zip(members, flags)}
+    colors = np.array([placed_rgb] * n_placed + [member_rgb.get(k, placed_rgb) for k in range(n_placed, N)])
     placed_items = [(ctx.layer(k), 0, 0, 0.0, k) for k in range(n_placed)]
-    new_items = [] if s is None else [(ctx.layer(s), 0, 0, 0.0, s)]
+    new_items = [(ctx.layer(k), 0, 0, 0.0, k) for k in members]
     rgb = np.ones((H, W, 3), dtype=np.float32)
 
     if not xray:
         depth, ids, shade = zmerge(W, H, placed_items + new_items)
         _paint(ids, shade, colors, rgb)
-        if s is not None:
-            _ghost_overlay(ctx, s, rgb, depth, new_rgb, config.ghost_alpha)
+        for k in members:
+            _ghost_overlay(ctx, k, rgb, depth, member_rgb[k], config.ghost_alpha)
         rgb[_edges(ids, depth, jump)] = OUTLINE_RGB
         return rgb
 
-    # X-ray: part and ghost drawn alone, the placed parts blended over them at xray_alpha.
+    # X-ray: parts and ghosts drawn alone, the placed parts blended over them at xray_alpha.
     depth, ids, shade = zmerge(W, H, new_items)
     _paint(ids, shade, colors, rgb)
-    _ghost_overlay(ctx, s, rgb, depth, new_rgb, config.ghost_alpha)
+    for k in members:
+        _ghost_overlay(ctx, k, rgb, depth, member_rgb[k], config.ghost_alpha)
     rgb[_edges(ids, depth, jump)] = OUTLINE_RGB
     pd, pid, psh = zmerge(W, H, placed_items)
     prgb = np.ones_like(rgb)
@@ -677,6 +730,36 @@ def footnote_lines(steps: list[dict], s: int, bom: dict, config: IllustrationCon
     if hold:
         lines.append(T["hold"])
     return lines, {"reorient": reorient, "hold": hold}
+
+
+def block_footnote_lines(steps: list[dict], first: int, last: int, bom: dict,
+                         config: IllustrationConfig) -> tuple[list[str], dict]:
+    """Footnote of a frame covering steps first..last (spec 12); a single step uses footnote_lines unchanged."""
+    if first == last:
+        return footnote_lines(steps, first, bom, config)
+    T = STRINGS[config.language]
+    block = steps[first:last + 1]
+    labels = [st["component_label"] for st in block]
+    tools = [tool_text(st, bom, config.language) for st in block]
+    head = f"{T['steps_range']} {block[0]['step']}-{block[-1]['step']} / {len(steps)}   {step_group(block[0], bom)}"
+    if len(set(tools)) == 1:
+        head += f"   {T['tool']}: {tools[0]}"
+    lines = [head, f"{T['parts']}: " + (", ".join(labels) if len(set(tools)) == 1 else
+                                        ", ".join(f"{lab} ({tool})" for lab, tool in zip(labels, tools)))]
+    if config.footnote_show_vector:
+        lines.append(f"{T['move']}: " + "; ".join(
+            f"{st['component_label']} {_fmt_vec(np.asarray(st['direction'], float) * float(st['travel']))} mm"
+            for st in block))
+    changed = [s for s in range(first, last + 1) if s > 0 and steps[s].get("gravity") is not None
+               and steps[s - 1].get("gravity") is not None
+               and not np.allclose(steps[s]["gravity"], steps[s - 1]["gravity"], atol=1e-9)]
+    if changed:
+        lines.append(T["reorient"].format(g=_fmt_vec(steps[changed[-1]]["gravity"])))
+    unstable = [st["component_label"] for st in block if st.get("stability_class") == 1]
+    hold = bool(config.mark_unstable and unstable)
+    if hold:
+        lines.append(f"{T['hold']}: {', '.join(unstable)}")
+    return lines, {"reorient": bool(changed), "hold": hold}
 
 
 def _snap(point: np.ndarray, other: np.ndarray, mask: np.ndarray) -> np.ndarray:
@@ -744,26 +827,37 @@ def _image_axes(fig, ctx: ViewContext, rgb: np.ndarray):
 
 
 def draw_step(ctx: ViewContext, steps: list[dict], s: int, choice: dict, lines: list[str],
-              config: IllustrationConfig):
-    """Matplotlib figure of one step: frame, trajectory arrow, gravity pictogram, footnote."""
-    st = steps[s]
+              config: IllustrationConfig, last: int | None = None):
+    """Matplotlib figure of steps s..last (default s): frame, one trajectory arrow per part, gravity
+    pictogram (of the last step), footnote."""
+    last = s if last is None else last
+    block = range(s, last + 1)
     fig = _figure(config)
-    ax = _image_axes(fig, ctx, compose_frame(ctx, s, config, bool(st["is_stander"]), choice["xray"]))
-    a, b = trajectory_points(ctx, s)
-    ax.plot([a[0], b[0]], [a[1], b[1]], linestyle=(0, (5, 4)), color=TRAJECTORY_COLOR, lw=1.5, zorder=4)
-    length = float(np.linalg.norm(b - a))
-    if length > 1e-6:
-        head = min(length, 0.03 * min(ctx.W, ctx.H))
-        ax.annotate("", xy=tuple(b), xytext=tuple(b - (b - a) / length * head), zorder=4,
-                    arrowprops=dict(arrowstyle="-|>", color=TRAJECTORY_COLOR, lw=1.5, mutation_scale=16,
-                                    shrinkA=0, shrinkB=0))
-    if config.show_gravity and st.get("gravity") is not None:
-        _draw_gravity(ax, ctx, st["gravity"])
+    rgb = compose_frame(ctx, s, config, [bool(steps[k]["is_stander"]) for k in block], choice["xray"], last)
+    ax = _image_axes(fig, ctx, rgb)
+    for k in block:
+        a, b = trajectory_points(ctx, k)
+        ax.plot([a[0], b[0]], [a[1], b[1]], linestyle=(0, (5, 4)), color=TRAJECTORY_COLOR, lw=1.5, zorder=4)
+        length = float(np.linalg.norm(b - a))
+        if length > 1e-6:
+            head = min(length, 0.03 * min(ctx.W, ctx.H))
+            ax.annotate("", xy=tuple(b), xytext=tuple(b - (b - a) / length * head), zorder=4,
+                        arrowprops=dict(arrowstyle="-|>", color=TRAJECTORY_COLOR, lw=1.5, mutation_scale=16,
+                                        shrinkA=0, shrinkB=0))
+    if config.show_gravity and steps[last].get("gravity") is not None:
+        _draw_gravity(ax, ctx, steps[last]["gravity"])
     if choice["xray"]:
         ax.text(0.01 * ctx.W, 0.02 * ctx.H, "x-ray", fontsize=8, color="#666666", va="top")
+    T = STRINGS[config.language]
+    gap = 0.28 if len(lines) <= 3 else 0.84 / len(lines)  # more lines (group frames) are packed tighter
+    small = 9 if len(lines) <= 3 else 7
+    width_pt = 0.96 * config.image_size[0] / config.dpi * 72
     for i, line in enumerate(lines):
-        fig.text(0.02, FOOTER_FRAC * (0.75 - 0.28 * i), line, fontsize=11 if i == 0 else 9,
-                 weight="bold" if i == 0 else "normal", va="center", color="#111111" if i == 0 else "#a33")
+        size = 11 if i == 0 else small
+        size = min(size, width_pt / (0.62 * max(len(line), 1)))  # shrink a line that would leave the page
+        warn = line.startswith(T["hold"]) or line.startswith(T["reorient"].split("{")[0])
+        fig.text(0.02, FOOTER_FRAC * (0.75 - gap * i), line, fontsize=size, weight="bold" if i == 0 else "normal",
+                 va="center", color="#a33" if warn else "#111111")
     return fig
 
 
@@ -865,10 +959,12 @@ def _load_cached(output_dir: Path, key: str) -> IllustrationResult | None:
     return IllustrationResult(data["frames"], data["manual_path"], tuple(data["global_view"]), key, data["stats"])
 
 
-def _cached_views(mesh_list, offsets, config, output_dir: Path, force: bool, stats: dict):
-    """select_views, cached on disk keyed by meshes, start offsets and the search fields of the config."""
+def _cached_views(mesh_list, offsets, config, output_dir: Path, force: bool, stats: dict,
+                  blocks: list[tuple[int, int]]):
+    """select_views, cached on disk keyed by meshes, start offsets, frame blocks and the search fields."""
     h = hashlib.sha256(f"v{FRAMES_VERSION};".encode())
     h.update(json.dumps({"meshes": [m.key for m in mesh_list], "offsets": np.round(offsets, 9).tolist(),
+                         "blocks": [list(b) for b in blocks],
                          "search": {f: getattr(config, f) for f in SEARCH_FIELDS}}, default=list).encode())
     key = h.hexdigest()
     path = output_dir / VIEWS_NAME
@@ -882,7 +978,7 @@ def _cached_views(mesh_list, offsets, config, output_dir: Path, force: bool, sta
                 return tuple(data["global_view"]), data["choices"]
         except Exception as exc:  # noqa: BLE001
             log.warning("Could not read %s (%s); searching views again", path, exc)
-    glob, choices = select_views(mesh_list, offsets, config, stats)
+    glob, choices = select_views(mesh_list, offsets, config, stats, blocks)
     _write_json_atomic(path, {"key": key, "global_view": glob, "choices": choices})
     return glob, choices
 
@@ -890,7 +986,9 @@ def _cached_views(mesh_list, offsets, config, output_dir: Path, force: bool, sta
 def render_illustrations(sequence, meshes: dict[str, Mesh], bom: dict, output_dir: str | Path,
                          config: IllustrationConfig | None = None, title: str = "Assembly",
                          force: bool | None = None) -> IllustrationResult:
-    """PNG per step + manual PDF from meshes keyed by component_id (no FreeCAD). Cached on disk (spec 8).
+    """PNG per frame + manual PDF from meshes keyed by component_id (no FreeCAD). Cached on disk (spec 8).
+
+    One frame per step, except that consecutive steps of the same BOM group share one frame (spec 12).
 
     bom: Label -> row dict (columns tool, group, is_stander; missing columns read as blank).
     """
@@ -916,7 +1014,8 @@ def render_illustrations(sequence, meshes: dict[str, Mesh], bom: dict, output_di
 
     t0 = time.perf_counter()
     stats: dict = {}
-    glob, choices = _cached_views(mesh_list, offsets, config, output_dir, force, stats)
+    blocks = group_blocks(steps, bom, config)
+    glob, choices = _cached_views(mesh_list, offsets, config, output_dir, force, stats, blocks)
     stats["view_search_s"] = time.perf_counter() - t0
 
     t1 = time.perf_counter()
@@ -936,17 +1035,26 @@ def render_illustrations(sequence, meshes: dict[str, Mesh], bom: dict, output_di
     tmp_manual = manual.with_suffix(".tmp.pdf")
     with PdfPages(tmp_manual, metadata={"Title": title, "CreationDate": None, "ModDate": None}) as pdf:
         pdf.savefig(draw_cover(context(glob), steps, bom, title, config))
-        for s, choice in enumerate(choices):
-            st = steps[s]
-            lines, flags = footnote_lines(steps, s, bom, config)
-            fig = draw_step(context(choice["view"]), steps, s, choice, lines, config)
-            png = output_dir / f"step_{st['step']:0{width}d}_{_safe(st['component_label'])}.png"
+        for i, ((s, last), choice) in enumerate(zip(blocks, choices)):
+            st, block = steps[s], steps[s:last + 1]
+            lines, flags = block_footnote_lines(steps, s, last, bom, config)
+            fig = draw_step(context(choice["view"]), steps, s, choice, lines, config, last)
+            if last == s:
+                name = f"step_{st['step']:0{width}d}_{_safe(st['component_label'])}.png"
+            else:
+                name = (f"step_{st['step']:0{width}d}-{steps[last]['step']:0{width}d}_"
+                        f"{_safe(step_group(st, bom))}.png")
+            png = output_dir / name
             fig.savefig(png, dpi=config.dpi, metadata={"Software": None})
             pdf.savefig(fig)
             frames.append({
-                "step": st["step"],
+                "step": st["step"],  # first step of the frame; its movement is the one judged visible
+                "steps": [b["step"] for b in block],
                 "component_id": st["component_id"],
                 "component_label": st["component_label"],
+                "component_ids": [b["component_id"] for b in block],
+                "component_labels": [b["component_label"] for b in block],
+                "group": step_group(st, bom) if last > s else None,
                 "is_stander": bool(st["is_stander"]),
                 "png": str(png),
                 "view": {"azimuth": choice["view"][0], "elevation": choice["view"][1],
@@ -961,7 +1069,7 @@ def render_illustrations(sequence, meshes: dict[str, Mesh], bom: dict, output_di
                 "warnings": choice["warnings"],
             })
             # Free the layers of views no later step uses (bounds memory at final resolution).
-            if all(c["view"] != choice["view"] for c in choices[s + 1:]) and choice["view"] != glob:
+            if all(c["view"] != choice["view"] for c in choices[i + 1:]) and choice["view"] != glob:
                 contexts.pop(choice["view"], None)
     os.replace(tmp_manual, manual)
     stats["render_s"] = time.perf_counter() - t1
@@ -971,8 +1079,8 @@ def render_illustrations(sequence, meshes: dict[str, Mesh], bom: dict, output_di
     _write_json_atomic(output_dir / REPORT_NAME, {**asdict(result), "config": {
         k: v for k, v in asdict(config).items() if k != "force"}})
     n_vis = sum(f["visible"] and not f["xray"] for f in frames)
-    log.info("Illustrations: %d frames (%d visible, %d x-ray, %d not visible), global view az %.1f el %.1f, "
-             "search %.1f s, render %.1f s", len(frames), n_vis, sum(f["xray"] for f in frames),
+    log.info("Illustrations: %d frames for %d steps (%d visible, %d x-ray, %d not visible), global view az %.1f "
+             "el %.1f, search %.1f s, render %.1f s", len(frames), len(steps), n_vis, sum(f["xray"] for f in frames),
              sum(not f["visible"] for f in frames), *glob, stats["view_search_s"], stats["render_s"])
     return result
 
@@ -991,20 +1099,6 @@ def read_bom(bom_path) -> dict[str, dict]:
             if row.get("label"):
                 rows[row["label"]] = row
     return rows
-
-
-def shape_geometry_hash(shape) -> str:
-    """Session-independent hash of a FreeCAD shape: global B-rep vertices and face/edge geometry types.
-
-    Volume, Area and BoundBox are left out on purpose: once a shape carries a triangulation (after
-    tessellate), OCC evaluates them on the mesh and they change in the last digits.
-    """
-    pts = np.array([[v.X, v.Y, v.Z] for v in shape.Vertexes], dtype=float).reshape(-1, 3).round(6) + 0.0
-    pts = pts[np.lexsort(pts.T[::-1])] if len(pts) else pts
-    head = [len(shape.Solids), len(shape.Edges), sorted(f.Surface.TypeId for f in shape.Faces)]
-    h = hashlib.sha256(json.dumps(head).encode())
-    h.update(pts.tobytes())
-    return h.hexdigest()
 
 
 def tessellate_shape(shape, tol: float, mesh_dir: Path | None = None, force: bool = False) -> Mesh:

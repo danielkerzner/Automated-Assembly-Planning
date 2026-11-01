@@ -1,0 +1,48 @@
+﻿node,level,mask,live,dead_end,components
+0,0,255,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part1; industrial_fastner_part5; industrial_fastner_part6; industrial_fastner_part7; industrial_fastner_part4; industrial_fastner_part001
+1,1,191,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part1; industrial_fastner_part5; industrial_fastner_part6; industrial_fastner_part7; industrial_fastner_part001
+2,1,223,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part1; industrial_fastner_part5; industrial_fastner_part6; industrial_fastner_part4; industrial_fastner_part001
+3,1,247,False,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part1; industrial_fastner_part6; industrial_fastner_part7; industrial_fastner_part4; industrial_fastner_part001
+4,1,251,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part5; industrial_fastner_part6; industrial_fastner_part7; industrial_fastner_part4; industrial_fastner_part001
+5,2,63,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part1; industrial_fastner_part5; industrial_fastner_part6; industrial_fastner_part7
+6,2,159,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part1; industrial_fastner_part5; industrial_fastner_part6; industrial_fastner_part001
+7,2,183,False,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part1; industrial_fastner_part6; industrial_fastner_part7; industrial_fastner_part001
+8,2,187,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part5; industrial_fastner_part6; industrial_fastner_part7; industrial_fastner_part001
+9,2,207,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part1; industrial_fastner_part5; industrial_fastner_part4; industrial_fastner_part001
+10,2,219,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part5; industrial_fastner_part6; industrial_fastner_part4; industrial_fastner_part001
+11,2,243,False,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part6; industrial_fastner_part7; industrial_fastner_part4; industrial_fastner_part001
+12,3,31,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part1; industrial_fastner_part5; industrial_fastner_part6
+13,3,55,False,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part1; industrial_fastner_part6; industrial_fastner_part7
+14,3,59,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part5; industrial_fastner_part6; industrial_fastner_part7
+15,3,143,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part1; industrial_fastner_part5; industrial_fastner_part001
+16,3,155,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part5; industrial_fastner_part6; industrial_fastner_part001
+17,3,179,False,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part6; industrial_fastner_part7; industrial_fastner_part001
+18,3,199,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part1; industrial_fastner_part4; industrial_fastner_part001
+19,3,203,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part5; industrial_fastner_part4; industrial_fastner_part001
+20,3,241,False,False,industrial_fastner_part3; industrial_fastner_part6; industrial_fastner_part7; industrial_fastner_part4; industrial_fastner_part001
+21,4,15,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part1; industrial_fastner_part5
+22,4,27,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part5; industrial_fastner_part6
+23,4,51,False,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part6; industrial_fastner_part7
+24,4,135,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part1; industrial_fastner_part001
+25,4,139,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part5; industrial_fastner_part001
+26,4,177,False,False,industrial_fastner_part3; industrial_fastner_part6; industrial_fastner_part7; industrial_fastner_part001
+27,4,195,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part4; industrial_fastner_part001
+28,4,197,True,False,industrial_fastner_part3; industrial_fastner_part1; industrial_fastner_part4; industrial_fastner_part001
+29,5,7,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part1
+30,5,11,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part5
+31,5,26,True,False,industrial_fastner_part2; industrial_fastner_part5; industrial_fastner_part6
+32,5,49,False,True,industrial_fastner_part3; industrial_fastner_part6; industrial_fastner_part7
+33,5,131,True,False,industrial_fastner_part3; industrial_fastner_part2; industrial_fastner_part001
+34,5,133,True,False,industrial_fastner_part3; industrial_fastner_part1; industrial_fastner_part001
+35,5,193,True,False,industrial_fastner_part3; industrial_fastner_part4; industrial_fastner_part001
+36,6,3,True,False,industrial_fastner_part3; industrial_fastner_part2
+37,6,5,True,False,industrial_fastner_part3; industrial_fastner_part1
+38,6,10,True,False,industrial_fastner_part2; industrial_fastner_part5
+39,6,24,True,False,industrial_fastner_part5; industrial_fastner_part6
+40,6,129,True,False,industrial_fastner_part3; industrial_fastner_part001
+41,7,1,True,False,industrial_fastner_part3
+42,7,2,True,False,industrial_fastner_part2
+43,7,4,True,False,industrial_fastner_part1
+44,7,8,True,False,industrial_fastner_part5
+45,7,16,True,False,industrial_fastner_part6
+46,8,0,True,False,(empty)

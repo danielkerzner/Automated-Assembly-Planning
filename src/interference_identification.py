@@ -104,6 +104,102 @@ class InterferenceResult:
         return _connected(self.contact, list(subset))
 
 
+# ---------------------------------------------------------------------------
+# Phase 2 (docs/subassembly-spec.md section 10): derived tensors for an automatic sub-assembly
+# group. Pure numpy, no geometry calls -- neither constructor re-runs collision.py.
+# ---------------------------------------------------------------------------
+
+
+def merge_groups(interf: InterferenceResult, group_ids: list[str], new_id: str, new_label: str) -> InterferenceResult:
+    """Derived InterferenceResult with `group_ids` replaced by one component `new_id` (the group,
+    treated as one rigid body). `free[new_id, j, k]` = AND over group members of `free[member, j,
+    k]` (the matrix's own documented composition rule); `free[j, new_id, k]` is never computed
+    separately -- it follows from the antisymmetric identity `free[j, i, neg[k]] == free[i, j,
+    k]`. `contact[new_id, j]` = OR over members, `gaps[new_id, j]` = min over members. Diagnostic-
+    only fields (`pair_info`, `exception_cells`, `caught_exceptions`, `outcome_detail`) are not
+    carried over -- they describe individual collision calls, none of which are repeated here, so
+    an empty value is more honest than a stale or synthesized one. Used both to rank Phase 2 merge
+    candidates (on a throwaway copy) and to commit the chosen one."""
+    ids = list(interf.component_ids)
+    group_idx = sorted(interf.index_of(g) for g in group_ids)
+    group_set = set(group_idx)
+    if len(group_idx) < 2:
+        raise ValueError(f"merge_groups needs at least 2 members, got {group_ids}")
+    if new_id in ids:
+        raise ValueError(f"new_id {new_id!r} already exists in this InterferenceResult")
+
+    keep = [i for i in range(len(ids)) if i not in group_set]
+    new_ids = [ids[i] for i in keep] + [new_id]
+    new_labels = [interf.component_labels[i] for i in keep] + [new_label]
+    n_new = len(new_ids)
+    D = len(interf.directions)
+
+    free = np.zeros((n_new, n_new, D), dtype=bool)
+    free[np.ix_(range(len(keep)), range(len(keep)), range(D))] = \
+        interf.free[np.ix_(keep, keep, range(D))]
+    merged_row = np.ones((len(keep), D), dtype=bool)  # free[new_id, kept, k]
+    for g in group_idx:
+        merged_row &= interf.free[g, keep, :]
+    free[-1, :-1, :] = merged_row
+    for b in range(len(keep)):
+        free[b, -1, interf.neg] = merged_row[b, :]  # antisymmetric identity, vectorized over k
+    free[-1, -1, :] = True  # self-diagonal, as in the original matrix (free_directions may pass
+                              # a subset that includes the component itself)
+
+    contact = gaps = None
+    if interf.contact is not None:
+        contact = np.zeros((n_new, n_new), dtype=bool)
+        contact[np.ix_(range(len(keep)), range(len(keep)))] = interf.contact[np.ix_(keep, keep)]
+        merged_contact = np.zeros(len(keep), dtype=bool)
+        for g in group_idx:
+            merged_contact |= interf.contact[g, keep]
+        contact[-1, :-1] = merged_contact
+        contact[:-1, -1] = merged_contact
+    if interf.gaps is not None:
+        gaps = np.full((n_new, n_new), np.inf, dtype=float)
+        gaps[np.ix_(range(len(keep)), range(len(keep)))] = interf.gaps[np.ix_(keep, keep)]
+        merged_gaps = np.full(len(keep), np.inf, dtype=float)
+        for g in group_idx:
+            merged_gaps = np.minimum(merged_gaps, interf.gaps[g, keep])
+        gaps[-1, :-1] = merged_gaps
+        gaps[:-1, -1] = merged_gaps
+
+    cache_key = hashlib.sha256(
+        f"merge:v1;parent:{interf.cache_key};group:{sorted(group_ids)};new_id:{new_id};"
+        f"ids:{'|'.join(new_ids)}".encode()
+    ).hexdigest()
+
+    return InterferenceResult(
+        component_ids=new_ids, component_labels=new_labels,
+        directions=interf.directions, neg=interf.neg, free=free,
+        pair_info={}, exception_cells=[], caught_exceptions=[], outcome_detail={},
+        config=interf.config, stats=dict(interf.stats), cache_key=cache_key,
+        contact=contact, contact_threshold=interf.contact_threshold, gaps=gaps,
+    )
+
+
+def sub_interference(interf: InterferenceResult, group_ids: list[str]) -> InterferenceResult:
+    """Restricted InterferenceResult for one Phase 2 group's own child level: the sub-block
+    `free[A, A, :]` (A = group_ids), same `directions`/`neg` as the parent (not rediscovered -- the
+    tensor stays indexed by the parent level's candidate-direction list, per spec)."""
+    idx = sorted(interf.index_of(g) for g in group_ids)
+    D = len(interf.directions)
+    ids = [interf.component_ids[i] for i in idx]
+    labels = [interf.component_labels[i] for i in idx]
+    free = interf.free[np.ix_(idx, idx, range(D))]
+    contact = interf.contact[np.ix_(idx, idx)] if interf.contact is not None else None
+    gaps = interf.gaps[np.ix_(idx, idx)] if interf.gaps is not None else None
+    cache_key = hashlib.sha256(
+        f"sub:v1;parent:{interf.cache_key};members:{sorted(group_ids)}".encode()
+    ).hexdigest()
+    return InterferenceResult(
+        component_ids=ids, component_labels=labels,
+        directions=interf.directions, neg=interf.neg, free=free,
+        pair_info={}, exception_cells=[], caught_exceptions=[], outcome_detail={},
+        config=interf.config, stats=dict(interf.stats), cache_key=cache_key,
+        contact=contact, contact_threshold=interf.contact_threshold, gaps=gaps,
+    )
+
 
 # Setup: components, directions, cache key, contacts
 

@@ -1,0 +1,353 @@
+{
+  "groups": [
+    "core"
+  ],
+  "results": {
+    "O1": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run scripts/test_aog.py first",
+      "seconds": 0.001
+    },
+    "O2": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "all on: sum 1 (1.000000000000)",
+          "passed": true
+        },
+        {
+          "label": "all on: weights = row sums / 49",
+          "passed": true
+        },
+        {
+          "label": "M3, M7 off: sum 1, terms dropped",
+          "passed": true
+        },
+        {
+          "label": "ratios kept",
+          "passed": true
+        },
+        {
+          "label": "override then renormalize",
+          "passed": true
+        },
+        {
+          "label": "unknown term raises",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.0
+    },
+    "O3": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run scripts/test_aog.py first",
+      "seconds": 0.001
+    },
+    "O4": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run scripts/test_aog.py first",
+      "seconds": 0.001
+    },
+    "O5": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "ratio 0.25, removal ['+x', '+x', '+x']: raw 0.000 = 0.000, normalized / (N - 1)",
+          "passed": true
+        },
+        {
+          "label": "ratio 0.25, removal ['+x', '+x', '-x']: raw 0.250 = 0.250, normalized / (N - 1)",
+          "passed": true
+        },
+        {
+          "label": "ratio 0.25, removal ['+x', '-x', '+y']: raw 1.250 = 1.250, normalized / (N - 1)",
+          "passed": true
+        },
+        {
+          "label": "ratio 0.25, removal ['+x', '+y', '+z']: raw 2.000 = 2.000, normalized / (N - 1)",
+          "passed": true
+        },
+        {
+          "label": "ratio 0.25, removal ['+z', '-z', '+z']: raw 0.500 = 0.500, normalized / (N - 1)",
+          "passed": true
+        },
+        {
+          "label": "ratio 0.6, removal ['+x', '+x', '+x']: raw 0.000 = 0.000, normalized / (N - 1)",
+          "passed": true
+        },
+        {
+          "label": "ratio 0.6, removal ['+x', '+x', '-x']: raw 0.600 = 0.600, normalized / (N - 1)",
+          "passed": true
+        },
+        {
+          "label": "ratio 0.6, removal ['+x', '-x', '+y']: raw 1.600 = 1.600, normalized / (N - 1)",
+          "passed": true
+        },
+        {
+          "label": "ratio 0.6, removal ['+x', '+y', '+z']: raw 2.000 = 2.000, normalized / (N - 1)",
+          "passed": true
+        },
+        {
+          "label": "ratio 0.6, removal ['+z', '-z', '+z']: raw 1.200 = 1.200, normalized / (N - 1)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.062
+    },
+    "O6": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "order [0, 2, 1, 3]: 1 = 1 (leave A unfinished (c1 missing) -> 1; B, A finished -> 0)",
+          "passed": true
+        },
+        {
+          "label": "order [0, 1, 2, 3]: 0 = 0 (A finished before leaving, singletons free)",
+          "passed": true
+        },
+        {
+          "label": "order [2, 0, 3, 1]: 1 = 1 (leave singleton B 0; leave A unfinished 1; leave singleton C 0)",
+          "passed": true
+        },
+        {
+          "label": "order [2, 3, 0, 1]: 0 = 0 (singletons then A)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.003
+    },
+    "O7": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "order [2, 0, 3, 1, 4]: 2 = 2 (A, B, A with movable parts between: 2 changes)",
+          "passed": true
+        },
+        {
+          "label": "order [2, 4, 0, 1, 3]: 1 = 1 (A, A, B: 1 change)",
+          "passed": true
+        },
+        {
+          "label": "order [0, 2, 4, 3, 1]: 1 = 1 (movable first, then A, A, B: 1 change)",
+          "passed": true
+        },
+        {
+          "label": "order [3, 0, 1, 2, 4]: 1 = 1 (B, A, A: 1 change)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.004
+    },
+    "O8": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "S_i = [2.3099, 0.1855, 0.5046]",
+          "passed": true
+        },
+        {
+          "label": "path value 1.2919 = sum S_i t / N 1.2919",
+          "passed": true
+        },
+        {
+          "label": "large part last costs more (2.7081 > 1.2919)",
+          "passed": true
+        },
+        {
+          "label": "ACO inserts large -> small ([0, 2, 1])",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.083
+    },
+    "O9": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "overhanging block, hull, g = -z: class 1 (expected 1)",
+          "passed": true
+        },
+        {
+          "label": "overhanging block, hull, g = +z: class 1 (expected 1)",
+          "passed": true
+        },
+        {
+          "label": "overhanging block, union, g = -z: class 1 (expected 1)",
+          "passed": true
+        },
+        {
+          "label": "block on a base (not overhanging), hull, g = -z: class 2 (expected 2)",
+          "passed": true
+        },
+        {
+          "label": "block on a base (not overhanging), hull, g = +z: class 1 (expected 1)",
+          "passed": true
+        },
+        {
+          "label": "block on a base (not overhanging), union, g = -z: class 2 (expected 2)",
+          "passed": true
+        },
+        {
+          "label": "block in U-shaped container, hull, g = -z: class 2 (expected 2)",
+          "passed": true
+        },
+        {
+          "label": "block in U-shaped container, hull, g = +x: class 2 (expected 2)",
+          "passed": true
+        },
+        {
+          "label": "block in U-shaped container, hull, g = +z: class 1 (expected 1)",
+          "passed": true
+        },
+        {
+          "label": "block in U-shaped container, union, g = -z: class 2 (expected 2)",
+          "passed": true
+        },
+        {
+          "label": "block in U-shaped container, union, g = +x: class 2 (expected 2)",
+          "passed": true
+        },
+        {
+          "label": "block in U-shaped container, union, g = +z: class 1 (expected 1)",
+          "passed": true
+        },
+        {
+          "label": "pin through one plate, hull, g = -z: class 2 (expected 2)",
+          "passed": true
+        },
+        {
+          "label": "pin through one plate, hull, g = +x: class 1 (expected 1)",
+          "passed": true
+        },
+        {
+          "label": "pin through one plate, union, g = -z: class 2 (expected 2)",
+          "passed": true
+        },
+        {
+          "label": "pin through one plate, union, g = +x: class 1 (expected 1)",
+          "passed": true
+        },
+        {
+          "label": "block on two rails, hull, g = -z: class 2 (expected 2)",
+          "passed": true
+        },
+        {
+          "label": "block on two rails, hull, g = +z: class 1 (expected 1)",
+          "passed": true
+        },
+        {
+          "label": "block on two rails, union, g = -z: class 1 (expected 1)",
+          "passed": true
+        },
+        {
+          "label": "pin through two separated plates, hull, g = -z: class 2 (expected 2)",
+          "passed": true
+        },
+        {
+          "label": "pin through two separated plates, hull, g = +x: class 1 (expected 1)",
+          "passed": true
+        },
+        {
+          "label": "pin through two separated plates, hull, g = +y: class 2 (expected 2)",
+          "passed": true
+        },
+        {
+          "label": "pin through two separated plates, union, g = -z: class 1 (expected 1)",
+          "passed": true
+        },
+        {
+          "label": "pin through two separated plates, union, g = +x: class 1 (expected 1)",
+          "passed": true
+        },
+        {
+          "label": "line contact, CoG on the line, hull, g = -z: class 2 (expected 2)",
+          "passed": true
+        },
+        {
+          "label": "line contact, CoG 1 mm off the line, hull, g = -z: class 1 (expected 1)",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "FreeCAD geometry variant skipped (run with --groups real)"
+      ],
+      "seconds": 0.041
+    },
+    "O10": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run scripts/test_aog.py first",
+      "seconds": 0.001
+    },
+    "O11": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run scripts/test_aog.py first",
+      "seconds": 0.001
+    },
+    "O12": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run scripts/test_aog.py first",
+      "seconds": 0.0
+    },
+    "O13": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run scripts/test_aog.py first",
+      "seconds": 0.0
+    },
+    "O14": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "N=12: 3.0 s < 60 s and 4.7 MB < 32.2 MB",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "N=12: V=688, E=1936, moves=8252, 72 iterations, 3.0 s, peak traced 4.7 MB (estimate 32.2 MB), cost 0.3266 (greedy 0.3371)",
+        "N = 20 skipped (run with --groups scale)"
+      ],
+      "seconds": 3.014
+    },
+    "cache": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "tests/industrial_fastner/interference/interference.json byte-identical after the run",
+          "passed": true
+        },
+        {
+          "label": "tests/industrial_fastner/interference/interference.npz byte-identical after the run",
+          "passed": true
+        },
+        {
+          "label": "tests/industrial_fastner/aog/aog.json byte-identical after the run",
+          "passed": true
+        },
+        {
+          "label": "tests/industrial_fastner/aog/aog.npz byte-identical after the run",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.0
+    }
+  }
+}

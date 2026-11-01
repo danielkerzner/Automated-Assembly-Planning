@@ -1,0 +1,677 @@
+{
+  "frames": [
+    {
+      "step": 1,
+      "steps": [
+        1
+      ],
+      "component_id": "Part__Feature",
+      "component_label": "0002-P-0901-A01-PP",
+      "component_ids": [
+        "Part__Feature"
+      ],
+      "component_labels": [
+        "0002-P-0901-A01-PP"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\lunar_bodylager\\illustrations\\step_01_0002-P-0901-A01-PP.png",
+      "view": {
+        "azimuth": 315.0,
+        "elevation": 35.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.4195726842365314,
+      "in_frame": true,
+      "footnote": [
+        "Step 1 / 30   0002-P-0901-A01-PP   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 2,
+      "steps": [
+        2
+      ],
+      "component_id": "_0002_P_0909_A01_PP_3",
+      "component_label": "0002-P-0909-A01-PP_3",
+      "component_ids": [
+        "_0002_P_0909_A01_PP_3"
+      ],
+      "component_labels": [
+        "0002-P-0909-A01-PP_3"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\lunar_bodylager\\illustrations\\step_02_0002-P-0909-A01-PP_3.png",
+      "view": {
+        "azimuth": 315.0,
+        "elevation": 35.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.6498015873015873,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.6498015873015873,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.15432558500726162,
+      "in_frame": true,
+      "footnote": [
+        "Step 2 / 30   0002-P-0909-A01-PP_3   Tool: by hand",
+        "Hold in place"
+      ],
+      "reorient": false,
+      "hold": true,
+      "warnings": []
+    },
+    {
+      "step": 3,
+      "steps": [
+        3
+      ],
+      "component_id": "Part__Feature008",
+      "component_label": "0002-P-0906-A02-AM",
+      "component_ids": [
+        "Part__Feature008"
+      ],
+      "component_labels": [
+        "0002-P-0906-A02-AM"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\lunar_bodylager\\illustrations\\step_03_0002-P-0906-A02-AM.png",
+      "view": {
+        "azimuth": 315.0,
+        "elevation": 35.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.8884007566050399,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.8884007566050399,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.12217442146351368,
+      "in_frame": true,
+      "footnote": [
+        "Step 3 / 30   0002-P-0906-A02-AM   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 4,
+      "steps": [
+        4
+      ],
+      "component_id": "Part__Feature002",
+      "component_label": "0002-P-0902-A01-SP-M8x90",
+      "component_ids": [
+        "Part__Feature002"
+      ],
+      "component_labels": [
+        "0002-P-0902-A01-SP-M8x90"
+      ],
+      "group": null,
+      "is_stander": true,
+      "png": "output\\lunar_bodylager\\illustrations\\step_04_0002-P-0902-A01-SP-M8x90.png",
+      "view": {
+        "azimuth": 315.0,
+        "elevation": 35.0,
+        "is_global": true
+      },
+      "view_kind": "xray",
+      "visible": true,
+      "xray": true,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.289045719545873,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.516026174865619,
+      "in_frame": true,
+      "footnote": [
+        "Step 4 / 30   0002-P-0902-A01-SP-M8x90   Tool: WrenchM8",
+        "Hold in place"
+      ],
+      "reorient": false,
+      "hold": true,
+      "warnings": [
+        "step 4: no view shows the part unoccluded; x-ray fallback at az 315.0 el 35.0"
+      ]
+    },
+    {
+      "step": 5,
+      "steps": [
+        5
+      ],
+      "component_id": "Part__Feature007",
+      "component_label": "0002-P-0905-A01-SP-al40x60x13",
+      "component_ids": [
+        "Part__Feature007"
+      ],
+      "component_labels": [
+        "0002-P-0905-A01-SP-al40x60x13"
+      ],
+      "group": null,
+      "is_stander": true,
+      "png": "output\\lunar_bodylager\\illustrations\\step_05_0002-P-0905-A01-SP-al40x60x13.png",
+      "view": {
+        "azimuth": 315.0,
+        "elevation": 35.0,
+        "is_global": true
+      },
+      "view_kind": "none",
+      "visible": false,
+      "xray": false,
+      "vis_end": 0.6072123640526617,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.6072123640526617,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.10341957606340996,
+      "in_frame": true,
+      "footnote": [
+        "Step 5 / 30   0002-P-0905-A01-SP-al40x60x13   Tool: Wrenchal"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": [
+        "step 5: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 315.0 el 35.0"
+      ]
+    },
+    {
+      "step": 6,
+      "steps": [
+        6
+      ],
+      "component_id": "_0002_P_0909_A01_PP_2",
+      "component_label": "0002-P-0909-A01-PP_2",
+      "component_ids": [
+        "_0002_P_0909_A01_PP_2"
+      ],
+      "component_labels": [
+        "0002-P-0909-A01-PP_2"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\lunar_bodylager\\illustrations\\step_06_0002-P-0909-A01-PP_2.png",
+      "view": {
+        "azimuth": 315.0,
+        "elevation": 35.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.68,
+      "vis_start": 0.835527950310559,
+      "vis_end_occluded": 0.68,
+      "vis_start_occluded": 0.835527950310559,
+      "trajectory_px_frac": 0.1339631814300097,
+      "in_frame": true,
+      "footnote": [
+        "Step 6 / 30   0002-P-0909-A01-PP_2   Tool: by hand",
+        "Re-orient assembly: gravity along (1, 0, 0)",
+        "Hold in place"
+      ],
+      "reorient": true,
+      "hold": true,
+      "warnings": []
+    },
+    {
+      "step": 7,
+      "steps": [
+        7
+      ],
+      "component_id": "Part__Feature011",
+      "component_label": "0002-P-0908-A01-PP",
+      "component_ids": [
+        "Part__Feature011"
+      ],
+      "component_labels": [
+        "0002-P-0908-A01-PP"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\lunar_bodylager\\illustrations\\step_07_0002-P-0908-A01-PP.png",
+      "view": {
+        "azimuth": 45.0,
+        "elevation": 35.0,
+        "is_global": false
+      },
+      "view_kind": "none",
+      "visible": false,
+      "xray": false,
+      "vis_end": 0.8959746720940751,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.8959746720940751,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.09954566578330758,
+      "in_frame": true,
+      "footnote": [
+        "Step 7 / 30   0002-P-0908-A01-PP   Tool: by hand",
+        "Re-orient assembly: gravity along (0, -1, 0)"
+      ],
+      "reorient": true,
+      "hold": false,
+      "warnings": [
+        "step 7: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 45.0 el 35.0"
+      ]
+    },
+    {
+      "step": 8,
+      "steps": [
+        8
+      ],
+      "component_id": "Part__Feature010",
+      "component_label": "0002-P-0907-A01-SP-al8x14x4",
+      "component_ids": [
+        "Part__Feature010"
+      ],
+      "component_labels": [
+        "0002-P-0907-A01-SP-al8x14x4"
+      ],
+      "group": null,
+      "is_stander": true,
+      "png": "output\\lunar_bodylager\\illustrations\\step_08_0002-P-0907-A01-SP-al8x14x4.png",
+      "view": {
+        "azimuth": 45.0,
+        "elevation": 35.0,
+        "is_global": false
+      },
+      "view_kind": "none",
+      "visible": false,
+      "xray": false,
+      "vis_end": 0.6937269372693727,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.6937269372693727,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.08644755186445148,
+      "in_frame": true,
+      "footnote": [
+        "Step 8 / 30   0002-P-0907-A01-SP-al8x14x4   Tool: Wrenchal"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": [
+        "step 8: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 45.0 el 35.0"
+      ]
+    },
+    {
+      "step": 9,
+      "steps": [
+        9
+      ],
+      "component_id": "Part__Feature001",
+      "component_label": "0002-P-0903-A01-AM",
+      "component_ids": [
+        "Part__Feature001"
+      ],
+      "component_labels": [
+        "0002-P-0903-A01-AM"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\lunar_bodylager\\illustrations\\step_09_0002-P-0903-A01-AM.png",
+      "view": {
+        "azimuth": 315.0,
+        "elevation": 35.0,
+        "is_global": true
+      },
+      "view_kind": "xray",
+      "visible": true,
+      "xray": true,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.004142931123770067,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.4195726842365317,
+      "in_frame": true,
+      "footnote": [
+        "Step 9 / 30   0002-P-0903-A01-AM   Tool: by hand",
+        "Re-orient assembly: gravity along (0, 1, 0)"
+      ],
+      "reorient": true,
+      "hold": false,
+      "warnings": [
+        "step 9: no view shows the part unoccluded; x-ray fallback at az 315.0 el 35.0"
+      ]
+    },
+    {
+      "step": 10,
+      "steps": [
+        10,
+        11,
+        12,
+        13
+      ],
+      "component_id": "Part__Feature018",
+      "component_label": "0002-P-0910-A01-SP-M4x003",
+      "component_ids": [
+        "Part__Feature018",
+        "Part__Feature017",
+        "Part__Feature016",
+        "Part__Feature015"
+      ],
+      "component_labels": [
+        "0002-P-0910-A01-SP-M4x003",
+        "0002-P-0910-A01-SP-M4x002",
+        "0002-P-0910-A01-SP-M4x001",
+        "0002-P-0910-A01-SP-M4x16"
+      ],
+      "group": "M4x16",
+      "is_stander": true,
+      "png": "output\\lunar_bodylager\\illustrations\\step_10-13_M4x16.png",
+      "view": {
+        "azimuth": 315.0,
+        "elevation": 35.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.6084507042253521,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.6084507042253521,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.14844613302079082,
+      "in_frame": true,
+      "footnote": [
+        "Steps 10-13 / 30   M4x16   Tool: WrenchM4",
+        "Parts: 0002-P-0910-A01-SP-M4x003, 0002-P-0910-A01-SP-M4x002, 0002-P-0910-A01-SP-M4x001, 0002-P-0910-A01-SP-M4x16",
+        "Re-orient assembly: gravity along (1, 0, 0)"
+      ],
+      "reorient": true,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 14,
+      "steps": [
+        14,
+        15,
+        16,
+        17
+      ],
+      "component_id": "Part__Feature006",
+      "component_label": "0002-P-0904-A01-SP-M4x003",
+      "component_ids": [
+        "Part__Feature006",
+        "Part__Feature005",
+        "Part__Feature004",
+        "Part__Feature003"
+      ],
+      "component_labels": [
+        "0002-P-0904-A01-SP-M4x003",
+        "0002-P-0904-A01-SP-M4x002",
+        "0002-P-0904-A01-SP-M4x001",
+        "0002-P-0904-A01-SP-M4x12"
+      ],
+      "group": "M4x12",
+      "is_stander": true,
+      "png": "output\\lunar_bodylager\\illustrations\\step_14-17_M4x12.png",
+      "view": {
+        "azimuth": 315.0,
+        "elevation": 35.0,
+        "is_global": true
+      },
+      "view_kind": "none",
+      "visible": false,
+      "xray": true,
+      "vis_end": 0.47440273037542663,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.47440273037542663,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.09806104880623905,
+      "in_frame": true,
+      "footnote": [
+        "Steps 14-17 / 30   M4x12   Tool: WrenchM4",
+        "Parts: 0002-P-0904-A01-SP-M4x003, 0002-P-0904-A01-SP-M4x002, 0002-P-0904-A01-SP-M4x001, 0002-P-0904-A01-SP-M4x12"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": [
+        "step 14: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 315.0 el 35.0"
+      ]
+    },
+    {
+      "step": 18,
+      "steps": [
+        18,
+        19,
+        20,
+        21
+      ],
+      "component_id": "Part__Feature027",
+      "component_label": "0002-P-0911-A01-SP-M4x003",
+      "component_ids": [
+        "Part__Feature027",
+        "Part__Feature026",
+        "Part__Feature025",
+        "Part__Feature024"
+      ],
+      "component_labels": [
+        "0002-P-0911-A01-SP-M4x003",
+        "0002-P-0911-A01-SP-M4x002",
+        "0002-P-0911-A01-SP-M4x001",
+        "0002-P-0911-A01-SP-M4x10"
+      ],
+      "group": "M4x10",
+      "is_stander": true,
+      "png": "output\\lunar_bodylager\\illustrations\\step_18-21_M4x10.png",
+      "view": {
+        "azimuth": 45.0,
+        "elevation": 35.0,
+        "is_global": false
+      },
+      "view_kind": "candidate",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.5476190476190477,
+      "vis_start": 0.9722222222222222,
+      "vis_end_occluded": 0.5476190476190477,
+      "vis_start_occluded": 0.9722222222222222,
+      "trajectory_px_frac": 0.16505083107508003,
+      "in_frame": true,
+      "footnote": [
+        "Steps 18-21 / 30   M4x10   Tool: WrenchM4",
+        "Parts: 0002-P-0911-A01-SP-M4x003, 0002-P-0911-A01-SP-M4x002, 0002-P-0911-A01-SP-M4x001, 0002-P-0911-A01-SP-M4x10"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 22,
+      "steps": [
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29
+      ],
+      "component_id": "Part__Feature031",
+      "component_label": "0002-P-0402-A01-M4nut007",
+      "component_ids": [
+        "Part__Feature031",
+        "Part__Feature030",
+        "Part__Feature029",
+        "Part__Feature028",
+        "Part__Feature021",
+        "Part__Feature020",
+        "Part__Feature019",
+        "Part__Feature014"
+      ],
+      "component_labels": [
+        "0002-P-0402-A01-M4nut007",
+        "0002-P-0402-A01-M4nut006",
+        "0002-P-0402-A01-M4nut005",
+        "0002-P-0402-A01-M4nut004",
+        "0002-P-0402-A01-M4nut003",
+        "0002-P-0402-A01-M4nut002",
+        "0002-P-0402-A01-M4nut001",
+        "0002-P-0402-A01-M4nut"
+      ],
+      "group": "M4nut",
+      "is_stander": true,
+      "png": "output\\lunar_bodylager\\illustrations\\step_22-29_M4nut.png",
+      "view": {
+        "azimuth": 315.0,
+        "elevation": 35.0,
+        "is_global": true
+      },
+      "view_kind": "xray",
+      "visible": true,
+      "xray": true,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.12217442146351111,
+      "in_frame": true,
+      "footnote": [
+        "Steps 22-29 / 30   M4nut   Tool: WrenchnutM4",
+        "Parts: 0002-P-0402-A01-M4nut007, 0002-P-0402-A01-M4nut006, 0002-P-0402-A01-M4nut005, 0002-P-0402-A01-M4nut004, 0002-P-0402-A01-M4nut003, 0002-P-0402-A01-M4nut002, 0002-P-0402-A01-M4nut001, 0002-P-0402-A01-M4nut",
+        "Re-orient assembly: gravity along (0, -1, 0)"
+      ],
+      "reorient": true,
+      "hold": false,
+      "warnings": [
+        "step 22: no view shows the part unoccluded; x-ray fallback at az 315.0 el 35.0"
+      ]
+    },
+    {
+      "step": 30,
+      "steps": [
+        30
+      ],
+      "component_id": "Part__Feature009",
+      "component_label": "0002-P-0206-A03-SP-M8locknut",
+      "component_ids": [
+        "Part__Feature009"
+      ],
+      "component_labels": [
+        "0002-P-0206-A03-SP-M8locknut"
+      ],
+      "group": null,
+      "is_stander": true,
+      "png": "output\\lunar_bodylager\\illustrations\\step_30_0002-P-0206-A03-SP-M8locknut.png",
+      "view": {
+        "azimuth": 45.0,
+        "elevation": 35.0,
+        "is_global": false
+      },
+      "view_kind": "none",
+      "visible": false,
+      "xray": false,
+      "vis_end": 0.7659259259259259,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.7659259259259259,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.0654905695942813,
+      "in_frame": true,
+      "footnote": [
+        "Step 30 / 30   0002-P-0206-A03-SP-M8locknut   Tool: WrenchnutM8",
+        "Hold in place"
+      ],
+      "reorient": false,
+      "hold": true,
+      "warnings": [
+        "step 30: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 45.0 el 35.0"
+      ]
+    }
+  ],
+  "manual_path": "output\\lunar_bodylager\\illustrations\\manual.pdf",
+  "global_view": [
+    315.0,
+    35.0
+  ],
+  "config_hash": "97e13a85ae5c0c0ee1a8749630d15e7fb2222d4cb501a4da0ee88f8660d067a9",
+  "stats": {
+    "layers_rasterized": 19425,
+    "raster_s": 1390.3852538024366,
+    "views_evaluated": 1339,
+    "view_search_s": 1415.7535000000207,
+    "layers_loaded": 45,
+    "render_s": 9.530454899999313,
+    "total_s": 1425.283960700006
+  },
+  "config": {
+    "image_size": [
+      1600,
+      1200
+    ],
+    "search_size": [
+      480,
+      360
+    ],
+    "dpi": 200,
+    "tess_tolerance_rel": 0.002,
+    "default_view": [
+      -35.0,
+      30.0
+    ],
+    "azimuths": [
+      0,
+      15,
+      30,
+      45,
+      60,
+      75,
+      90,
+      105,
+      120,
+      135,
+      150,
+      165,
+      180,
+      195,
+      210,
+      225,
+      240,
+      255,
+      270,
+      285,
+      300,
+      315,
+      330,
+      345
+    ],
+    "elevations": [
+      20,
+      35,
+      50
+    ],
+    "vis_min_end": 0.5,
+    "vis_min_start": 0.5,
+    "min_trajectory_px_frac": 0.12,
+    "perturb_step_deg": 5.0,
+    "perturb_max_deg": 30.0,
+    "xray_alpha": 0.25,
+    "placed_color": "#bdbdbd",
+    "new_color": "#f28e2b",
+    "stander_color": "#3b75af",
+    "ghost_alpha": 0.35,
+    "show_gravity": true,
+    "mark_unstable": true,
+    "footnote_show_vector": false,
+    "group_frames": true,
+    "title": "0002-A-0900-A06-bodylager_1",
+    "language": "en"
+  }
+}

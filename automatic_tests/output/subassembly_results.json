@@ -1,0 +1,54 @@
+{
+  "groups": [
+    "core"
+  ],
+  "results": {
+    "H6b": {
+      "passed": false,
+      "checks": [],
+      "notes": [],
+      "error": "ValueError: BOM row for container '0002-P-0909-A01-PP_3' [_0002_P_0909_A01_PP_3] sets is_stander=true, but a container cannot be a stander (CLAUDE.md: standers are flagged on leaf rows only) -- fix the row or confirm it should not be a container",
+      "seconds": 1.013
+    },
+    "H1b": {
+      "passed": false,
+      "checks": [
+        {
+          "label": "industrial_fastner: flat, root + 8 leaves (expected 8, no containers)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "error": "ValueError: BOM row for container '0002-P-0909-A01-PP_3' [_0002_P_0909_A01_PP_3] sets is_stander=true, but a container cannot be a stander (CLAUDE.md: standers are flagged on leaf rows only) -- fix the row or confirm it should not be a container",
+      "seconds": 0.897
+    },
+    "H12": {
+      "passed": false,
+      "checks": [
+        {
+          "label": "same component ids/labels (5 components)",
+          "passed": true
+        },
+        {
+          "label": "same component shapes (volumes match within 1e-9)",
+          "passed": true
+        },
+        {
+          "label": "same candidate directions (10)",
+          "passed": true
+        },
+        {
+          "label": "same interference cache_key (True)",
+          "passed": true
+        },
+        {
+          "label": "same stander ids",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "error": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\danie\\\\Documents\\\\documentosprincipal\\\\Master Thesis\\\\AAP\\\\tests\\\\industrial_fastner\\\\interference\\\\interference.json'",
+      "seconds": 7.109
+    }
+  }
+}

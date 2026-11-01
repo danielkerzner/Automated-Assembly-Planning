@@ -1,0 +1,63 @@
+{
+  "key": "759f60e7b535632ea53ba4156cd829ea24ebb176b783f8e50fe8e5cc49c91d51",
+  "global_view": [
+    315.0,
+    35.0
+  ],
+  "choices": [
+    {
+      "step_index": 0,
+      "warnings": [],
+      "view": [
+        315.0,
+        35.0
+      ],
+      "is_global": true,
+      "kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.24997197495993953,
+      "in_frame": true
+    },
+    {
+      "step_index": 1,
+      "warnings": [],
+      "view": [
+        315.0,
+        35.0
+      ],
+      "is_global": true,
+      "kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.37495796243990936,
+      "in_frame": true
+    },
+    {
+      "step_index": 2,
+      "warnings": [],
+      "view": [
+        315.0,
+        35.0
+      ],
+      "is_global": true,
+      "kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.1243777377551077,
+      "in_frame": true
+    }
+  ]
+}

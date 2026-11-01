@@ -1,0 +1,192 @@
+{
+  "frames": [
+    {
+      "step": 1,
+      "steps": [
+        1
+      ],
+      "component_id": "Part__Feature002",
+      "component_label": "component002",
+      "component_ids": [
+        "Part__Feature002"
+      ],
+      "component_labels": [
+        "component002"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\nonlinearsimple_r1\\illustrations\\step_01_component002.png",
+      "view": {
+        "azimuth": 330.0,
+        "elevation": 20.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.4759379901280618,
+      "in_frame": true,
+      "footnote": [
+        "Step 1 / 3   component002   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 2,
+      "steps": [
+        2
+      ],
+      "component_id": "Part__Feature003",
+      "component_label": "component003",
+      "component_ids": [
+        "Part__Feature003"
+      ],
+      "component_labels": [
+        "component003"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\nonlinearsimple_r1\\illustrations\\step_02_component003.png",
+      "view": {
+        "azimuth": 330.0,
+        "elevation": 20.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.7909145607701564,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.7909145607701564,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.2493008519718416,
+      "in_frame": true,
+      "footnote": [
+        "Step 2 / 3   component003   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 3,
+      "steps": [
+        3
+      ],
+      "component_id": "auto_0",
+      "component_label": "auto_0 (component + component001)",
+      "component_ids": [
+        "auto_0"
+      ],
+      "component_labels": [
+        "auto_0 (component + component001)"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\nonlinearsimple_r1\\illustrations\\step_03_auto_0_component_component001.png",
+      "view": {
+        "azimuth": 330.0,
+        "elevation": 20.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.9979260089686098,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.9979260089686098,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.22426020109889971,
+      "in_frame": true,
+      "footnote": [
+        "Step 3 / 3   auto_0 (component + component001)   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    }
+  ],
+  "manual_path": "output\\nonlinearsimple_r1\\illustrations\\manual.pdf",
+  "global_view": [
+    330.0,
+    20.0
+  ],
+  "config_hash": "32c2226a971fdf52a65e996c2d2538c11bb5e8f8136f9048ac087e95d16bb513",
+  "stats": {
+    "layers_rasterized": 222,
+    "raster_s": 3.607166699890513,
+    "views_evaluated": 73,
+    "view_search_s": 2.987018000014359,
+    "render_s": 2.9827835999894887,
+    "total_s": 5.969806300010532
+  },
+  "config": {
+    "image_size": [
+      1600,
+      1200
+    ],
+    "search_size": [
+      480,
+      360
+    ],
+    "dpi": 200,
+    "tess_tolerance_rel": 0.002,
+    "default_view": [
+      -35.0,
+      30.0
+    ],
+    "azimuths": [
+      0,
+      15,
+      30,
+      45,
+      60,
+      75,
+      90,
+      105,
+      120,
+      135,
+      150,
+      165,
+      180,
+      195,
+      210,
+      225,
+      240,
+      255,
+      270,
+      285,
+      300,
+      315,
+      330,
+      345
+    ],
+    "elevations": [
+      20,
+      35,
+      50
+    ],
+    "vis_min_end": 0.5,
+    "vis_min_start": 0.5,
+    "min_trajectory_px_frac": 0.12,
+    "perturb_step_deg": 5.0,
+    "perturb_max_deg": 30.0,
+    "xray_alpha": 0.25,
+    "placed_color": "#bdbdbd",
+    "new_color": "#f28e2b",
+    "stander_color": "#3b75af",
+    "ghost_alpha": 0.35,
+    "show_gravity": true,
+    "mark_unstable": true,
+    "footnote_show_vector": false,
+    "group_frames": true,
+    "title": "Assembly",
+    "language": "en"
+  }
+}

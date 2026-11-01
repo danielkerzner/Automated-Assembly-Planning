@@ -1,0 +1,542 @@
+{
+  "groups": [
+    "core",
+    "real"
+  ],
+  "results": {
+    "L1": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "default config validates",
+          "passed": true
+        },
+        {
+          "label": "invalid {'image_size': (0, 100)} raises ('image_size')",
+          "passed": true
+        },
+        {
+          "label": "invalid {'search_size': (100,)} raises ('search_size')",
+          "passed": true
+        },
+        {
+          "label": "invalid {'azimuths': ()} raises ('must not be empty')",
+          "passed": true
+        },
+        {
+          "label": "invalid {'elevations': ()} raises ('must not be empty')",
+          "passed": true
+        },
+        {
+          "label": "invalid {'elevations': (-10, 20)} raises ('Elevations')",
+          "passed": true
+        },
+        {
+          "label": "invalid {'default_view': (0, -5)} raises ('Elevations')",
+          "passed": true
+        },
+        {
+          "label": "invalid {'vis_min_end': 1.5} raises ('vis_min_end')",
+          "passed": true
+        },
+        {
+          "label": "invalid {'xray_alpha': -0.1} raises ('xray_alpha')",
+          "passed": true
+        },
+        {
+          "label": "invalid {'placed_color': 'notacolour'} raises ('colour')",
+          "passed": true
+        },
+        {
+          "label": "invalid {'language': 'xx'} raises ('language')",
+          "passed": true
+        },
+        {
+          "label": "invalid {'perturb_step_deg': 0} raises ('perturb_step_deg')",
+          "passed": true
+        },
+        {
+          "label": "invalid {'dpi': 0} raises ('dpi')",
+          "passed": true
+        },
+        {
+          "label": "invalid {'tess_tolerance_rel': 0} raises ('tess_tolerance_rel')",
+          "passed": true
+        },
+        {
+          "label": "BOM without a tool column: stander prints 'by hand'",
+          "passed": true
+        },
+        {
+          "label": "stander tool read from the BOM by Label",
+          "passed": true
+        },
+        {
+          "label": "blank tool prints 'by hand'",
+          "passed": true
+        },
+        {
+          "label": "non-stander prints 'by hand'",
+          "passed": true
+        },
+        {
+          "label": "label missing from BOM",
+          "passed": true
+        },
+        {
+          "label": "missing mesh raises",
+          "passed": true
+        },
+        {
+          "label": "duplicate component raises",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 1.07
+    },
+    "L2": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "az 0 el 0: right +y, up +z, looking along -x",
+          "passed": true
+        },
+        {
+          "label": "az 90 el 0: right -x, looking along -y",
+          "passed": true
+        },
+        {
+          "label": "el 90 looks straight down",
+          "passed": true
+        },
+        {
+          "label": "basis orthonormal, right-handed, r horizontal, up towards +z (6 views)",
+          "passed": true
+        },
+        {
+          "label": "unit moves along r / u / v map to (+s, 0) / (0, -s) / (0, 0) pixels",
+          "passed": true
+        },
+        {
+          "label": "framing centre maps to the image centre",
+          "passed": true
+        },
+        {
+          "label": "ghost shift equals the projection of start_offset (pixels and depth)",
+          "passed": true
+        },
+        {
+          "label": "depth of the front face x = 10 is v . p = -10 (got -10.00000)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.05
+    },
+    "L3": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "boxes are closed, outward-oriented meshes",
+          "passed": true
+        },
+        {
+          "label": "ID buffer: overlap: B (nearer) wins",
+          "passed": true
+        },
+        {
+          "label": "ID buffer: A only",
+          "passed": true
+        },
+        {
+          "label": "ID buffer: B only",
+          "passed": true
+        },
+        {
+          "label": "overlap depth is B's front face (-15)",
+          "passed": true
+        },
+        {
+          "label": "box behind a plate is fully occluded (end fraction 0.0)",
+          "passed": true
+        },
+        {
+          "label": "its ghost above the plate is fully visible",
+          "passed": true
+        },
+        {
+          "label": "ring mesh is closed",
+          "passed": true
+        },
+        {
+          "label": "ring seen from above: hole empty, annulus covered",
+          "passed": true
+        },
+        {
+          "label": "a single triangle is not closed",
+          "passed": true
+        },
+        {
+          "label": "open meshes are not back-face culled (both windings drawn)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.066
+    },
+    "L4": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "coverage of the merged layers equals direct rasterization (0 px differ)",
+          "passed": true
+        },
+        {
+          "label": "depth of the merge equals direct rasterization (max diff 0.00e+00)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.295
+    },
+    "L5": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "end occluded fails (end 0.00, start 1.00)",
+          "passed": true
+        },
+        {
+          "label": "start occluded fails (end 1.00, start 0.00)",
+          "passed": true
+        },
+        {
+          "label": "view along the insertion direction fails (trajectory 0.000)",
+          "passed": true
+        },
+        {
+          "label": "clear case passes (end 1.00, start 1.00, trajectory 0.45)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.028
+    },
+    "L6": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "global view (270.0, 50.0) shows the maximum number of steps (4)",
+          "passed": true
+        },
+        {
+          "label": "ties broken by the sum of end-visible fractions",
+          "passed": true
+        },
+        {
+          "label": "full tie on count and end fractions: default view wins by angular distance (got (-35.0, 30.0))",
+          "passed": true
+        },
+        {
+          "label": "the default view is always the first candidate (got (80.0, 45.0))",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "visible counts: [3, 4], 2 view(s) tied on count"
+      ],
+      "seconds": 0.112
+    },
+    "L7": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "global view (0, 20) shows step 2 (global)",
+          "passed": true
+        },
+        {
+          "label": "step 3 hidden behind the wall gets the other candidate (candidate (180.0, 20.0))",
+          "passed": true
+        },
+        {
+          "label": "step along the only candidate's view direction gets a perturbed view (perturbed (-5.0, 20.0))",
+          "passed": true
+        },
+        {
+          "label": "the nearest perturbation that passes is used (4.7 deg)",
+          "passed": true
+        },
+        {
+          "label": "enclosed part gets the x-ray fallback with a warning (xray, ['step 2: no view shows the part unoccluded; x-ray fallback at az -35.0 el 30.0'])",
+          "passed": true
+        },
+        {
+          "label": "its occluded end fraction is 0 in the chosen view",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.841
+    },
+    "L8": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "frames keep the sequence order",
+          "passed": true
+        },
+        {
+          "label": "one PNG per step and the manual are written",
+          "passed": true
+        },
+        {
+          "label": "step t never shows components of later steps",
+          "passed": true
+        },
+        {
+          "label": "step t shows the parts of steps 1..t-1",
+          "passed": true
+        },
+        {
+          "label": "ghost at final + start_offset; arrow from ghost centroid to part centroid",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.711
+    },
+    "L9": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "4 frames share the global view",
+          "passed": true
+        },
+        {
+          "label": "framing is a union over all steps (independent of the order)",
+          "passed": true
+        },
+        {
+          "label": "a placed part has the same pixels in consecutive frames (same scale and offset)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.626
+    },
+    "L10": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "step 1: label and 'by hand' (['Step 1 / 3   P   Tool: by hand'])",
+          "passed": true
+        },
+        {
+          "label": "stander: BOM tool, class 1 gets 'Hold in place' (['Step 2 / 3   S   Tool: wrench_10', 'Hold in place'])",
+          "passed": true
+        },
+        {
+          "label": "gravity change gets the re-orient line (['Step 3 / 3   Q   Tool: by hand', 'Re-orient assembly: gravity along (0, 1, 0)'])",
+          "passed": true
+        },
+        {
+          "label": "mark_unstable=False drops the hold mark",
+          "passed": true
+        },
+        {
+          "label": "footnote_show_vector appends the displacement (Step 2 / 3   S   Tool: wrench_10   Move: (0, 0, -30) mm)",
+          "passed": true
+        },
+        {
+          "label": "no gravity data: no re-orient or hold marks",
+          "passed": true
+        },
+        {
+          "label": "frames report the same footnotes and flags",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.537
+    },
+    "L11": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "7 PNGs = 7 frames for N = 8 (group blocks [(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 7)])",
+          "passed": true
+        },
+        {
+          "label": "every step is in one frame",
+          "passed": true
+        },
+        {
+          "label": "manual.pdf written",
+          "passed": true
+        },
+        {
+          "label": "every frame visible or carries a warning",
+          "passed": true
+        },
+        {
+          "label": "every x-ray frame carries a warning",
+          "passed": true
+        },
+        {
+          "label": "end to end in 42.3 s (target about 1 min)",
+          "passed": true
+        },
+        {
+          "label": "colour change does not re-tessellate",
+          "passed": true
+        },
+        {
+          "label": "colour change does not re-rasterize layers",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "sequence from tests_scripts\\output\\optimization_test\\pipeline\\optimization\\optimization_result.json",
+        "global view (270.0, 35.0); 1:global; 2:global; 3:global; 4:candidate; 5:perturbed; 6:xray(x-ray); 7:perturbed"
+      ],
+      "seconds": 51.04
+    },
+    "L12": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "second run loads the cached frames",
+          "passed": true
+        },
+        {
+          "label": "identical PNG bytes for the same config (fresh directory)",
+          "passed": true
+        },
+        {
+          "label": "identical manual PDF",
+          "passed": true
+        },
+        {
+          "label": "colour change re-renders frames",
+          "passed": true
+        },
+        {
+          "label": "colour change re-rasterizes no layer and reuses the view search (0)",
+          "passed": true
+        },
+        {
+          "label": "sequence change invalidates the frames",
+          "passed": true
+        },
+        {
+          "label": "reordering reuses all 4 final-resolution layers of the global view (framing is order independent); views: ['global', 'global', 'perturbed', 'global']",
+          "passed": true
+        },
+        {
+          "label": "stale step PNGs from the previous order are removed",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 2.228
+    },
+    "L13": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "N = 8: 8 frames",
+          "passed": true
+        },
+        {
+          "label": "N = 8 within 60 s (9.1 s: search 4.2 s, render 4.8 s)",
+          "passed": true
+        },
+        {
+          "label": "peak traced memory 361 MB < 2 GB",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "N = 8: 113280 triangles",
+        "views evaluated 73, layers rasterized 592, kinds ['global', 'global', 'global', 'global', 'global', 'global', 'global', 'global']",
+        "N = 20 skipped (run with --groups scale)"
+      ],
+      "seconds": 9.39
+    },
+    "L14": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "runs of one non-blank group merge, blanks and interrupted groups do not ([(0, 1), (2, 2), (3, 3), (4, 4), (5, 6)])",
+          "passed": true
+        },
+        {
+          "label": "group_frames=False gives one frame per step",
+          "passed": true
+        },
+        {
+          "label": "3 frames, the second covers steps 2-3 ([[1], [2, 3], [4]])",
+          "passed": true
+        },
+        {
+          "label": "one PNG per frame, named by step range and group (step_02-03_pins.png)",
+          "passed": true
+        },
+        {
+          "label": "block footnote with per-part tools (['Steps 2-3 / 4   pins', 'Parts: B (by hand), C (wrench_10)'])",
+          "passed": true
+        },
+        {
+          "label": "both members drawn at their final positions in their own colours",
+          "passed": true
+        },
+        {
+          "label": "both members get a ghost at final + start_offset",
+          "passed": true
+        },
+        {
+          "label": "the later step D is not drawn in the group frame",
+          "passed": true
+        },
+        {
+          "label": "one trajectory per member",
+          "passed": true
+        },
+        {
+          "label": "the group frame passes on its first movement alone (global)",
+          "passed": true
+        },
+        {
+          "label": "without grouping the hidden second step needs its own view",
+          "passed": true
+        },
+        {
+          "label": "a sibling in front hides the first movement (end 1.00 -> 0.00)",
+          "passed": true
+        },
+        {
+          "label": "block footnote lines and flags (['Steps 2-3 / 3   f   Tool: wrench_10', 'Parts: S1, S2', 'Move: S1 (0, -10, 0) mm; S2 (0, -10, 0) mm', 'Re-orient assembly: gravity along (0, 1, 0)', 'Hold in place: S1, S2'])",
+          "passed": true
+        },
+        {
+          "label": "a single-step block keeps the per-step footnote",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.547
+    },
+    "cache": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "tests/industrial_fastner/optimization/optimization_result.json byte-identical after the run",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.0
+    }
+  }
+}

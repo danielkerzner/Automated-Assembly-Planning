@@ -1,0 +1,267 @@
+{
+ "cache_key": "ea5694532ce204a2342817ea9261794ba015c8c4817c82e7c50fe42407911f4f",
+ "rows": {
+  "0,1": [
+   true,
+   true,
+   true,
+   false,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "0,2": [
+   true,
+   true,
+   true,
+   false,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "0,3": [
+   false,
+   false,
+   true,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false
+  ]
+ },
+ "exception_cells": [],
+ "outcome_detail": {
+  "0,1,0": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,1,1": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,1,2": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,1,3": {
+   "phase": "step",
+   "iterations": 3,
+   "t_block": 11.249999999999957,
+   "volume": 100.9709576275396
+  },
+  "0,1,4": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,1,5": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,1,6": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,1,7": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,1,8": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,1,9": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,2,0": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,2,1": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,2,2": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,2,3": {
+   "phase": "step",
+   "iterations": 4,
+   "t_block": 46.57100463261899,
+   "volume": 112.57865079987334
+  },
+  "0,2,4": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,2,5": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,2,6": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,2,7": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,2,8": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,2,9": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,3,0": {
+   "phase": "step",
+   "iterations": 9,
+   "t_block": 7.000000000007548,
+   "volume": 0.031144555724863417
+  },
+  "0,3,1": {
+   "phase": "step",
+   "iterations": 9,
+   "t_block": 7.000000000007747,
+   "volume": 0.0311445557232825
+  },
+  "0,3,2": {
+   "phase": "step",
+   "iterations": 4,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,3,3": {
+   "phase": "step",
+   "iterations": 16,
+   "t_block": 11.250000000001004,
+   "volume": 947.9114579400584
+  },
+  "0,3,4": {
+   "phase": "step",
+   "iterations": 9,
+   "t_block": 7.000000000007718,
+   "volume": 0.03114455572630208
+  },
+  "0,3,5": {
+   "phase": "step",
+   "iterations": 9,
+   "t_block": 7.000000000007605,
+   "volume": 0.031144555724970775
+  },
+  "0,3,6": {
+   "phase": "step",
+   "iterations": 8,
+   "t_block": 6.025193625048172,
+   "volume": 0.6164483945897107
+  },
+  "0,3,7": {
+   "phase": "step",
+   "iterations": 8,
+   "t_block": 6.025193625048223,
+   "volume": 0.6164483945892937
+  },
+  "0,3,8": {
+   "phase": "step",
+   "iterations": 8,
+   "t_block": 6.025193625048161,
+   "volume": 0.6164483945894114
+  },
+  "0,3,9": {
+   "phase": "step",
+   "iterations": 8,
+   "t_block": 6.025193625048195,
+   "volume": 0.6164483945897409
+  }
+ },
+ "pair_times": {
+  "0,1": 31.153703599993605,
+  "0,2": 50.320918900019024,
+  "0,3": 186.66797360000783
+ },
+ "stats": {
+  "calls": 30,
+  "broad_free": 18,
+  "iterations": 95,
+  "commons": 19,
+  "dists": 95,
+  "travel": 129.7986772835672,
+  "gap_travel": 127.96543881870888,
+  "times": [
+   30.913536600011867,
+   50.08379849998164,
+   11.289818100020057,
+   10.89931060001254,
+   6.787713600002462,
+   73.82970780000323,
+   17.574361699982546,
+   12.269573400000809,
+   16.337747199984733,
+   9.182418200012762,
+   14.069199499994284,
+   14.113123299990548
+  ],
+  "iters_per_test": [
+   3,
+   4,
+   9,
+   9,
+   4,
+   16,
+   9,
+   9,
+   8,
+   8,
+   8,
+   8
+  ],
+  "exceptions": []
+ }
+}

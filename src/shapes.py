@@ -1,6 +1,26 @@
-"""Shared FreeCAD shape access for the modules after Preprocessing (Optimization, Illustration Generator)."""
+"""Shared FreeCAD shape access for the modules after Preprocessing (Optimization, Illustration Generator,
+Levels)."""
 
 from __future__ import annotations
+
+import hashlib
+import json
+
+import numpy as np
+
+
+def shape_geometry_hash(shape) -> str:
+    """Session-independent hash of a FreeCAD shape: global B-rep vertices and face/edge geometry types.
+
+    Volume, Area and BoundBox are left out on purpose: once a shape carries a triangulation (after
+    tessellate), OCC evaluates them on the mesh and they change in the last digits.
+    """
+    pts = np.array([[v.X, v.Y, v.Z] for v in shape.Vertexes], dtype=float).reshape(-1, 3).round(6) + 0.0
+    pts = pts[np.lexsort(pts.T[::-1])] if len(pts) else pts
+    head = [len(shape.Solids), len(shape.Edges), sorted(f.Surface.TypeId for f in shape.Faces)]
+    h = hashlib.sha256(json.dumps(head).encode())
+    h.update(pts.tobytes())
+    return h.hexdigest()
 
 
 def component_shapes(component_ids, is_stander, prep) -> list:

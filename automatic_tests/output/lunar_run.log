@@ -1,0 +1,6 @@
+2026-10-29 14:45:04,681 aap.levels INFO: Loaded cached fused shape for container '0013-P-0101-A01-PP-motor038' [_0013_P_0101_A01_PP_motor] from output\lunar_motor_tire\fused\_0013_P_0101_A01_PP_motor_1b12b7fd1f356fa54e53b702088cc7c6819056b8048a0da0ceac40ff85d3c8d4.brep
+2026-10-29 14:45:05,134 aap.levels INFO: Loaded cached fused shape for container '0013-A-0300-A01_3' [_0013_A_0300_A01_3] from output\lunar_motor_tire\fused\_0013_A_0300_A01_3_f0418d239bb0ec34bbec6e4db0cf362c2411ec7fb6dd78430283b89c5505ccb3.brep
+2026-10-29 14:45:59,481 aap.interference INFO: Ignoring checkpoint with a different cache key
+2026-10-29 14:46:30,640 aap.interference INFO: Pair 1/15 0013-P-0102-A02-PP / 0013-P-0103-A02-AM: 31.2 s, 9/10 directions free
+2026-10-29 14:47:20,965 aap.interference INFO: Pair 2/15 0013-P-0102-A02-PP / 0013-P-0104-A01-AM: 50.3 s, 9/10 directions free
+2026-10-29 14:50:27,637 aap.interference INFO: Pair 3/15 0013-P-0102-A02-PP / 0013-P-0105-A01-PP: 186.7 s, 1/10 directions free
