@@ -176,6 +176,7 @@ class TermTables:
     cog: np.ndarray  # (N, 3) centre of gravity, mm
     tool: list[str | None]  # BOM `tool` (standers; None if blank or absent)
     group: list[str | None]  # BOM `group` (None if blank or absent)
+    pitch: list[float | None]  # BOM `pitch`, mm/turn (screw/nut rows only; None if blank/non-positive/absent)
     has_tool_column: bool
     has_group_column: bool
     # i < j -> (tri (T, 3, 3), normal (T, 3)); normal = outward normal of j's surface, i.e. pointing
@@ -827,6 +828,68 @@ def _build_result(model: CostModel, edges, ks, ev: dict, history: dict, config_h
     )
 
 
+def _apply_turns(aog, prep, tables: TermTables, steps: list[dict]) -> None:
+    """Add `turns`/`turns_pitch`/`turns_note`/`turns_nut_label` to each step, in place (display
+    only -- docs/stander_processing-spec.md section 12; the ACO cost and the AoG are unaffected).
+
+    `turns_nut_label` is an extra field beyond the spec's literal 3 (`turns`, `turns_pitch`,
+    `turns_note`): the "partner rotates" case (12.2 row 3) needs the responsible nut's label for
+    the output text (12.4, "thread of nut <label>"), and no listed field carries it, so it is
+    added here rather than re-derived twice downstream.
+    """
+    index = {cid: i for i, cid in enumerate(aog.component_ids)}
+    step_of = {s["component"]: i for i, s in enumerate(steps)}
+    for s in steps:
+        s["turns"] = None
+        s["turns_pitch"] = None
+        s["turns_note"] = None
+        s["turns_nut_label"] = None
+
+    # partner bit -> [(nut bit, nut pitch)], only for nuts whose partner rotates (row 3).
+    partner_groups: dict[int, list[tuple[int, float]]] = {}
+
+    for c, cid in enumerate(aog.component_ids):
+        rec = prep.stander_records.get(cid)
+        if rec is None or c not in step_of:
+            continue
+        if rec.category == 1:  # screw: own step, own pitch (row 1)
+            p = tables.pitch[c]
+            if p is None:
+                continue
+            i = step_of[c]
+            steps[i]["turns"] = steps[i]["travel"] / p
+            steps[i]["turns_pitch"] = p
+        elif rec.category == 2 and rec.partner is not None:  # nut
+            partner_bit = index.get(rec.partner)
+            nut_pitch = tables.pitch[c]
+            if partner_bit is None or nut_pitch is None or partner_bit not in step_of:
+                continue
+            partner_before = step_of[partner_bit] < step_of[c]
+            if partner_before:  # row 2: the nut rotates, on its own step
+                i = step_of[c]
+                steps[i]["turns"] = steps[i]["travel"] / nut_pitch
+                steps[i]["turns_pitch"] = nut_pitch
+            else:  # row 3: the partner rotates -- unless it's a screw, which already got its own
+                   # turns above (12.2: "the nut then only matters when the nut comes after the screw").
+                partner_rec = prep.stander_records.get(rec.partner)
+                if partner_rec is not None and partner_rec.category == 1:
+                    continue
+                partner_groups.setdefault(partner_bit, []).append((c, nut_pitch))
+
+    for partner_bit, nuts in partner_groups.items():
+        i = step_of[partner_bit]
+        first_nut, first_pitch = nuts[0]
+        pitches = {p for _, p in nuts}
+        if len(pitches) > 1:
+            log.warning("Partner %r is rotated by several nuts with different pitches (%s); using %r's pitch",
+                       aog.component_labels[partner_bit],
+                       ", ".join(aog.component_labels[n] for n, _ in nuts), aog.component_labels[first_nut])
+        steps[i]["turns"] = steps[i]["travel"] / first_pitch
+        steps[i]["turns_pitch"] = first_pitch
+        steps[i]["turns_note"] = "nut"
+        steps[i]["turns_nut_label"] = aog.component_labels[first_nut]
+
+
 def compute_config_hash(aog, tables: TermTables, config: OptimizationConfig) -> str:
     cfg = asdict(config)
     cfg.pop("force")
@@ -866,6 +929,21 @@ def _log_summary(result: OptimizationResult) -> None:
 
 def _fmt_vec(v) -> str:
     return "(" + ", ".join(f"{round(float(c), 3) + 0.0:g}" for c in v) + ")"
+
+
+def _fmt_turns_text(s: dict, decimals: int) -> str:
+    """docs/stander_processing-spec.md 12.4: the turns clause for one step, or "" if `turns` is
+    None. `decimals` controls the turns count only (2 for assembly_sequence.txt, 1 for the
+    manual); the pitch is shown as given, not padded."""
+    turns = s.get("turns")
+    if turns is None:
+        return ""
+    pitch = s.get("turns_pitch")
+    pitch_txt = f"{pitch:.2f}".rstrip("0").rstrip(".") if pitch is not None else "?"
+    if s.get("turns_note") == "nut":
+        return (f", rotate {turns:.{decimals}f} turns clockwise (thread of nut "
+                f"{s.get('turns_nut_label')}, pitch {pitch_txt} mm)")
+    return f", rotate {turns:.{decimals}f} turns clockwise (pitch {pitch_txt} mm)"
 
 
 # ---------------------------------------------------------------------------
@@ -1073,11 +1151,26 @@ def collect_tables(aog, interference_result, prep, config: OptimizationConfig, c
     else:
         log.info("Loaded cached term tables from %s", cache_dir)
 
-    tool, group = [], []
+    tool, group, pitch = [], [], []
     auto_group_override = getattr(prep, "auto_group_override", None) or {}
     for cid, label in zip(aog.component_ids, aog.component_labels):
         row = rows.get(label, {})
         tool.append(row.get("tool") or None)
+        # docs/stander_processing-spec.md section 12: pitch is read for screw/nut rows only; blank,
+        # unparsable or non-positive gives None and (for an actual screw/nut) a warning naming the label.
+        rec = prep.stander_records.get(cid)
+        p = None
+        raw_pitch = row.get("pitch")
+        if raw_pitch:
+            try:
+                p = float(raw_pitch)
+            except ValueError:
+                p = None
+            if p is not None and p <= 0:
+                p = None
+        if p is None and "pitch" in columns and rec is not None and rec.category in (1, 2):
+            log.warning("Stander %r has no usable 'pitch' in the BOM; no turn count will be shown for it", label)
+        pitch.append(p)
         if cid in auto_group_override:
             group.append(auto_group_override[cid])
         else:
@@ -1094,6 +1187,7 @@ def collect_tables(aog, interference_result, prep, config: OptimizationConfig, c
         cog=np.array(data["cog"], dtype=float),
         tool=tool,
         group=group,
+        pitch=pitch,
         has_tool_column="tool" in columns,
         has_group_column="group" in columns,
         cache_key=key,
@@ -1151,6 +1245,7 @@ def save_result(result: OptimizationResult, cache_dir: Path) -> None:
         lines.append(f"{s['step']:>3}. {s['component_label']}{' [stander]' if s['is_stander'] else ''}: "
                      f"insert along {_fmt_vec(s['direction'])}, travel {s['travel']:.2f} mm, start offset "
                      f"{_fmt_vec(s['start_offset'])}"
+                     + _fmt_turns_text(s, decimals=2)
                      + ("" if s["gravity"] is None else
                         f", gravity {_fmt_vec(s['gravity'])}, class {s['stability_class']}"))
     lines += ["", "Cost breakdown (normalized x weight):"]
@@ -1221,5 +1316,6 @@ def optimize_sequence(aog, interference_result, prep, config: OptimizationConfig
     if config.use_stability:
         _write_json_atomic(stab_path, {"key": stab_key, "classes": {
             f"{S}|{i}": int(sum(1 << g for g, b in enumerate(cls) if b)) for (S, i), cls in new_cache.items()}})
+    _apply_turns(aog, prep, tables, result.steps)
     save_result(result, cache_dir)
     return result

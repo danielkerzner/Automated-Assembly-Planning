@@ -1,15 +1,18 @@
 """AoG generator: the graph of every feasible single-component disassembly sequence.
 
-Implements docs/aog-spec.md. Nodes are sub-assembly states (bitmask over all N components,
-standers included), edges are removal moves carrying every free direction as a bitset. The
-graph is generated iteratively, level by level (level L = L components removed), vectorised
-over all states of a level; each state is expanded exactly once. No geometry calls: removal
-freedom comes from InterferenceResult.free via the composition property, standers follow the
-precedence (gate) rule, and travel distances are measured to the constant whole-assembly box.
-States whose components do not form one group through physical contacts (parts floating apart)
-are dropped, with the edges leading to them. Members of one BOM group are removed consecutively,
-in one order per group block (docs/aog-spec.md D12, D13). There is no node limit; the only size
-limit is MAX_COMPONENTS (one uint64 bitmask per state).
+Implements docs/aog-spec.md, migrated to the three-class stander model of
+docs/stander_processing-spec.md (section 3). Nodes are sub-assembly states (bitmask over all N
+components, standers included), edges are removal moves carrying every free direction as a
+bitset. The graph is generated iteratively, level by level (level L = L components removed),
+vectorised over all states of a level; each state is expanded exactly once. No geometry calls:
+removal freedom comes from InterferenceResult.free via the composition property; a stander may
+have several removal options (direction, blocker set), a screw's holds must stay present while it
+leaves, and a nut's `nut_rule` orders it against its `partner` (stander or movable) -- all encoded
+as blocker masks (section 3.3), no single gate any more. Travel distances are measured to the
+constant whole-assembly box. States whose components do not form one group through physical
+contacts (parts floating apart) are dropped, with the edges leading to them. Members of one BOM
+group are removed consecutively, in one order per group block (docs/aog-spec.md D12, D13). There
+is no node limit; the only size limit is MAX_COMPONENTS (one uint64 bitmask per state).
 
 `generate_aog` is pure numpy on `AoGInputs`, so tests need no FreeCAD. `collect_inputs` and
 `build_aog` connect it to the pipeline objects.
@@ -47,9 +50,6 @@ U64 = np.uint64
 # Dataclass for the AoG configuration
 @dataclass
 class AoGConfig:
-    # Define if in the stander components, if the neighbouring comonents will also
-    # be dealt as prerequisitesor
-    stander_gate: str = "prerequisites+contacts"
     margin: float = 1.0  # mm, travel-model clearance (same default as CollisionConfig.margin)
     # D12: members of one BOM group are removed (so also assembled) consecutively: while a group is
     # partly removed, only its remaining members may move. Blank group = a group of one.
@@ -67,8 +67,13 @@ class AoGInputs:
     free: np.ndarray  # (n, n, D) bool from InterferenceResult
     directions: np.ndarray  # (D, 3) candidates + appended stander directions
     neg: np.ndarray  # (D,) int64, neg[k] = index of -directions[k] in directions
-    stander_dir: dict[int, np.ndarray]  # bit index -> unit dismantle direction
-    stander_gate: dict[int, set[int]]  # bit index -> movable bit indices (per config)
+    # docs/stander_processing-spec.md section 3.1: bit index -> one entry per RemovalOption,
+    # (unit direction, blocker bit indices -- may include stander bits). 1 entry for a screw/nut,
+    # 2 for a category-3 "other" stander.
+    stander_options: dict[int, list[tuple[np.ndarray, set[int]]]]
+    stander_holds: dict[int, set[int]]  # bit index -> movable bit indices that must stay present (screws only)
+    # nut bit index -> (partner bit index, "locked" | "free"); partner may be movable or a stander.
+    nut_links: dict[int, tuple[int, str]]
     bbox_lo: np.ndarray  # (N, 3) global AABBs of every component, mm (travel model)
     bbox_hi: np.ndarray  # (N, 3)
     assembly_lo: np.ndarray  # (3,) Preprocessing's whole-assembly box, all components
@@ -258,16 +263,20 @@ def _unit(v) -> np.ndarray:
 
 
 def extend_directions(
-    directions: np.ndarray, neg: np.ndarray, stander_dir: dict[int, np.ndarray]
-) -> tuple[np.ndarray, np.ndarray, dict[int, int]]:
-    """Candidate directions extended with the stander dismantle directions (spec "Direction table").
+    directions: np.ndarray, neg: np.ndarray,
+    stander_options: dict[int, list[tuple[np.ndarray, set[int]]]],
+) -> tuple[np.ndarray, np.ndarray, dict[int, list[int]]]:
+    """Candidate directions extended with every stander option's direction (spec
+    "Direction table" / docs/stander_processing-spec.md 3.2).
 
-    A stander direction equal to an existing entry (|d - e| < 1e-6) reuses its index; otherwise d
-    and -d are appended (-d only if absent) and `neg` extended. Returns (dirs', neg', {s: k}).
+    A direction equal to an existing entry (|d - e| < 1e-6) reuses its index; otherwise d and -d
+    are appended (-d only if absent) and `neg` extended. Returns (dirs', neg', {s: [k_opt0, ...]}),
+    one column index per option, in the same order as `stander_options[s]` (so a category-3
+    stander with two options gets two columns).
     """
     dirs = [np.asarray(d, dtype=float) for d in directions]
     neg_list = [int(x) for x in neg]
-    kd: dict[int, int] = {}
+    kd: dict[int, list[int]] = {}
 
     def find(d):
         for k, e in enumerate(dirs):
@@ -275,21 +284,24 @@ def extend_directions(
                 return k
         return None
 
-    for s in sorted(stander_dir):
-        d = _unit(stander_dir[s])
-        k = find(d)
-        if k is None:
-            k = len(dirs)
-            dirs.append(d)
-            neg_list.append(-1)
-            m = find(-d)
-            if m is None:
-                m = len(dirs)
-                dirs.append(-d)
-                neg_list.append(k)
-            neg_list[k] = m
-            neg_list[m] = k
-        kd[s] = k
+    for s in sorted(stander_options):
+        cols = []
+        for direction, _blockers in stander_options[s]:
+            d = _unit(direction)
+            k = find(d)
+            if k is None:
+                k = len(dirs)
+                dirs.append(d)
+                neg_list.append(-1)
+                m = find(-d)
+                if m is None:
+                    m = len(dirs)
+                    dirs.append(-d)
+                    neg_list.append(k)
+                neg_list[k] = m
+                neg_list[m] = k
+            cols.append(k)
+        kd[s] = cols
     out = np.array(dirs, dtype=float).reshape(-1, 3)
     return out, np.array(neg_list, dtype=np.int64), kd
 
@@ -352,17 +364,25 @@ def connected_states(masks: np.ndarray, adj: np.ndarray) -> np.ndarray:
 
 
 def compute_cache_key(inputs: AoGInputs, config: AoGConfig) -> str:
-    """Cache key for AoG generation, including the interference cache_key and the stander data."""
+    """Cache key for AoG generation, including the interference cache_key and the stander data
+    (docs/stander_processing-spec.md 3.7: options, holds, nut links -- not the removed
+    stander_dir/stander_gate)."""
     h = hashlib.sha256()
     h.update(b"inputs:" + inputs.cache_key.encode())
     h.update(("ids:" + "|".join(inputs.component_ids)).encode())
     h.update(f"n:{inputs.n_movable};".encode())
     h.update(b"free:" + np.ascontiguousarray(inputs.free, dtype=bool).tobytes())
-    dirs, neg, kd = extend_directions(inputs.directions, inputs.neg, inputs.stander_dir)
+    dirs, neg, kd = extend_directions(inputs.directions, inputs.neg, inputs.stander_options)
     h.update(b"dirs:" + np.round(dirs, 9).tobytes() + b"neg:" + neg.tobytes())
-    for s in sorted(inputs.stander_dir):
-        h.update(f"stander:{s}:{np.round(_unit(inputs.stander_dir[s]), 9).tolist()}:k{kd[s]}:"
-                 f"gate{sorted(int(g) for g in inputs.stander_gate.get(s, ()))};".encode())
+    for s in sorted(inputs.stander_options):
+        opts_repr = [
+            {"k": kd[s][o], "dir": np.round(_unit(d), 9).tolist(), "blockers": sorted(int(b) for b in blockers)}
+            for o, (d, blockers) in enumerate(inputs.stander_options[s])
+        ]
+        h.update(f"stander:{s}:{json.dumps(opts_repr, sort_keys=True)}:"
+                 f"holds{sorted(int(x) for x in inputs.stander_holds.get(s, ()))};".encode())
+    nut_repr = {str(k): [int(v[0]), v[1]] for k, v in sorted(inputs.nut_links.items())}
+    h.update(("nut_links:" + json.dumps(nut_repr, sort_keys=True)).encode())
     for arr in (inputs.bbox_lo, inputs.bbox_hi, inputs.assembly_lo, inputs.assembly_hi):
         h.update(b"box:" + np.round(np.asarray(arr, dtype=float), 9).tobytes())
     if inputs.contact is None:
@@ -392,25 +412,56 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
     if free.shape != (n, n, D): # Check that the free array has the correct shape
         raise ValueError(f"free has shape {free.shape}, expected {(n, n, D)}")
     standers = list(range(n, N))
-    if set(inputs.stander_dir) != set(standers): # Check that the stander_dir has one entry per stander bit
-        raise ValueError(f"stander_dir must have one entry per stander bit {standers}")
+    if set(inputs.stander_options) != set(standers):  # one options entry per stander bit
+        raise ValueError(f"stander_options must have one entry per stander bit {standers}")
 
-    dirs, neg, kd = extend_directions(inputs.directions, inputs.neg, inputs.stander_dir)
+    dirs, neg, kd = extend_directions(inputs.directions, inputs.neg, inputs.stander_options)
     Dp = len(dirs)
     if Dp > MAX_DIRECTIONS: # Check that the number of directions does not exceed the maximum allowed
         raise ValueError(f"D' = {Dp} directions exceeds {MAX_DIRECTIONS} (one uint64 word per edge)")
 
     bm = np.zeros((n, D), dtype=U64)
-    # Build a bitmask for each movable component and direction, indicating which other 
+    # Build a bitmask for each movable component and direction, indicating which other
     # components block its movement in that direction.
     for i in range(n):
         for k in range(D):
             bm[i, k] = U64(_mask_of(j for j in range(n) if j != i and not free[i, j, k]))
-    gate = {s: U64(_mask_of(inputs.stander_gate.get(s, ()))) for s in standers}
+
+    # docs/stander_processing-spec.md 3.3: blocker masks replace the old single gate.
+    # blockmask[s][o] = components that must be gone before stander s may leave via option o
+    # (may include stander bits, category 3/P11). holdmask[s] = movable components that must stay
+    # present while s leaves (screws only, P6).
+    blockmask: dict[int, list] = {
+        s: [U64(_mask_of(blockers)) for _direction, blockers in inputs.stander_options[s]]
+        for s in standers
+    }
+    holdmask = {s: U64(_mask_of(inputs.stander_holds.get(s, ()))) for s in standers}
     for s in standers:
-        if int(gate[s]) >> n: # Check that the gate of stander bit s does not contain non-movable bits
-            raise ValueError(f"Gate of stander bit {s} contains non-movable bits")
-        
+        if any(b >= n for b in inputs.stander_holds.get(s, ())):
+            raise ValueError(f"Holds of stander bit {s} contain non-movable bits")
+
+    # Nut/partner order (P8): applied once, as extra blocker bits -- "locked" blocks the nut on
+    # its partner, "free" blocks the partner on the nut (on the partner's own blockmask if it's a
+    # stander, or on `extra[partner]` -- applied to every one of its directions -- if movable).
+    extra = np.zeros(n, dtype=U64)
+    for nut, (partner, rule) in inputs.nut_links.items():
+        if nut not in blockmask:
+            raise ValueError(f"nut_links key {nut} is not a stander bit")
+        if not (0 <= partner < N) or partner == nut:
+            raise ValueError(f"nut_links partner {partner} for stander bit {nut} is invalid")
+        if rule == "locked":
+            partner_bit = U64(1) << U64(partner)
+            blockmask[nut] = [m | partner_bit for m in blockmask[nut]]
+        elif rule == "free":
+            nut_bit = U64(1) << U64(nut)
+            if partner < n:
+                extra[partner] |= nut_bit
+            else:
+                blockmask[partner] = [m | nut_bit for m in blockmask[partner]]
+        else:
+            raise ValueError(f"Unknown nut_rule {rule!r} for stander bit {nut}")
+    bm = bm | extra[:, None]  # fold the extra blockers into every direction of their movable owner
+
     # Contact adjacency as bitmasks: adj[c] = components touching c (None = connectivity rule off).
     adj = None
     if inputs.contact is not None:
@@ -446,12 +497,18 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
         use_groups = bool(gmasks)
     one_order = use_groups and config.group_one_order
 
-    # Define a function to check if a state is valid
+    # A state T is valid only if every stander still present in it has all of its holds present
+    # too (docs/stander_processing-spec.md 3.4): a screw's hold cannot have legally left while the
+    # screw is still there, on any path, so such a T is unreachable and must be filtered out
+    # regardless of which edge led to it (same role the old gate check played for every stander).
     def valid(T: np.ndarray) -> np.ndarray:
         ok = np.ones(len(T), dtype=bool)
         for s in standers:
+            hm = holdmask[s]
+            if hm == 0:
+                continue
             present = ((T >> U64(s)) & U64(1)).astype(bool)
-            ok &= ~present | ((T & gate[s]) == gate[s])
+            ok &= ~present | ((T & hm) == hm)
         return ok
 
     # Variables for the iterative generation of the AoG
@@ -485,11 +542,18 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
             if c < n:
                 ds = np.zeros(len(S), dtype=U64)
                 for k in range(D):
-                    ds |= ((S & bm[c, k]) == 0).astype(U64) << U64(k)
+                    ds |= ((S & bm[c, k]) == 0).astype(U64) << U64(k)  # bm already folds in extra[c]
                 ok = present & (ds != 0)
             else:
-                ds = np.full(len(S), U64(1) << U64(kd[c]), dtype=U64)
-                ok = present & ((S & gate[c]) == gate[c])
+                # Every option that is free (its blockers all gone from S) contributes its own
+                # direction column -- a category-3 stander can have up to two at once (D5).
+                ds = np.zeros(len(S), dtype=U64)
+                for o, col in enumerate(kd[c]):
+                    ds |= ((S & blockmask[c][o]) == 0).astype(U64) << U64(col)
+                ok = present & (ds != 0)
+                hm = holdmask[c]
+                if hm:  # a screw may leave only while all its holds are still present (P6)
+                    ok &= (S & hm) == hm
             T = S & ~bit
             ok &= valid(T)
             if use_groups:  # inside a group block only that group's members may move
@@ -748,10 +812,13 @@ def read_bom_groups(bom_path, labels: list[str]) -> list[str | None] | None:
 
 
 def collect_inputs(interference_result, prep, config: AoGConfig | None = None) -> AoGInputs:
-    """Build AoGInputs from InterferenceResult + PreprocessingResult (bounding boxes only)."""
+    """Build AoGInputs from InterferenceResult + PreprocessingResult (bounding boxes only).
+
+    docs/stander_processing-spec.md 3.1: `options`/`blockers` come from `rec.options` (names
+    mapped to indices over movable+stander space -- a blocker may itself be a stander, P5/P11),
+    `holds` from `rec.holds` (movable-only, P6), `nut_links` from `rec.partner`/`rec.nut_rule`.
+    """
     config = config or AoGConfig()
-    if config.stander_gate not in ("prerequisites+contacts", "prerequisites"):
-        raise ValueError(f"Unknown stander_gate mode {config.stander_gate!r}")
     if prep.assembly_bbox is None:
         raise ValueError("PreprocessingResult.assembly_bbox is missing; re-run Preprocessing")
 
@@ -760,6 +827,7 @@ def collect_inputs(interference_result, prep, config: AoGConfig | None = None) -
     stander_ids = sorted(prep.stander_records)
     n = len(movable)
     ids = movable + stander_ids
+    index_all = {cid: i for i, cid in enumerate(ids)}
     labels = list(interference_result.component_labels) + [_stander_label(prep, s) for s in stander_ids]
 
     bbox_lo, bbox_hi = [], []
@@ -777,22 +845,39 @@ def collect_inputs(interference_result, prep, config: AoGConfig | None = None) -
     contact = np.zeros((N, N), dtype=bool)
     contact[:n, :n] = np.asarray(interference_result.contact, dtype=bool)
 
-    stander_dir, stander_gate = {}, {}
+    stander_options: dict[int, list[tuple[np.ndarray, set[int]]]] = {}
+    stander_holds: dict[int, set[int]] = {}
+    nut_links: dict[int, tuple[int, str]] = {}
     h = hashlib.sha256(b"interference:" + interference_result.cache_key.encode())
     for b, sid in enumerate(stander_ids, start=n):
         rec = prep.stander_records[sid]
         if rec.bbox is None:
             raise ValueError(f"StanderRecord {sid} has no bbox; re-run Preprocessing")
-        gate_ids = set(rec.prerequisites)
-        if config.stander_gate == "prerequisites+contacts":
-            gate_ids |= set(rec.contact_neighbors)
-        unknown = gate_ids - set(index)
-        if unknown:
-            raise ValueError(f"Gate of stander {sid} names components not in the interference matrix: "
-                             f"{sorted(unknown)}")
-        stander_dir[b] = _unit(_vec3(rec.dismantle_direction))
-        stander_gate[b] = {index[g] for g in gate_ids}
-        # A stander touches its contact neighbours whatever the gate mode (connectivity rule).
+
+        options = []
+        for opt in rec.options:
+            unknown = set(opt.blockers) - set(index_all)
+            if unknown:
+                raise ValueError(f"Blockers of stander {sid} name components not in this level: "
+                                 f"{sorted(unknown)}")
+            options.append((_unit(_vec3(opt.direction)), {index_all[m] for m in opt.blockers}))
+        stander_options[b] = options
+
+        unknown_holds = set(rec.holds) - set(index)
+        if unknown_holds:
+            raise ValueError(f"Holds of stander {sid} name components not in the interference "
+                             f"matrix (holds are movable-only, P6): {sorted(unknown_holds)}")
+        stander_holds[b] = {index[m] for m in rec.holds}
+
+        if rec.nut_rule is not None:
+            if rec.partner is None or rec.partner not in index_all:
+                log.warning("Nut stander %r has nut_rule=%r but no usable partner in this level "
+                           "(partner=%r); treating it as a plain stander with no nut order",
+                           sid, rec.nut_rule, rec.partner)
+            else:
+                nut_links[b] = (index_all[rec.partner], rec.nut_rule)
+
+        # A stander touches its contact neighbours regardless (connectivity rule, P10).
         for g in rec.contact_neighbors:
             if g not in index:
                 raise ValueError(f"Contact neighbour {g} of stander {sid} is not in the interference matrix")
@@ -801,9 +886,15 @@ def collect_inputs(interference_result, prep, config: AoGConfig | None = None) -
         bbox_hi.append(_vec3(rec.bbox[1]))
         h.update(json.dumps({
             "id": sid,
-            "prerequisites": sorted(rec.prerequisites),
+            "category": rec.category,
+            "options": [
+                {"direction": [round(x, 9) for x in _vec3(opt.direction)], "blockers": sorted(opt.blockers)}
+                for opt in rec.options
+            ],
+            "holds": sorted(rec.holds),
             "contact_neighbors": sorted(rec.contact_neighbors),
-            "direction": [round(x, 9) for x in _vec3(rec.dismantle_direction)],
+            "partner": rec.partner,
+            "nut_rule": rec.nut_rule,
             "bbox": [[round(x, 9) for x in _vec3(p)] for p in rec.bbox],
         }, sort_keys=True).encode())
     assembly_lo, assembly_hi = (np.array(_vec3(p), dtype=float) for p in prep.assembly_bbox)
@@ -816,8 +907,9 @@ def collect_inputs(interference_result, prep, config: AoGConfig | None = None) -
         free=np.asarray(interference_result.free, dtype=bool),
         directions=np.asarray(interference_result.directions, dtype=float),
         neg=np.asarray(interference_result.neg, dtype=np.int64),
-        stander_dir=stander_dir,
-        stander_gate=stander_gate,
+        stander_options=stander_options,
+        stander_holds=stander_holds,
+        nut_links=nut_links,
         bbox_lo=np.array(bbox_lo, dtype=float).reshape(-1, 3),
         bbox_hi=np.array(bbox_hi, dtype=float).reshape(-1, 3),
         assembly_lo=assembly_lo,
@@ -837,6 +929,11 @@ JSON_NAME = "aog.json"
 _ARRAY_FIELDS = ("is_stander", "directions", "neg", "node_mask", "node_level", "level_offsets",
                  "edge_src", "edge_dst", "edge_comp", "edge_dirs", "out_ptr", "live", "dead_ends",
                  "travel")
+# docs/stander_processing-spec.md 3.7: bump whenever a cached AoG's on-disk meaning could change
+# without its cache_key necessarily changing (e.g. a loader/field rename) -- rejects old caches
+# outright rather than risking a silent misread. 2 = the stander_options/holds/nut_links model
+# (was 1, implicitly, under stander_dir/stander_gate).
+AOG_SCHEMA_VERSION = 2
 
 
 def save_aog(aog: AoG, cache_dir: str | Path) -> None:
@@ -844,6 +941,7 @@ def save_aog(aog: AoG, cache_dir: str | Path) -> None:
     cache_dir.mkdir(parents=True, exist_ok=True)
     np.savez(cache_dir / NPZ_NAME, **{name: getattr(aog, name) for name in _ARRAY_FIELDS})
     meta = {
+        "schema_version": AOG_SCHEMA_VERSION,
         "cache_key": aog.cache_key,
         "component_ids": aog.component_ids,
         "component_labels": aog.component_labels,
@@ -862,13 +960,18 @@ def save_aog(aog: AoG, cache_dir: str | Path) -> None:
 
 
 def load_aog(cache_dir: str | Path, cache_key: str | None = None) -> AoG | None:
-    """Load a cached AoG; None if absent, unreadable, or (when given) the key does not match."""
+    """Load a cached AoG; None if absent, unreadable, of an old schema, or (when given) the key
+    does not match."""
     cache_dir = Path(cache_dir)
     json_path, npz_path = cache_dir / JSON_NAME, cache_dir / NPZ_NAME
     if not (json_path.exists() and npz_path.exists()):
         return None
     try:
         meta = json.loads(json_path.read_text(encoding="utf-8"))
+        if meta.get("schema_version") != AOG_SCHEMA_VERSION:
+            log.info("Cached AoG is an old on-disk schema (%r != %r); recomputing",
+                     meta.get("schema_version"), AOG_SCHEMA_VERSION)
+            return None
         if cache_key is not None and meta.get("cache_key") != cache_key:
             log.info("Cached AoG is stale (key mismatch); recomputing")
             return None

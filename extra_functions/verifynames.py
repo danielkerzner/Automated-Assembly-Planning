@@ -9,7 +9,7 @@ def walk(obj, depth=0):
     for child in getattr(obj, "Group", []):
         walk(child, depth + 1)
 
-doc = load_assembly(r"C:\Users\danie\Documents\documentosprincipal\Master Thesis\AAP\data\lunar_bodylager\0002-A-0900-A06-bodylager_1.stp")
+doc = load_assembly(r"data\industrial_fastner\industrial_fastner.stp")
 for obj in doc.RootObjects:
     walk(obj)
 

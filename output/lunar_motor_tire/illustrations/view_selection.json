@@ -1,0 +1,99 @@
+{
+  "key": "6674c09c5dbd5bffc5c87407bdb14d4b61fd127dd6eaee25edeae22b3f7ef5c8",
+  "global_view": [
+    105.0,
+    20.0
+  ],
+  "choices": [
+    {
+      "step_index": 0,
+      "warnings": [],
+      "view": [
+        105.0,
+        20.0
+      ],
+      "is_global": true,
+      "kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.13185532676350942,
+      "in_frame": true
+    },
+    {
+      "step_index": 1,
+      "warnings": [],
+      "view": [
+        105.0,
+        20.0
+      ],
+      "is_global": true,
+      "kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.23761334132207573,
+      "in_frame": true
+    },
+    {
+      "step_index": 2,
+      "warnings": [],
+      "view": [
+        105.0,
+        20.0
+      ],
+      "is_global": true,
+      "kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.21688197597182757,
+      "in_frame": true
+    },
+    {
+      "step_index": 3,
+      "warnings": [],
+      "view": [
+        105.0,
+        20.0
+      ],
+      "is_global": true,
+      "kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.988399071925754,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.988399071925754,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.22326085761805778,
+      "in_frame": true
+    },
+    {
+      "step_index": 4,
+      "warnings": [],
+      "view": [
+        105.0,
+        20.0
+      ],
+      "is_global": true,
+      "kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.2376133413220759,
+      "in_frame": true
+    }
+  ]
+}

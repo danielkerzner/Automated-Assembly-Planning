@@ -15,7 +15,7 @@
       ],
       "group": null,
       "is_stander": false,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\l10\\step_01_P.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l10\\step_01_P.png",
       "view": {
         "azimuth": 315.0,
         "elevation": 35.0,
@@ -52,7 +52,7 @@
       ],
       "group": null,
       "is_stander": true,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\l10\\step_02_S.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l10\\step_02_S.png",
       "view": {
         "azimuth": 315.0,
         "elevation": 35.0,
@@ -90,7 +90,7 @@
       ],
       "group": null,
       "is_stander": false,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\l10\\step_03_Q.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l10\\step_03_Q.png",
       "view": {
         "azimuth": 315.0,
         "elevation": 35.0,
@@ -114,7 +114,7 @@
       "warnings": []
     }
   ],
-  "manual_path": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\l10\\manual.pdf",
+  "manual_path": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l10\\manual.pdf",
   "global_view": [
     315.0,
     35.0
@@ -122,11 +122,11 @@
   "config_hash": "4378b29cd374d18cc0b8806f28f7d3299b70a45e82dbdd0d3b680c2018c48ef1",
   "stats": {
     "layers_rasterized": 222,
-    "raster_s": 0.1043053999019321,
+    "raster_s": 0.1939264999950865,
     "views_evaluated": 73,
-    "view_search_s": 0.15553680001175962,
-    "render_s": 0.3742729999939911,
-    "total_s": 0.5298132000025362
+    "view_search_s": 0.28972799999974086,
+    "render_s": 0.5956940000000941,
+    "total_s": 0.8854271999998673
   },
   "config": {
     "image_size": [

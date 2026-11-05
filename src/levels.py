@@ -319,10 +319,16 @@ def _commit_merge(doc_L, prep_L, interf, group_ids: list[str], new_id: str, new_
 
     new_stander_records = {}
     for sid, rec in prep_L.stander_records.items():
+        new_options = [
+            replace(opt, blockers={new_id if m in group_set else m for m in opt.blockers})
+            for opt in rec.options
+        ]
         new_stander_records[sid] = replace(
             rec,
-            prerequisites={new_id if m in group_set else m for m in rec.prerequisites},
+            options=new_options,
+            holds={new_id if m in group_set else m for m in rec.holds},
             contact_neighbors={new_id if m in group_set else m for m in rec.contact_neighbors},
+            partner=(new_id if rec.partner in group_set else rec.partner),
         )
 
     new_compound_ids = (set(prep_L.compound_ids) - group_set) | {new_id}
@@ -374,12 +380,16 @@ def _group_child_prep(prep_L, group_ids: list[str], group_shapes: dict, new_id: 
 
     child_stander_records = {}
     for sid, rec in prep_L.stander_records.items():
-        gate = rec.prerequisites | rec.contact_neighbors
-        if sid in group_set and gate <= group_set:
+        refs = set(rec.contact_neighbors) | set(rec.holds)
+        if rec.partner:
+            refs.add(rec.partner)
+        for opt in rec.options:
+            refs |= opt.blockers
+        if sid in group_set and refs <= group_set:
             child_stander_records[sid] = rec
         elif sid in group_set:
             log.warning("Stander %r's gate reaches outside its Phase 2 group %s (%s); dropped at "
-                       "the group's own level", sid, new_id, sorted(gate - group_set))
+                       "the group's own level", sid, new_id, sorted(refs - group_set))
 
     bbox = None
     for gid in group_ids:
@@ -520,6 +530,7 @@ def solve_level(
     bom_path,
     bom_labels: set[str],
     output_dir: Path,
+    bom_categories: dict | None = None,
     preprocessing_config=None,
     collision_config=None,
     illustration_config=None,
@@ -538,6 +549,7 @@ def solve_level(
     doc_L, compound_ids, members = build_level_document(hier, container_id, original_doc, level_dir)
     prep_L = run_preprocessing_on_document(
         doc_L, bom_labels, preprocessing_config,
+        collision_config=collision_config, bom_categories=bom_categories,
         step_path=step_path, bom_path=bom_path,
         level_id=container_id, level_label=container.label,
         compound_ids=frozenset(compound_ids), members=members,
@@ -555,7 +567,7 @@ def solve_level(
                 plan.children[child_id] = solve_level(
                     hier, child_id, original_doc,
                     step_path=step_path, bom_path=bom_path, bom_labels=bom_labels,
-                    output_dir=output_dir,
+                    output_dir=output_dir, bom_categories=bom_categories,
                     preprocessing_config=preprocessing_config, collision_config=collision_config,
                     illustration_config=illustration_config, optimization_config=optimization_config,
                     force_interference=force_interference,

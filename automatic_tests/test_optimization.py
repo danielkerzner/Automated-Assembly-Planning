@@ -53,7 +53,7 @@ OUT_DIR = Path(__file__).resolve().parent / "output"
 SCRATCH = OUT_DIR / "optimization_test"
 FASTENER_DIR = REPO_ROOT / "tests" / "industrial_fastner"
 FASTENER_STEP = REPO_ROOT / "data" / "industrial_fastner" / "industrial_fastner.stp"
-FASTENER_BOM = REPO_ROOT / "data" / "industrial_fastner" / "bom.csv"
+FASTENER_BOM = REPO_ROOT / "data" / "industrial_fastner" / "generated_bom.csv"
 
 PX, NX, PY, NY, PZ, NZ = range(6)  # indices into AXES and the default gravity_dirs
 FLAGS = [op.FLAG_OF[t] for t in op.TERMS]
@@ -130,8 +130,8 @@ def only(*flags, **extra) -> OptimizationConfig:
 # ---------------------------------------------------------------------------
 
 
-def make_tables(aog, volume=None, area=None, contact=None, cog=None, tool=None, group=None, patches=None,
-                has_tool=True, has_group=True) -> TermTables:
+def make_tables(aog, volume=None, area=None, contact=None, cog=None, tool=None, group=None, pitch=None,
+                patches=None, has_tool=True, has_group=True) -> TermTables:
     N = aog.n_components
     return TermTables(
         component_ids=list(aog.component_ids),
@@ -141,6 +141,7 @@ def make_tables(aog, volume=None, area=None, contact=None, cog=None, tool=None, 
         cog=np.zeros((N, 3)) if cog is None else np.asarray(cog, float),
         tool=tool if tool is not None else [("T" if s else None) for s in aog.is_stander],
         group=group if group is not None else [f"g{c}" for c in range(N)],
+        pitch=pitch if pitch is not None else [None] * N,
         has_tool_column=has_tool,
         has_group_column=has_group,
         patches={} if patches is None else patches,
@@ -159,10 +160,10 @@ def path_for(aog, assembly_order, removal_dirs):
     return np.array(edges), np.array(list(reversed(removal_dirs)))
 
 
-def all_free_aog(n, n_standers=0, stander_dir=PZ):
+def all_free_aog(n, n_standers=0, stander_dir_axis=PZ):
     free = np.ones((n, n, 6), dtype=bool)
-    sd = {s: AXES[stander_dir] for s in range(n, n + n_standers)}
-    return ag.generate_aog(make_inputs(free, stander_dir=sd, stander_gate={s: set() for s in sd}))
+    so = {s: AXES[stander_dir_axis] for s in range(n, n + n_standers)}
+    return ag.generate_aog(make_inputs(free, stander_options=so))
 
 
 def add_patch(patches, i, j, tri, normal_into_i):
@@ -709,6 +710,77 @@ def test_o14(rec, args):
         rec.note("N = 20 skipped (run with --groups scale)")
 
 
+def _stander_rec(category, partner=None, nut_rule=None):
+    return SimpleNamespace(category=category, partner=partner, nut_rule=nut_rule)
+
+
+def test_o15(rec, args):
+    """Thread pitch and rotation counts (docs/stander_processing-spec.md section 12). Synthetic,
+    no FreeCAD: _apply_turns is pure Python over step dicts + StanderRecord-like stand-ins."""
+    ids = ["A", "B", "S", "N", "M", "N2", "O", "S2"]
+    aog = SimpleNamespace(component_ids=ids, component_labels=list(ids))
+    prep = SimpleNamespace(stander_records={
+        "S": _stander_rec(1),
+        "N": _stander_rec(2, partner="S", nut_rule="locked"),
+        "N2": _stander_rec(2, partner="M", nut_rule="free"),
+        "O": _stander_rec(3),
+        "S2": _stander_rec(1),
+    })
+    tables = SimpleNamespace(pitch=[None, None, 1.5, 1.0, None, 2.0, None, None])
+
+    # Screw with pitch 1.5 and travel 18 -> 12.0 turns; nut after a stander-screw partner rotates
+    # itself; category 3 never gets turns; missing pitch (S2) gives None.
+    steps = [
+        {"component": 0, "component_label": "A", "travel": 10.0},
+        {"component": 2, "component_label": "S", "travel": 18.0},
+        {"component": 3, "component_label": "N", "travel": 5.0},
+        {"component": 6, "component_label": "O", "travel": 3.0},
+        {"component": 7, "component_label": "S2", "travel": 4.0},
+    ]
+    op._apply_turns(aog, prep, tables, steps)
+    by_label = {s["component_label"]: s for s in steps}
+    rec.check(by_label["S"]["turns"] == 12.0, f"screw S: 18/1.5 == 12.0 turns (got {by_label['S']['turns']})")
+    rec.check(by_label["N"]["turns"] == 5.0, f"nut N after its stander-screw partner: rotates itself (got {by_label['N']['turns']})")
+    rec.check(by_label["O"]["turns"] is None, "category-3 stander O never gets turns")
+    rec.check(by_label["S2"]["turns"] is None, "screw S2 with missing pitch gives turns=None")
+    rec.check(by_label["S2"]["turns_pitch"] is None and by_label["S2"]["turns_note"] is None,
+              "missing-pitch step has no pitch/note either")
+
+    # Nut assembled before its stander-screw partner (locked, screw added after): the screw keeps
+    # its own row-1 turns; the nut's "partner rotates" override is skipped (partner is a screw).
+    steps2 = [
+        {"component": 3, "component_label": "N", "travel": 5.0},
+        {"component": 2, "component_label": "S", "travel": 18.0},
+    ]
+    op._apply_turns(aog, prep, tables, steps2)
+    rec.check(steps2[0]["turns"] is None, "nut N before screw partner S: N itself does not rotate")
+    rec.check(steps2[1]["turns"] == 12.0, "screw S keeps its own turns regardless of N's position")
+
+    # Nut before a movable partner: the turns go to the partner's own step, turns_note == "nut".
+    steps3 = [
+        {"component": 5, "component_label": "N2", "travel": 9.0},
+        {"component": 4, "component_label": "M", "travel": 20.0},
+    ]
+    op._apply_turns(aog, prep, tables, steps3)
+    rec.check(steps3[0]["turns"] is None, "nut N2 assembled before its movable partner M: N2 itself does not rotate")
+    rec.check(steps3[1]["turns"] == 10.0, f"movable partner M rotates: 20/2.0 == 10.0 (got {steps3[1]['turns']})")
+    rec.check(steps3[1]["turns_note"] == "nut", "partner-rotates case sets turns_note == 'nut'")
+    rec.check(steps3[1]["turns_nut_label"] == "N2", "partner-rotates case names the responsible nut")
+
+    # Text output (12.4): assembly_sequence.txt format (2 decimals on turns), manual format (1
+    # decimal), "nut" phrasing, and no text at all when turns is None.
+    plain = op._fmt_turns_text({"turns": 12.5, "turns_pitch": 1.5, "turns_note": None}, decimals=2)
+    rec.check(plain == ", rotate 12.50 turns clockwise (pitch 1.5 mm)", f"plain turns text (got {plain!r})")
+    manual = op._fmt_turns_text({"turns": 12.5, "turns_pitch": 1.5, "turns_note": None}, decimals=1)
+    rec.check(manual == ", rotate 12.5 turns clockwise (pitch 1.5 mm)", f"manual (1 decimal) turns text (got {manual!r})")
+    nut_text = op._fmt_turns_text(
+        {"turns": 10.0, "turns_pitch": 2.0, "turns_note": "nut", "turns_nut_label": "N2"}, decimals=2)
+    rec.check(nut_text == ", rotate 10.00 turns clockwise (thread of nut N2, pitch 2 mm)",
+              f"nut-rotates-partner turns text (got {nut_text!r})")
+    none_text = op._fmt_turns_text({"turns": None}, decimals=2)
+    rec.check(none_text == "", f"no text when turns is None (got {none_text!r})")
+
+
 # ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
@@ -716,7 +788,7 @@ def test_o14(rec, args):
 TESTS = [
     ("O1", test_o1), ("O2", test_o2), ("O3", test_o3), ("O4", test_o4), ("O5", test_o5), ("O6", test_o6),
     ("O7", test_o7), ("O8", test_o8), ("O9", test_o9), ("O10", test_o10), ("O11", test_o11), ("O12", test_o12),
-    ("O13", test_o13), ("O14", test_o14),
+    ("O13", test_o13), ("O14", test_o14), ("O15", test_o15),
 ]
 
 

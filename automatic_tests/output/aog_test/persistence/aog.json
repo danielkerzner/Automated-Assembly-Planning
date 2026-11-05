@@ -1,5 +1,6 @@
 {
- "cache_key": "2b3a86d65db9d977fa186ab2ee77a3b34c60552351d7507f029a398449f886c4",
+ "schema_version": 2,
+ "cache_key": "9b787b1a66209b21c020b01ac4190149015b545a137c8ddd7f9b00949081f3aa",
  "component_ids": [
   "Part__Feature",
   "Part__Feature001",
@@ -21,62 +22,54 @@
   "industrial_fastner_part001"
  ],
  "config": {
-  "stander_gate": "prerequisites+contacts",
   "margin": 1.0,
   "group_consecutive": true,
   "group_one_order": true
  },
  "stats": {
-  "group_rule": true,
-  "group_one_order": true,
-  "groups": {
-   "fastener_small": [
-    "industrial_fastner_part4",
-    "industrial_fastner_part001"
-   ]
-  },
-  "group_order_pruned_edges": 13,
+  "group_rule": false,
+  "group_one_order": false,
+  "groups": {},
+  "group_order_pruned_edges": 0,
   "N": 8,
   "n_movable": 5,
   "n_standers": 3,
-  "D": 26,
-  "D_prime": 26,
-  "V": 47,
-  "E": 75,
+  "D": 6,
+  "D_prime": 6,
+  "V": 61,
+  "E": 141,
   "nodes_per_level": [
    1,
-   4,
-   7,
-   9,
-   8,
-   7,
+   5,
+   10,
+   12,
+   12,
+   10,
    5,
    5,
    1
   ],
   "connectivity_rule": true,
-  "disconnected_dropped": 11,
-  "dead_ends": 1,
-  "live_nodes": 38,
+  "disconnected_dropped": 47,
+  "dead_ends": 0,
+  "live_nodes": 61,
   "complete": true,
-  "time_s": 0.024677199980942532,
-  "array_bytes": 4721
+  "time_s": 0.04215999999996711,
+  "array_bytes": 4167
  },
  "complete": true,
  "root": 0,
- "terminal": 46,
- "dead_ends": [
-  32
- ],
+ "terminal": 60,
+ "dead_ends": [],
  "component_groups": [
-  "part3",
-  "part2",
-  "part1",
-  "part5",
-  "part6",
-  "part7",
-  "fastener_small",
-  "fastener_small"
+  "industrial_fastner_part3",
+  "industrial_fastner_part2",
+  "industrial_fastner_part1",
+  "industrial_fastner_part5",
+  "industrial_fastner_part6",
+  "industrial_fastner_part7",
+  "industrial_fastner_part4",
+  "industrial_fastner_part001"
  ],
- "date": "2026-10-31T09:37:41"
+ "date": "2026-11-05T09:01:39"
 }

@@ -1,0 +1,9 @@
+label,is_stander,tool,group,processed,subassembly
+Assembly,False,,Assembly,true,
+cube,False,,cube,,Assembly
+plug,False,,plug,,Assembly
+plug001,False,,plug,,Assembly
+plug002,False,,plug,,Assembly
+plug003,False,,plug,,Assembly
+plug004,False,,plug,,Assembly
+base,False,,base,,Assembly

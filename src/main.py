@@ -30,7 +30,7 @@ from hierarchy import Hierarchy, build_hierarchy, check_level_sizes
 from illustration_generator import IllustrationConfig
 from levels import LevelPlan, solve_level
 from optimization import OptimizationConfig
-from preprocessing import PreprocessingConfig, load_assembly, load_bom
+from preprocessing import PreprocessingConfig, load_assembly, load_bom, load_stander_categories
 
 log = logging.getLogger("aap.main")
 DEFAULT_MAX_LEVEL_COMPONENTS = 20
@@ -116,6 +116,7 @@ def run_pipeline(
 
     doc = load_assembly(step_path)
     bom_labels = load_bom(bom_path)
+    bom_categories = load_stander_categories(bom_path)
     bom_rows = _read_bom_rows(bom_path)
 
     hier = build_hierarchy(doc, bom_rows=bom_rows)
@@ -124,7 +125,7 @@ def run_pipeline(
     plan = solve_level(
         hier, hier.root, doc,
         step_path=step_path, bom_path=bom_path, bom_labels=bom_labels,
-        output_dir=output_dir,
+        output_dir=output_dir, bom_categories=bom_categories,
         preprocessing_config=preprocessing_config,
         collision_config=collision_config,
         illustration_config=illustration_config,
@@ -146,14 +147,10 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run the AAP assembly sequence planning pipeline on a STEP assembly."
     )
-    parser.add_argument("step_path", type=Path, help="STEP file for the assembly.",
-                        default=DEFAULT_STEP)
-    parser.add_argument("bom_path", type=Path, help="BOM CSV flagging stander components.",
-                        default=DEFAULT_BOM)
+    parser.add_argument("step_path", type=Path, help="STEP file for the assembly.")
+    parser.add_argument("bom_path", type=Path, help="BOM CSV flagging stander components.")
     parser.add_argument(
-        "output_dir", type=Path, help="Directory to write the plan and per-level output into.",
-        default=DEFAULT_OUT
-    )
+        "output_dir", type=Path, help="Directory to write the plan and per-level output into.")
     parser.add_argument(
         "--step",
         type=float,

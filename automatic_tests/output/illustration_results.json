@@ -1,7 +1,6 @@
 {
   "groups": [
-    "core",
-    "real"
+    "core"
   ],
   "results": {
     "L1": {
@@ -93,7 +92,7 @@
         }
       ],
       "notes": [],
-      "seconds": 1.07
+      "seconds": 1.633
     },
     "L2": {
       "passed": true,
@@ -132,7 +131,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.05
+      "seconds": 0.147
     },
     "L3": {
       "passed": true,
@@ -183,7 +182,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.066
+      "seconds": 0.172
     },
     "L4": {
       "passed": true,
@@ -198,7 +197,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.295
+      "seconds": 0.664
     },
     "L5": {
       "passed": true,
@@ -221,7 +220,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.028
+      "seconds": 0.049
     },
     "L6": {
       "passed": true,
@@ -246,7 +245,7 @@
       "notes": [
         "visible counts: [3, 4], 2 view(s) tied on count"
       ],
-      "seconds": 0.112
+      "seconds": 0.165
     },
     "L7": {
       "passed": true,
@@ -277,7 +276,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.841
+      "seconds": 1.359
     },
     "L8": {
       "passed": true,
@@ -304,7 +303,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.711
+      "seconds": 1.405
     },
     "L9": {
       "passed": true,
@@ -323,7 +322,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.626
+      "seconds": 1.252
     },
     "L10": {
       "passed": true,
@@ -358,49 +357,15 @@
         }
       ],
       "notes": [],
-      "seconds": 0.537
+      "seconds": 0.908
     },
     "L11": {
       "passed": true,
-      "checks": [
-        {
-          "label": "7 PNGs = 7 frames for N = 8 (group blocks [(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 7)])",
-          "passed": true
-        },
-        {
-          "label": "every step is in one frame",
-          "passed": true
-        },
-        {
-          "label": "manual.pdf written",
-          "passed": true
-        },
-        {
-          "label": "every frame visible or carries a warning",
-          "passed": true
-        },
-        {
-          "label": "every x-ray frame carries a warning",
-          "passed": true
-        },
-        {
-          "label": "end to end in 42.3 s (target about 1 min)",
-          "passed": true
-        },
-        {
-          "label": "colour change does not re-tessellate",
-          "passed": true
-        },
-        {
-          "label": "colour change does not re-rasterize layers",
-          "passed": true
-        }
-      ],
+      "checks": [],
       "notes": [
-        "sequence from tests_scripts\\output\\optimization_test\\pipeline\\optimization\\optimization_result.json",
-        "global view (270.0, 35.0); 1:global; 2:global; 3:global; 4:candidate; 5:perturbed; 6:xray(x-ray); 7:perturbed"
+        "skipped (run with --groups real)"
       ],
-      "seconds": 51.04
+      "seconds": 0.0
     },
     "L12": {
       "passed": true,
@@ -439,7 +404,7 @@
         }
       ],
       "notes": [],
-      "seconds": 2.228
+      "seconds": 4.027
     },
     "L13": {
       "passed": true,
@@ -449,11 +414,11 @@
           "passed": true
         },
         {
-          "label": "N = 8 within 60 s (9.1 s: search 4.2 s, render 4.8 s)",
+          "label": "N = 8 within 60 s (12.9 s: search 7.2 s, render 5.7 s)",
           "passed": true
         },
         {
-          "label": "peak traced memory 361 MB < 2 GB",
+          "label": "peak traced memory 354 MB < 2 GB",
           "passed": true
         }
       ],
@@ -462,7 +427,7 @@
         "views evaluated 73, layers rasterized 592, kinds ['global', 'global', 'global', 'global', 'global', 'global', 'global', 'global']",
         "N = 20 skipped (run with --groups scale)"
       ],
-      "seconds": 9.39
+      "seconds": 13.522
     },
     "L14": {
       "passed": true,
@@ -525,7 +490,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.547
+      "seconds": 0.622
     },
     "cache": {
       "passed": true,

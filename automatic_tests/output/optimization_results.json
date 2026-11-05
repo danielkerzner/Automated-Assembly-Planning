@@ -7,8 +7,8 @@
       "passed": false,
       "checks": [],
       "notes": [],
-      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run scripts/test_aog.py first",
-      "seconds": 0.001
+      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
+      "seconds": 0.003
     },
     "O2": {
       "passed": true,
@@ -39,20 +39,20 @@
         }
       ],
       "notes": [],
-      "seconds": 0.0
+      "seconds": 0.001
     },
     "O3": {
       "passed": false,
       "checks": [],
       "notes": [],
-      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run scripts/test_aog.py first",
+      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
       "seconds": 0.001
     },
     "O4": {
       "passed": false,
       "checks": [],
       "notes": [],
-      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run scripts/test_aog.py first",
+      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
       "seconds": 0.001
     },
     "O5": {
@@ -100,7 +100,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.062
+      "seconds": 0.12
     },
     "O6": {
       "passed": true,
@@ -123,7 +123,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.003
+      "seconds": 0.005
     },
     "O7": {
       "passed": true,
@@ -146,7 +146,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.004
+      "seconds": 0.01
     },
     "O8": {
       "passed": true,
@@ -169,7 +169,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.083
+      "seconds": 0.198
     },
     "O9": {
       "passed": true,
@@ -282,49 +282,116 @@
       "notes": [
         "FreeCAD geometry variant skipped (run with --groups real)"
       ],
-      "seconds": 0.041
+      "seconds": 0.068
     },
     "O10": {
       "passed": false,
       "checks": [],
       "notes": [],
-      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run scripts/test_aog.py first",
-      "seconds": 0.001
+      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
+      "seconds": 0.002
     },
     "O11": {
       "passed": false,
       "checks": [],
       "notes": [],
-      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run scripts/test_aog.py first",
+      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
       "seconds": 0.001
     },
     "O12": {
       "passed": false,
       "checks": [],
       "notes": [],
-      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run scripts/test_aog.py first",
-      "seconds": 0.0
+      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
+      "seconds": 0.001
     },
     "O13": {
       "passed": false,
       "checks": [],
       "notes": [],
-      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run scripts/test_aog.py first",
-      "seconds": 0.0
+      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
+      "seconds": 0.001
     },
     "O14": {
       "passed": true,
       "checks": [
         {
-          "label": "N=12: 3.0 s < 60 s and 4.7 MB < 32.2 MB",
+          "label": "N=12: 11.5 s < 60 s and 6.5 MB < 32.2 MB",
           "passed": true
         }
       ],
       "notes": [
-        "N=12: V=688, E=1936, moves=8252, 72 iterations, 3.0 s, peak traced 4.7 MB (estimate 32.2 MB), cost 0.3266 (greedy 0.3371)",
+        "N=12: V=587, E=1540, moves=6610, 91 iterations, 11.5 s, peak traced 6.5 MB (estimate 32.2 MB), cost 0.3297 (greedy 0.3367)",
         "N = 20 skipped (run with --groups scale)"
       ],
-      "seconds": 3.014
+      "seconds": 11.511
+    },
+    "O15": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "screw S: 18/1.5 == 12.0 turns (got 12.0)",
+          "passed": true
+        },
+        {
+          "label": "nut N after its stander-screw partner: rotates itself (got 5.0)",
+          "passed": true
+        },
+        {
+          "label": "category-3 stander O never gets turns",
+          "passed": true
+        },
+        {
+          "label": "screw S2 with missing pitch gives turns=None",
+          "passed": true
+        },
+        {
+          "label": "missing-pitch step has no pitch/note either",
+          "passed": true
+        },
+        {
+          "label": "nut N before screw partner S: N itself does not rotate",
+          "passed": true
+        },
+        {
+          "label": "screw S keeps its own turns regardless of N's position",
+          "passed": true
+        },
+        {
+          "label": "nut N2 assembled before its movable partner M: N2 itself does not rotate",
+          "passed": true
+        },
+        {
+          "label": "movable partner M rotates: 20/2.0 == 10.0 (got 10.0)",
+          "passed": true
+        },
+        {
+          "label": "partner-rotates case sets turns_note == 'nut'",
+          "passed": true
+        },
+        {
+          "label": "partner-rotates case names the responsible nut",
+          "passed": true
+        },
+        {
+          "label": "plain turns text (got ', rotate 12.50 turns clockwise (pitch 1.5 mm)')",
+          "passed": true
+        },
+        {
+          "label": "manual (1 decimal) turns text (got ', rotate 12.5 turns clockwise (pitch 1.5 mm)')",
+          "passed": true
+        },
+        {
+          "label": "nut-rotates-partner turns text (got ', rotate 10.00 turns clockwise (thread of nut N2, pitch 2 mm)')",
+          "passed": true
+        },
+        {
+          "label": "no text when turns is None (got '')",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.0
     },
     "cache": {
       "passed": true,

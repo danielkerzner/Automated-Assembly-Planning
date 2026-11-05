@@ -1,0 +1,287 @@
+{
+ "assembly": "Assembly",
+ "levels_independent": true,
+ "level": {
+  "container_id": "Assembly",
+  "label": "Assembly",
+  "status": "complete",
+  "locked_parts": [],
+  "total_cost": 0.1003401360544216,
+  "inseparable_pairs": [],
+  "steps": [
+   {
+    "step": 1,
+    "component": 6,
+    "component_id": "Part__Feature006",
+    "component_label": "base",
+    "is_stander": false,
+    "edge": 14,
+    "removal_direction_index": 9,
+    "direction_index": 8,
+    "direction": [
+     -0.7071067811865487,
+     1.1775693440128334e-16,
+     -0.7071067811865465
+    ],
+    "travel": 49.8245508636725,
+    "start_offset": [
+     35.23127778527694,
+     -5.8671863676268875e-15,
+     35.23127778527682
+    ],
+    "gravity_index": 1,
+    "gravity": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "stability_class": 2,
+    "costs": {
+     "travel": 0.03549247645959901,
+     "size_contacts": 0.16496496602553037,
+     "direction_change": 0.0,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.0,
+     "gravity_change": 0.0
+    },
+    "kind": "part",
+    "sub_plan": null
+   },
+   {
+    "step": 2,
+    "component": 0,
+    "component_id": "Part__Feature",
+    "component_label": "cube",
+    "is_stander": false,
+    "edge": 10,
+    "removal_direction_index": 9,
+    "direction_index": 8,
+    "direction": [
+     -0.7071067811865487,
+     1.1775693440128334e-16,
+     -0.7071067811865465
+    ],
+    "travel": 43.82455086367238,
+    "start_offset": [
+     30.988637098157557,
+     -5.1606447612191736e-15,
+     30.98863709815746
+    ],
+    "gravity_index": 1,
+    "gravity": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "stability_class": 2,
+    "costs": {
+     "travel": 0.03121838155927015,
+     "size_contacts": 0.0847049603617742,
+     "direction_change": 0.0,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.0,
+     "gravity_change": 0.0
+    },
+    "kind": "part",
+    "sub_plan": null
+   },
+   {
+    "step": 3,
+    "component": 5,
+    "component_id": "Part__Feature005",
+    "component_label": "plug004",
+    "is_stander": false,
+    "edge": 8,
+    "removal_direction_index": 11,
+    "direction_index": 10,
+    "direction": [
+     -0.9238795325112861,
+     9.85374174547403e-16,
+     -0.3826834323650915
+    ],
+    "travel": 10.06131257541157,
+    "start_offset": [
+     9.295440758621165,
+     -9.91415757385958e-15,
+     3.850297630456558
+    ],
+    "gravity_index": 1,
+    "gravity": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "stability_class": 2,
+    "costs": {
+     "travel": 0.007167167461530052,
+     "size_contacts": 0.029098256869191836,
+     "direction_change": 0.013605442176870748,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.0,
+     "gravity_change": 0.0
+    },
+    "kind": "part",
+    "sub_plan": null
+   },
+   {
+    "step": 4,
+    "component": 4,
+    "component_id": "Part__Feature004",
+    "component_label": "plug003",
+    "is_stander": false,
+    "edge": 6,
+    "removal_direction_index": 0,
+    "direction_index": 1,
+    "direction": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "travel": 6.997259069509152,
+    "start_offset": [
+     6.997259069509152,
+     0.0,
+     0.0
+    ],
+    "gravity_index": 1,
+    "gravity": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "stability_class": 2,
+    "costs": {
+     "travel": 0.00498449155087805,
+     "size_contacts": 0.03879767582558911,
+     "direction_change": 0.013605442176870748,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.0,
+     "gravity_change": 0.0
+    },
+    "kind": "part",
+    "sub_plan": null
+   },
+   {
+    "step": 5,
+    "component": 3,
+    "component_id": "Part__Feature003",
+    "component_label": "plug002",
+    "is_stander": false,
+    "edge": 4,
+    "removal_direction_index": 9,
+    "direction_index": 8,
+    "direction": [
+     -0.7071067811865487,
+     1.1775693440128334e-16,
+     -0.7071067811865465
+    ],
+    "travel": 20.2365118651344,
+    "start_offset": [
+     14.309374767398586,
+     -2.3829896002134233e-15,
+     14.309374767398541
+    ],
+    "gravity_index": 1,
+    "gravity": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "stability_class": 2,
+    "costs": {
+     "travel": 0.014415462027202263,
+     "size_contacts": 0.0484970947819864,
+     "direction_change": 0.013605442176870748,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.0,
+     "gravity_change": 0.0
+    },
+    "kind": "part",
+    "sub_plan": null
+   },
+   {
+    "step": 6,
+    "component": 2,
+    "component_id": "Part__Feature002",
+    "component_label": "plug001",
+    "is_stander": false,
+    "edge": 2,
+    "removal_direction_index": 4,
+    "direction_index": 5,
+    "direction": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "travel": 6.997259069509148,
+    "start_offset": [
+     0.0,
+     0.0,
+     6.997259069509148
+    ],
+    "gravity_index": 5,
+    "gravity": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "stability_class": 2,
+    "costs": {
+     "travel": 0.004984491550878048,
+     "size_contacts": 0.05819651373838366,
+     "direction_change": 0.013605442176870748,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.0,
+     "gravity_change": 0.011904761904761904
+    },
+    "kind": "part",
+    "sub_plan": null
+   },
+   {
+    "step": 7,
+    "component": 1,
+    "component_id": "Part__Feature001",
+    "component_label": "plug",
+    "is_stander": false,
+    "edge": 1,
+    "removal_direction_index": 7,
+    "direction_index": 6,
+    "direction": [
+     -0.3826834323650889,
+     4.440892098500626e-16,
+     -0.9238795325112871
+    ],
+    "travel": 10.061312575411664,
+    "start_offset": [
+     3.8502976304565677,
+     -4.4681203516690645e-15,
+     9.295440758621263
+    ],
+    "gravity_index": 5,
+    "gravity": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "stability_class": 2,
+    "costs": {
+     "travel": 0.00716716746153012,
+     "size_contacts": 0.06789593269478093,
+     "direction_change": 0.013605442176870748,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.0,
+     "gravity_change": 0.0
+    },
+    "kind": "part",
+    "sub_plan": null
+   }
+  ]
+ }
+}

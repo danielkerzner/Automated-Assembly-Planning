@@ -1,0 +1,193 @@
+{
+  "reduced_assembly_component_count": 5,
+  "reduced_assembly_components": [
+    "industrial_fastner_part3",
+    "industrial_fastner_part2",
+    "industrial_fastner_part1",
+    "industrial_fastner_part5",
+    "industrial_fastner_part6"
+  ],
+  "stander_count": 3,
+  "stander_records": {
+    "Part__Feature003": {
+      "category": 2,
+      "options": [
+        {
+          "direction": [
+            1.0,
+            1.6454069302272747e-16,
+            1.590963696221047e-16
+          ],
+          "exit_point": [
+            35.49435320175435,
+            -34.74795068197693,
+            -6.550190351148198e-16
+          ],
+          "blockers": []
+        }
+      ],
+      "holds": [],
+      "contact_neighbors": [
+        "Part__Feature",
+        "Part__Feature007"
+      ],
+      "bbox": [
+        [
+          2.249999519109075,
+          -45.14025552739035,
+          -10.392307845087206
+        ],
+        [
+          14.250000480890906,
+          -24.355645836562857,
+          10.392307845086707
+        ]
+      ],
+      "partner": "Part__Feature007",
+      "nut_rule": "locked"
+    },
+    "Part__Feature004": {
+      "category": 3,
+      "options": [
+        {
+          "direction": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "exit_point": [
+            25.0,
+            53.10494645091231,
+            -9.0
+          ],
+          "blockers": []
+        },
+        {
+          "direction": [
+            -0.0,
+            -1.0,
+            -0.0
+          ],
+          "exit_point": [
+            25.0,
+            -51.49572645031702,
+            -9.0
+          ],
+          "blockers": []
+        }
+      ],
+      "holds": [],
+      "contact_neighbors": [
+        "Part__Feature"
+      ],
+      "bbox": [
+        [
+          20.25,
+          29.200000000000003,
+          -13.75
+        ],
+        [
+          29.75,
+          35.2,
+          -4.25
+        ]
+      ],
+      "partner": null,
+      "nut_rule": null
+    },
+    "Part__Feature005": {
+      "category": 3,
+      "options": [
+        {
+          "direction": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "exit_point": [
+            25.0,
+            53.10494645091231,
+            9.0
+          ],
+          "blockers": []
+        },
+        {
+          "direction": [
+            -0.0,
+            -1.0,
+            -0.0
+          ],
+          "exit_point": [
+            25.0,
+            -51.49572645031702,
+            9.0
+          ],
+          "blockers": []
+        }
+      ],
+      "holds": [],
+      "contact_neighbors": [
+        "Part__Feature"
+      ],
+      "bbox": [
+        [
+          20.25,
+          29.200000000000003,
+          4.249999999999999
+        ],
+        [
+          29.75,
+          35.2,
+          13.75
+        ]
+      ],
+      "partner": null,
+      "nut_rule": null
+    }
+  },
+  "candidate_direction_count": 6,
+  "candidate_directions": [
+    [
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      -1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      -1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0,
+      -1.0
+    ]
+  ],
+  "assembly_bbox": [
+    [
+      -48.25000000026933,
+      -51.49572645031702,
+      -26.200000000000003
+    ],
+    [
+      35.49435320175435,
+      53.10494645091231,
+      19.3
+    ]
+  ]
+}

@@ -1,0 +1,60 @@
+{
+ "schema_version": 2,
+ "cache_key": "da8d6b9a09ed695e7bb8b4a0e442a226a947a6d0ad611731f122e93b1b9f02f7",
+ "component_ids": [
+  "Part__P (plate)",
+  "Part__B (bracket)",
+  "Part__C (cover)",
+  "Part__S (side)",
+  "Part__screw1",
+  "Part__screw2"
+ ],
+ "component_labels": [
+  "P (plate)",
+  "B (bracket)",
+  "C (cover)",
+  "S (side)",
+  "screw1",
+  "screw2"
+ ],
+ "config": {
+  "margin": 1.0,
+  "group_consecutive": true,
+  "group_one_order": true
+ },
+ "stats": {
+  "group_rule": false,
+  "group_one_order": false,
+  "groups": {},
+  "group_order_pruned_edges": 0,
+  "N": 6,
+  "n_movable": 4,
+  "n_standers": 2,
+  "D": 6,
+  "D_prime": 6,
+  "V": 26,
+  "E": 53,
+  "nodes_per_level": [
+   1,
+   3,
+   5,
+   6,
+   6,
+   4,
+   1
+  ],
+  "connectivity_rule": false,
+  "disconnected_dropped": 0,
+  "dead_ends": 0,
+  "live_nodes": 26,
+  "complete": true,
+  "time_s": 0.017817099927924573,
+  "array_bytes": 1927
+ },
+ "complete": true,
+ "root": 0,
+ "terminal": 25,
+ "dead_ends": [],
+ "component_groups": null,
+ "date": "2026-11-04T22:28:51"
+}

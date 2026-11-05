@@ -1,11 +1,18 @@
-"""Preprocessing: stander handling + candidate direction discovery."""
+"""Preprocessing: stander handling + candidate direction discovery.
+
+Part 1 (stander handling) follows docs/preprocessing-spec.md (rewritten 2026-11-04, nut
+partnering generalised the same evening): standers split into three classes -- screw, nut,
+other -- each with its own dismantle-direction and blocker rule, reusing the collision core
+(collision.py) instead of an inflated probe cylinder. Part 2 (candidate directions) is unchanged
+(spec decision P12).
+"""
 
 from __future__ import annotations
 
 import csv
 import logging
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 import FreeCAD
@@ -14,14 +21,13 @@ import Import
 
 log = logging.getLogger("aap.preprocessing")
 
+_TRUE = ("1", "true", "yes", "y", "t")
+
 
 # Dataclass for preprocessing configuration parameters. All values are tunable, but the
 # default values are based on the industrial fastner case study.
 @dataclass
 class PreprocessingConfig:
-    # Radial distance beyond a stander's shaft surface used for the contact
-    # walk (spec Part 1 step 3).
-    radial_threshold: float = 1.0
     # Intersection volume below this is treated as numerical noise from
     # touching (not interfering) geometry, not a real contact.
     volume_epsilon: float = 1e-6
@@ -42,30 +48,65 @@ class PreprocessingConfig:
     # misaligned faces from blowing up the candidate-direction count.
     direction_min_angle_deg: float = 15.0
 
-# Dataclass for storing the contact and dismantle information for a stander component. 
-# This is used to store the prerequisites, exit point, dismantle direction, and contact neighbors.
+    # Part 1 (docs/preprocessing-spec.md), all "unconfirmed defaults, calibrate on
+    # industrial_fastner":
+    probe_displacement: float = 0.1  # mm, axial displacement for the direction-sign test (P4)
+    perpendicular_displacement: float = 0.5  # mm, lateral displacement for screw holds (P6)
+    perpendicular_directions: int = 8  # evenly spaced directions around the axis (P6)
+    nut_rotation_angles_deg: tuple[float, ...] = (15.0, 30.0, 45.0)  # rotation lock test (P8)
+    pairing_min_fill: float = 0.25  # min fraction of bore volume a partner must occupy (P7)
+    bore_clip_margin: float = 0.2  # mm, radial margin added to the bore when clipping the partner (P8)
+
+
+# Dataclass for one removal option of a stander: a direction, where its trajectory exits the
+# assembly bounding box, and the components that must already be gone before it can leave.
+@dataclass
+class RemovalOption:
+    direction: FreeCAD.Vector
+    exit_point: FreeCAD.Vector
+    blockers: set[str]  # component Names that must already be removed
+
+
+# Dataclass for storing the contact and dismantle information for a stander component. Replaces
+# the old prerequisites/dismantle_direction/exit_point fields (docs/preprocessing-spec.md,
+# "Data model"): "present" is now `holds`, "absent" is now a RemovalOption's `blockers`.
 @dataclass
 class StanderRecord:
-    # Components physically along the stander's chosen exit path (directional collision
-    # walk). Per the AoG stander-precedence rule (docs/aog-spec.md D4), a stander is
-    # assembled after these are in place, so in disassembly it must come off BEFORE
-    # them, while they are still present -- not the other way around.
-    prerequisites: set[str]
+    category: int  # 1 screw, 2 nut, 3 other
+    options: list[RemovalOption]  # 1 for categories 1/2, 2 for category 3
 
-    #Exit point of the stander in the assembly. Used for creating the dismatle path.
-    exit_point: FreeCAD.Vector
+    # Non-stander components that must still be PRESENT while this stander is removed (screws
+    # only; P6). Category 2/3 standers never have holds.
+    holds: set[str]
 
-    #Dismantle direction of the stander.
-    dismantle_direction: FreeCAD.Vector
-
-    # All non-stander components physically touching the stander (full contact walk,
-    # not directional). Same precedence direction as prerequisites: the stander must be
-    # removed before these, not after.
+    # All non-stander components physically touching the stander (full contact walk, not
+    # directional). Unchanged meaning from the old spec (P10): feeds the AoG connectivity rule
+    # (D11), it is not a gate any more.
     contact_neighbors: set[str]
 
-    #Global (min, max) bounding box of the stander's own shape inside the assembly.
-    #Needed by the AoG travel model, which has no other access to stander geometry.
+    # Global (min, max) bounding box of the stander's own shape inside the assembly. Needed by
+    # the AoG travel model, which has no other access to stander geometry.
     bbox: tuple[FreeCAD.Vector, FreeCAD.Vector] | None = None
+
+    partner: str | None = None  # nuts only (P7): Name of whatever occupies the bore, stander or not
+    nut_rule: str | None = None  # "locked" | "free" | None (P8)
+
+    # Read-only compatibility properties for single-option standers (categories 1/2), for any
+    # downstream code not yet migrated to `options` (docs/preprocessing-spec.md, "Data
+    # model"). Raise on a category-3 stander (two options; there is no single answer).
+    @property
+    def dismantle_direction(self) -> FreeCAD.Vector:
+        if len(self.options) != 1:
+            raise AttributeError("dismantle_direction is only defined for a single-option stander "
+                                  "(category 1/2); this one has multiple options, use .options")
+        return self.options[0].direction
+
+    @property
+    def exit_point(self) -> FreeCAD.Vector:
+        if len(self.options) != 1:
+            raise AttributeError("exit_point is only defined for a single-option stander "
+                                  "(category 1/2); this one has multiple options, use .options")
+        return self.options[0].exit_point
 
 #Dataclass for preprocessing results. Reduxed assembly + Stander records + candidate directions.
 #Also stores the input file paths for caching purposes.
@@ -130,10 +171,43 @@ def load_bom(bom_path: str | Path) -> set[str]:
                 continue
             if has_flag_col:
                 flag = (row.get("is_stander") or "").strip().lower()
-                if flag not in ("1", "true", "yes", "y", "t"):
+                if flag not in _TRUE:
                     continue
             standers.add(label)
     return standers
+
+
+def load_stander_categories(bom_path: str | Path) -> dict[str, str | None]:
+    """Load the BOM's `screw`/`nut` category flags (docs/preprocessing-spec.md P1).
+
+    Returns `{label: "screw" | "nut" | None}` for every row with `is_stander` true; `None` means
+    category 3 ("other"). Rows without `is_stander` true are not in the returned dict at all
+    (`process_standers` only consults it for actual standers). A BOM without `screw`/`nut`
+    columns makes every stander category 3 (empty dict values). Both flags true on one row is a
+    load error; a flag set on a non-stander row is ignored with a warning.
+    """
+    categories: dict[str, str | None] = {}
+    with open(bom_path, newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        fieldnames = reader.fieldnames or []
+        has_screw_col = "screw" in fieldnames
+        has_nut_col = "nut" in fieldnames
+        for row in reader:
+            label = (row.get("label") or "").strip()
+            if not label:
+                continue
+            is_stander = (row.get("is_stander") or "").strip().lower() in _TRUE
+            screw = has_screw_col and (row.get("screw") or "").strip().lower() in _TRUE
+            nut = has_nut_col and (row.get("nut") or "").strip().lower() in _TRUE
+            if not is_stander:
+                if screw or nut:
+                    log.warning("BOM row %r sets 'screw'/'nut' but 'is_stander' is not true; ignored", label)
+                continue
+            if screw and nut:
+                raise ValueError(f"BOM row {label!r} sets both 'screw' and 'nut' true; a stander "
+                                  "can only be one category")
+            categories[label] = "screw" if screw else ("nut" if nut else None)
+    return categories
 
 """Functions marked with _ are internal helpers and not part of the public API."""
 def _leaf_components(doc: "FreeCAD.Document") -> list:
@@ -199,30 +273,11 @@ def _bbox_overlap(a, b, margin: float = 0.0) -> bool:
     )
 
 
-def _collect_axis_collisions(
-    probe: Part.Shape, candidates: list, candidate_shapes: dict[str, Part.Shape], config: PreprocessingConfig
-):
-    """Return (count, volume, colliding_ids) of candidates that intersect the probe."""
-    probe_bbox = probe.BoundBox
-    count = 0
-    volume = 0.0
-    colliding_ids: set[str] = set()
-    for obj in candidates:
-        shape = candidate_shapes[obj.Name]
-        if not _bbox_overlap(probe_bbox, shape.BoundBox):
-            continue
-        intersection = probe.common(shape)
-        if intersection.Volume > config.volume_epsilon:
-            count += 1
-            volume += intersection.Volume
-            colliding_ids.add(obj.Name)
-    return count, volume, colliding_ids
-
-
 def _contact_neighbors(
     stander_shape: Part.Shape, candidates: list, candidate_shapes: dict[str, Part.Shape], config: PreprocessingConfig
 ) -> set[str]:
-    """Return the set of candidate component Names that are in contact with the stander."""
+    """Return the set of candidate component Names that are in contact with the stander (P10,
+    unchanged from the old spec)."""
     stander_bbox = stander_shape.BoundBox
     neighbors: set[str] = set()
     for obj in candidates:
@@ -235,94 +290,356 @@ def _contact_neighbors(
     return neighbors
 
 
-def determine_dismantle_direction(
-    stander_obj,
-    candidates: list,
-    candidate_shapes: dict[str, Part.Shape],
-    assembly_bbox,
-    config: PreprocessingConfig,
-) -> StanderRecord:
-    """Determine the dismantle direction for a stander object.
+# --- Part 1 helpers (docs/preprocessing-spec.md) -------------------------------------
 
-    `candidates` (and their precomputed global `candidate_shapes`) are the non-stander leaf
-    components -- the same list for every stander, computed once by `process_standers` rather
-    than per call, since copying+placing a shape is not free and there is nothing stander-specific
-    about it.
-    """
-    shape = _global_shape(stander_obj)
-    axis = _dominant_cylindrical_axis(shape)
-    if axis is None:
-        raise ValueError(f"No cylindrical feature found on stander '{stander_obj.Label}'")
-    base, direction, radius = axis
-    probe_radius = radius + config.radial_threshold
+def _v0(a_name: str, b_name: str, shapes: dict[str, Part.Shape], cache: dict[tuple[str, str], float]) -> float:
+    """Static overlap volume at rest (P3), cached -- the baseline every displaced/swept/rotated
+    collision test below is compared against."""
+    key = (a_name, b_name)
+    if key not in cache:
+        cache[key] = shapes[a_name].common(shapes[b_name]).Volume
+    return cache[key]
 
-    # Identify colisions with the probe in both directions along the axis.
-    # The direction with fewer collisions is preferred.
-    per_direction = {}
-    for sign in (1.0, -1.0):
 
-        # Compute the start point of the probe along the axis.
-        d = direction * sign
-        extent = max(d.dot(v.Point - base) for v in shape.Vertexes)
-        probe_start = base + d * extent
+def _collides(overlap_volume: float, v0: float, config: PreprocessingConfig) -> bool:
+    """P3: a moved/swept/rotated copy collides with j iff its overlap exceeds max(eps, 2*V0)."""
+    return overlap_volume > max(config.volume_epsilon, 2 * v0)
 
-        #Compute the exit point of the probe from the assembly bounding box.
-        exit_point = assembly_bbox.getIntersectionPoint(probe_start, d)
-        height = (exit_point - probe_start).Length
-        if height <= 0:
-            per_direction[sign] = (0, 0.0, set())
+
+def _perp_basis(d: FreeCAD.Vector) -> tuple[FreeCAD.Vector, FreeCAD.Vector]:
+    """Return two unit vectors perpendicular to d and to each other."""
+    helper = FreeCAD.Vector(1, 0, 0) if abs(d.x) < 0.9 else FreeCAD.Vector(0, 1, 0)
+    u = d.cross(helper).normalize()
+    w = d.cross(u).normalize()
+    return u, w
+
+
+def _bore_radius(shape: Part.Shape, axis_base: FreeCAD.Vector, axis_dir: FreeCAD.Vector) -> float | None:
+    """P7/implementation notes: radius of the nut's largest *internal* cylindrical face (its
+    bore) -- the face whose normal points toward the axis, not away from it. This is not always
+    the same face as P2's dominant cylinder: for a hex nut the bore is also the largest cylinder,
+    but for a round/knurled nut the outside is larger, so the bore must be picked separately.
+    Returns None if the shape has no internal cylindrical face at all."""
+    best = None
+    for face in shape.Faces:
+        if face.Surface.TypeId != "Part::GeomCylinder":
             continue
+        # `face.CenterOfMass` collapses onto the axis for a full-revolution cylindrical face (the
+        # radially symmetric points average out), so it can't give a radial direction -- sample an
+        # actual surface point at the middle of the face's own parameter range instead.
+        u0, u1, v0, v1 = face.ParameterRange
+        u, v = (u0 + u1) / 2, (v0 + v1) / 2
+        point = face.Surface.value(u, v)
+        normal = face.normalAt(u, v)
+        t = (point - axis_base).dot(axis_dir)
+        axis_point = axis_base + axis_dir * t
+        radial = point - axis_point
+        if radial.Length < 1e-9:
+            continue
+        radial.normalize()
+        if normal.dot(radial) >= 0:
+            continue  # outward-facing cylindrical face, not a bore
+        if best is None or face.Area > best[0]:
+            best = (face.Area, face.Surface.Radius)
+    return best[1] if best is not None else None
 
-        #Compute the probe shape as a cylinder extending from the probe start point to the exit point.
-        #Calculate the amount of interference with the candidate components in that direction.
-        probe = Part.makeCylinder(probe_radius, height, probe_start, d)
-        per_direction[sign] = _collect_axis_collisions(probe, candidates, candidate_shapes, config)
 
-    #Choose the direction with fewer collisions, or if equal, the one with less total volume of interference.
-    count_pos, volume_pos, _ = per_direction[1.0]
-    count_neg, volume_neg, _ = per_direction[-1.0]
-    if count_pos != count_neg:
-        winner = 1.0 if count_pos < count_neg else -1.0
-    else:
-        winner = 1.0 if volume_pos <= volume_neg else -1.0
+def _axial_extent(shape: Part.Shape, base: FreeCAD.Vector, axis_dir: FreeCAD.Vector) -> tuple[float, float]:
+    """Min/max signed projection of every vertex onto `axis_dir` through `base` -- the stander's
+    own extent along its axis, used to size the bore solid (P7) to "the nut's length"."""
+    projections = [(v.Point - base).dot(axis_dir) for v in shape.Vertexes]
+    return min(projections), max(projections)
 
-    chosen_direction = direction * winner
-    prerequisites = per_direction[winner][2]
 
-    #Recalculate exit point in the chosen direction for the final record.
-    exit_point = assembly_bbox.getIntersectionPoint(base, chosen_direction)
-    contact_neighbors = _contact_neighbors(shape, candidates, candidate_shapes, config)
+def _axial_solid(radius: float, base: FreeCAD.Vector, axis_dir: FreeCAD.Vector,
+                 t_min: float, t_max: float) -> Part.Shape:
+    """A cylinder of `radius`, centered on the axis, spanning from `t_min` to `t_max` along
+    `axis_dir` from `base` -- the bore solid (P7) or its clipped-partner counterpart (P8)."""
+    length = t_max - t_min
+    start = base + axis_dir * t_min
+    return Part.makeCylinder(radius, length, start, axis_dir)
 
-    return StanderRecord(
-        prerequisites=prerequisites,
-        exit_point=exit_point,
-        dismantle_direction=chosen_direction,
-        contact_neighbors=contact_neighbors,
-        bbox=_bbox_to_tuple(shape.BoundBox),
-    )
+
+def _find_partner(
+    nut_shape: Part.Shape, bore_solid: Part.Shape, bore_volume: float, candidates: list,
+    shapes: dict[str, Part.Shape], config: PreprocessingConfig, name: str,
+) -> str | None:
+    """P7 (generalised 2026-11-04): the partner is whatever occupies the nut's bore, stander or
+    not -- the component with the largest overlap against the bore solid, provided that overlap
+    is at least `pairing_min_fill` of the bore volume. A component merely touching the nut (a
+    washer ringed around the shaft) does not occupy the bore and is never a candidate. No
+    candidate above the threshold: the nut is category 3."""
+    best_name, best_overlap = None, 0.0
+    bore_bbox = bore_solid.BoundBox
+    for other in candidates:
+        if other.Name == name:
+            continue
+        other_shape = shapes[other.Name]
+        if not _bbox_overlap(bore_bbox, other_shape.BoundBox):
+            continue
+        overlap = bore_solid.common(other_shape).Volume
+        if overlap > best_overlap:
+            best_overlap, best_name = overlap, other.Name
+    if best_name is None or best_overlap < config.pairing_min_fill * bore_volume:
+        return None
+    return best_name
+
+
+def _signed_axis_direction(
+    shape: Part.Shape, axis_dir: FreeCAD.Vector, displacement: float, candidates: list,
+    shapes: dict[str, Part.Shape], v0_cache: dict, config: PreprocessingConfig, name: str,
+) -> FreeCAD.Vector | None:
+    """P4: move `shape` by `displacement` along each axis side; a side "collides" (P3) if the
+    moved copy collides with any other candidate, standers included. Returns the single free
+    side's direction, or None if both or neither side is free (caller falls back to category 3)."""
+    collides_side = {}
+    for sign in (1.0, -1.0):
+        moved = shape.translated(axis_dir * sign * displacement)
+        moved_bbox = moved.BoundBox
+        collided = False
+        for other in candidates:
+            if other.Name == name:
+                continue
+            other_shape = shapes[other.Name]
+            if not _bbox_overlap(moved_bbox, other_shape.BoundBox):
+                continue
+            overlap = moved.common(other_shape).Volume
+            if _collides(overlap, _v0(name, other.Name, shapes, v0_cache), config):
+                collided = True
+                break
+        collides_side[sign] = collided
+    free_sides = [s for s, c in collides_side.items() if not c]
+    return axis_dir * free_sides[0] if len(free_sides) == 1 else None
+
+
+def _sweep_blockers(
+    shape: Part.Shape, direction: FreeCAD.Vector, candidates: list, shapes: dict[str, Part.Shape],
+    v0_cache: dict, collision_config, config: PreprocessingConfig, name: str, stats,
+) -> set[str]:
+    """P5: every candidate the stander's own solid cannot sweep past along `direction` (the
+    collision core's stepped sweep, contact counts as free, threshold per P3) is a blocker."""
+    from collision import is_free_detail
+
+    blockers: set[str] = set()
+    for other in candidates:
+        if other.Name == name:
+            continue
+        other_shape = shapes[other.Name]
+        threshold = max(config.volume_epsilon, 2 * _v0(name, other.Name, shapes, v0_cache))
+        outcome = is_free_detail(shape, other_shape, direction, collision_config, stats, threshold=threshold)
+        if not outcome.free:
+            blockers.add(other.Name)
+    return blockers
+
+
+def _screw_holds(
+    shape: Part.Shape, axis_dir: FreeCAD.Vector, candidates: list, shapes: dict[str, Part.Shape],
+    v0_cache: dict, config: PreprocessingConfig, name: str,
+) -> set[str]:
+    """P6: a non-stander j is a hold if it statically overlaps the screw, or if displacing the
+    screw perpendicular to its axis (any of `perpendicular_directions` evenly spaced directions)
+    makes it collide (P3) with j. Non-stander candidates only -- holds are screws-only."""
+    holds: set[str] = set()
+    for other in candidates:
+        if other.Name == name:
+            continue
+        if _v0(name, other.Name, shapes, v0_cache) > config.volume_epsilon:
+            holds.add(other.Name)
+
+    u, w = _perp_basis(axis_dir)
+    n = max(config.perpendicular_directions, 1)
+    for i in range(n):
+        angle = 2 * math.pi * i / n
+        perp_dir = (u * math.cos(angle) + w * math.sin(angle)).normalize()
+        moved = shape.translated(perp_dir * config.perpendicular_displacement)
+        moved_bbox = moved.BoundBox
+        for other in candidates:
+            if other.Name == name or other.Name in holds:
+                continue
+            other_shape = shapes[other.Name]
+            if not _bbox_overlap(moved_bbox, other_shape.BoundBox):
+                continue
+            overlap = moved.common(other_shape).Volume
+            if _collides(overlap, _v0(name, other.Name, shapes, v0_cache), config):
+                holds.add(other.Name)
+    return holds
+
+
+def _nut_rotation_locked(
+    nut_shape: Part.Shape, base: FreeCAD.Vector, axis_dir: FreeCAD.Vector, candidates: list,
+    shapes: dict[str, Part.Shape], v0_cache: dict, config: PreprocessingConfig, name: str,
+    partner_name: str, partner_clip_shape: Part.Shape,
+) -> bool:
+    """P8 (generalised 2026-11-04): rotate the nut about its own axis by each of
+    `nut_rotation_angles_deg` (both signs) against every other component, standers included
+    (P3). The partner is tested too, but against its bore-clipped shape (`partner_clip_shape`,
+    the thread engagement cut out) so normal thread contact cannot cause a false lock while a
+    hex pocket belonging to the partner itself still counts. Any collision at any tested angle =
+    locked (hex pocket)."""
+    for angle_deg in config.nut_rotation_angles_deg:
+        for sign in (1.0, -1.0):
+            rotated = nut_shape.rotated(base, axis_dir, angle_deg * sign)
+            rotated_bbox = rotated.BoundBox
+            for other in candidates:
+                if other.Name == name:
+                    continue
+                if other.Name == partner_name:
+                    other_shape, v0 = partner_clip_shape, 0.0  # clip already removes the rest baseline
+                else:
+                    other_shape, v0 = shapes[other.Name], _v0(name, other.Name, shapes, v0_cache)
+                if not _bbox_overlap(rotated_bbox, other_shape.BoundBox):
+                    continue
+                overlap = rotated.common(other_shape).Volume
+                if _collides(overlap, v0, config):
+                    return True
+    return False
 
 
 def process_standers(
-    doc: "FreeCAD.Document", bom_labels: set[str], config: PreprocessingConfig
+    doc: "FreeCAD.Document",
+    bom_labels: set[str],
+    config: PreprocessingConfig,
+    collision_config=None,
+    bom_categories: dict[str, str | None] | None = None,
 ) -> tuple[dict[str, StanderRecord], set[str], tuple[FreeCAD.Vector, FreeCAD.Vector]]:
-    """Return stander records, the set of stander object Names, and the whole-assembly bbox."""
+    """Return stander records, the set of stander object Names, and the whole-assembly bbox.
+
+    Implements docs/preprocessing-spec.md Part 1 (P1-P12): standers are classified into three
+    categories from the BOM's `screw`/`nut` flags (P1). Nut partnering (P7, generalised
+    2026-11-04) is whatever occupies the nut's bore by volume, stander or movable component
+    alike, so unlike the rest of the pipeline the nut pass needs nothing precomputed by the
+    screw pass -- the precedence it derives (P8) lives entirely on the nut's own record
+    (`partner`/`nut_rule`), the AoG reads it from there instead of it being pushed into anyone
+    else's blockers.
+    """
+    from collision import CollisionConfig, Stats
+
+    collision_config = collision_config or CollisionConfig()
+    bom_categories = bom_categories or {}
+
     all_components = _leaf_components(doc)
     stander_objs = [obj for obj in all_components if obj.Label in bom_labels]
     stander_ids = {obj.Name for obj in stander_objs}
     assembly_bbox = _assembly_bounding_box(all_components)
+    non_standers = [obj for obj in all_components if obj.Name not in stander_ids]
+    shapes = {obj.Name: _global_shape(obj) for obj in all_components}
+    v0_cache: dict[tuple[str, str], float] = {}
+    stats = Stats()
 
-    # Standers never test against each other (spec: stander-stander contact is ignored for
-    # ordering), so every stander's candidate pool is exactly the same non-stander leaf set --
-    # compute it, and its global shapes, once rather than per stander.
-    candidates = [obj for obj in all_components if obj.Name not in stander_ids]
-    candidate_shapes = {obj.Name: _global_shape(obj) for obj in candidates}
+    # Pass 1: axis (P2, unchanged) + initial category for every stander, from the BOM flags.
+    axes: dict[str, tuple] = {}
+    category: dict[str, int] = {}
+    for obj in stander_objs:
+        axis = _dominant_cylindrical_axis(shapes[obj.Name])
+        if axis is None:
+            raise ValueError(f"No cylindrical feature found on stander '{obj.Label}'")
+        axes[obj.Name] = axis
+        category[obj.Name] = {"screw": 1, "nut": 2}.get(bom_categories.get(obj.Label), 3)
 
-    records = {
-        obj.Name: determine_dismantle_direction(
-            obj, candidates, candidate_shapes, assembly_bbox, config
+    records: dict[str, StanderRecord] = {}
+
+    # Pass 2: screws.
+    for obj in stander_objs:
+        name = obj.Name
+        if category[name] != 1:
+            continue
+        base, axis_dir, _radius = axes[name]
+        shape = shapes[name]
+        d = _signed_axis_direction(shape, axis_dir, config.probe_displacement, all_components,
+                                   shapes, v0_cache, config, name)
+        if d is None:
+            log.warning("Screw stander %r: both axis sides free or both blocked (P4); treating "
+                       "as category 3", obj.Label)
+            category[name] = 3
+            continue
+        holds = _screw_holds(shape, axis_dir, non_standers, shapes, v0_cache, config, name)
+        blockers = _sweep_blockers(shape, d, non_standers, shapes, v0_cache, collision_config,
+                                   config, name, stats) - holds
+        exit_point = assembly_bbox.getIntersectionPoint(base, d)
+        records[name] = StanderRecord(
+            category=1, options=[RemovalOption(direction=d, exit_point=exit_point, blockers=blockers)],
+            holds=holds, contact_neighbors=set(), bbox=_bbox_to_tuple(shape.BoundBox),
         )
-        for obj in stander_objs
-    }
+
+    # Pass 3: nuts. The partner (P7, generalised 2026-11-04) can be any component -- stander or
+    # movable -- so this pass needs nothing from pass 2; the precedence it derives (P8) lives
+    # entirely on the nut's own record (`partner`/`nut_rule`), never mutating anyone else's.
+    for obj in stander_objs:
+        name = obj.Name
+        if category[name] != 2:
+            continue
+        base, axis_dir, _radius = axes[name]
+        shape = shapes[name]
+        bore_radius = _bore_radius(shape, base, axis_dir)
+        if bore_radius is None:
+            raise ValueError(f"No internal (bore) cylindrical face found on nut stander '{obj.Label}'")
+        t_min, t_max = _axial_extent(shape, base, axis_dir)
+        bore_solid = _axial_solid(bore_radius, base, axis_dir, t_min, t_max)
+        bore_volume = bore_solid.Volume
+        partner = _find_partner(shape, bore_solid, bore_volume, all_components, shapes, config, name)
+        if partner is None:
+            log.info("Nut stander %r: nothing occupies its bore above pairing_min_fill (P7); "
+                     "treating as category 3", obj.Label)
+            category[name] = 3
+            continue
+        d = _signed_axis_direction(shape, axis_dir, config.probe_displacement, all_components,
+                                   shapes, v0_cache, config, name)
+        if d is None:
+            log.warning("Nut stander %r: both axis sides free or both blocked (P4); treating as "
+                       "category 3", obj.Label)
+            category[name] = 3
+            continue
+        partner_rec = records.get(partner)
+        if partner_rec is not None and len(partner_rec.options) == 1 and d.dot(partner_rec.options[0].direction) > 0:
+            log.warning("Nut stander %r's direction is not opposite its partner %r's (P1 sanity "
+                       "check); keeping it anyway", obj.Label, partner)
+        blockers = _sweep_blockers(shape, d, non_standers, shapes, v0_cache, collision_config,
+                                   config, name, stats)
+        clip_solid = _axial_solid(bore_radius + config.bore_clip_margin, base, axis_dir, t_min, t_max)
+        partner_clip_shape = shapes[partner].cut(clip_solid)
+        locked = _nut_rotation_locked(shape, base, axis_dir, stander_objs + non_standers, shapes,
+                                      v0_cache, config, name, partner, partner_clip_shape)
+        nut_rule = "locked" if locked else "free"
+        exit_point = assembly_bbox.getIntersectionPoint(base, d)
+        records[name] = StanderRecord(
+            category=2, options=[RemovalOption(direction=d, exit_point=exit_point, blockers=blockers)],
+            holds=set(), contact_neighbors=set(), bbox=_bbox_to_tuple(shape.BoundBox),
+            partner=partner, nut_rule=nut_rule,
+        )
+
+    # Pass 4: everything else -- originally category 3, plus any screw/nut demoted above.
+    for obj in stander_objs:
+        name = obj.Name
+        if category[name] != 3:
+            continue
+        base, axis_dir, _radius = axes[name]
+        shape = shapes[name]
+        others = [o for o in stander_objs + non_standers if o.Name != name]
+        options = []
+        for sign in (1.0, -1.0):
+            d = axis_dir * sign
+            blockers = _sweep_blockers(shape, d, others, shapes, v0_cache, collision_config,
+                                       config, name, stats)
+            exit_point = assembly_bbox.getIntersectionPoint(base, d)
+            options.append(RemovalOption(direction=d, exit_point=exit_point, blockers=blockers))
+        records[name] = StanderRecord(
+            category=3, options=options, holds=set(), contact_neighbors=set(),
+            bbox=_bbox_to_tuple(shape.BoundBox),
+        )
+
+    # contact_neighbors (P10, unchanged): every stander against the non-stander pool.
+    for obj in stander_objs:
+        name = obj.Name
+        records[name] = replace(
+            records[name], contact_neighbors=_contact_neighbors(shapes[name], non_standers, shapes, config),
+        )
+
+    n_screw = sum(1 for c in category.values() if c == 1)
+    n_nut = sum(1 for c in category.values() if c == 2)
+    n_other = sum(1 for c in category.values() if c == 3)
+    log.info("Processed %d stander(s): %d screw, %d nut, %d other; %.2f s",
+             len(stander_objs), n_screw, n_nut, n_other, sum(stats.times))
+
     return records, stander_ids, _bbox_to_tuple(assembly_bbox)
 
 
@@ -491,6 +808,8 @@ def run_preprocessing_on_document(
     bom_labels: set[str],
     config: PreprocessingConfig | None = None,
     *,
+    collision_config=None,
+    bom_categories: dict[str, str | None] | None = None,
     step_path: Path | None = None,
     bom_path: Path | None = None,
     level_id: str | None = None,
@@ -502,14 +821,17 @@ def run_preprocessing_on_document(
 
     `doc` may be the flat, originally loaded assembly, or one level's document from
     `levels.build_level_document` (docs/subassembly-spec.md). `compound_ids` names this
-    document's fused sub-assembly components, if any.
+    document's fused sub-assembly components, if any. `collision_config` and `bom_categories`
+    (from `load_stander_categories`) feed Part 1's new screw/nut/other classification
+    (docs/preprocessing-spec.md); both default to "every stander is category 3" if omitted.
     """
     config = config or PreprocessingConfig()
     if config.compound_directions not in ("none", "exterior"):
         raise ValueError(f"compound_directions must be 'none' or 'exterior', got {config.compound_directions!r}")
     members = members or {}
 
-    stander_records, stander_ids, assembly_bbox = process_standers(doc, bom_labels, config)
+    stander_records, stander_ids, assembly_bbox = process_standers(
+        doc, bom_labels, config, collision_config=collision_config, bom_categories=bom_categories)
     reduced_assembly = build_stander_reduced_assembly(doc, stander_ids)
 
     skip_ids = compound_ids if config.compound_directions == "none" else frozenset()
@@ -538,9 +860,11 @@ def run_preprocessing(
     step_path: str | Path,
     bom_path: str | Path,
     config: PreprocessingConfig | None = None,
+    collision_config=None,
 ) -> PreprocessingResult:
     doc = load_assembly(step_path)
     bom_labels = load_bom(bom_path)
+    bom_categories = load_stander_categories(bom_path)
     if _has_nested_containers(doc):
         log.warning(
             "This assembly has nested sub-assemblies (App::Part); run_preprocessing only sees the "
@@ -548,5 +872,6 @@ def run_preprocessing(
             "levels.solve_level for a correct nested run (docs/subassembly-spec.md)."
         )
     return run_preprocessing_on_document(
-        doc, bom_labels, config, step_path=Path(step_path), bom_path=Path(bom_path),
+        doc, bom_labels, config, collision_config=collision_config, bom_categories=bom_categories,
+        step_path=Path(step_path), bom_path=Path(bom_path),
     )

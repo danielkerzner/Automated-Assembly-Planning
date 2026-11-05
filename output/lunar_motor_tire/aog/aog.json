@@ -1,0 +1,63 @@
+{
+ "cache_key": "9605e3552beb9c1ae3f55b09ed9ef6b864070e8c5446857acbe42018666f4085",
+ "component_ids": [
+  "Part__Feature",
+  "Part__Feature001",
+  "Part__Feature002",
+  "Part__Feature003",
+  "_0013_A_0300_A01_3"
+ ],
+ "component_labels": [
+  "0013-P-0101-A01-PP-motor",
+  "0013-P-0102-A02-PP",
+  "0013-P-0103-A02-AM",
+  "0013-P-0105-A01-PP",
+  "0013-A-0300-A01_3"
+ ],
+ "config": {
+  "stander_gate": "prerequisites+contacts",
+  "margin": 1.0,
+  "group_consecutive": true,
+  "group_one_order": true
+ },
+ "stats": {
+  "group_rule": false,
+  "group_one_order": false,
+  "groups": {},
+  "group_order_pruned_edges": 0,
+  "N": 5,
+  "n_movable": 5,
+  "n_standers": 0,
+  "D": 12,
+  "D_prime": 12,
+  "V": 16,
+  "E": 25,
+  "nodes_per_level": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   1
+  ],
+  "connectivity_rule": true,
+  "disconnected_dropped": 3,
+  "dead_ends": 0,
+  "live_nodes": 16,
+  "complete": true,
+  "time_s": 0.02462860004743561,
+  "array_bytes": 1646
+ },
+ "complete": true,
+ "root": 0,
+ "terminal": 15,
+ "dead_ends": [],
+ "component_groups": [
+  null,
+  "0013-P-0102-A02-PP",
+  "0013-P-0103-A02-AM",
+  "0013-P-0105-A01-PP",
+  "0013-A-0300-A01_3"
+ ],
+ "date": "2026-11-04T16:17:37"
+}

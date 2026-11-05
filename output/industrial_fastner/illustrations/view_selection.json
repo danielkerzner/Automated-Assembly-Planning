@@ -1,0 +1,159 @@
+{
+  "key": "0869ccec2755db3251d270aa5694b06f48242f79e6170421fb2d44164012cedb",
+  "global_view": [
+    270.0,
+    20.0
+  ],
+  "choices": [
+    {
+      "step_index": 0,
+      "warnings": [],
+      "view": [
+        270.0,
+        20.0
+      ],
+      "is_global": true,
+      "kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.271937774149184,
+      "in_frame": true
+    },
+    {
+      "step_index": 1,
+      "warnings": [],
+      "view": [
+        270.0,
+        20.0
+      ],
+      "is_global": true,
+      "kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.5882708585247884,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.5882708585247884,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.2828882885444531,
+      "in_frame": true
+    },
+    {
+      "step_index": 2,
+      "warnings": [],
+      "view": [
+        270.0,
+        20.0
+      ],
+      "is_global": true,
+      "kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.9738219895287958,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.9738219895287958,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.22996080230065216,
+      "in_frame": true
+    },
+    {
+      "step_index": 3,
+      "warnings": [],
+      "view": [
+        270.0,
+        20.0
+      ],
+      "is_global": true,
+      "kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.2302489693000234,
+      "in_frame": true
+    },
+    {
+      "step_index": 4,
+      "warnings": [],
+      "view": [
+        300.0,
+        20.0
+      ],
+      "is_global": false,
+      "kind": "candidate",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.5170212765957447,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.5170212765957447,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.19350117130020153,
+      "in_frame": true
+    },
+    {
+      "step_index": 5,
+      "warnings": [
+        "step 6: no view shows the part unoccluded; x-ray fallback at az 270.0 el 20.0"
+      ],
+      "view": [
+        270.0,
+        20.0
+      ],
+      "is_global": true,
+      "kind": "xray",
+      "visible": true,
+      "xray": true,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.010806317539484621,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.4612396638303548,
+      "in_frame": true
+    },
+    {
+      "step_index": 6,
+      "warnings": [
+        "step 7: no view shows the part unoccluded; x-ray fallback at az 255.0 el 50.0"
+      ],
+      "view": [
+        255.0,
+        50.0
+      ],
+      "is_global": false,
+      "kind": "xray",
+      "visible": true,
+      "xray": true,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.02631578947368421,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.124825061880303,
+      "in_frame": true
+    },
+    {
+      "step_index": 7,
+      "warnings": [
+        "step 8: no view shows the part unoccluded; x-ray fallback at az 255.0 el 50.0"
+      ],
+      "view": [
+        255.0,
+        50.0
+      ],
+      "is_global": false,
+      "kind": "xray",
+      "visible": true,
+      "xray": true,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.0,
+      "vis_start_occluded": 0.047493403693931395,
+      "trajectory_px_frac": 0.124825061880303,
+      "in_frame": true
+    }
+  ]
+}

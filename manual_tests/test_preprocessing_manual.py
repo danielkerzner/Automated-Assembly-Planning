@@ -10,12 +10,12 @@ you can inspect it:
                              file -- open it in FreeCAD/any STEP viewer and
                              confirm part4 (both instances) and part7 are
                              actually gone, nothing else is
-    report.json              per-stander record (prerequisites,
-                             contact_neighbors, exit_point,
-                             dismantle_direction, bbox) plus the full
-                             candidate direction list and the whole-assembly
-                             bbox -- everything else run_preprocessing()
-                             returns
+    report.json              per-stander record (category, options[] each with
+                             direction/exit_point/blockers, holds,
+                             contact_neighbors, bbox, partner, nut_rule) plus
+                             the full candidate direction list and the
+                             whole-assembly bbox -- everything else
+                             run_preprocessing() returns
 
 Run (from repo root, environmentAPP active):
 
@@ -40,9 +40,9 @@ import Import
 from preprocessing import run_preprocessing
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_STEP = REPO_ROOT / "data" / "lunar_bodylager" / "0002-A-0900-A06-bodylager_1.stp"
-DEFAULT_BOM = REPO_ROOT / "data" / "lunar_bodylager" / "bom_generated.csv"
-DEFAULT_OUT = REPO_ROOT / "output" / "lunar_bodylager"
+DEFAULT_STEP = REPO_ROOT / "data" / "industrial_fastner" / "industrial_fastner.stp"
+DEFAULT_BOM = REPO_ROOT / "data" / "industrial_fastner" / "generated_bom.csv"
+DEFAULT_OUT = REPO_ROOT / "output" / "industrial_fastner"
 
 
 def _vec(v: FreeCAD.Vector) -> list[float]:
@@ -66,11 +66,17 @@ def main(step_path: Path, bom_path: Path, out_dir: Path) -> None:
         "stander_count": len(result.stander_records),
         "stander_records": {
             name: {
-                "prerequisites": sorted(rec.prerequisites),
+                "category": rec.category,
+                "options": [
+                    {"direction": _vec(opt.direction), "exit_point": _vec(opt.exit_point),
+                     "blockers": sorted(opt.blockers)}
+                    for opt in rec.options
+                ],
+                "holds": sorted(rec.holds),
                 "contact_neighbors": sorted(rec.contact_neighbors),
-                "exit_point": _vec(rec.exit_point),
-                "dismantle_direction": _vec(rec.dismantle_direction),
                 "bbox": [_vec(v) for v in rec.bbox] if rec.bbox else None,
+                "partner": rec.partner,
+                "nut_rule": rec.nut_rule,
             }
             for name, rec in result.stander_records.items()
         },
@@ -85,12 +91,14 @@ def main(step_path: Path, bom_path: Path, out_dir: Path) -> None:
 
     # 3. Short console summary.
     print(f"Standers processed: {len(result.stander_records)}")
+    cat_name = {1: "screw", 2: "nut", 3: "other"}
     for name, rec in result.stander_records.items():
         bbox_str = f"{_vec(rec.bbox[0])} -> {_vec(rec.bbox[1])}" if rec.bbox else None
+        opts_str = "; ".join(f"dir={_vec(opt.direction)} blockers={sorted(opt.blockers)}" for opt in rec.options)
         print(
-            f"  {name}: {len(rec.prerequisites)} prerequisite(s), "
-            f"{len(rec.contact_neighbors)} contact neighbor(s), "
-            f"dismantle_direction={_vec(rec.dismantle_direction)}, bbox={bbox_str}"
+            f"  {name} ({cat_name.get(rec.category, rec.category)}): {opts_str}, "
+            f"holds={sorted(rec.holds)}, {len(rec.contact_neighbors)} contact neighbor(s), "
+            f"partner={rec.partner}, nut_rule={rec.nut_rule}, bbox={bbox_str}"
         )
     print(
         f"Reduced assembly: {len(reduced_objs)} component(s) "

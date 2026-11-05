@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AoG graph</title>
+<style>
+  :root {
+    --bg: #ffffff; --panel: #f6f7f9; --line: #d5d9e0; --text: #1c2330; --muted: #5d677a;
+    --node: #8792a6; --node-stroke: #ffffff; --root: #1c2330; --terminal: #1f8a4c; --dead: #c8382e;
+    --accent: #2a6fdb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12161d; --panel: #1b212b; --line: #2f3846; --text: #e6eaf1; --muted: #93a0b5;
+      --node: #7f8ba0; --node-stroke: #12161d; --root: #e6eaf1; --terminal: #4cc383; --dead: #ff7166;
+      --accent: #6aa3ff;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+         display: flex; flex-direction: column; }
+  header { padding: 10px 16px; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap;
+           gap: 6px 20px; align-items: baseline; }
+  header h1 { font-size: 16px; margin: 0; font-weight: 650; }
+  header .stats { color: var(--muted); font-size: 13px; }
+  header .bad { color: var(--dead); font-weight: 600; }
+  main { flex: 1; display: flex; min-height: 0; }
+  #stage { flex: 1; position: relative; min-width: 0; overflow: hidden; }
+  svg { width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+  svg.dragging { cursor: grabbing; }
+  aside { width: 320px; border-left: 1px solid var(--line); background: var(--panel); overflow-y: auto;
+          padding: 12px 14px; }
+  aside h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
+             margin: 14px 0 6px; font-weight: 600; }
+  aside h2:first-child { margin-top: 0; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 6px; }
+  button { font: inherit; padding: 4px 10px; border: 1px solid var(--line); border-radius: 6px;
+           background: var(--bg); color: var(--text); cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .legend { display: flex; flex-direction: column; gap: 3px; }
+  .chip { display: flex; align-items: center; gap: 8px; padding: 2px 6px; border-radius: 5px; cursor: pointer;
+          user-select: none; }
+  .chip:hover { background: var(--bg); }
+  .chip.off { opacity: .35; }
+  .chip .sw { width: 22px; height: 0; border-top: 3px solid; flex: none; }
+  .chip .sw.st { border-top-style: dashed; }
+  .chip .n { margin-left: auto; color: var(--muted); font-size: 12px; }
+  #detail { font-size: 13px; }
+  #detail .k { color: var(--muted); }
+  #detail ul, #steps { margin: 4px 0 0; padding-left: 18px; }
+  #steps li { cursor: default; padding: 1px 0; }
+  #steps li:hover { color: var(--accent); }
+  .lvl { fill: var(--muted); font-size: 12px; }
+  .node { stroke: var(--node-stroke); stroke-width: 1.5; cursor: pointer; }
+  .edge { fill: none; }
+  #tip { position: absolute; pointer-events: none; background: var(--panel); border: 1px solid var(--line);
+         border-radius: 6px; padding: 6px 9px; font-size: 12px; max-width: 340px; display: none; z-index: 5;
+         box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+  .hint { color: var(--muted); font-size: 12px; }
+  @media (max-width: 760px) { main { flex-direction: column; } aside { width: auto; max-height: 40%;
+      border-left: 0; border-top: 1px solid var(--line); } }
+</style>
+</head>
+<body>
+<header>
+  <h1>AoG graph</h1>
+  <span class="stats" id="stats"></span>
+</header>
+<main>
+  <div id="stage"><svg id="svg"><g id="vp"><g id="lvl"></g><g id="eg"></g><g id="ng"></g></g></svg><div id="tip"></div></div>
+  <aside>
+    <h2>View</h2>
+    <div class="toolbar">
+      <button id="bFit">Fit</button>
+      <button id="bSeq">Example sequence</button>
+      <button id="bClear">Clear selection</button>
+    </div>
+    <p class="hint">Wheel: zoom &middot; drag: pan &middot; click a node: highlight all paths through it &middot; click a legend row: hide that component's edges.</p>
+    <h2>Removed component (edge colour)</h2>
+    <div class="legend" id="legend"></div>
+    <h2>Selection</h2>
+    <div id="detail"><span class="hint">Nothing selected.</span></div>
+    <h2>Example sequence</h2>
+    <ol id="steps"></ol>
+    <p class="hint">Cheapest total travel, each step along its shortest free direction. Only an illustration: direction choice belongs to the ACO.</p>
+  </aside>
+</main>
+<script id="data" type="application/json">{"comps":[{"label":"P (plate)","stander":false},{"label":"B (bracket)","stander":false},{"label":"C (cover)","stander":false},{"label":"S (side)","stander":false},{"label":"screw1","stander":true},{"label":"screw2","stander":true}],"dirs":[[1.0,0.0,0.0],[-1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,-1.0,0.0],[0.0,0.0,1.0],[0.0,0.0,-1.0]],"levelSizes":[1,3,5,6,6,4,1],"nodes":[[0,0,1,0,"3f"],[1,2,1,0,"1f"],[1,1,1,0,"2f"],[1,0,1,0,"37"],[2,3,1,0,"f"],[2,1,1,0,"17"],[2,4,1,0,"1e"],[2,0,1,0,"27"],[2,2,1,0,"2b"],[3,1,1,0,"7"],[3,3,1,0,"b"],[3,4,1,0,"d"],[3,5,1,0,"e"],[3,2,1,0,"16"],[3,0,1,0,"23"],[4,0,1,0,"3"],[4,1,1,0,"5"],[4,2,1,0,"6"],[4,3,1,0,"9"],[4,4,1,0,"a"],[4,5,1,0,"c"],[5,0,1,0,"1"],[5,1,1,0,"2"],[5,2,1,0,"4"],[5,3,1,0,"8"],[6,0,1,0,"0"]],"edges":[[0,3,3,[0,2,3,4],[21.0,81.0,81.0,36.0]],[0,2,4,[4],[26.0]],[0,1,5,[5],[26.0]],[1,6,0,[0,1,2,3,5],[111.0,101.0,101.0,101.0,16.0]],[1,5,3,[0,2,3,4],[21.0,81.0,81.0,36.0]],[1,4,4,[4],[26.0]],[2,8,2,[0,1,2,3,4],[91.0,81.0,81.0,81.0,16.0]],[2,7,3,[0,2,3,4],[21.0,81.0,81.0,36.0]],[2,4,5,[5],[26.0]],[3,7,4,[4],[26.0]],[3,5,5,[5],[26.0]],[4,12,0,[0,1,2,3,5],[111.0,101.0,101.0,101.0,16.0]],[4,11,1,[1,2,3],[91.0,91.0,91.0]],[4,10,2,[0,1,2,3,4],[91.0,81.0,81.0,81.0,16.0]],[4,9,3,[0,2,3,4],[21.0,81.0,81.0,36.0]],[5,13,0,[0,1,2,3,5],[111.0,101.0,101.0,101.0,16.0]],[5,9,4,[4],[26.0]],[6,13,3,[0,2,3,4,5],[21.0,81.0,81.0,36.0,36.0]],[6,12,4,[4],[26.0]],[7,14,2,[0,1,2,3,4],[91.0,81.0,81.0,81.0,16.0]],[7,9,5,[5],[26.0]],[8,14,3,[0,2,3,4],[21.0,81.0,81.0,36.0]],[8,10,5,[5],[26.0]],[9,17,0,[0,1,2,3,5],[111.0,101.0,101.0,101.0,16.0]],[9,16,1,[0,1,2,3],[101.0,91.0,91.0,91.0]],[9,15,2,[0,1,2,3,4],[91.0,81.0,81.0,81.0,16.0]],[10,19,0,[0,1,2,3,5],[111.0,101.0,101.0,101.0,16.0]],[10,18,1,[1,2,3,4],[91.0,91.0,91.0,36.0]],[10,15,3,[0,2,3,4],[21.0,81.0,81.0,36.0]],[11,20,0,[0,1,2,3,5],[111.0,101.0,101.0,101.0,16.0]],[11,18,2,[0,1,2,3,4],[91.0,81.0,81.0,81.0,16.0]],[11,16,3,[0,1,2,3,4],[21.0,111.0,81.0,81.0,36.0]],[12,20,1,[1,2,3,5],[91.0,91.0,91.0,36.0]],[12,19,2,[0,1,2,3,4],[91.0,81.0,81.0,81.0,16.0]],[12,17,3,[0,2,3,4,5],[21.0,81.0,81.0,36.0,36.0]],[13,17,4,[4],[26.0]],[14,15,5,[5],[26.0]],[15,22,0,[0,1,2,3,5],[111.0,101.0,101.0,101.0,16.0]],[15,21,1,[0,1,2,3,4],[101.0,91.0,91.0,91.0,36.0]],[16,23,0,[0,1,2,3,5],[111.0,101.0,101.0,101.0,16.0]],[16,21,2,[0,1,2,3,4],[91.0,81.0,81.0,81.0,16.0]],[17,23,1,[0,1,2,3,5],[101.0,91.0,91.0,91.0,36.0]],[17,22,2,[0,1,2,3,4],[91.0,81.0,81.0,81.0,16.0]],[18,24,0,[0,1,2,3,5],[111.0,101.0,101.0,101.0,16.0]],[18,21,3,[0,1,2,3,4],[21.0,111.0,81.0,81.0,36.0]],[19,24,1,[1,2,3,4,5],[91.0,91.0,91.0,36.0,36.0]],[19,22,3,[0,2,3,4,5],[21.0,81.0,81.0,36.0,36.0]],[20,24,2,[0,1,2,3,4,5],[91.0,81.0,81.0,81.0,16.0,46.0]],[20,23,3,[0,1,2,3,4,5],[21.0,111.0,81.0,81.0,36.0,36.0]],[21,25,0,[0,1,2,3,4,5],[111.0,101.0,101.0,101.0,46.0,16.0]],[22,25,1,[0,1,2,3,4,5],[101.0,91.0,91.0,91.0,36.0,36.0]],[23,25,2,[0,1,2,3,4,5],[91.0,81.0,81.0,81.0,16.0,46.0]],[24,25,3,[0,1,2,3,4,5],[21.0,111.0,81.0,81.0,36.0,36.0]]],"sequence":[0,9,19,36,37,50],"stats":{"N":6,"V":26,"E":53,"dead":0,"complete":true}}</script>
+<script>
+(() => {
+  const D = JSON.parse(document.getElementById('data').textContent);
+  const NS = 'http://www.w3.org/2000/svg';
+  const N = D.comps.length, DX = 30, DY = 130, PADX = 110, PADY = 50, R = 7;
+  const svg = document.getElementById('svg'), vp = document.getElementById('vp');
+  const gL = document.getElementById('lvl'), gE = document.getElementById('eg'), gN = document.getElementById('ng');
+  const tip = document.getElementById('tip'), stage = document.getElementById('stage');
+  const maxRow = Math.max(...D.levelSizes);
+  const lastLevel = Math.max(...D.levelSizes.map((s, i) => s ? i : 0));
+  const W = maxRow * DX + PADX * 2, H = lastLevel * DY + PADY * 2;
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const color = c => `hsl(${Math.round((c * 360 / N + 12) % 360)} 62% ${matchMedia('(prefers-color-scheme: dark)').matches ? 62 : 44}%)`;
+  const esc = s => String(s).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+  const r3 = x => Math.round(x * 1000) / 1000 + 0;
+  function dirName(v) {
+    const nz = v.map((x, i) => [x, i]).filter(p => Math.abs(p[0]) > 1e-6);
+    if (nz.length === 1 && Math.abs(Math.abs(nz[0][0]) - 1) < 1e-6) return (nz[0][0] > 0 ? '+' : '−') + 'xyz'[nz[0][1]];
+    return '(' + v.map(r3).join(', ') + ')';
+  }
+  const pos = D.nodes.map(n => ({
+    x: W / 2 + (n[1] - (D.levelSizes[n[0]] - 1) / 2) * DX, y: PADY + n[0] * DY }));
+  const masks = D.nodes.map(n => BigInt('0x' + n[4]));
+  const present = v => { const p = []; for (let c = 0; c < N; c++) if ((masks[v] >> BigInt(c)) & 1n) p.push(c); return p; };
+  const out = D.nodes.map(() => []), inn = D.nodes.map(() => []);
+  D.edges.forEach((e, i) => { out[e[0]].push(i); inn[e[1]].push(i); });
+  const edgeCount = new Array(N).fill(0); D.edges.forEach(e => edgeCount[e[2]]++);
+
+  const el = (name, attrs, parent) => { const n = document.createElementNS(NS, name);
+    for (const k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; };
+
+  D.levelSizes.forEach((sz, L) => {
+    if (!sz) return;
+    const t = el('text', {x: 10, y: PADY + L * DY + 4, class: 'lvl'}, gL);
+    t.textContent = `L${L}: ${sz} state${sz > 1 ? 's' : ''}`;
+    const s = el('text', {x: 10, y: PADY + L * DY + 19, class: 'lvl'}, gL);
+    s.textContent = `${N - L} assembled`;
+  });
+
+  const edgeEls = D.edges.map((e, i) => {
+    const a = pos[e[0]], b = pos[e[1]], st = D.comps[e[2]].stander;
+    const ln = el('line', {x1: a.x, y1: a.y, x2: b.x, y2: b.y, class: 'edge', stroke: color(e[2]),
+      'stroke-width': 1.3, opacity: 0.32, 'stroke-dasharray': st ? '5 3' : ''}, gE);
+    ln.addEventListener('mousemove', ev => showEdgeTip(ev, i));
+    ln.addEventListener('mouseleave', hideTip);
+    return ln;
+  });
+  const nodeEls = D.nodes.map((n, v) => {
+    const c = el('circle', {cx: pos[v].x, cy: pos[v].y, r: R, class: 'node'}, gN);
+    c.addEventListener('mousemove', ev => showNodeTip(ev, v));
+    c.addEventListener('mouseleave', hideTip);
+    c.addEventListener('click', ev => { if (!moved) select(v); });
+    return c;
+  });
+  function paintNodes() {
+    nodeEls.forEach((c, v) => {
+      const n = D.nodes[v];
+      let fill = css('--node');
+      if (n[0] === 0) fill = css('--root');
+      else if (n[0] === N) fill = css('--terminal');
+      else if (n[3]) fill = css('--dead');
+      else if (!n[2]) fill = css('--dead');
+      c.setAttribute('fill', fill);
+      c.setAttribute('r', (n[0] === 0 || n[0] === N) ? R + 2 : R);
+    });
+  }
+  paintNodes();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    paintNodes(); edgeEls.forEach((l, i) => l.setAttribute('stroke', color(D.edges[i][2])));
+    buildLegend(); });
+
+  // ---- tooltips -----------------------------------------------------------
+  function placeTip(ev, html) {
+    tip.innerHTML = html; tip.style.display = 'block';
+    const r = stage.getBoundingClientRect();
+    let x = ev.clientX - r.left + 14, y = ev.clientY - r.top + 14;
+    if (x + tip.offsetWidth > r.width - 4) x = ev.clientX - r.left - tip.offsetWidth - 14;
+    if (y + tip.offsetHeight > r.height - 4) y = ev.clientY - r.top - tip.offsetHeight - 14;
+    tip.style.left = Math.max(4, x) + 'px'; tip.style.top = Math.max(4, y) + 'px';
+  }
+  function hideTip() { tip.style.display = 'none'; }
+  function edgeInfo(i) {
+    const e = D.edges[i];
+    return e[3].map((k, j) => `${dirName(D.dirs[k])}&nbsp;${e[4][j]}&nbsp;mm`).join(' &middot; ');
+  }
+  function showEdgeTip(ev, i) {
+    const e = D.edges[i], c = D.comps[e[2]];
+    placeTip(ev, `<b>Remove ${esc(c.label)}</b>${c.stander ? ' (stander)' : ''}<br>${e[3].length} free direction${e[3].length > 1 ? 's' : ''}: ${edgeInfo(i)}`);
+  }
+  function stateSummary(v) {
+    const p = present(v), n = D.nodes[v];
+    const flag = n[0] === 0 ? 'root' : n[0] === N ? 'fully disassembled' : (n[3] ? 'DEAD END' : (n[2] ? '' : 'cannot reach the end'));
+    return `<b>State ${v}</b> &middot; level ${n[0]}${flag ? ' &middot; ' + flag : ''}<br>` +
+      `<span class="k">assembled (${p.length}):</span> ${p.map(c => esc(D.comps[c].label)).join(', ') || '—'}`;
+  }
+  function showNodeTip(ev, v) { placeTip(ev, stateSummary(v) + `<br><span class="k">moves out:</span> ${out[v].length}`); }
+
+  // ---- highlight / filters -----------------------------------------------
+  const hidden = new Set(); let selected = null, seqOn = false, hoverStep = null;
+  const seqEdges = new Set(D.sequence), seqNodes = new Set();
+  { let v = 0; seqNodes.add(0); D.sequence.forEach(i => { seqNodes.add(D.edges[i][1]); }); }
+  function related(v) {
+    const nodes = new Set([v]), edges = new Set();
+    let stack = [v];
+    while (stack.length) { const u = stack.pop(); for (const i of inn[u]) { edges.add(i);
+      const p = D.edges[i][0]; if (!nodes.has(p)) { nodes.add(p); stack.push(p); } } }
+    stack = [v];
+    const seen = new Set([v]);
+    while (stack.length) { const u = stack.pop(); for (const i of out[u]) { edges.add(i);
+      const d = D.edges[i][1]; nodes.add(d); if (!seen.has(d)) { seen.add(d); stack.push(d); } } }
+    return {nodes, edges};
+  }
+  function refresh() {
+    const rel = selected === null ? null : related(selected);
+    D.edges.forEach((e, i) => {
+      const l = edgeEls[i];
+      l.style.display = hidden.has(e[2]) ? 'none' : '';
+      let op = 0.32, w = 1.3;
+      if (rel) { if (rel.edges.has(i)) { op = 0.85; w = 1.8; } else op = 0.04; }
+      if (seqOn && seqEdges.has(i)) { op = 1; w = 3.6; }
+      if (hoverStep === i) { op = 1; w = 5; }
+      l.setAttribute('opacity', op); l.setAttribute('stroke-width', w);
+    });
+    nodeEls.forEach((c, v) => {
+      let op = 1;
+      if (rel && !rel.nodes.has(v)) op = 0.12;
+      c.setAttribute('opacity', op);
+      const ring = v === selected || (seqOn && seqNodes.has(v));
+      c.setAttribute('stroke', ring ? css('--accent') : css('--node-stroke'));
+      c.setAttribute('stroke-width', ring ? 3 : 1.5);
+    });
+  }
+  function select(v) {
+    selected = (selected === v) ? null : v;
+    const d = document.getElementById('detail');
+    if (selected === null) { d.innerHTML = '<span class="hint">Nothing selected.</span>'; refresh(); return; }
+    const moves = out[v].map(i => { const e = D.edges[i], c = D.comps[e[2]];
+      return `<li>${esc(c.label)}${c.stander ? ' (stander)' : ''}: ${edgeInfo(i)}</li>`; }).join('');
+    d.innerHTML = stateSummary(v) + `<br><span class="k">Moves out (${out[v].length}):</span><ul>${moves || '<li>none</li>'}</ul>`;
+    refresh();
+  }
+  document.getElementById('bClear').onclick = () => { selected = null;
+    document.getElementById('detail').innerHTML = '<span class="hint">Nothing selected.</span>'; refresh(); };
+  const bSeq = document.getElementById('bSeq');
+  bSeq.onclick = () => { seqOn = !seqOn; bSeq.classList.toggle('on', seqOn); refresh(); };
+  if (!D.sequence.length) { bSeq.disabled = true; bSeq.title = 'The AoG has no complete sequence'; }
+
+  function buildLegend() {
+    const lg = document.getElementById('legend'); lg.innerHTML = '';
+    D.comps.forEach((c, i) => {
+      const row = document.createElement('div'); row.className = 'chip' + (hidden.has(i) ? ' off' : '');
+      row.innerHTML = `<span class="sw${c.stander ? ' st' : ''}" style="border-color:${color(i)}"></span>` +
+        `<span>${esc(c.label)}${c.stander ? ' <span class="k">(stander)</span>' : ''}</span><span class="n">${edgeCount[i]}</span>`;
+      row.onclick = () => { hidden.has(i) ? hidden.delete(i) : hidden.add(i); buildLegend(); refresh(); };
+      lg.appendChild(row);
+    });
+  }
+  buildLegend();
+
+  const steps = document.getElementById('steps');
+  D.sequence.forEach((i, s) => {
+    const e = D.edges[i], c = D.comps[e[2]];
+    let j = 0; e[4].forEach((t, q) => { if (t < e[4][j]) j = q; });
+    const li = document.createElement('li');
+    li.innerHTML = `${esc(c.label)} → ${dirName(D.dirs[e[3][j]])}, ${e[4][j]}&nbsp;mm`;
+    li.onmouseenter = () => { hoverStep = i; refresh(); };
+    li.onmouseleave = () => { hoverStep = null; refresh(); };
+    steps.appendChild(li);
+  });
+  if (!D.sequence.length) steps.innerHTML = '<li class="hint" style="list-style:none;margin-left:-18px">no complete sequence</li>';
+
+  // ---- header -------------------------------------------------------------
+  const S = D.stats;
+  document.getElementById('stats').innerHTML =
+    `${S.N} components &middot; ${S.V} states &middot; ${S.E} moves` +
+    (S.dead ? ` &middot; <span class="bad">${S.dead} dead end${S.dead > 1 ? 's' : ''}</span>` : '') +
+    (S.complete ? '' : ' &middot; <span class="bad">incomplete: the root cannot reach the end</span>');
+
+  // ---- pan / zoom ---------------------------------------------------------
+  let view = {x: 0, y: 0, k: 1}, moved = false;
+  const apply = () => vp.setAttribute('transform', `translate(${view.x} ${view.y}) scale(${view.k})`);
+  function fit() {
+    const r = svg.getBoundingClientRect();
+    const k = Math.min(r.width / W, r.height / H, 1.6);
+    view = {k, x: (r.width - W * k) / 2, y: (r.height - H * k) / 2}; apply();
+  }
+  document.getElementById('bFit').onclick = fit;
+  addEventListener('resize', fit);
+  svg.addEventListener('wheel', ev => {
+    ev.preventDefault();
+    const r = svg.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top;
+    const f = ev.deltaY < 0 ? 1.15 : 1 / 1.15, k = Math.min(8, Math.max(0.05, view.k * f)), g = k / view.k;
+    view.x = mx - (mx - view.x) * g; view.y = my - (my - view.y) * g; view.k = k; apply();
+  }, {passive: false});
+  let drag = null;
+  svg.addEventListener('pointerdown', ev => { drag = {x: ev.clientX, y: ev.clientY, vx: view.x, vy: view.y}; moved = false; });
+  addEventListener('pointermove', ev => {
+    if (!drag) return;
+    const dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) { moved = true; svg.classList.add('dragging'); hideTip(); }
+    if (moved) { view.x = drag.vx + dx; view.y = drag.vy + dy; apply(); }
+  });
+  addEventListener('pointerup', () => { drag = null; svg.classList.remove('dragging'); setTimeout(() => moved = false, 0); });
+  fit(); refresh();
+})();
+</script>
+</body>
+</html>

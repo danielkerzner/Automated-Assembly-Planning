@@ -74,7 +74,7 @@ from aog_generator import (  # noqa: E402
 )
 
 DEFAULT_STEP = REPO_ROOT / "data" / "industrial_fastner" / "industrial_fastner.stp"
-DEFAULT_BOM = REPO_ROOT / "data" / "industrial_fastner" / "bom.csv"
+DEFAULT_BOM = REPO_ROOT / "data" / "industrial_fastner" / "generated_bom.csv"
 DEFAULT_OUT = REPO_ROOT / "tests" / "industrial_fastner"
 DEFAULT_H = 2.0
 
@@ -104,7 +104,9 @@ XP, XN, YP, YN, ZP, ZN = range(6)
 
 def _make_inputs(labels, n, blocked, standers, boxes, key) -> AoGInputs:
     """blocked: (i, j, k) triples meaning "i cannot leave past j along axis k" (the antisymmetric
-    twin is added). standers: list of (label, unit direction, gate set of movable indices, box)."""
+    twin is added). standers: list of (label, unit direction, holds set of movable indices, box) --
+    one RemovalOption each, no blockers of its own (these demos only model holds); holds = movable
+    indices that must stay present while the stander leaves (docs/stander_processing-spec.md P6)."""
     free = np.ones((n, n, len(AXES)), dtype=bool)
     for i, j, k in blocked:
         free[i, j, k] = False
@@ -121,8 +123,9 @@ def _make_inputs(labels, n, blocked, standers, boxes, key) -> AoGInputs:
         free=free,
         directions=AXES.copy(),
         neg=AXNEG.copy(),
-        stander_dir={n + q: np.asarray(s[1], dtype=float) for q, s in enumerate(standers)},
-        stander_gate={n + q: set(s[2]) for q, s in enumerate(standers)},
+        stander_options={n + q: [(np.asarray(s[1], dtype=float), set())] for q, s in enumerate(standers)},
+        stander_holds={n + q: set(s[2]) for q, s in enumerate(standers)},
+        nut_links={},
         bbox_lo=lo,
         bbox_hi=hi,
         assembly_lo=lo.min(axis=0),
@@ -235,8 +238,13 @@ def check_structure(aog: AoG) -> dict:
     return _result("S1", "structure", p, f"{V} nodes, {E} edges, layered DAG, CSR consistent")
 
 
+def _stander_dir0(inputs: AoGInputs, s: int) -> np.ndarray:
+    """First (and, for every demo this script builds, only) option's direction of stander `s`."""
+    return np.asarray(inputs.stander_options[s][0][0], dtype=float)
+
+
 def _expected_stander_dir(aog: AoG, inputs: AoGInputs, s: int) -> int:
-    d = np.asarray(inputs.stander_dir[s], dtype=float)
+    d = _stander_dir0(inputs, s)
     d = d / np.linalg.norm(d)
     return int(np.flatnonzero(np.linalg.norm(aog.directions - d, axis=1) < 1e-6)[0])
 
@@ -247,7 +255,7 @@ def check_bruteforce(aog: AoG, inputs: AoGInputs, max_n: int) -> dict:
         return {"id": "S2", "name": "brute force", "passed": True, "skipped": True,
                 "detail": f"skipped (N={N} > {max_n})"}
     free, D = inputs.free, inputs.free.shape[2]
-    gates = {s: frozenset(inputs.stander_gate.get(s, ())) for s in range(n, N)}
+    gates = {s: frozenset(inputs.stander_holds.get(s, ())) for s in range(n, N)}
     sdir = {s: _expected_stander_dir(aog, inputs, s) for s in range(n, N)}
 
     def valid(S):
@@ -305,7 +313,7 @@ def check_standers(aog: AoG, inputs: AoGInputs) -> dict:
     mask = aog.node_mask.astype(np.uint64)
     p = []
     for s in range(n, N):
-        gate = np.uint64(sum(1 << g for g in inputs.stander_gate.get(s, ())))
+        gate = np.uint64(sum(1 << g for g in inputs.stander_holds.get(s, ())))
         present = ((mask >> np.uint64(s)) & np.uint64(1)).astype(bool)
         has_move = np.bincount(aog.edge_src[aog.edge_comp == s].astype(np.int64), minlength=V) > 0
         label = aog.component_labels[s]
@@ -386,7 +394,7 @@ def check_paths(aog: AoG, inputs: AoGInputs, samples: int, seed: int = 0) -> dic
                 "detail": "skipped (AoG is incomplete)"}
     N, n = aog.n_components, inputs.n_movable
     rng = random.Random(seed)
-    gates = {s: set(inputs.stander_gate.get(s, ())) for s in range(n, N)}
+    gates = {s: set(inputs.stander_holds.get(s, ())) for s in range(n, N)}
     p, walked = [], 0
     for _ in range(samples):
         v, path = aog.root, []
@@ -503,17 +511,19 @@ def check_cache_key(aog: AoG, inputs: AoGInputs) -> dict:
         p.append("changing the margin did not change the key")
     if N > n:
         s = n
-        gate = set(inputs.stander_gate.get(s, ()))
+        gate = set(inputs.stander_holds.get(s, ()))
         other = set(range(n)) - gate
         new_gate = (gate | {next(iter(other))}) if other else (gate - {next(iter(gate))} if gate else gate)
         if new_gate != gate:
-            changed = replace(inputs, stander_gate={**inputs.stander_gate, s: new_gate})
+            changed = replace(inputs, stander_holds={**inputs.stander_holds, s: new_gate})
             if compute_cache_key(changed, aog.config) == key:
-                p.append("changing a gate set did not change the key")
-        moved = replace(inputs, stander_dir={**inputs.stander_dir, s: -np.asarray(inputs.stander_dir[s])})
+                p.append("changing a holds set did not change the key")
+        d0, blockers0 = inputs.stander_options[s][0]
+        moved_options = {**inputs.stander_options, s: [(-np.asarray(d0, dtype=float), blockers0)]}
+        moved = replace(inputs, stander_options=moved_options)
         if compute_cache_key(moved, aog.config) == key:
             p.append("changing a stander direction did not change the key")
-    return _result("S10", "cache key", p, "key changes with the config, gate sets and stander directions")
+    return _result("S10", "cache key", p, "key changes with the config, holds sets and stander directions")
 
 
 def run_checks(aog: AoG, inputs: AoGInputs, samples: int, brute_max_n: int) -> list[dict]:
@@ -649,8 +659,8 @@ def build_report(aog: AoG, inputs: AoGInputs, checks: list[dict], path: list[int
         "directions": [{"index": k, "vector": _vec(aog.directions[k]),
                         "neg": int(aog.neg[k]), "appended_for_standers": k >= inputs.free.shape[2]}
                        for k in range(len(aog.directions))],
-        "stander_gates": {aog.component_labels[s]: sorted(aog.component_labels[g]
-                                                          for g in inputs.stander_gate.get(s, ()))
+        "stander_holds": {aog.component_labels[s]: sorted(aog.component_labels[g]
+                                                          for g in inputs.stander_holds.get(s, ()))
                           for s in range(n, N)},
         "nodes": aog.n_nodes,
         "edges": aog.n_edges,
@@ -1018,9 +1028,9 @@ def print_summary(aog: AoG, inputs: AoGInputs, report: dict, checks: list[dict],
           f"{aog.n_nodes} states, {aog.n_edges} moves, complete={aog.complete}, "
           f"{len(aog.dead_ends)} dead ends")
     print("States per level:  " + "  ".join(f"L{L}:{s}" for L, s in enumerate(report["states_per_level"])))
-    if report["stander_gates"]:
-        print("Stander gates (must all still be present when the stander is removed):")
-        for s, g in report["stander_gates"].items():
+    if report["stander_holds"]:
+        print("Stander holds (must all still be present when the stander is removed):")
+        for s, g in report["stander_holds"].items():
             print(f"  {s}: {', '.join(g) if g else '(none)'}")
     print("Moves with everything assembled:")
     for m in report["moves_with_everything_assembled"]:
@@ -1048,7 +1058,7 @@ def print_summary(aog: AoG, inputs: AoGInputs, report: dict, checks: list[dict],
 
 def main(args: argparse.Namespace) -> int:
     logging.basicConfig(level=logging.INFO, format="%(name)s %(levelname)s: %(message)s")
-    cfg = AoGConfig(stander_gate=args.gate, margin=args.margin)
+    cfg = AoGConfig(margin=args.margin)
     t0 = time.perf_counter()
 
     if args.synthetic:
@@ -1131,8 +1141,6 @@ if __name__ == "__main__":
                         help=f"collision step h in mm (default {DEFAULT_H}, calibrated for industrial_fastner only)")
     parser.add_argument("--force-interference", action="store_true", help="recompute the interference matrix")
     parser.add_argument("--force-aog", action="store_true", help="regenerate the AoG even if a cached one matches")
-    parser.add_argument("--gate", choices=["prerequisites+contacts", "prerequisites"], default="prerequisites+contacts",
-                        help="stander gate set (default prerequisites+contacts)")
     parser.add_argument("--margin", type=float, default=AoGConfig.margin, help="travel margin in mm (default 1.0)")
     parser.add_argument("--samples", type=int, default=200, help="random paths replayed by check S6 (default 200)")
     parser.add_argument("--brute-max-n", type=int, default=BRUTE_MAX_N,

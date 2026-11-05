@@ -1,0 +1,19 @@
+Example disassembly (cheapest total travel; each step along its shortest direction).
+The ACO will choose directions itself; this only illustrates the graph.
+
+   1. remove S (side)       along (1.0, 0.0, 0.0)  travel    21.00 mm   (4 free directions)
+   2. remove screw1         along (0.0, 0.0, 1.0)  travel    26.00 mm   (1 free direction)
+   3. remove C (cover)      along (0.0, 0.0, 1.0)  travel    16.00 mm   (5 free directions)
+   4. remove screw2         along (0.0, 0.0, -1.0)  travel    26.00 mm   (1 free direction)
+   5. remove P (plate)      along (0.0, 0.0, -1.0)  travel    16.00 mm   (5 free directions)
+   6. remove B (bracket)    along (0.0, 0.0, 1.0)  travel    36.00 mm   (6 free directions)
+
+Total travel: 141.00 mm
+
+Assembly order (reverse of the above):
+   1. insert B (bracket)    along (0.0, 0.0, -1.0)  starting 36.00 mm outside
+   2. insert P (plate)      along (0.0, 0.0, 1.0)  starting 16.00 mm outside
+   3. insert screw2         along (0.0, 0.0, 1.0)  starting 26.00 mm outside
+   4. insert C (cover)      along (0.0, 0.0, -1.0)  starting 16.00 mm outside
+   5. insert screw1         along (0.0, 0.0, -1.0)  starting 26.00 mm outside
+   6. insert S (side)       along (-1.0, 0.0, 0.0)  starting 21.00 mm outside

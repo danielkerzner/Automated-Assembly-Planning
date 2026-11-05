@@ -1,0 +1,63 @@
+{
+ "cache_key": "e816a0aedd7fa6c051d3b724393b8aef5139bd86c2e4416b7b704c1b0630e52b",
+ "component_ids": [
+  "Part__Feature004",
+  "Part__Feature005",
+  "Part__Feature006",
+  "Part__Feature007",
+  "Part__Feature008"
+ ],
+ "component_labels": [
+  "0013-P-0301-A01-PP",
+  "0013-P-0302-A01-PP",
+  "0013-P-0303-A01-PP",
+  "0013-P-0304-A01-PP",
+  "0013-P-0104-A01-AM"
+ ],
+ "config": {
+  "stander_gate": "prerequisites+contacts",
+  "margin": 1.0,
+  "group_consecutive": true,
+  "group_one_order": true
+ },
+ "stats": {
+  "group_rule": false,
+  "group_one_order": false,
+  "groups": {},
+  "group_order_pruned_edges": 0,
+  "N": 5,
+  "n_movable": 5,
+  "n_standers": 0,
+  "D": 6,
+  "D_prime": 6,
+  "V": 10,
+  "E": 13,
+  "nodes_per_level": [
+   1,
+   1,
+   2,
+   2,
+   3,
+   1
+  ],
+  "connectivity_rule": true,
+  "disconnected_dropped": 6,
+  "dead_ends": 0,
+  "live_nodes": 10,
+  "complete": true,
+  "time_s": 0.004256299987901002,
+  "array_bytes": 902
+ },
+ "complete": true,
+ "root": 0,
+ "terminal": 9,
+ "dead_ends": [],
+ "component_groups": [
+  "0013-P-0301-A01-PP",
+  "0013-P-0302-A01-PP",
+  "0013-P-0303-A01-PP",
+  "0013-P-0304-A01-PP",
+  "0013-P-0104-A01-AM"
+ ],
+ "date": "2026-11-04T16:19:52"
+}

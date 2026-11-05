@@ -196,6 +196,7 @@ def synthetic_tables(aog, inputs) -> TermTables:
         cog=cog,
         tool=tool,
         group=group,
+        pitch=[None] * n,
         has_tool_column=True,
         has_group_column=True,
         patches=patches,

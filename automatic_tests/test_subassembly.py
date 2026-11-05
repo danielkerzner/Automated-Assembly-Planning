@@ -204,7 +204,8 @@ def stub_pipeline(hier):
         return SimpleNamespace(Name=f"doc_{container_id}"), frozenset(), {}
 
     def fake_run_preprocessing_on_document(doc_L, bom_labels, config, *, step_path, bom_path,
-                                           level_id, level_label, compound_ids, members):
+                                           level_id, level_label, compound_ids, members,
+                                           collision_config=None, bom_categories=None):
         c = hier.containers[level_id]
         return SimpleNamespace(level_id=level_id, level_label=level_label,
                                leaf_ids=list(c.leaf_ids), child_ids=list(c.child_ids),
@@ -1066,7 +1067,7 @@ def test_r3(rec, args):
     )
     inputs = AoGInputs(
         component_ids=ids, component_labels=ids, n_movable=3, free=free, directions=np.zeros((D, 3)),
-        neg=neg, stander_dir={}, stander_gate={}, bbox_lo=np.zeros((3, 3)), bbox_hi=np.ones((3, 3)),
+        neg=neg, stander_options={}, stander_holds={}, nut_links={}, bbox_lo=np.zeros((3, 3)), bbox_hi=np.ones((3, 3)),
         assembly_lo=np.zeros(3), assembly_hi=np.ones(3), cache_key="r3-inputs", contact=contact, group=None,
     )
     aog = generate_aog(inputs, AoGConfig())
@@ -1256,7 +1257,7 @@ def test_r7(rec, args):
             component_ids=list(interference_result.component_ids),
             component_labels=list(interference_result.component_labels),
             n_movable=n, free=interference_result.free, directions=interference_result.directions,
-            neg=interference_result.neg, stander_dir={}, stander_gate={},
+            neg=interference_result.neg, stander_options={}, stander_holds={}, nut_links={},
             bbox_lo=np.zeros((n, 3)), bbox_hi=np.ones((n, 3)) * 10,
             assembly_lo=np.zeros(3), assembly_hi=np.array([60.0, 10.0, 10.0]),
             cache_key=interference_result.cache_key, contact=interference_result.contact, group=None,

@@ -15,7 +15,7 @@
       ],
       "group": null,
       "is_stander": false,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale8\\step_01_c0.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\scale8\\step_01_c0.png",
       "view": {
         "azimuth": 300.0,
         "elevation": 35.0,
@@ -52,7 +52,7 @@
       ],
       "group": null,
       "is_stander": false,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale8\\step_02_c1.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\scale8\\step_02_c1.png",
       "view": {
         "azimuth": 300.0,
         "elevation": 35.0,
@@ -89,7 +89,7 @@
       ],
       "group": null,
       "is_stander": false,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale8\\step_03_c2.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\scale8\\step_03_c2.png",
       "view": {
         "azimuth": 300.0,
         "elevation": 35.0,
@@ -126,7 +126,7 @@
       ],
       "group": null,
       "is_stander": true,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale8\\step_04_c3.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\scale8\\step_04_c3.png",
       "view": {
         "azimuth": 300.0,
         "elevation": 35.0,
@@ -163,7 +163,7 @@
       ],
       "group": null,
       "is_stander": false,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale8\\step_05_c4.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\scale8\\step_05_c4.png",
       "view": {
         "azimuth": 300.0,
         "elevation": 35.0,
@@ -200,7 +200,7 @@
       ],
       "group": null,
       "is_stander": false,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale8\\step_06_c5.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\scale8\\step_06_c5.png",
       "view": {
         "azimuth": 300.0,
         "elevation": 35.0,
@@ -237,7 +237,7 @@
       ],
       "group": null,
       "is_stander": false,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale8\\step_07_c6.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\scale8\\step_07_c6.png",
       "view": {
         "azimuth": 300.0,
         "elevation": 35.0,
@@ -274,7 +274,7 @@
       ],
       "group": null,
       "is_stander": true,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale8\\step_08_c7.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\scale8\\step_08_c7.png",
       "view": {
         "azimuth": 300.0,
         "elevation": 35.0,
@@ -297,7 +297,7 @@
       "warnings": []
     }
   ],
-  "manual_path": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\scale8\\manual.pdf",
+  "manual_path": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\scale8\\manual.pdf",
   "global_view": [
     300.0,
     35.0
@@ -305,11 +305,11 @@
   "config_hash": "7cc413b4ab4f214cd369880bcaa2762e6f866fd1aa43fb7874186f2deaf5455b",
   "stats": {
     "layers_rasterized": 592,
-    "raster_s": 3.0734271998226177,
+    "raster_s": 5.254733000003398,
     "views_evaluated": 73,
-    "view_search_s": 4.200722300010966,
-    "render_s": 4.846431999991182,
-    "total_s": 9.047180599998683
+    "view_search_s": 7.225556599999891,
+    "render_s": 5.6941178000001855,
+    "total_s": 12.919732199999999
   },
   "config": {
     "image_size": [

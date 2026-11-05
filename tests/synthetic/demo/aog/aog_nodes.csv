@@ -1,0 +1,27 @@
+﻿node,level,mask,live,dead_end,components
+0,0,63,True,False,P (plate); B (bracket); C (cover); S (side); screw1; screw2
+1,1,31,True,False,P (plate); B (bracket); C (cover); S (side); screw1
+2,1,47,True,False,P (plate); B (bracket); C (cover); S (side); screw2
+3,1,55,True,False,P (plate); B (bracket); C (cover); screw1; screw2
+4,2,15,True,False,P (plate); B (bracket); C (cover); S (side)
+5,2,23,True,False,P (plate); B (bracket); C (cover); screw1
+6,2,30,True,False,B (bracket); C (cover); S (side); screw1
+7,2,39,True,False,P (plate); B (bracket); C (cover); screw2
+8,2,43,True,False,P (plate); B (bracket); S (side); screw2
+9,3,7,True,False,P (plate); B (bracket); C (cover)
+10,3,11,True,False,P (plate); B (bracket); S (side)
+11,3,13,True,False,P (plate); C (cover); S (side)
+12,3,14,True,False,B (bracket); C (cover); S (side)
+13,3,22,True,False,B (bracket); C (cover); screw1
+14,3,35,True,False,P (plate); B (bracket); screw2
+15,4,3,True,False,P (plate); B (bracket)
+16,4,5,True,False,P (plate); C (cover)
+17,4,6,True,False,B (bracket); C (cover)
+18,4,9,True,False,P (plate); S (side)
+19,4,10,True,False,B (bracket); S (side)
+20,4,12,True,False,C (cover); S (side)
+21,5,1,True,False,P (plate)
+22,5,2,True,False,B (bracket)
+23,5,4,True,False,C (cover)
+24,5,8,True,False,S (side)
+25,6,0,True,False,(empty)

@@ -1,0 +1,275 @@
+{
+  "frames": [
+    {
+      "step": 1,
+      "steps": [
+        1
+      ],
+      "component_id": "Part__Feature005",
+      "component_label": "0013-P-0302-A01-PP",
+      "component_ids": [
+        "Part__Feature005"
+      ],
+      "component_labels": [
+        "0013-P-0302-A01-PP"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\lunar_motor_tire\\levels\\_0013_A_0300_A01_3\\illustrations\\step_01_0013-P-0302-A01-PP.png",
+      "view": {
+        "azimuth": 285.0,
+        "elevation": 20.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.14780001956993405,
+      "in_frame": true,
+      "footnote": [
+        "Step 1 / 5   0013-P-0302-A01-PP   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 2,
+      "steps": [
+        2
+      ],
+      "component_id": "Part__Feature004",
+      "component_label": "0013-P-0301-A01-PP",
+      "component_ids": [
+        "Part__Feature004"
+      ],
+      "component_labels": [
+        "0013-P-0301-A01-PP"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\lunar_motor_tire\\levels\\_0013_A_0300_A01_3\\illustrations\\step_02_0013-P-0301-A01-PP.png",
+      "view": {
+        "azimuth": 285.0,
+        "elevation": 20.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.7581957348481202,
+      "vis_start": 0.5206277379290425,
+      "vis_end_occluded": 0.7581957348481202,
+      "vis_start_occluded": 0.5206277379290425,
+      "trajectory_px_frac": 0.13106591754077582,
+      "in_frame": true,
+      "footnote": [
+        "Step 2 / 5   0013-P-0301-A01-PP   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 3,
+      "steps": [
+        3
+      ],
+      "component_id": "Part__Feature006",
+      "component_label": "0013-P-0303-A01-PP",
+      "component_ids": [
+        "Part__Feature006"
+      ],
+      "component_labels": [
+        "0013-P-0303-A01-PP"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\lunar_motor_tire\\levels\\_0013_A_0300_A01_3\\illustrations\\step_03_0013-P-0303-A01-PP.png",
+      "view": {
+        "azimuth": 0.0,
+        "elevation": 35.0,
+        "is_global": false
+      },
+      "view_kind": "none",
+      "visible": false,
+      "xray": false,
+      "vis_end": 0.8888888888888888,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.8888888888888888,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.03478105264339553,
+      "in_frame": true,
+      "footnote": [
+        "Step 3 / 5   0013-P-0303-A01-PP   Tool: by hand",
+        "Re-orient assembly: gravity along (0, -1, 0)"
+      ],
+      "reorient": true,
+      "hold": false,
+      "warnings": [
+        "step 3: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 0.0 el 35.0"
+      ]
+    },
+    {
+      "step": 4,
+      "steps": [
+        4
+      ],
+      "component_id": "Part__Feature008",
+      "component_label": "0013-P-0104-A01-AM",
+      "component_ids": [
+        "Part__Feature008"
+      ],
+      "component_labels": [
+        "0013-P-0104-A01-AM"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\lunar_motor_tire\\levels\\_0013_A_0300_A01_3\\illustrations\\step_04_0013-P-0104-A01-AM.png",
+      "view": {
+        "azimuth": 330.0,
+        "elevation": 20.0,
+        "is_global": false
+      },
+      "view_kind": "none",
+      "visible": false,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.0823914453274049,
+      "in_frame": true,
+      "footnote": [
+        "Step 4 / 5   0013-P-0104-A01-AM   Tool: by hand",
+        "Re-orient assembly: gravity along (0, 1, 0)"
+      ],
+      "reorient": true,
+      "hold": false,
+      "warnings": [
+        "step 4: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 330.0 el 20.0"
+      ]
+    },
+    {
+      "step": 5,
+      "steps": [
+        5
+      ],
+      "component_id": "Part__Feature007",
+      "component_label": "0013-P-0304-A01-PP",
+      "component_ids": [
+        "Part__Feature007"
+      ],
+      "component_labels": [
+        "0013-P-0304-A01-PP"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\lunar_motor_tire\\levels\\_0013_A_0300_A01_3\\illustrations\\step_05_0013-P-0304-A01-PP.png",
+      "view": {
+        "azimuth": 195.0,
+        "elevation": 20.0,
+        "is_global": false
+      },
+      "view_kind": "none",
+      "visible": false,
+      "xray": false,
+      "vis_end": 0.5725207514198339,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.5725207514198339,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.04710789029604744,
+      "in_frame": true,
+      "footnote": [
+        "Step 5 / 5   0013-P-0304-A01-PP   Tool: by hand",
+        "Hold in place"
+      ],
+      "reorient": false,
+      "hold": true,
+      "warnings": [
+        "step 5: not visible in any view (degenerate trajectory or out of frame); using the best-scoring view az 195.0 el 20.0"
+      ]
+    }
+  ],
+  "manual_path": "output\\lunar_motor_tire\\levels\\_0013_A_0300_A01_3\\illustrations\\manual.pdf",
+  "global_view": [
+    285.0,
+    20.0
+  ],
+  "config_hash": "c55058cec1b708e31a08a04cf2e48b7571090c954c0bc29b334ad09abef14a90",
+  "stats": {
+    "layers_rasterized": 2164,
+    "raster_s": 76.80036410072353,
+    "views_evaluated": 525,
+    "view_search_s": 75.86125469999388,
+    "render_s": 10.582248199963942,
+    "total_s": 86.44350829999894
+  },
+  "config": {
+    "image_size": [
+      1600,
+      1200
+    ],
+    "search_size": [
+      480,
+      360
+    ],
+    "dpi": 200,
+    "tess_tolerance_rel": 0.002,
+    "default_view": [
+      -35.0,
+      30.0
+    ],
+    "azimuths": [
+      0,
+      15,
+      30,
+      45,
+      60,
+      75,
+      90,
+      105,
+      120,
+      135,
+      150,
+      165,
+      180,
+      195,
+      210,
+      225,
+      240,
+      255,
+      270,
+      285,
+      300,
+      315,
+      330,
+      345
+    ],
+    "elevations": [
+      20,
+      35,
+      50
+    ],
+    "vis_min_end": 0.5,
+    "vis_min_start": 0.5,
+    "min_trajectory_px_frac": 0.12,
+    "perturb_step_deg": 5.0,
+    "perturb_max_deg": 30.0,
+    "xray_alpha": 0.25,
+    "placed_color": "#bdbdbd",
+    "new_color": "#f28e2b",
+    "stander_color": "#3b75af",
+    "ghost_alpha": 0.35,
+    "show_gravity": true,
+    "mark_unstable": true,
+    "footnote_show_vector": false,
+    "group_frames": true,
+    "title": "0013-A-0300-A01_3",
+    "language": "en"
+  }
+}

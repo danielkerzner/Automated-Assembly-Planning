@@ -15,7 +15,7 @@
       ],
       "group": null,
       "is_stander": false,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\l9\\step_01_A.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l9\\step_01_A.png",
       "view": {
         "azimuth": 0.0,
         "elevation": 35.0,
@@ -52,7 +52,7 @@
       ],
       "group": null,
       "is_stander": false,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\l9\\step_02_B.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l9\\step_02_B.png",
       "view": {
         "azimuth": 0.0,
         "elevation": 35.0,
@@ -89,7 +89,7 @@
       ],
       "group": null,
       "is_stander": true,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\l9\\step_03_C.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l9\\step_03_C.png",
       "view": {
         "azimuth": 0.0,
         "elevation": 35.0,
@@ -126,7 +126,7 @@
       ],
       "group": null,
       "is_stander": false,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\l9\\step_04_D.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l9\\step_04_D.png",
       "view": {
         "azimuth": 0.0,
         "elevation": 35.0,
@@ -149,7 +149,7 @@
       "warnings": []
     }
   ],
-  "manual_path": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\l9\\manual.pdf",
+  "manual_path": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l9\\manual.pdf",
   "global_view": [
     0.0,
     35.0
@@ -157,11 +157,11 @@
   "config_hash": "df2c73a3370fc70a223641f61ba55c0ed0f7408075b4714470585be23972c695",
   "stats": {
     "layers_rasterized": 296,
-    "raster_s": 0.1421370000753086,
+    "raster_s": 0.2736285000046337,
     "views_evaluated": 73,
-    "view_search_s": 0.201873699988937,
-    "render_s": 0.36434230001759715,
-    "total_s": 0.5662192999734543
+    "view_search_s": 0.38727689999996073,
+    "render_s": 0.6762852000001658,
+    "total_s": 1.0635683000000427
   },
   "config": {
     "image_size": [

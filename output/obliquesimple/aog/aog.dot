@@ -1,0 +1,41 @@
+digraph AoG {
+  rankdir=TB;
+  node [shape=box, fontsize=9];
+  { rank=same; n0; }
+  n0 [label="0\ncube\nplug\nplug001\nplug002\nplug003\nplug004\nbase"];
+  { rank=same; n1; n2; }
+  n1 [label="1\ncube\nplug001\nplug002\nplug003\nplug004\nbase"];
+  n2 [label="2\nplug\nplug001\nplug002\nplug003\nplug004\nbase"];
+  { rank=same; n3; n4; }
+  n3 [label="3\ncube\nplug002\nplug003\nplug004\nbase"];
+  n4 [label="4\nplug001\nplug002\nplug003\nplug004\nbase"];
+  { rank=same; n5; n6; }
+  n5 [label="5\ncube\nplug003\nplug004\nbase"];
+  n6 [label="6\nplug002\nplug003\nplug004\nbase"];
+  { rank=same; n7; n8; }
+  n7 [label="7\ncube\nplug004\nbase"];
+  n8 [label="8\nplug003\nplug004\nbase"];
+  { rank=same; n9; n10; }
+  n9 [label="9\ncube\nbase"];
+  n10 [label="10\nplug004\nbase"];
+  { rank=same; n11; n12; }
+  n11 [label="11\ncube"];
+  n12 [label="12\nbase"];
+  { rank=same; n13; }
+  n13 [label="13\n(empty)"];
+  n0 -> n2 [label="cube\n[9]", fontsize=8];
+  n0 -> n1 [label="plug\n[7]", fontsize=8];
+  n1 -> n3 [label="plug001\n[4]", fontsize=8];
+  n2 -> n4 [label="plug\n[7]", fontsize=8];
+  n3 -> n5 [label="plug002\n[9]", fontsize=8];
+  n4 -> n6 [label="plug001\n[4]", fontsize=8];
+  n5 -> n7 [label="plug003\n[0]", fontsize=8];
+  n6 -> n8 [label="plug002\n[9]", fontsize=8];
+  n7 -> n9 [label="plug004\n[11]", fontsize=8];
+  n8 -> n10 [label="plug003\n[0]", fontsize=8];
+  n9 -> n12 [label="cube\n[9]", fontsize=8];
+  n9 -> n11 [label="base\n[8]", fontsize=8];
+  n10 -> n12 [label="plug004\n[11]", fontsize=8];
+  n11 -> n13 [label="cube\n[0 1 2 3 4 5 6 7 8 9 10 11 12 13]", fontsize=8];
+  n12 -> n13 [label="base\n[0 1 2 3 4 5 6 7 8 9 10 11 12 13]", fontsize=8];
+}

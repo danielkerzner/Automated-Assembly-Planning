@@ -3,52 +3,316 @@
     "core"
   ],
   "results": {
-    "H6b": {
-      "passed": false,
-      "checks": [],
-      "notes": [],
-      "error": "ValueError: BOM row for container '0002-P-0909-A01-PP_3' [_0002_P_0909_A01_PP_3] sets is_stander=true, but a container cannot be a stander (CLAUDE.md: standers are flagged on leaf rows only) -- fix the row or confirm it should not be a container",
-      "seconds": 1.013
-    },
-    "H1b": {
-      "passed": false,
+    "H1": {
+      "passed": true,
       "checks": [
         {
-          "label": "industrial_fastner: flat, root + 8 leaves (expected 8, no containers)",
+          "label": "flat: root + 8 leaves (got 8 leaves, 0 containers)",
+          "passed": true
+        },
+        {
+          "label": "nested: root direct leaves ['leafA', 'leafB'] (transparent group flattened), containers ['containerX', 'containerY']",
+          "passed": true
+        },
+        {
+          "label": "nested: container children correct",
+          "passed": true
+        },
+        {
+          "label": "transparent group type does not change the parent id",
+          "passed": true
+        },
+        {
+          "label": "no single top-level App::Part: virtual __root__ holds the top-level objects",
+          "passed": true
+        },
+        {
+          "label": "App::Link raises NotImplementedError",
           "passed": true
         }
       ],
       "notes": [],
-      "error": "ValueError: BOM row for container '0002-P-0909-A01-PP_3' [_0002_P_0909_A01_PP_3] sets is_stander=true, but a container cannot be a stander (CLAUDE.md: standers are flagged on leaf rows only) -- fix the row or confirm it should not be a container",
-      "seconds": 0.897
+      "seconds": 0.0
     },
-    "H12": {
-      "passed": false,
+    "H4": {
+      "passed": true,
       "checks": [
         {
-          "label": "same component ids/labels (5 components)",
+          "label": "blank processed defaults to true",
           "passed": true
         },
         {
-          "label": "same component shapes (volumes match within 1e-9)",
+          "label": "explicit false (2 leaves) -> not processed, no child level",
           "passed": true
         },
         {
-          "label": "same candidate directions (10)",
+          "label": "false on a leaf row is ignored with a warning",
           "passed": true
         },
         {
-          "label": "same interference cache_key (True)",
+          "label": "root is processed whatever its BOM value",
           "passed": true
         },
         {
-          "label": "same stander ids",
+          "label": "overriding root processed warns",
+          "passed": true
+        },
+        {
+          "label": "invalid processed text raises",
           "passed": true
         }
       ],
       "notes": [],
-      "error": "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\danie\\\\Documents\\\\documentosprincipal\\\\Master Thesis\\\\AAP\\\\tests\\\\industrial_fastner\\\\interference\\\\interference.json'",
-      "seconds": 7.109
+      "seconds": 0.001
+    },
+    "H4b": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "matching subassembly column does not raise",
+          "passed": true
+        },
+        {
+          "label": "mismatching subassembly column raises and names the row (BOM 'subassembly' column does not match the STEP tree (BOM and STEP are out of sync):\ncontainer 'ContainerX' [containerX]: BOM subassembly='WrongParent', tree parent='Assembly')",
+          "passed": true
+        },
+        {
+          "label": "blank subassembly cell is not checked",
+          "passed": true
+        },
+        {
+          "label": "unmatched BOM label warns",
+          "passed": true
+        },
+        {
+          "label": "unmatched BOM label with a non-blank 'processed' raises and names the label (BOM has unmatched labels with a 'processed' value (BOM and STEP are out of sync):\nBOM label 'NoSuchLabel' sets 'processed' but matches no component in the assembly tree (stale or misspelled label; a processed/not-processed decision on it would be silently lost))",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.001
+    },
+    "H4c": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "is_stander=true on a container row raises and names the row (BOM row for container 'ContainerX' [containerX] sets is_stander=true, but a container cannot be a stander (CLAUDE.md: standers are flagged on leaf rows only) -- fix the row or confirm it should not be a container)",
+          "passed": true
+        },
+        {
+          "label": "is_stander=false on a container row does not raise",
+          "passed": true
+        },
+        {
+          "label": "blank is_stander on a container row does not raise",
+          "passed": true
+        },
+        {
+          "label": "is_stander=true on a leaf row is unaffected (standers are only flagged on leaves)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.0
+    },
+    "H5": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "oversized root raises and names it (Container 'Assembly' [root] has 25 components at its level, over the limit 20; set 'processed = false' in the BOM for it (or an ancestor).)",
+          "passed": true
+        },
+        {
+          "label": "oversized container named (Container 'Big' [big] has 25 components at its level, over the limit 20; set 'processed = false' in the BOM for it (or an ancestor).)",
+          "passed": true
+        },
+        {
+          "label": "processed=false removes the oversized container from the guard",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.0
+    },
+    "H6": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "depth-first solve order: ['root', 'containerX'] == ['root', 'containerX']",
+          "passed": true
+        },
+        {
+          "label": "root level_dir == output_dir (C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\subassembly_test\\h6)",
+          "passed": true
+        },
+        {
+          "label": "only processed children get a LevelPlan (['containerX'])",
+          "passed": true
+        },
+        {
+          "label": "child containerX level_dir flat under output_dir/levels/containerX (C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\subassembly_test\\h6\\levels\\containerX)",
+          "passed": true
+        },
+        {
+          "label": "root step count == direct leaves + containers",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.006
+    },
+    "H8": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "both instances solved: ['widgetA', 'widgetB']",
+          "passed": true
+        },
+        {
+          "label": "plan.json: both instances appear as distinct subassembly steps",
+          "passed": true
+        },
+        {
+          "label": "both instances carry a sub_plan",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.005
+    },
+    "H9": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "plan.json round-trips through json.dumps/loads",
+          "passed": true
+        },
+        {
+          "label": "kind values: containerX=subassembly, leafA=part (got {'leafA': 'part', 'leafB': 'part', 'containerX': 'subassembly', 'containerY': 'subassembly'})",
+          "passed": true
+        },
+        {
+          "label": "processed subassembly (containerX, 2 leaves) nests its own sub_plan",
+          "passed": true
+        },
+        {
+          "label": "unprocessed subassembly (containerY, 1 leaf, trivial rule) has no sub_plan",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.004
+    },
+    "H13": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "inseparable pair recorded: [('Part1', 'Part2')]",
+          "passed": true
+        },
+        {
+          "label": "inseparable pair logs a warning",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.002
+    },
+    "R3": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "setup: the fully-entangled 3-part state is genuinely incomplete (V=1, E=0)",
+          "passed": true
+        },
+        {
+          "label": "locked level reports status='locked' (got 'locked')",
+          "passed": true
+        },
+        {
+          "label": "locked_parts names the stuck parts (got ['p0', 'p1', 'p2'])",
+          "passed": true
+        },
+        {
+          "label": "locked level has no sequence",
+          "passed": true
+        },
+        {
+          "label": "optimize_sequence/generate_illustrations are never called for a locked level (got {'optimize': 0, 'illustrate': 0})",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.004
+    },
+    "R4": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "merge_groups' free/contact/gaps match an independent brute-force AND/OR/min over 20 random trials (mismatches: none)",
+          "passed": true
+        },
+        {
+          "label": "repeated merging terminates (down to 1 component in 9 merges)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.093
+    },
+    "R5": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "setup: the group-consecutive conflict is genuinely incomplete (matches A13)",
+          "passed": true
+        },
+        {
+          "label": "every dead end in the D12-conflict AoG classifies rule_induced, never blocking (got {1: 'rule_induced'}) -- Phase 2 would never attempt to merge this",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.056
+    },
+    "R8": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "merge_groups is deterministic: same inputs -> same cache_key",
+          "passed": true
+        },
+        {
+          "label": "a different group -> a different cache_key",
+          "passed": true
+        },
+        {
+          "label": "a different new_id -> a different cache_key",
+          "passed": true
+        },
+        {
+          "label": "a different parent cache_key -> a different merged cache_key",
+          "passed": true
+        },
+        {
+          "label": "sub_interference: a different member set -> a different cache_key",
+          "passed": true
+        },
+        {
+          "label": "aog_generator.compute_cache_key folds in AoGInputs.cache_key (confirmed by source inspection, src/aog_generator.py)",
+          "passed": true
+        },
+        {
+          "label": "aog_generator.compute_cache_key also folds in inputs.component_ids directly (confirmed by source inspection) -- so a merge's distinct component_ids alone already changes the committed AoG's cache_key, independent of the interference key",
+          "passed": true
+        },
+        {
+          "label": "aog_generator.collect_inputs derives AoGInputs.cache_key from interference_result.cache_key (confirmed by source inspection)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.013
     }
   }
 }

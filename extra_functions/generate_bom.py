@@ -1,9 +1,12 @@
 """Generate a starter bom.csv listing every leaf component's Label, plus every subassembly.
 
-Writes `label,is_stander,tool,group,processed,subassembly` (one row per leaf Part::Feature,
-same filter Preprocessing uses, plus one row per App::Part subassembly). `is_stander`, `tool`
-and `group` are left blank to fill in by hand; see data/industrial_fastner/bom.csv for the
-columns the pipeline actually reads.
+Writes `label,is_stander,screw,nut,pitch,tool,group,processed,subassembly` (one row per leaf
+Part::Feature, same filter Preprocessing uses, plus one row per App::Part subassembly).
+`is_stander`, `screw`, `nut`, `pitch` and `tool` are filled by hand (`screw`/`nut` pick a
+stander's category, docs/preprocessing-spec.md P1; `pitch` is mm of axial travel per full turn,
+read only for screw/nut rows, docs/stander_processing-spec.md section 12 -- blank means no turn
+count is shown for that stander). See data/industrial_fastner/generated_bom.csv for the columns
+the pipeline actually reads.
 
 The assembly tree may contain nested subassemblies (App::Part). The very first one (the root
 object representing the whole assembly) is always expanded. Every other App::Part encountered
@@ -22,7 +25,7 @@ sys.path.insert(0, "src")
 import freecad  # bootstrap for the conda build
 from preprocessing import load_assembly
 
-FIELDNAMES = ["label", "is_stander", "tool", "group", "processed", "subassembly"]
+FIELDNAMES = ["label", "is_stander", "screw", "nut", "pitch", "tool", "group", "processed", "subassembly"]
 
 
 def is_leaf_component(obj) -> bool:
@@ -52,7 +55,10 @@ def _row(label: str, subassembly: str, processed: str = "") -> dict[str, str]:
     return {
         "label": label,
         "is_stander": False,
-        "tool": "",
+        "screw": False,
+        "nut": False,
+        "pitch": "",
+        "tool": "By_hand",
         "group": label,
         "processed": processed,
         "subassembly": subassembly,

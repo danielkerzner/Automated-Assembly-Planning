@@ -45,7 +45,7 @@ OUT_DIR = Path(__file__).resolve().parent / "output"
 SCRATCH = OUT_DIR / "aog_test"
 FASTENER_DIR = REPO_ROOT / "tests" / "industrial_fastner"
 FASTENER_STEP = REPO_ROOT / "data" / "industrial_fastner" / "industrial_fastner.stp"
-FASTENER_BOM = REPO_ROOT / "data" / "industrial_fastner" / "bom.csv"
+FASTENER_BOM = REPO_ROOT / "data" / "industrial_fastner" / "generated_bom.csv"
 # Stander IDs -> Labels of industrial_fastner (report.json stores IDs only; resolved by the real run).
 FASTENER_STANDER_LABELS = {"Part__Feature003": "industrial_fastner_part7",
                            "Part__Feature004": "industrial_fastner_part4",
@@ -116,19 +116,30 @@ def fresh_dir(name: str) -> Path:
 # ---------------------------------------------------------------------------
 
 
-def make_inputs(free, directions=AXES, neg=AXES_NEG, stander_dir=None, stander_gate=None,
-                bbox_lo=None, bbox_hi=None, box=((0, 0, 0), (100, 100, 100)), ids=None, key="synthetic",
-                contact=None, group=None):
+def make_inputs(free, directions=AXES, neg=AXES_NEG, stander_options=None, stander_holds=None,
+                nut_links=None, bbox_lo=None, bbox_hi=None, box=((0, 0, 0), (100, 100, 100)), ids=None,
+                key="synthetic", contact=None, group=None):
+    """Build AoGInputs for a synthetic case. `stander_options`: {bit: [(direction, blockers), ...]}
+    (one entry = one RemovalOption; most tests only need a single-option stander, so a bare
+    `{bit: direction}` shorthand is also accepted and expanded to one option with no blockers)."""
     free = np.asarray(free, dtype=bool)
     n = free.shape[0]
-    stander_dir = stander_dir or {}
-    N = n + len(stander_dir)
+    stander_options = stander_options or {}
+    norm_options = {}
+    for s, opts in stander_options.items():
+        if isinstance(opts, tuple) and len(opts) == 2 and not isinstance(opts[0], (tuple, list)):
+            opts = [opts]
+        elif not isinstance(opts, list):
+            opts = [(opts, set())]  # bare direction shorthand: one option, no blockers
+        norm_options[s] = [(np.asarray(d, dtype=float), set(b)) for d, b in opts]
+    N = n + len(norm_options)
     ids = ids or [f"c{i}" for i in range(N)]
     return AoGInputs(
         component_ids=list(ids), component_labels=list(ids), n_movable=n, free=free,
         directions=np.asarray(directions, dtype=float), neg=np.asarray(neg),
-        stander_dir={s: np.asarray(d, dtype=float) for s, d in stander_dir.items()},
-        stander_gate={s: set(g) for s, g in (stander_gate or {}).items()},
+        stander_options=norm_options,
+        stander_holds={s: set(h) for s, h in (stander_holds or {}).items()},
+        nut_links={s: (int(p), r) for s, (p, r) in (nut_links or {}).items()},
         bbox_lo=np.zeros((N, 3)) if bbox_lo is None else np.asarray(bbox_lo, dtype=float),
         bbox_hi=np.ones((N, 3)) if bbox_hi is None else np.asarray(bbox_hi, dtype=float),
         assembly_lo=np.asarray(box[0], dtype=float), assembly_hi=np.asarray(box[1], dtype=float),
@@ -156,10 +167,21 @@ def random_inputs(rng: np.random.Generator, N: int) -> AoGInputs:
             row = rng.random(D) < p
             free[i, j] = row
             free[j, i, AXES_NEG] = row  # antisymmetry, as the real matrix
-    stander_dir, stander_gate = {}, {}
+    stander_options, stander_holds, nut_links = {}, {}, {}
     for s in range(n, N):
-        stander_dir[s] = AXES[rng.integers(D)] if rng.random() < 0.5 else rng.normal(size=3)
-        stander_gate[s] = {int(j) for j in range(n) if rng.random() < 0.3}
+        n_opts = 2 if rng.random() < 0.3 else 1
+        opts = []
+        for _ in range(n_opts):
+            d = AXES[rng.integers(D)] if rng.random() < 0.5 else rng.normal(size=3)
+            blockers = {int(j) for j in range(N) if j != s and rng.random() < 0.25}
+            opts.append((d, blockers))
+        stander_options[s] = opts
+        if rng.random() < 0.3:
+            stander_holds[s] = {int(j) for j in range(n) if rng.random() < 0.3}
+        if n_opts == 1 and rng.random() < 0.4:
+            candidates = [c for c in range(N) if c != s]
+            if candidates:
+                nut_links[s] = (int(rng.choice(candidates)), "locked" if rng.random() < 0.5 else "free")
     contact = None
     if rng.random() < 0.75:
         q = rng.uniform(0.15, 0.7)
@@ -173,7 +195,8 @@ def random_inputs(rng: np.random.Generator, N: int) -> AoGInputs:
             for c in rng.choice(N, size=min(N, int(rng.integers(2, 4))), replace=False):
                 names[int(c)] = f"g{g}"
         group = names
-    return make_inputs(free, stander_dir=stander_dir, stander_gate=stander_gate, contact=contact, group=group)
+    return make_inputs(free, stander_options=stander_options, stander_holds=stander_holds,
+                      nut_links=nut_links, contact=contact, group=group)
 
 
 def fixture(rel: str) -> Path:
@@ -192,7 +215,11 @@ def fixture(rel: str) -> Path:
 
 
 def fastener_inputs_from_cache() -> AoGInputs:
-    """industrial_fastner inputs from the cached matrix + report.json (no FreeCAD, no movable AABBs)."""
+    """industrial_fastner inputs from the cached matrix + report.json (no FreeCAD, no movable AABBs).
+
+    report.json (docs/stander_processing-spec.md 3.1 field names): category, options[] (direction,
+    exit_point, blockers), holds, contact_neighbors, bbox, partner, nut_rule.
+    """
     meta = json.loads(fixture("interference/interference.json").read_text(encoding="utf-8"))
     with np.load(fixture("interference/interference.npz")) as a:
         free, dirs, neg = a["free"], a["directions"], a["neg"]
@@ -204,20 +231,23 @@ def fastener_inputs_from_cache() -> AoGInputs:
     n = len(ids)
     index = {c: i for i, c in enumerate(ids)}
     stander_ids = sorted(report["stander_records"])
-    stander_dir, stander_gate = {}, {}
+    index_all = {c: i for i, c in enumerate(ids + stander_ids)}
+    stander_options, stander_holds, nut_links = {}, {}, {}
     lo, hi = [[0, 0, 0]] * n, [[0, 0, 0]] * n
     N = n + len(stander_ids)
     contact = np.zeros((N, N), dtype=bool)
     contact[:n, :n] = movable_contact
     for b, sid in enumerate(stander_ids, start=n):
         rec = report["stander_records"][sid]
-        stander_dir[b] = rec["dismantle_direction"]
-        stander_gate[b] = {index[g] for g in set(rec["prerequisites"]) | set(rec["contact_neighbors"])}
+        stander_options[b] = [(opt["direction"], {index_all[m] for m in opt["blockers"]}) for opt in rec["options"]]
+        stander_holds[b] = {index[m] for m in rec["holds"]}
+        if rec["nut_rule"] is not None and rec["partner"] is not None and rec["partner"] in index_all:
+            nut_links[b] = (index_all[rec["partner"]], rec["nut_rule"])
         lo, hi = lo + [rec["bbox"][0]], hi + [rec["bbox"][1]]
         for g in rec["contact_neighbors"]:
             contact[b, index[g]] = contact[index[g], b] = True
     labels = meta["component_labels"] + [FASTENER_STANDER_LABELS.get(s, s) for s in stander_ids]
-    inputs = make_inputs(free, dirs, neg, stander_dir, stander_gate, lo, hi,
+    inputs = make_inputs(free, dirs, neg, stander_options, stander_holds, nut_links, lo, hi,
                          box=report["assembly_bbox"], ids=ids + stander_ids, key=meta["cache_key"],
                          contact=contact, group=ag.read_bom_groups(FASTENER_BOM, labels))
     inputs.component_labels = labels
@@ -245,9 +275,14 @@ def _free_directions(free, directions, i, subset):
 
 
 def brute_force(inputs: AoGInputs):
-    """(node set, edge set) with edges as (src_mask, comp, dst_mask, frozenset(direction indices))."""
+    """(node set, edge set) with edges as (src_mask, comp, dst_mask, frozenset(direction indices)).
+
+    Independent reference for docs/stander_processing-spec.md section 3: blocker masks per
+    stander option (plus nut_links folded into them / into movable `extra`), holds checked on
+    the resulting state T (section 3.4), not derived from `generate_aog`'s own mask code.
+    """
     N, n = len(inputs.component_ids), inputs.n_movable
-    dirs, _, kd = ag.extend_directions(inputs.directions, inputs.neg, inputs.stander_dir)
+    dirs, _, kd = ag.extend_directions(inputs.directions, inputs.neg, inputs.stander_options)
 
     def members(mask):
         return [c for c in range(N) if (mask >> c) & 1]
@@ -267,10 +302,27 @@ def brute_force(inputs: AoGInputs):
                     stack.append(b)
         return len(seen) == len(comps)
 
+    # Fold nut_links into blocker sets / movable extra, exactly as docs/stander_processing-spec.md
+    # 3.3 describes (independently of generate_aog's own numpy mask code).
+    blockers = {s: [set(b) for _d, b in inputs.stander_options[s]] for s in range(n, N)}
+    holds = {s: set(inputs.stander_holds.get(s, ())) for s in range(n, N)}
+    extra = {i: set() for i in range(n)}
+    for nut, (partner, rule) in inputs.nut_links.items():
+        if rule == "locked":
+            for bset in blockers[nut]:
+                bset.add(partner)
+        elif rule == "free":
+            if partner < n:
+                extra[partner].add(nut)
+            else:
+                for bset in blockers[partner]:
+                    bset.add(nut)
+
     def valid(mask):
-        return connected(mask) and all(
-            not (mask >> s) & 1 or all((mask >> g) & 1 for g in inputs.stander_gate.get(s, ()))
-            for s in range(n, N))
+        if not connected(mask):
+            return False
+        present = set(members(mask))
+        return all(not (s in present and holds[s] and not holds[s] <= present) for s in range(n, N))
 
     groups = {}
     if inputs.group is not None:
@@ -281,16 +333,18 @@ def brute_force(inputs: AoGInputs):
 
     out = {}
     for S in range(1 << N):
+        present = set(members(S))
         edges = []
-        for c in members(S):
+        for c in present:
             T = S & ~(1 << c)
             if not valid(T):
                 continue
             if c < n:
-                ks = _free_directions(inputs.free, inputs.directions, c, [j for j in members(S) if j < n])
+                if extra[c] & present:
+                    continue
+                ks = _free_directions(inputs.free, inputs.directions, c, [j for j in present if j < n])
             else:
-                gate_ok = all((S >> g) & 1 for g in inputs.stander_gate.get(c, ()))
-                ks = [kd[c]] if gate_ok else []
+                ks = [kd[c][o] for o, bset in enumerate(blockers[c]) if not (bset & present)]
             if len(ks):
                 edges.append((S, c, T, frozenset(int(k) for k in ks)))
         if groups:
@@ -458,10 +512,13 @@ def same_graph_up_to_directions(real, cached) -> bool:
 FASTENER_ROOT = {
     "Part__Feature002": [(0.0, 0.0, -1.0)],  # part1, -z
     "Part__Feature006": [(-1.0, 0.0, 0.0)],  # part5, -x
-    # part6 (+x) is free but gated: Part__Feature003's gate {part3, part6} must stay present.
-    "Part__Feature003": [(1.0, 0.0, 0.0)],  # part7
-    # part4 and part001 form BOM group fastener_small: one order per block (D13) keeps the lower bit only.
-    "Part__Feature004": [(0.0, -1.0, 0.0)],
+    # part6 (+x): freely removable at the root -- part7 (the nut) is "locked" on it as partner
+    # (P8: partner leaves before the nut), so part6 has no extra constraint, only part7 does (and
+    # part7 is therefore NOT in this dict: it only becomes removable once part6 is gone).
+    "Part__Feature007": [(1.0, 0.0, 0.0)],  # part6
+    # part4, part001 (category 3, no BOM group in the current generated_bom.csv): both +y/-y free.
+    "Part__Feature004": [(0.0, 1.0, 0.0), (0.0, -1.0, 0.0)],
+    "Part__Feature005": [(0.0, 1.0, 0.0), (0.0, -1.0, 0.0)],
 }
 
 
@@ -481,34 +538,39 @@ def test_a2b(rec, args):
                   "directions a subset (live Preprocessing has fewer candidate directions than the fixture)")
 
 
-def _a3_run(mode):
-    # p (0), q (1) movable, free everywhere; stander s (2) with prerequisites {p}, contacts {q}.
+def _a3_run():
+    # p (0), q (1) movable, free everywhere, touching each other; stander s (2) is a screw with
+    # hold {p} (must stay present while s leaves) and touches both p and q (contact_neighbors,
+    # connectivity only, P10 -- not a gate any more: q must NOT be required present, unlike the
+    # old "prerequisites+contacts" gate mode). s also touching q (not just p) keeps {p, s}
+    # connected after q leaves, so D11 (no-floating-parts) cannot confound the holds check below.
     free = np.ones((2, 2, 6), dtype=bool)
     ir = SimpleNamespace(component_ids=["p", "q"], component_labels=["p", "q"], free=free,
                          directions=AXES, neg=AXES_NEG, cache_key="a3",
                          contact=np.array([[False, True], [True, False]]))
     box = SimpleNamespace(XMin=0, YMin=0, ZMin=0, XMax=1, YMax=1, ZMax=1)
     reduced = SimpleNamespace(Name="a3", getObject=lambda cid: SimpleNamespace(Shape=SimpleNamespace(BoundBox=box)))
-    rec_s = SimpleNamespace(prerequisites={"p"}, contact_neighbors={"q"}, dismantle_direction=(0, 0, 1),
-                            bbox=((0, 0, 0), (1, 1, 1)))
+    opt = SimpleNamespace(direction=(0, 0, 1), exit_point=(0, 0, 1), blockers=set())
+    rec_s = SimpleNamespace(category=1, options=[opt], holds={"p"}, contact_neighbors={"p", "q"},
+                            bbox=((0, 0, 0), (1, 1, 1)), partner=None, nut_rule=None)
     prep = SimpleNamespace(reduced_assembly=reduced, stander_records={"s": rec_s},
                            assembly_bbox=((0, 0, 0), (1, 1, 1)), step_path=None)
-    config = AoGConfig(stander_gate=mode)
+    config = AoGConfig()
     inputs = ag.collect_inputs(ir, prep, config)
     return inputs, ag.generate_aog(inputs, config)
 
 
 def test_a3(rec, args):
-    for mode, gate in (("prerequisites", {0}), ("prerequisites+contacts", {0, 1})):
-        inputs, aog = _a3_run(mode)
-        rec.check(inputs.stander_gate == {2: gate}, f"[{mode}] gate of s = {inputs.stander_gate[2]}")
-        root_comps = {int(aog.edge_comp[e]) for e in aog.out_edges(aog.root)}
-        rec.check(2 in root_comps, f"[{mode}] s removable at the root")
-        rec.check(all(g not in root_comps for g in gate), f"[{mode}] gate {gate} not removable while s present")
-        s_bit = 1 << 2
-        bad = [int(m) for m in aog.node_mask if int(m) & s_bit and any(not (int(m) >> g) & 1 for g in gate)]
-        rec.check(not bad, f"[{mode}] every node with s present contains its gate ({len(bad)} violations)")
-        rec.check(aog.complete, f"[{mode}] complete, V={aog.n_nodes}, E={aog.n_edges}")
+    inputs, aog = _a3_run()
+    rec.check(inputs.stander_holds == {2: {0}}, f"holds of s = {inputs.stander_holds[2]} (only p, not q)")
+    root_comps = {int(aog.edge_comp[e]) for e in aog.out_edges(aog.root)}
+    rec.check(2 in root_comps, "s removable at the root")
+    rec.check(0 not in root_comps, "p (a hold) not removable while s present")
+    rec.check(1 in root_comps, "q (only a contact_neighbor, not a hold -- P10) IS removable while s present")
+    s_bit = 1 << 2
+    bad = [int(m) for m in aog.node_mask if int(m) & s_bit and not (int(m) >> 0) & 1]
+    rec.check(not bad, f"every node with s present also has its hold p present ({len(bad)} violations)")
+    rec.check(aog.complete, f"complete, V={aog.n_nodes}, E={aog.n_edges}")
 
 
 def test_a4(rec, args):
@@ -582,9 +644,10 @@ def test_a6(rec, args):
 
 def test_a7(rec, args):
     diag = np.array([1, 1, 0]) / np.sqrt(2)
-    dirs, neg, kd = ag.extend_directions(AXES, AXES_NEG, {6: AXES[4] + 1e-9, 7: diag, 8: -diag})
-    rec.check(kd[6] == 4, f"stander direction equal to a candidate reuses its index (got {kd[6]})")
-    rec.check(len(dirs) == 8 and kd[7] == 6 and kd[8] == 7,
+    stander_opts = {6: [(AXES[4] + 1e-9, set())], 7: [(diag, set())], 8: [(-diag, set())]}
+    dirs, neg, kd = ag.extend_directions(AXES, AXES_NEG, stander_opts)
+    rec.check(kd[6] == [4], f"stander direction equal to a candidate reuses its index (got {kd[6]})")
+    rec.check(len(dirs) == 8 and kd[7] == [6] and kd[8] == [7],
               f"new direction appends d and -d, and -d is then reused (D'={len(dirs)}, kd={kd})")
     rec.check(np.allclose(dirs[neg], -dirs), "dirs[neg[k]] == -dirs[k] for all k")
     _, aog = fastener_cached()
@@ -592,7 +655,7 @@ def test_a7(rec, args):
               f"industrial_fastner: stander directions all reuse candidates (D'={len(aog.directions)})")
     # A stander with a direction that is not a candidate: movable parts never use the new index.
     free = np.ones((2, 2, 6), dtype=bool)
-    aog = ag.generate_aog(make_inputs(free, stander_dir={2: diag}, stander_gate={2: {0}}))
+    aog = ag.generate_aog(make_inputs(free, stander_options={2: diag}))
     new_bits = np.uint64((1 << 6) | (1 << 7))
     movable_edges = aog.edge_comp < 2
     rec.check(not np.any(aog.edge_dirs[movable_edges, 0] & new_bits)
@@ -656,16 +719,24 @@ def test_a9(rec, args):
     rec.check(ag.load_aog(cache, "other") is None, "load with a different key returns None (recompute)")
     rec.check(all((cache / f).exists() for f in ("aog_nodes.csv", "aog_edges.csv", "aog.dot")), "exports written")
     base = ag.compute_cache_key(inputs, AoGConfig())
-    s0 = inputs.n_movable
+    s0 = inputs.n_movable  # the nut (Part__Feature003): has a non-trivial nut_links entry to mutate
     variants = {}
     v = fastener_inputs_from_cache()
-    v.stander_gate[s0] = set(v.stander_gate[s0]) - {min(v.stander_gate[s0])}
-    variants["gate set"] = ag.compute_cache_key(v, AoGConfig())
+    d0, blockers0 = v.stander_options[s0][0]
+    v.stander_options[s0][0] = (d0, blockers0 | {0})
+    variants["stander option blockers"] = ag.compute_cache_key(v, AoGConfig())
     v = fastener_inputs_from_cache()
-    v.stander_dir[s0] = -np.asarray(v.stander_dir[s0], dtype=float)
-    variants["stander direction"] = ag.compute_cache_key(v, AoGConfig())
+    d0, blockers0 = v.stander_options[s0][0]
+    v.stander_options[s0][0] = (-np.asarray(d0, dtype=float), blockers0)
+    variants["stander option direction"] = ag.compute_cache_key(v, AoGConfig())
+    v = fastener_inputs_from_cache()
+    v.stander_holds[s0] = v.stander_holds[s0] | {0}
+    variants["stander holds"] = ag.compute_cache_key(v, AoGConfig())
+    v = fastener_inputs_from_cache()
+    partner, rule = v.nut_links[s0]
+    v.nut_links[s0] = (partner, "free" if rule == "locked" else "locked")
+    variants["nut_rule"] = ag.compute_cache_key(v, AoGConfig())
     variants["AoGConfig.margin"] = ag.compute_cache_key(inputs, AoGConfig(margin=2.0))
-    variants["AoGConfig.stander_gate"] = ag.compute_cache_key(inputs, AoGConfig(stander_gate="prerequisites"))
     v = fastener_inputs_from_cache()
     v.group = [None] * len(v.group)
     variants["BOM groups"] = ag.compute_cache_key(v, AoGConfig())
@@ -694,13 +765,18 @@ def test_a10(rec, args):
     while len(cases) < 4:
         inputs = random_inputs(rng, 9)
         aog = ag.generate_aog(inputs)
-        if aog.complete and inputs.stander_dir:
-            cases.append((f"random N=9 ({len(inputs.stander_dir)} standers)", inputs, aog))
+        if aog.complete and inputs.stander_options:
+            cases.append((f"random N=9 ({len(inputs.stander_options)} standers)", inputs, aog))
     for name, inputs, aog in cases:
         if not aog.complete:
             rec.check(False, f"{name}: graph incomplete, no root->terminal path")
             continue
         n, N = inputs.n_movable, len(inputs.component_ids)
+        # A "free" nut blocks its movable partner from leaving while the nut is still present (P8).
+        free_blockers_of = {c: set() for c in range(n)}
+        for nut, (partner, rule) in inputs.nut_links.items():
+            if rule == "free" and partner < n:
+                free_blockers_of[partner].add(nut)
         bad_replay = bad_assembly = 0
         for path in _sample_paths(aog, rng, 100):
             present = set(range(N))
@@ -710,8 +786,11 @@ def test_a10(rec, args):
                 if c < n:
                     ks = _free_directions(inputs.free, inputs.directions, c, [j for j in present if j < n])
                     ok &= set(step["removal_direction_indices"]) == set(int(k) for k in ks) and len(ks) > 0
+                    ok &= not (free_blockers_of[c] & present)
                 present.discard(c)
-                ok &= all(s not in present or inputs.stander_gate[s] <= present for s in range(n, N))
+                ok &= all(
+                    s not in present or not inputs.stander_holds.get(s) or inputs.stander_holds[s] <= present
+                    for s in range(n, N))
                 bad_replay += not ok
             bad_replay += bool(present)
             placed: set[int] = set()
@@ -721,12 +800,13 @@ def test_a10(rec, args):
                 ok = step["direction_indices"] == [int(aog.neg[k]) for k in rem]
                 ok &= np.allclose(step["directions"], -np.asarray(step["removal_directions"]))
                 if c >= n:
-                    ok &= inputs.stander_gate[c] <= placed
+                    ok &= inputs.stander_holds.get(c, set()) <= placed
                 placed.add(c)
                 bad_assembly += not ok
         rec.check(bad_replay == 0 and bad_assembly == 0,
-                  f"{name}: 100 sampled paths replay as valid removal orders ({bad_replay} bad steps); "
-                  f"assembly sequence uses neg and places standers after their gate ({bad_assembly} bad steps)")
+                  f"{name}: 100 sampled paths replay as valid removal orders ({bad_replay} bad steps, holds "
+                  f"and free-nut/movable-partner order checked); assembly sequence uses neg and places "
+                  f"standers after their holds ({bad_assembly} bad steps)")
 
 
 def test_a11(rec, args):
@@ -777,14 +857,16 @@ def test_a12(rec, args):
     P, X, Y = 0, 1, 2
     aog = ag.generate_aog(make_inputs(free, ids=["P", "X", "Y"], contact=contact_from_pairs(3, [(P, X), (P, Y)])))
     rec.check(0b110 not in {int(m) for m in aog.node_mask}, "plate P with X, Y: state {X, Y} dropped")
-    # Two parts touching only through a stander s (bolt): s cannot be removed while both are there.
+    # Two parts touching only through a stander s (bolt), s holding both A and B present: removing
+    # A or B first breaks s's holds (invalid T); removing s first leaves {A, B} disconnected (D11,
+    # since they only ever touched through s) -- every first move is blocked, root is a dead end.
     free2 = np.ones((2, 2, 6), dtype=bool)
     bridge = contact_from_pairs(3, [(0, 2), (1, 2)])
     with LogCapture() as cap:
-        aog = ag.generate_aog(make_inputs(free2, stander_dir={2: AXES[4]}, stander_gate={2: {0, 1}},
+        aog = ag.generate_aog(make_inputs(free2, stander_options={2: AXES[4]}, stander_holds={2: {0, 1}},
                                           contact=bridge, ids=["A", "B", "s"]))
     rec.check(aog.n_nodes == 1 and list(aog.dead_ends) == [0] and not aog.complete,
-              f"A, B held only by stander s (gate {{A, B}}): root is a dead end (V={aog.n_nodes})")
+              f"A, B held only by stander s (holds {{A, B}}): root is a dead end (V={aog.n_nodes})")
     rec.check(any("dead-end" in r.getMessage() for r in cap.records), "dead end reported, not resolved")
     # Full assembly not connected: warning, no mixed state reachable.
     with LogCapture() as cap:
@@ -887,17 +969,16 @@ def test_a13(rec, args):
     except ValueError:
         rec.check(True, "group_one_order without group_consecutive raises ValueError")
 
-    # industrial_fastner: part4 and part001 (fastener_small) always assembled one after the other.
+    # industrial_fastner: the current generated_bom.csv gives every component its own `group`
+    # value (no shared group of >= 2 members any more -- unlike the older bom.csv this file once
+    # referenced), so D12/D13 has no effect on this fixture. Confirm that directly rather than
+    # asserting a specific grouping the committed BOM no longer defines.
     inputs, aog = fastener_cached()
-    gs = {inputs.component_labels.index("industrial_fastner_part4"),
-          inputs.component_labels.index("industrial_fastner_part001")}
     plain = ag.generate_aog(inputs, AoGConfig(group_consecutive=False, group_one_order=False))
-    bad = sum(not _blocks_contiguous([s["component"] for s in aog.sequence(p)], gs)
-              for p in _sample_paths(aog, rng, 200))
-    rec.check(aog.complete and bad == 0 and _group_violations(aog, [gs]) == 0,
-              f"industrial_fastner: groups {aog.stats['groups']}; V={aog.n_nodes}, E={aog.n_edges}, "
-              f"{_path_count(aog)} paths (without groups V={plain.n_nodes}, E={plain.n_edges}, "
-              f"{_path_count(plain)} paths); 200 sampled paths consecutive ({bad} bad)")
+    rec.check(aog.stats["groups"] == {}, f"no BOM group with >= 2 members in this fixture ({aog.stats['groups']})")
+    rec.check(module_sets(aog) == module_sets(plain),
+              f"with no multi-member group, grouped (V={aog.n_nodes}, E={aog.n_edges}) and ungrouped "
+              f"(V={plain.n_nodes}, E={plain.n_edges}) graphs are identical")
     if "real" in args.groups:
         _, _, real = fastener_real()
         rec.check(same_graph_up_to_directions(real, aog) and real.stats["groups"] == aog.stats["groups"],

@@ -66,9 +66,11 @@ STRINGS = {
         "hold": "Hold in place",
         "steps": "{n} steps",
         "final": "Final assembly",
-        "columns": ("Part", "Stander", "Tool", "Group"),
+        "columns": ("Part", "Stander", "Tool", "Group", "Turns"),
         "yes": "yes",
         "no": "no",
+        "turns": "Turns",
+        "clockwise": "clockwise",
     },
 }
 
@@ -719,6 +721,9 @@ def footnote_lines(steps: list[dict], s: int, bom: dict, config: IllustrationCon
     st = steps[s]
     first = (f"{T['step']} {st['step']} / {len(steps)}   {st['component_label']}   "
              f"{T['tool']}: {tool_text(st, bom, config.language)}")
+    turns = st.get("turns")
+    if turns is not None:
+        first += f"   {T['turns']}: {turns:.1f} ({T['clockwise']})"
     if config.footnote_show_vector:
         first += f"   {T['move']}: {_fmt_vec(np.asarray(st['direction'], float) * float(st['travel']))} mm"
     lines = [first]
@@ -741,11 +746,23 @@ def block_footnote_lines(steps: list[dict], first: int, last: int, bom: dict,
     block = steps[first:last + 1]
     labels = [st["component_label"] for st in block]
     tools = [tool_text(st, bom, config.language) for st in block]
+    turns_vals = [st.get("turns") for st in block]
     head = f"{T['steps_range']} {block[0]['step']}-{block[-1]['step']} / {len(steps)}   {step_group(block[0], bom)}"
-    if len(set(tools)) == 1:
+    same_tool = len(set(tools)) == 1
+    if same_tool:
         head += f"   {T['tool']}: {tools[0]}"
-    lines = [head, f"{T['parts']}: " + (", ".join(labels) if len(set(tools)) == 1 else
-                                        ", ".join(f"{lab} ({tool})" for lab, tool in zip(labels, tools)))]
+    has_turns = any(t is not None for t in turns_vals)
+    if same_tool and not has_turns:
+        parts_line = ", ".join(labels)
+    else:
+        parts = []
+        for lab, tool, turns in zip(labels, tools, turns_vals):
+            extras = [] if same_tool else [tool]
+            if turns is not None:
+                extras.append(f"{turns:.1f} {T['turns'].lower()}")
+            parts.append(f"{lab} ({', '.join(extras)})" if extras else lab)
+        parts_line = ", ".join(parts)
+    lines = [head, f"{T['parts']}: " + parts_line]
     if config.footnote_show_vector:
         lines.append(f"{T['move']}: " + "; ".join(
             f"{st['component_label']} {_fmt_vec(np.asarray(st['direction'], float) * float(st['travel']))} mm"
@@ -870,9 +887,10 @@ def draw_cover(ctx: ViewContext, steps: list[dict], bom: dict, title: str, confi
     rows = []
     for st in steps:
         row = bom.get(st["component_label"], {})
+        turns = st.get("turns")
         rows.append([st["component_label"], T["yes"] if st["is_stander"] else T["no"],
                      tool_text(st, bom, config.language) if st["is_stander"] or row.get("tool") else "",
-                     row.get("group") or ""])
+                     row.get("group") or "", f"{turns:.1f}" if turns is not None else ""])
     tax = fig.add_axes([0.02, 0.06, 0.46, 0.78])
     tax.axis("off")
     table = tax.table(cellText=rows, colLabels=list(T["columns"]), loc="upper left", cellLoc="left")

@@ -1,0 +1,10 @@
+label,is_stander,screw,nut,pitch, tool,group,processed,subassembly
+industrial_fastner,False,False,False,,,industrial_fastner,true,
+industrial_fastner_part3,False,False,False,,,industrial_fastner_part3,,industrial_fastner
+industrial_fastner_part2,False,False,False,,,industrial_fastner_part2,,industrial_fastner
+industrial_fastner_part1,False,False,False,,,industrial_fastner_part1,,industrial_fastner
+industrial_fastner_part7,True,False,True, 1.75 ,by_hand,industrial_fastner_part7,,industrial_fastner
+industrial_fastner_part4,True,False,False,,wrenchA,industrial_fastner_part4,,industrial_fastner
+industrial_fastner_part001,True,False,False,,wrenchA,industrial_fastner_part001,,industrial_fastner
+industrial_fastner_part5,False,False,False,,,industrial_fastner_part5,,industrial_fastner
+industrial_fastner_part6,False,False,False,,,industrial_fastner_part6,,industrial_fastner
