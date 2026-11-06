@@ -43,10 +43,11 @@ OUT_DIR = Path(__file__).resolve().parent / "output"
 SCRATCH = OUT_DIR / "illustration_test"
 FASTENER_DIR = REPO_ROOT / "tests" / "industrial_fastner"
 FASTENER_STEP = REPO_ROOT / "data" / "industrial_fastner" / "industrial_fastner.stp"
-FASTENER_BOM = REPO_ROOT / "data" / "industrial_fastner" / "bom.csv"
+FASTENER_BOM = REPO_ROOT / "data" / "industrial_fastner" / "generated_bom.csv"
 SEQUENCE_FILE = FASTENER_DIR / "optimization" / "optimization_result.json"
 # Fallback when the committed cache is absent: the industrial_fastner sequence written by test_optimization.py O13.
 SEQUENCE_FALLBACK = OUT_DIR / "optimization_test" / "pipeline" / "optimization" / "optimization_result.json"
+PIPELINE_SEQUENCE = REPO_ROOT / "output" / "industrial_fastner" / "optimization" / "optimization_result.json"  # main.py
 
 SMALL = dict(image_size=(480, 360), search_size=(240, 180))
 
@@ -229,7 +230,7 @@ def test_l1(rec, args):
                        ({"elevations": (-10, 20)}, "Elevations"), ({"default_view": (0, -5)}, "Elevations"),
                        ({"vis_min_end": 1.5}, "vis_min_end"), ({"xray_alpha": -0.1}, "xray_alpha"),
                        ({"placed_color": "notacolour"}, "colour"), ({"language": "xx"}, "language"),
-                       ({"perturb_step_deg": 0}, "perturb_step_deg"), ({"dpi": 0}, "dpi"),
+                       ({"dpi": 0}, "dpi"),
                        ({"tess_tolerance_rel": 0}, "tess_tolerance_rel")]:
         rec.check(raises(lambda: ig.validate_config(C(**kw)), needle), f"invalid {kw} raises ({needle!r})")
 
@@ -409,24 +410,66 @@ def test_l7(rec, args):
     rec.check(ch[2]["kind"] == "candidate" and ch[2]["view"] == (180.0, 20.0) and ch[2]["visible"],
               f"step 3 hidden behind the wall gets the other candidate ({ch[2]['kind']} {ch[2]['view']})")
 
-    toward = np.array([np.cos(np.radians(20)), 0, np.sin(np.radians(20))])
-    _, _, mesh_list, offsets = scene([("a", box([0, 0, 0], [10, 10, 10]), [0, 0, 40]),
-                                      ("b", box([0, 20, 0], [10, 30, 10]), (60 * toward).tolist())])
-    cfg = IllustrationConfig(azimuths=(0,), elevations=(20,), default_view=(0, 20), search_size=(480, 360),
-                             min_trajectory_px_frac=0.05)
-    glob, ch = ig.select_views(mesh_list, offsets, cfg)
-    rec.check(ch[1]["kind"] == "perturbed" and ch[1]["visible"] and ch[1]["view"] != glob,
-              f"step along the only candidate's view direction gets a perturbed view ({ch[1]['kind']} {ch[1]['view']})")
-    d = ig.view_angle(ch[1]["view"], glob)
-    rec.check(d <= cfg.perturb_step_deg + 1e-6, f"the nearest perturbation that passes is used ({d:.1f} deg)")
-
+    # Hidden from every main view: movable part -> x-ray with a warning, stander -> drawn normally.
     _, _, mesh_list, offsets = scene([("box", enclosure([-10, -10, -10], [10, 10, 10], 2), [0, 0, 60]),
                                       ("inner", box([-4, -4, -4], [4, 4, 4]), [0, 0, 40])])
     cfg = IllustrationConfig(search_size=(160, 120))
-    glob, ch = ig.select_views(mesh_list, offsets, cfg)
+    stats = {}
+    glob, ch = ig.select_views(mesh_list, offsets, cfg, stats, is_stander=[False, False])
     rec.check(ch[1]["kind"] == "xray" and ch[1]["xray"] and ch[1]["warnings"] and ch[1]["visible"],
-              f"enclosed part gets the x-ray fallback with a warning ({ch[1]['kind']}, {ch[1]['warnings']})")
+              f"enclosed movable part gets the x-ray fallback with a warning ({ch[1]['kind']}, {ch[1]['warnings']})")
     rec.check(ch[1]["vis_end_occluded"] == 0.0, "its occluded end fraction is 0 in the chosen view")
+    cands = ig.candidate_views(cfg)
+    rec.check(stats["views_evaluated"] == len(cands) and all(c["view"] in cands for c in ch),
+              f"only the main views are searched, no perturbation ({stats['views_evaluated']} views)")
+    _, ch = ig.select_views(mesh_list, offsets, cfg, is_stander=[False, True])
+    rec.check(ch[1]["kind"] == "stander" and not ch[1]["xray"] and not ch[1]["visible"] and ch[1]["warnings"]
+              and ch[1]["view"] in cands,
+              f"enclosed stander is drawn without x-ray and reported as not visible ({ch[1]['kind']})")
+
+    # Its best view prefers a clear trajectory over the view that looks along the insertion direction.
+    toward = np.array([np.cos(np.radians(20)), 0, np.sin(np.radians(20))])
+    _, _, mesh_list, offsets = scene([("box", enclosure([-10, -10, -10], [10, 10, 10], 2), [0, 0, 60]),
+                                      ("inner", box([-4, -4, -4], [4, 4, 4]), (60 * toward).tolist())])
+    cfg = IllustrationConfig(azimuths=(0, 90), elevations=(20,), default_view=(0, 20), search_size=(240, 180))
+    glob, ch = ig.select_views(mesh_list, offsets, cfg, is_stander=[False, True])
+    rec.check(glob == (0.0, 20.0) and ch[1]["kind"] == "stander" and ch[1]["view"] == (90.0, 20.0),
+              f"stander best view has a clear trajectory ({ch[1]['view']}, global {glob})")
+
+    # Degenerate in the only main view: nothing to fall back on, reported as not visible, never aborts.
+    _, _, mesh_list, offsets = scene([("a", box([0, 0, 0], [10, 10, 10]), [0, 0, 40]),
+                                      ("b", box([0, 20, 0], [10, 30, 10]), (60 * toward).tolist())])
+    cfg = IllustrationConfig(azimuths=(0,), elevations=(20,), default_view=(0, 20), search_size=(480, 360))
+    _, ch = ig.select_views(mesh_list, offsets, cfg)
+    rec.check(ch[1]["kind"] == "none" and not ch[1]["visible"] and ch[1]["warnings"],
+              f"step along the only view's direction: not visible with a warning ({ch[1]['kind']})")
+
+    # A group frame takes the fallback of its first movement (the one judged, spec 12).
+    _, _, mesh_list, offsets = scene([("box", enclosure([-10, -10, -10], [10, 10, 10], 2), [0, 0, 60]),
+                                      ("s", box([-4, -4, -4], [-1, 4, 4]), [0, 0, 40]),
+                                      ("m", box([1, -4, -4], [4, 4, 4]), [0, 0, 40])])
+    cfg = IllustrationConfig(azimuths=(0, 90), elevations=(20,), default_view=(0, 20), search_size=(240, 180))
+    blocks = [(0, 0), (1, 2)]
+    _, ch = ig.select_views(mesh_list, offsets, cfg, blocks=blocks, is_stander=[False, True, False])
+    rec.check(ch[1]["kind"] == "stander", f"block led by a stander: no x-ray ({ch[1]['kind']})")
+    _, ch = ig.select_views(mesh_list, offsets, cfg, blocks=blocks, is_stander=[False, False, True])
+    rec.check(ch[1]["kind"] == "xray", f"block led by a movable part: x-ray ({ch[1]['kind']})")
+
+    # End to end: the report and the rendered frame follow the same decision.
+    parts = [("box", enclosure([-10, -10, -10], [10, 10, 10], 2), [0, 0, 60]),
+             ("inner", box([-4, -4, -4], [4, 4, 4]), [0, 0, 40], {"stander": True})]
+    steps, meshes, mesh_list, offsets = scene(parts)
+    res = ig.render_illustrations(steps, meshes, {}, fresh_dir("l7"), IllustrationConfig(**SMALL), title="enclosed")
+    f = res.frames[1]
+    rec.check(f["view_kind"] == "stander" and not f["xray"] and f["warnings"] and Path(f["png"]).exists(),
+              "render: stander frame written without x-ray, the report carries the note")
+    v = (f["view"]["azimuth"], f["view"]["elevation"])
+    ctx = ViewContext(v, SMALL["image_size"], mesh_list, offsets)
+    cfg = IllustrationConfig(**SMALL)
+    plain, xray = ig.compose_frame(ctx, 1, cfg, True, False), ig.compose_frame(ctx, 1, cfg, True, True)
+    r, c = at_pixel(ctx, mesh_list[1].centroid)
+    rec.check(np.ptp(plain[r, c]) < 0.02 and np.ptp(xray[r, c]) > 0.05,
+              f"the enclosed stander stays behind the grey enclosure, x-ray would show it ({plain[r, c]}, {xray[r, c]})")
 
 
 def test_l8(rec, args):
@@ -597,7 +640,7 @@ def test_l11(rec, args):
     from preprocessing import run_preprocessing
 
     out = fresh_dir("fastener")
-    seq_file = SEQUENCE_FILE if SEQUENCE_FILE.exists() else SEQUENCE_FALLBACK
+    seq_file = next((f for f in (SEQUENCE_FILE, PIPELINE_SEQUENCE) if f.exists()), SEQUENCE_FALLBACK)
     if not seq_file.exists():
         rec.check(False, f"no cached industrial_fastner sequence ({SEQUENCE_FILE} or {SEQUENCE_FALLBACK}); "
                          "run test_optimization.py --tests O13 --groups real first")

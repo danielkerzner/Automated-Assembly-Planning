@@ -154,14 +154,14 @@
     0.0,
     35.0
   ],
-  "config_hash": "df2c73a3370fc70a223641f61ba55c0ed0f7408075b4714470585be23972c695",
+  "config_hash": "509d54de0c0eccb56d528eeb0fd27ed24be18a510d813dfca65a603e20dbe7c7",
   "stats": {
     "layers_rasterized": 296,
-    "raster_s": 0.2736285000046337,
+    "raster_s": 0.12894769999616074,
     "views_evaluated": 73,
-    "view_search_s": 0.38727689999996073,
-    "render_s": 0.6762852000001658,
-    "total_s": 1.0635683000000427
+    "view_search_s": 0.1816710000000512,
+    "render_s": 0.3192498999999316,
+    "total_s": 0.5009248000001207
   },
   "config": {
     "image_size": [
@@ -209,11 +209,9 @@
       35,
       50
     ],
-    "vis_min_end": 0.5,
-    "vis_min_start": 0.5,
-    "min_trajectory_px_frac": 0.12,
-    "perturb_step_deg": 5.0,
-    "perturb_max_deg": 30.0,
+    "vis_min_end": 0.35,
+    "vis_min_start": 0.35,
+    "min_trajectory_px_frac": 0.1,
     "xray_alpha": 0.25,
     "placed_color": "#bdbdbd",
     "new_color": "#f28e2b",

@@ -1,5 +1,6 @@
 {
- "cache_key": "9605e3552beb9c1ae3f55b09ed9ef6b864070e8c5446857acbe42018666f4085",
+ "schema_version": 2,
+ "cache_key": "a29e38d0a9396d290e9667b4d1e0ea111c9e835dca78cd14a7a78f7c90a85ca6",
  "component_ids": [
   "Part__Feature",
   "Part__Feature001",
@@ -15,7 +16,6 @@
   "0013-A-0300-A01_3"
  ],
  "config": {
-  "stander_gate": "prerequisites+contacts",
   "margin": 1.0,
   "group_consecutive": true,
   "group_one_order": true
@@ -45,7 +45,7 @@
   "dead_ends": 0,
   "live_nodes": 16,
   "complete": true,
-  "time_s": 0.02462860004743561,
+  "time_s": 0.025345199999719625,
   "array_bytes": 1646
  },
  "complete": true,
@@ -53,11 +53,11 @@
  "terminal": 15,
  "dead_ends": [],
  "component_groups": [
-  null,
+  "0013-P-0101-A01-PP-motor",
   "0013-P-0102-A02-PP",
   "0013-P-0103-A02-AM",
   "0013-P-0105-A01-PP",
   "0013-A-0300-A01_3"
  ],
- "date": "2026-11-04T16:17:37"
+ "date": "2026-11-06T11:07:10"
 }

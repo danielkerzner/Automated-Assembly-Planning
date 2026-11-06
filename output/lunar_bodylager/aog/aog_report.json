@@ -1,0 +1,587 @@
+{
+  "components": [
+    {
+      "bit": 0,
+      "label": "0002-P-0901-A01-PP",
+      "id": "Part__Feature",
+      "kind": "movable"
+    },
+    {
+      "bit": 1,
+      "label": "0002-P-0903-A01-AM",
+      "id": "Part__Feature001",
+      "kind": "movable"
+    },
+    {
+      "bit": 2,
+      "label": "0002-P-0906-A02-AM",
+      "id": "Part__Feature008",
+      "kind": "movable"
+    },
+    {
+      "bit": 3,
+      "label": "0002-P-0908-A01-PP",
+      "id": "Part__Feature011",
+      "kind": "movable"
+    },
+    {
+      "bit": 4,
+      "label": "1603-0032-0032",
+      "id": "Part__Feature012",
+      "kind": "movable"
+    },
+    {
+      "bit": 5,
+      "label": "1601-0039-00032",
+      "id": "Part__Feature013",
+      "kind": "movable"
+    },
+    {
+      "bit": 6,
+      "label": "1603-0032-0033",
+      "id": "Part__Feature022",
+      "kind": "movable"
+    },
+    {
+      "bit": 7,
+      "label": "1601-0039-00033",
+      "id": "Part__Feature023",
+      "kind": "movable"
+    },
+    {
+      "bit": 8,
+      "label": "0002-P-0902-A01-SP-M8x90",
+      "id": "Part__Feature002",
+      "kind": "stander"
+    },
+    {
+      "bit": 9,
+      "label": "0002-P-0904-A01-SP-M4x12",
+      "id": "Part__Feature003",
+      "kind": "stander"
+    },
+    {
+      "bit": 10,
+      "label": "0002-P-0904-A01-SP-M4x001",
+      "id": "Part__Feature004",
+      "kind": "stander"
+    },
+    {
+      "bit": 11,
+      "label": "0002-P-0904-A01-SP-M4x002",
+      "id": "Part__Feature005",
+      "kind": "stander"
+    },
+    {
+      "bit": 12,
+      "label": "0002-P-0904-A01-SP-M4x003",
+      "id": "Part__Feature006",
+      "kind": "stander"
+    },
+    {
+      "bit": 13,
+      "label": "0002-P-0905-A01-SP-al40x60x13",
+      "id": "Part__Feature007",
+      "kind": "stander"
+    },
+    {
+      "bit": 14,
+      "label": "0002-P-0206-A03-SP-M8locknut",
+      "id": "Part__Feature009",
+      "kind": "stander"
+    },
+    {
+      "bit": 15,
+      "label": "0002-P-0907-A01-SP-al8x14x4",
+      "id": "Part__Feature010",
+      "kind": "stander"
+    },
+    {
+      "bit": 16,
+      "label": "0002-P-0402-A01-M4nut",
+      "id": "Part__Feature014",
+      "kind": "stander"
+    },
+    {
+      "bit": 17,
+      "label": "0002-P-0910-A01-SP-M4x16",
+      "id": "Part__Feature015",
+      "kind": "stander"
+    },
+    {
+      "bit": 18,
+      "label": "0002-P-0910-A01-SP-M4x001",
+      "id": "Part__Feature016",
+      "kind": "stander"
+    },
+    {
+      "bit": 19,
+      "label": "0002-P-0910-A01-SP-M4x002",
+      "id": "Part__Feature017",
+      "kind": "stander"
+    },
+    {
+      "bit": 20,
+      "label": "0002-P-0910-A01-SP-M4x003",
+      "id": "Part__Feature018",
+      "kind": "stander"
+    },
+    {
+      "bit": 21,
+      "label": "0002-P-0402-A01-M4nut001",
+      "id": "Part__Feature019",
+      "kind": "stander"
+    },
+    {
+      "bit": 22,
+      "label": "0002-P-0402-A01-M4nut002",
+      "id": "Part__Feature020",
+      "kind": "stander"
+    },
+    {
+      "bit": 23,
+      "label": "0002-P-0402-A01-M4nut003",
+      "id": "Part__Feature021",
+      "kind": "stander"
+    },
+    {
+      "bit": 24,
+      "label": "0002-P-0911-A01-SP-M4x10",
+      "id": "Part__Feature024",
+      "kind": "stander"
+    },
+    {
+      "bit": 25,
+      "label": "0002-P-0911-A01-SP-M4x001",
+      "id": "Part__Feature025",
+      "kind": "stander"
+    },
+    {
+      "bit": 26,
+      "label": "0002-P-0911-A01-SP-M4x002",
+      "id": "Part__Feature026",
+      "kind": "stander"
+    },
+    {
+      "bit": 27,
+      "label": "0002-P-0911-A01-SP-M4x003",
+      "id": "Part__Feature027",
+      "kind": "stander"
+    },
+    {
+      "bit": 28,
+      "label": "0002-P-0402-A01-M4nut004",
+      "id": "Part__Feature028",
+      "kind": "stander"
+    },
+    {
+      "bit": 29,
+      "label": "0002-P-0402-A01-M4nut005",
+      "id": "Part__Feature029",
+      "kind": "stander"
+    },
+    {
+      "bit": 30,
+      "label": "0002-P-0402-A01-M4nut006",
+      "id": "Part__Feature030",
+      "kind": "stander"
+    },
+    {
+      "bit": 31,
+      "label": "0002-P-0402-A01-M4nut007",
+      "id": "Part__Feature031",
+      "kind": "stander"
+    }
+  ],
+  "directions": [
+    {
+      "index": 0,
+      "vector": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "neg": 1,
+      "appended_for_standers": false
+    },
+    {
+      "index": 1,
+      "vector": [
+        -1.0,
+        0.0,
+        0.0
+      ],
+      "neg": 0,
+      "appended_for_standers": false
+    },
+    {
+      "index": 2,
+      "vector": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "neg": 3,
+      "appended_for_standers": false
+    },
+    {
+      "index": 3,
+      "vector": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "neg": 2,
+      "appended_for_standers": false
+    },
+    {
+      "index": 4,
+      "vector": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "neg": 5,
+      "appended_for_standers": false
+    },
+    {
+      "index": 5,
+      "vector": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "neg": 4,
+      "appended_for_standers": false
+    },
+    {
+      "index": 6,
+      "vector": [
+        -0.544931,
+        0.0,
+        -0.838481
+      ],
+      "neg": 7,
+      "appended_for_standers": false
+    },
+    {
+      "index": 7,
+      "vector": [
+        0.544931,
+        0.0,
+        0.838481
+      ],
+      "neg": 6,
+      "appended_for_standers": false
+    },
+    {
+      "index": 8,
+      "vector": [
+        0.838481,
+        0.0,
+        -0.544931
+      ],
+      "neg": 9,
+      "appended_for_standers": false
+    },
+    {
+      "index": 9,
+      "vector": [
+        -0.838481,
+        0.0,
+        0.544931
+      ],
+      "neg": 8,
+      "appended_for_standers": false
+    }
+  ],
+  "stander_holds": {
+    "0002-P-0902-A01-SP-M8x90": [
+      "0002-P-0903-A01-AM"
+    ],
+    "0002-P-0904-A01-SP-M4x12": [
+      "0002-P-0901-A01-PP"
+    ],
+    "0002-P-0904-A01-SP-M4x001": [
+      "0002-P-0901-A01-PP"
+    ],
+    "0002-P-0904-A01-SP-M4x002": [
+      "0002-P-0901-A01-PP"
+    ],
+    "0002-P-0904-A01-SP-M4x003": [
+      "0002-P-0901-A01-PP"
+    ],
+    "0002-P-0905-A01-SP-al40x60x13": [],
+    "0002-P-0206-A03-SP-M8locknut": [],
+    "0002-P-0907-A01-SP-al8x14x4": [],
+    "0002-P-0402-A01-M4nut": [],
+    "0002-P-0910-A01-SP-M4x16": [
+      "0002-P-0908-A01-PP",
+      "1601-0039-00032",
+      "1603-0032-0032"
+    ],
+    "0002-P-0910-A01-SP-M4x001": [
+      "0002-P-0908-A01-PP",
+      "1601-0039-00032",
+      "1603-0032-0032"
+    ],
+    "0002-P-0910-A01-SP-M4x002": [
+      "0002-P-0908-A01-PP",
+      "1601-0039-00032",
+      "1603-0032-0032"
+    ],
+    "0002-P-0910-A01-SP-M4x003": [
+      "0002-P-0908-A01-PP",
+      "1601-0039-00032",
+      "1603-0032-0032"
+    ],
+    "0002-P-0402-A01-M4nut001": [],
+    "0002-P-0402-A01-M4nut002": [],
+    "0002-P-0402-A01-M4nut003": [],
+    "0002-P-0911-A01-SP-M4x10": [
+      "1601-0039-00033",
+      "1603-0032-0033"
+    ],
+    "0002-P-0911-A01-SP-M4x001": [
+      "1601-0039-00033",
+      "1603-0032-0033"
+    ],
+    "0002-P-0911-A01-SP-M4x002": [
+      "1601-0039-00033",
+      "1603-0032-0033"
+    ],
+    "0002-P-0911-A01-SP-M4x003": [
+      "1601-0039-00033",
+      "1603-0032-0033"
+    ],
+    "0002-P-0402-A01-M4nut004": [],
+    "0002-P-0402-A01-M4nut005": [],
+    "0002-P-0402-A01-M4nut006": [],
+    "0002-P-0402-A01-M4nut007": []
+  },
+  "nodes": 433,
+  "edges": 565,
+  "states_per_level": [
+    1,
+    1,
+    5,
+    13,
+    23,
+    31,
+    35,
+    36,
+    36,
+    36,
+    36,
+    36,
+    36,
+    35,
+    31,
+    23,
+    13,
+    5,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "complete": false,
+  "dead_ends": [
+    {
+      "node": 432,
+      "present": [
+        "0002-P-0901-A01-PP",
+        "0002-P-0908-A01-PP",
+        "1603-0032-0032",
+        "1601-0039-00032",
+        "1603-0032-0033",
+        "1601-0039-00033",
+        "0002-P-0910-A01-SP-M4x16",
+        "0002-P-0910-A01-SP-M4x001",
+        "0002-P-0910-A01-SP-M4x002",
+        "0002-P-0910-A01-SP-M4x003",
+        "0002-P-0911-A01-SP-M4x10",
+        "0002-P-0911-A01-SP-M4x001",
+        "0002-P-0911-A01-SP-M4x002",
+        "0002-P-0911-A01-SP-M4x003"
+      ]
+    }
+  ],
+  "moves_with_everything_assembled": [
+    {
+      "component": "0002-P-0206-A03-SP-M8locknut",
+      "is_stander": true,
+      "directions": [
+        [
+          0.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "travel_mm": [
+        12.5
+      ]
+    }
+  ],
+  "example_sequence": [],
+  "stats": {
+    "group_rule": true,
+    "group_one_order": true,
+    "groups": {
+      "M4nut": [
+        "0002-P-0402-A01-M4nut",
+        "0002-P-0402-A01-M4nut001",
+        "0002-P-0402-A01-M4nut002",
+        "0002-P-0402-A01-M4nut003",
+        "0002-P-0402-A01-M4nut004",
+        "0002-P-0402-A01-M4nut005",
+        "0002-P-0402-A01-M4nut006",
+        "0002-P-0402-A01-M4nut007"
+      ],
+      "M4x10": [
+        "0002-P-0911-A01-SP-M4x10",
+        "0002-P-0911-A01-SP-M4x001",
+        "0002-P-0911-A01-SP-M4x002",
+        "0002-P-0911-A01-SP-M4x003"
+      ],
+      "M4x12": [
+        "0002-P-0904-A01-SP-M4x12",
+        "0002-P-0904-A01-SP-M4x001",
+        "0002-P-0904-A01-SP-M4x002",
+        "0002-P-0904-A01-SP-M4x003"
+      ],
+      "M4x16": [
+        "0002-P-0910-A01-SP-M4x16",
+        "0002-P-0910-A01-SP-M4x001",
+        "0002-P-0910-A01-SP-M4x002",
+        "0002-P-0910-A01-SP-M4x003"
+      ]
+    },
+    "group_order_pruned_edges": 1224,
+    "N": 32,
+    "n_movable": 8,
+    "n_standers": 24,
+    "D": 10,
+    "D_prime": 10,
+    "V": 433,
+    "E": 565,
+    "nodes_per_level": [
+      1,
+      1,
+      5,
+      13,
+      23,
+      31,
+      35,
+      36,
+      36,
+      36,
+      36,
+      36,
+      36,
+      35,
+      31,
+      23,
+      13,
+      5,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "connectivity_rule": true,
+    "disconnected_dropped": 74,
+    "dead_ends": 1,
+    "live_nodes": 0,
+    "complete": false,
+    "time_s": 0.13427380000030098,
+    "array_bytes": 20599
+  },
+  "cache_key": "27108639f05dee24303a59ac664f245144cb93adde820039f847235469743357",
+  "checks": [
+    {
+      "id": "S1",
+      "name": "structure",
+      "passed": true,
+      "detail": "433 nodes, 565 edges, layered DAG, CSR consistent"
+    },
+    {
+      "id": "S2",
+      "name": "brute force",
+      "passed": true,
+      "skipped": true,
+      "detail": "skipped (N=32 > 12)"
+    },
+    {
+      "id": "S3",
+      "name": "standers",
+      "passed": false,
+      "detail": "0002-P-0902-A01-SP-M8x90: no removal move in a state where it is present; 0002-P-0904-A01-SP-M4x12: no removal move in a state where it is present; 0002-P-0904-A01-SP-M4x001: no removal move in a state where it is present; 0002-P-0904-A01-SP-M4x002: no removal move in a state where it is present; 0002-P-0904-A01-SP-M4x003: no removal move in a state where it is present; 0002-P-0905-A01-SP-al40x60x13: no removal move in a state where it is present; 0002-P-0907-A01-SP-al8x14x4: no removal move in a state where it is present; 0002-P-0402-A01-M4nut: no removal move in a state where it is present (+15 more)"
+    },
+    {
+      "id": "S4",
+      "name": "directions",
+      "passed": false,
+      "detail": "stander 0002-P-0907-A01-SP-al8x14x4: an edge does not carry exactly its own direction"
+    },
+    {
+      "id": "S5",
+      "name": "travel",
+      "passed": true,
+      "detail": "320 cells match the reference; hand cases OK; all >= margin (1.0 mm); range 12.50..109.23 mm"
+    },
+    {
+      "id": "S6",
+      "name": "paths",
+      "passed": true,
+      "skipped": true,
+      "detail": "skipped (AoG is incomplete)"
+    },
+    {
+      "id": "S7",
+      "name": "live / dead ends",
+      "passed": true,
+      "detail": "0/433 nodes live, 1 dead ends, complete=False"
+    },
+    {
+      "id": "S8",
+      "name": "persistence",
+      "passed": true,
+      "detail": "save/load round trip identical; wrong key rejected"
+    },
+    {
+      "id": "S9",
+      "name": "determinism",
+      "passed": true,
+      "detail": "a second generation gives identical arrays and key"
+    },
+    {
+      "id": "S10",
+      "name": "cache key",
+      "passed": true,
+      "detail": "key changes with the config, holds sets and stander directions"
+    }
+  ]
+}

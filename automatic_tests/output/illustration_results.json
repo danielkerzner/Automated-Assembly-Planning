@@ -1,6 +1,8 @@
 {
   "groups": [
-    "core"
+    "core",
+    "real",
+    "scale"
   ],
   "results": {
     "L1": {
@@ -51,10 +53,6 @@
           "passed": true
         },
         {
-          "label": "invalid {'perturb_step_deg': 0} raises ('perturb_step_deg')",
-          "passed": true
-        },
-        {
           "label": "invalid {'dpi': 0} raises ('dpi')",
           "passed": true
         },
@@ -92,7 +90,7 @@
         }
       ],
       "notes": [],
-      "seconds": 1.633
+      "seconds": 0.658
     },
     "L2": {
       "passed": true,
@@ -131,7 +129,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.147
+      "seconds": 0.03
     },
     "L3": {
       "passed": true,
@@ -182,7 +180,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.172
+      "seconds": 0.051
     },
     "L4": {
       "passed": true,
@@ -197,7 +195,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.664
+      "seconds": 0.246
     },
     "L5": {
       "passed": true,
@@ -220,7 +218,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.049
+      "seconds": 0.017
     },
     "L6": {
       "passed": true,
@@ -243,9 +241,9 @@
         }
       ],
       "notes": [
-        "visible counts: [3, 4], 2 view(s) tied on count"
+        "visible counts: [3, 4], 4 view(s) tied on count"
       ],
-      "seconds": 0.165
+      "seconds": 0.068
     },
     "L7": {
       "passed": true,
@@ -259,24 +257,48 @@
           "passed": true
         },
         {
-          "label": "step along the only candidate's view direction gets a perturbed view (perturbed (-5.0, 20.0))",
-          "passed": true
-        },
-        {
-          "label": "the nearest perturbation that passes is used (4.7 deg)",
-          "passed": true
-        },
-        {
-          "label": "enclosed part gets the x-ray fallback with a warning (xray, ['step 2: no view shows the part unoccluded; x-ray fallback at az -35.0 el 30.0'])",
+          "label": "enclosed movable part gets the x-ray fallback with a warning (xray, ['step 2: no main view shows the part unoccluded; x-ray fallback at az -35.0 el 30.0'])",
           "passed": true
         },
         {
           "label": "its occluded end fraction is 0 in the chosen view",
           "passed": true
+        },
+        {
+          "label": "only the main views are searched, no perturbation (73 views)",
+          "passed": true
+        },
+        {
+          "label": "enclosed stander is drawn without x-ray and reported as not visible (stander)",
+          "passed": true
+        },
+        {
+          "label": "stander best view has a clear trajectory ((90.0, 20.0), global (0.0, 20.0))",
+          "passed": true
+        },
+        {
+          "label": "step along the only view's direction: not visible with a warning (none)",
+          "passed": true
+        },
+        {
+          "label": "block led by a stander: no x-ray (stander)",
+          "passed": true
+        },
+        {
+          "label": "block led by a movable part: x-ray (xray)",
+          "passed": true
+        },
+        {
+          "label": "render: stander frame written without x-ray, the report carries the note",
+          "passed": true
+        },
+        {
+          "label": "the enclosed stander stays behind the grey enclosure, x-ray would show it ([0.60117877 0.60117877 0.60117877], [0.29104686 0.4294134  0.5677799 ])",
+          "passed": true
         }
       ],
       "notes": [],
-      "seconds": 1.359
+      "seconds": 1.052
     },
     "L8": {
       "passed": true,
@@ -303,7 +325,7 @@
         }
       ],
       "notes": [],
-      "seconds": 1.405
+      "seconds": 0.609
     },
     "L9": {
       "passed": true,
@@ -322,7 +344,7 @@
         }
       ],
       "notes": [],
-      "seconds": 1.252
+      "seconds": 0.552
     },
     "L10": {
       "passed": true,
@@ -357,15 +379,49 @@
         }
       ],
       "notes": [],
-      "seconds": 0.908
+      "seconds": 0.497
     },
     "L11": {
       "passed": true,
-      "checks": [],
-      "notes": [
-        "skipped (run with --groups real)"
+      "checks": [
+        {
+          "label": "8 PNGs = 8 frames for N = 8 (group blocks [(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7)])",
+          "passed": true
+        },
+        {
+          "label": "every step is in one frame",
+          "passed": true
+        },
+        {
+          "label": "manual.pdf written",
+          "passed": true
+        },
+        {
+          "label": "every frame visible or carries a warning",
+          "passed": true
+        },
+        {
+          "label": "every x-ray frame carries a warning",
+          "passed": true
+        },
+        {
+          "label": "end to end in 19.5 s (target about 1 min)",
+          "passed": true
+        },
+        {
+          "label": "colour change does not re-tessellate",
+          "passed": true
+        },
+        {
+          "label": "colour change does not re-rasterize layers",
+          "passed": true
+        }
       ],
-      "seconds": 0.0
+      "notes": [
+        "sequence from output\\industrial_fastner\\optimization\\optimization_result.json",
+        "global view (285.0, 20.0); 1:global; 2:global; 3:global; 4:global; 5:global; 6:candidate; 7:stander; 8:stander"
+      ],
+      "seconds": 160.263
     },
     "L12": {
       "passed": true,
@@ -395,7 +451,7 @@
           "passed": true
         },
         {
-          "label": "reordering reuses all 4 final-resolution layers of the global view (framing is order independent); views: ['global', 'global', 'perturbed', 'global']",
+          "label": "reordering reuses all 4 final-resolution layers of the global view (framing is order independent); views: ['global', 'global', 'global', 'global']",
           "passed": true
         },
         {
@@ -404,7 +460,7 @@
         }
       ],
       "notes": [],
-      "seconds": 4.027
+      "seconds": 2.01
     },
     "L13": {
       "passed": true,
@@ -414,20 +470,33 @@
           "passed": true
         },
         {
-          "label": "N = 8 within 60 s (12.9 s: search 7.2 s, render 5.7 s)",
+          "label": "N = 8 within 60 s (8.5 s: search 4.1 s, render 4.4 s)",
           "passed": true
         },
         {
           "label": "peak traced memory 354 MB < 2 GB",
+          "passed": true
+        },
+        {
+          "label": "N = 20: 20 frames",
+          "passed": true
+        },
+        {
+          "label": "N = 20 within 300 s (19.8 s: search 8.6 s, render 11.2 s)",
+          "passed": true
+        },
+        {
+          "label": "peak traced memory 454 MB < 2 GB",
           "passed": true
         }
       ],
       "notes": [
         "N = 8: 113280 triangles",
         "views evaluated 73, layers rasterized 592, kinds ['global', 'global', 'global', 'global', 'global', 'global', 'global', 'global']",
-        "N = 20 skipped (run with --groups scale)"
+        "N = 20: 283200 triangles",
+        "views evaluated 73, layers rasterized 1480, kinds ['global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global']"
       ],
-      "seconds": 13.522
+      "seconds": 29.391
     },
     "L14": {
       "passed": true,
@@ -490,7 +559,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.622
+      "seconds": 0.711
     },
     "cache": {
       "passed": true,

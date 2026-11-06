@@ -73,10 +73,10 @@ from aog_generator import (  # noqa: E402
     save_aog,
 )
 
-DEFAULT_STEP = REPO_ROOT / "data" / "industrial_fastner" / "industrial_fastner.stp"
-DEFAULT_BOM = REPO_ROOT / "data" / "industrial_fastner" / "generated_bom.csv"
-DEFAULT_OUT = REPO_ROOT / "tests" / "industrial_fastner"
-DEFAULT_H = 2.0
+DEFAULT_STEP = REPO_ROOT / "data" / "lunar_bodylager" / "0002-A-0900-A06-bodylager_1.stp"
+DEFAULT_BOM = REPO_ROOT / "data" / "lunar_bodylager" / "generated_bom.csv"
+DEFAULT_OUT = REPO_ROOT / "output" / "lunar_bodylager"
+DEFAULT_H = 5.0
 
 HTML_MAX_NODES = 1500  # beyond this the SVG gets too heavy to be useful
 HTML_MAX_EDGES = 6000

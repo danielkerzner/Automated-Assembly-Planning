@@ -1,5 +1,6 @@
 {
- "cache_key": "6b3b531946418f5bedb63698524f3e64c9a53ca5dc28197bdb44f2d6cb97bb2a",
+ "schema_version": 2,
+ "cache_key": "b62cf328b2b059db01df2981c51acd6de4107282d3353ba09ecb296dcd761295",
  "component_ids": [
   "Part__Feature012",
   "Part__Feature013"
@@ -9,7 +10,6 @@
   "1601-0039-00032"
  ],
  "config": {
-  "stander_gate": "prerequisites+contacts",
   "margin": 1.0,
   "group_consecutive": true,
   "group_one_order": true
@@ -36,7 +36,7 @@
   "dead_ends": 0,
   "live_nodes": 4,
   "complete": true,
-  "time_s": 0.0010066000104416162,
+  "time_s": 0.0010677999998733867,
   "array_bytes": 470
  },
  "complete": true,
@@ -47,5 +47,5 @@
   "1603-0032-0032",
   "1601-0039-00032"
  ],
- "date": "2026-10-31T10:44:41"
+ "date": "2026-11-05T16:54:39"
 }

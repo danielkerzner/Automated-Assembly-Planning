@@ -40,9 +40,10 @@ import Import
 from preprocessing import run_preprocessing
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_STEP = REPO_ROOT / "data" / "industrial_fastner" / "industrial_fastner.stp"
-DEFAULT_BOM = REPO_ROOT / "data" / "industrial_fastner" / "generated_bom.csv"
-DEFAULT_OUT = REPO_ROOT / "output" / "industrial_fastner"
+
+DEFAULT_STEP = REPO_ROOT / "data" / "lunar_bodylager" / "0002-A-0900-A06-bodylager_1.stp"
+DEFAULT_BOM = REPO_ROOT / "data" / "lunar_bodylager" / "generated_bom.csv"
+DEFAULT_OUT = REPO_ROOT / "output" / "lunar_bodylager"
 
 
 def _vec(v: FreeCAD.Vector) -> list[float]:

@@ -17,7 +17,7 @@
       "is_stander": false,
       "png": "output\\lunar_bodylager\\levels\\_0002_P_0909_A01_PP_3\\illustrations\\step_01_1603-0032-0033.png",
       "view": {
-        "azimuth": 75.0,
+        "azimuth": 90.0,
         "elevation": 50.0,
         "is_global": true
       },
@@ -28,10 +28,10 @@
       "vis_start": 1.0,
       "vis_end_occluded": 1.0,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.12186894841494295,
+      "trajectory_px_frac": 0.11914940623239269,
       "in_frame": true,
       "footnote": [
-        "Step 1 / 2   1603-0032-0033   Tool: by hand"
+        "Step 1 / 2   1603-0032-0033   Tool: By_hand"
       ],
       "reorient": false,
       "hold": false,
@@ -54,21 +54,21 @@
       "is_stander": false,
       "png": "output\\lunar_bodylager\\levels\\_0002_P_0909_A01_PP_3\\illustrations\\step_02_1601-0039-00033.png",
       "view": {
-        "azimuth": 10.0,
-        "elevation": 10.0,
-        "is_global": false
+        "azimuth": 90.0,
+        "elevation": 50.0,
+        "is_global": true
       },
-      "view_kind": "perturbed",
+      "view_kind": "global",
       "visible": true,
       "xray": false,
-      "vis_end": 0.5437310269774901,
+      "vis_end": 0.7979390057095113,
       "vis_start": 1.0,
-      "vis_end_occluded": 0.5437310269774901,
+      "vis_end_occluded": 0.7979390057095113,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.1203195513055822,
+      "trajectory_px_frac": 0.10212806248752697,
       "in_frame": true,
       "footnote": [
-        "Step 2 / 2   1601-0039-00033   Tool: by hand"
+        "Step 2 / 2   1601-0039-00033   Tool: By_hand"
       ],
       "reorient": false,
       "hold": false,
@@ -77,18 +77,17 @@
   ],
   "manual_path": "output\\lunar_bodylager\\levels\\_0002_P_0909_A01_PP_3\\illustrations\\manual.pdf",
   "global_view": [
-    75.0,
+    90.0,
     50.0
   ],
-  "config_hash": "98ad768142bc31a82b431a15eb843292cee7fca8588fb09fcc46dba1e164bd0b",
+  "config_hash": "17523027778308aaadc5b6187c764ed0d2d40d7259bcc73efded99e9a8ae59cd",
   "stats": {
-    "layers_rasterized": 176,
-    "raster_s": 5.038083799794549,
-    "views_evaluated": 88,
-    "view_search_s": 5.289208400005009,
-    "layers_loaded": 4,
-    "render_s": 1.4066601999802515,
-    "total_s": 6.695873099990422
+    "layers_rasterized": 148,
+    "raster_s": 6.603342800003702,
+    "views_evaluated": 73,
+    "view_search_s": 6.142642399999204,
+    "render_s": 2.593906600000082,
+    "total_s": 8.736552899999879
   },
   "config": {
     "image_size": [
@@ -136,11 +135,9 @@
       35,
       50
     ],
-    "vis_min_end": 0.5,
-    "vis_min_start": 0.5,
-    "min_trajectory_px_frac": 0.12,
-    "perturb_step_deg": 5.0,
-    "perturb_max_deg": 30.0,
+    "vis_min_end": 0.35,
+    "vis_min_start": 0.35,
+    "min_trajectory_px_frac": 0.1,
     "xray_alpha": 0.25,
     "placed_color": "#bdbdbd",
     "new_color": "#f28e2b",

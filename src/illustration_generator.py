@@ -45,13 +45,13 @@ OUTLINE_RGB = np.array([0.12, 0.12, 0.12])
 TRAJECTORY_COLOR = "#1a1a1a"
 MESH_VERSION = "1"
 LAYER_VERSION = "1"
-FRAMES_VERSION = "2"  # 2: group frames (spec 12)
+FRAMES_VERSION = "3"  # 2: group frames (spec 12); 3: no view perturbation, stander fallback (spec 6.2)
 
 REPORT_NAME = "illustration_report.json"
 VIEWS_NAME = "view_selection.json"
 # Config fields the view search depends on (the view cache ignores colours, footnote and page options).
 SEARCH_FIELDS = ("search_size", "default_view", "azimuths", "elevations", "vis_min_end", "vis_min_start",
-                 "min_trajectory_px_frac", "perturb_step_deg", "perturb_max_deg")
+                 "min_trajectory_px_frac")
 MANUAL_NAME = "manual.pdf"
 
 STRINGS = {
@@ -89,11 +89,9 @@ class IllustrationConfig:
     default_view: tuple[float, float] = (-35.0, 30.0)  # (azimuth, elevation) deg, start of the search order
     azimuths: tuple = tuple(range(0, 360, 15))
     elevations: tuple = (20, 35, 50)
-    vis_min_end: float = 0.5
-    vis_min_start: float = 0.5
-    min_trajectory_px_frac: float = 0.12  # of the shorter image side
-    perturb_step_deg: float = 5.0
-    perturb_max_deg: float = 30.0
+    vis_min_end: float = 0.35
+    vis_min_start: float = 0.35
+    min_trajectory_px_frac: float = 0.10  # of the shorter image side
     xray_alpha: float = 0.25
     placed_color: str = "#bdbdbd"
     new_color: str = "#f28e2b"
@@ -134,8 +132,6 @@ def validate_config(config: IllustrationConfig) -> None:
             raise ValueError(f"{name} must lie in [0, 1]")
     if config.min_trajectory_px_frac < 0:
         raise ValueError("min_trajectory_px_frac must be >= 0")
-    if config.perturb_step_deg <= 0 or config.perturb_max_deg < 0:
-        raise ValueError("perturb_step_deg must be > 0 and perturb_max_deg >= 0")
     for name in ("placed_color", "new_color", "stander_color"):
         if not is_color_like(getattr(config, name)):
             raise ValueError(f"{name} is not a colour: {getattr(config, name)!r}")
@@ -459,9 +455,8 @@ def _step_visibility(ctx: ViewContext, k: int, placed: np.ndarray) -> dict:
     return out
 
 
-def evaluate_view(ctx: ViewContext, only: int | None = None,
-                  blocks: list[tuple[int, int]] | None = None) -> dict[str, np.ndarray]:
-    """Visibility figures per frame (or only frame index `only`, NaN elsewhere) in one view.
+def evaluate_view(ctx: ViewContext, blocks: list[tuple[int, int]] | None = None) -> dict[str, np.ndarray]:
+    """Visibility figures per frame in one view.
 
     Without `blocks` every step is its own frame. For a block (a, b) only step a is judged, against the
     placed parts 0..a-1 and the other members a+1..b, which the same frame draws at their final positions.
@@ -471,21 +466,17 @@ def evaluate_view(ctx: ViewContext, only: int | None = None,
     res = {name: np.full(B, np.nan) for name in ("end", "start", "traj")}
     res["in_frame"] = np.zeros(B, dtype=bool)
     placed = np.full((ctx.H, ctx.W), np.inf, dtype=np.float32)
-    last = B - 1 if only is None else only
-    for i in range(last + 1):
-        a, b = blocks[i]
-        if only is None or i == only:
-            occluders = placed
-            if b > a:
-                occluders = placed.copy()
-                for k in range(a + 1, b + 1):
-                    _merge_into(occluders, ctx.layer(k))
-            v = _step_visibility(ctx, a, occluders)
-            for name in ("end", "start", "traj", "in_frame"):
-                res[name][i] = v[name]
-        if i < last:
-            for k in range(a, b + 1):
-                _merge_into(placed, ctx.layer(k))
+    for i, (a, b) in enumerate(blocks):
+        occluders = placed
+        if b > a:
+            occluders = placed.copy()
+            for k in range(a + 1, b + 1):
+                _merge_into(occluders, ctx.layer(k))
+        v = _step_visibility(ctx, a, occluders)
+        for name in ("end", "start", "traj", "in_frame"):
+            res[name][i] = v[name]
+        for k in range(a, b + 1):
+            _merge_into(placed, ctx.layer(k))
     return res
 
 
@@ -502,7 +493,7 @@ def visible_mask(ev: dict, config: IllustrationConfig, occlusion: bool = True) -
 
 
 def step_score(ev: dict, config: IllustrationConfig) -> np.ndarray:
-    """Bottleneck of the visibility conditions (>= 1 means visible), used to pick the view to perturb."""
+    """Bottleneck of the visibility conditions (>= 1 means visible), used to pick the best failing view."""
     s = np.minimum(np.minimum(_ratio(ev["end"], config.vis_min_end), _ratio(ev["start"], config.vis_min_start)),
                    _ratio(ev["traj"], config.min_trajectory_px_frac))
     return np.where(ev["in_frame"], np.nan_to_num(s, nan=-1.0), -1.0)
@@ -519,15 +510,6 @@ def candidate_views(config: IllustrationConfig) -> list[tuple[float, float]]:
     return out
 
 
-def perturbations(config: IllustrationConfig) -> list[tuple[float, float]]:
-    """(d_azimuth, d_elevation) offsets, nearest ring first."""
-    n = int(config.perturb_max_deg // config.perturb_step_deg)
-    st = config.perturb_step_deg
-    offs = [(i, j) for i in range(-n, n + 1) for j in range(-n, n + 1) if (i, j) != (0, 0)]
-    offs.sort(key=lambda ij: (max(abs(ij[0]), abs(ij[1])), np.hypot(*ij), ij))
-    return [(i * st, j * st) for i, j in offs]
-
-
 def _figures(ev: dict, s: int, occluded: bool = True) -> dict:
     return {"vis_end": float(ev["end"][s]) if occluded else 1.0,
             "vis_start": float(ev["start"][s]) if occluded else 1.0,
@@ -536,12 +518,13 @@ def _figures(ev: dict, s: int, occluded: bool = True) -> dict:
 
 
 def select_views(meshes: list[Mesh], offsets: np.ndarray, config: IllustrationConfig,
-                 stats: dict | None = None, blocks: list[tuple[int, int]] | None = None
-                 ) -> tuple[tuple[float, float], list[dict]]:
+                 stats: dict | None = None, blocks: list[tuple[int, int]] | None = None,
+                 is_stander: list[bool] | None = None) -> tuple[tuple[float, float], list[dict]]:
     """Spec 6.2 cascade at search resolution. Returns (global view, per-frame choice).
 
     blocks: (first, last) step indices per frame (default: one frame per step); only the first movement
-    of a block is judged (spec 12).
+    of a block is judged (spec 12), so that movement's is_stander flag (per step, default False) picks
+    the fallback when no main view passes.
     """
     stats = stats if stats is not None else {}
     blocks = blocks or [(s, s) for s in range(len(meshes))]
@@ -579,31 +562,23 @@ def select_views(meshes: list[Mesh], offsets: np.ndarray, config: IllustrationCo
             choices.append({**base, "view": cands[hit], "is_global": False, "kind": "candidate", "visible": True,
                             "xray": False, **_figures(evals[hit], s)})
             continue
-        # Perturb around the candidate that comes closest (spec 6.2 step 3).
+        # No main view passes. Best failing view: clear trajectory first, then the bottleneck score, then near glob.
         scores = [step_score(evals[i], config)[s] for i in range(len(cands))]
-        best = max(range(len(cands)), key=lambda i: (round(float(scores[i]), 9), -view_angle(cands[i], glob), -i))
-        tried = []  # (view, evaluation)
-        found = None
-        for daz, dele in perturbations(config):
-            view = (cands[best][0] + daz, cands[best][1] + dele)
-            if not 0 <= view[1] <= 90:
-                continue
-            ev = evaluate_view(ViewContext(view, config.search_size, meshes, offsets, stats=stats), only=s,
-                               blocks=blocks)
-            stats["views_evaluated"] = stats.get("views_evaluated", 0) + 1
-            tried.append((view, ev))
-            if visible_mask(ev, config)[s]:
-                found = (view, ev)
-                break
-        if found is not None:
-            choices.append({**base, "view": found[0], "is_global": False, "kind": "perturbed", "visible": True,
-                            "xray": False, **_figures(found[1], s)})
+        best = max(range(len(cands)), key=lambda i: (bool(visible_mask(evals[i], config, occlusion=False)[s]),
+                                                     round(float(scores[i]), 9), -view_angle(cands[i], glob), -i))
+        if is_stander is not None and is_stander[first]:
+            # Standers are easy to assemble: drawn normally in the best view, never in x-ray (spec 6.2 step 3).
+            msg = (f"step {first + 1}: stander not fully visible in any main view; drawn without x-ray at "
+                   f"az {cands[best][0]:.1f} el {cands[best][1]:.1f}")
+            log.info(msg)
+            choices.append({**base, "view": cands[best], "is_global": best == g, "kind": "stander", "visible": False,
+                            "xray": False, **_figures(evals[best], s), "warnings": [msg]})
             continue
         # X-ray fallback (spec 6.2 step 4): visibility judged without occlusion, cascade order again.
-        order = [(cands[i], evals[i]) for i in [g] + by_distance] + tried
+        order = [(cands[i], evals[i]) for i in [g] + by_distance]
         xr = next(((v, ev) for v, ev in order if visible_mask(ev, config, occlusion=False)[s]), None)
         if xr is not None:
-            msg = (f"step {first + 1}: no view shows the part unoccluded; x-ray fallback at az {xr[0][0]:.1f} "
+            msg = (f"step {first + 1}: no main view shows the part unoccluded; x-ray fallback at az {xr[0][0]:.1f} "
                    f"el {xr[0][1]:.1f}")
             log.warning(msg)
             choices.append({**base, "view": xr[0], "is_global": xr[0] == glob, "kind": "xray", "visible": True,
@@ -978,11 +953,11 @@ def _load_cached(output_dir: Path, key: str) -> IllustrationResult | None:
 
 
 def _cached_views(mesh_list, offsets, config, output_dir: Path, force: bool, stats: dict,
-                  blocks: list[tuple[int, int]]):
-    """select_views, cached on disk keyed by meshes, start offsets, frame blocks and the search fields."""
+                  blocks: list[tuple[int, int]], is_stander: list[bool]):
+    """select_views, cached on disk keyed by meshes, start offsets, frame blocks, stander flags and search fields."""
     h = hashlib.sha256(f"v{FRAMES_VERSION};".encode())
     h.update(json.dumps({"meshes": [m.key for m in mesh_list], "offsets": np.round(offsets, 9).tolist(),
-                         "blocks": [list(b) for b in blocks],
+                         "blocks": [list(b) for b in blocks], "is_stander": is_stander,
                          "search": {f: getattr(config, f) for f in SEARCH_FIELDS}}, default=list).encode())
     key = h.hexdigest()
     path = output_dir / VIEWS_NAME
@@ -996,7 +971,7 @@ def _cached_views(mesh_list, offsets, config, output_dir: Path, force: bool, sta
                 return tuple(data["global_view"]), data["choices"]
         except Exception as exc:  # noqa: BLE001
             log.warning("Could not read %s (%s); searching views again", path, exc)
-    glob, choices = select_views(mesh_list, offsets, config, stats, blocks)
+    glob, choices = select_views(mesh_list, offsets, config, stats, blocks, is_stander)
     _write_json_atomic(path, {"key": key, "global_view": glob, "choices": choices})
     return glob, choices
 
@@ -1033,7 +1008,8 @@ def render_illustrations(sequence, meshes: dict[str, Mesh], bom: dict, output_di
     t0 = time.perf_counter()
     stats: dict = {}
     blocks = group_blocks(steps, bom, config)
-    glob, choices = _cached_views(mesh_list, offsets, config, output_dir, force, stats, blocks)
+    glob, choices = _cached_views(mesh_list, offsets, config, output_dir, force, stats, blocks,
+                                  [bool(st["is_stander"]) for st in steps])
     stats["view_search_s"] = time.perf_counter() - t0
 
     t1 = time.perf_counter()

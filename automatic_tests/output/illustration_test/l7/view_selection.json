@@ -1,0 +1,47 @@
+{
+  "key": "2e30ac890380480272eafd3aba18c9d113cf268b733b8fbc113f168b350c8398",
+  "global_view": [
+    -35.0,
+    30.0
+  ],
+  "choices": [
+    {
+      "step_index": 0,
+      "warnings": [],
+      "view": [
+        -35.0,
+        30.0
+      ],
+      "is_global": true,
+      "kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.5575603751082331,
+      "in_frame": true
+    },
+    {
+      "step_index": 1,
+      "warnings": [
+        "step 2: stander not fully visible in any main view; drawn without x-ray at az -35.0 el 30.0"
+      ],
+      "view": [
+        -35.0,
+        30.0
+      ],
+      "is_global": true,
+      "kind": "stander",
+      "visible": false,
+      "xray": false,
+      "vis_end": 0.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.37170691673882206,
+      "in_frame": true
+    }
+  ]
+}

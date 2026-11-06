@@ -17,8 +17,8 @@
       "is_stander": false,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l10\\step_01_P.png",
       "view": {
-        "azimuth": 315.0,
-        "elevation": 35.0,
+        "azimuth": -35.0,
+        "elevation": 30.0,
         "is_global": true
       },
       "view_kind": "global",
@@ -28,7 +28,7 @@
       "vis_start": 1.0,
       "vis_end_occluded": 1.0,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.24997197495993953,
+      "trajectory_px_frac": 0.2540224792730274,
       "in_frame": true,
       "footnote": [
         "Step 1 / 3   P   Tool: by hand"
@@ -54,8 +54,8 @@
       "is_stander": true,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l10\\step_02_S.png",
       "view": {
-        "azimuth": 315.0,
-        "elevation": 35.0,
+        "azimuth": -35.0,
+        "elevation": 30.0,
         "is_global": true
       },
       "view_kind": "global",
@@ -65,7 +65,7 @@
       "vis_start": 1.0,
       "vis_end_occluded": 1.0,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.37495796243990936,
+      "trajectory_px_frac": 0.3810337189095411,
       "in_frame": true,
       "footnote": [
         "Step 2 / 3   S   Tool: wrench_10",
@@ -92,8 +92,8 @@
       "is_stander": false,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l10\\step_03_Q.png",
       "view": {
-        "azimuth": 315.0,
-        "elevation": 35.0,
+        "azimuth": -35.0,
+        "elevation": 30.0,
         "is_global": true
       },
       "view_kind": "global",
@@ -103,7 +103,7 @@
       "vis_start": 1.0,
       "vis_end_occluded": 1.0,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.1243777377551077,
+      "trajectory_px_frac": 0.10336586872088965,
       "in_frame": true,
       "footnote": [
         "Step 3 / 3   Q   Tool: by hand",
@@ -116,17 +116,17 @@
   ],
   "manual_path": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l10\\manual.pdf",
   "global_view": [
-    315.0,
-    35.0
+    -35.0,
+    30.0
   ],
-  "config_hash": "4378b29cd374d18cc0b8806f28f7d3299b70a45e82dbdd0d3b680c2018c48ef1",
+  "config_hash": "8782e822f2f1f64d35575be3bef9a6cbc4afed2222c3778df91c00edb7109721",
   "stats": {
     "layers_rasterized": 222,
-    "raster_s": 0.1939264999950865,
+    "raster_s": 0.08830240000156664,
     "views_evaluated": 73,
-    "view_search_s": 0.28972799999974086,
-    "render_s": 0.5956940000000941,
-    "total_s": 0.8854271999998673
+    "view_search_s": 0.12953999999990629,
+    "render_s": 0.3609857999999804,
+    "total_s": 0.4905285999998341
   },
   "config": {
     "image_size": [
@@ -174,11 +174,9 @@
       35,
       50
     ],
-    "vis_min_end": 0.5,
-    "vis_min_start": 0.5,
-    "min_trajectory_px_frac": 0.12,
-    "perturb_step_deg": 5.0,
-    "perturb_max_deg": 30.0,
+    "vis_min_end": 0.35,
+    "vis_min_start": 0.35,
+    "min_trajectory_px_frac": 0.1,
     "xray_alpha": 0.25,
     "placed_color": "#bdbdbd",
     "new_color": "#f28e2b",

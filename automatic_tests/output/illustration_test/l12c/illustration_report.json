@@ -92,17 +92,17 @@
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l12c\\step_03_B.png",
       "view": {
         "azimuth": 0.0,
-        "elevation": 45.0,
-        "is_global": false
+        "elevation": 35.0,
+        "is_global": true
       },
-      "view_kind": "perturbed",
+      "view_kind": "global",
       "visible": true,
       "xray": false,
-      "vis_end": 0.5,
+      "vis_end": 0.4090909090909091,
       "vis_start": 1.0,
-      "vis_end_occluded": 0.5,
+      "vis_end_occluded": 0.4090909090909091,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.29761904761904767,
+      "trajectory_px_frac": 0.3132718017272636,
       "in_frame": true,
       "footnote": [
         "Step 3 / 4   B   Tool: by hand"
@@ -154,15 +154,15 @@
     0.0,
     35.0
   ],
-  "config_hash": "6b96c513c39a6adc11ac1e11e2e3e7257a2b4769045b89ea0e4a7ce5ef18fcd9",
+  "config_hash": "9229031864d317038641f613570cb3dbb7daa82e3350ec94ce7cfb06bfa16750",
   "stats": {
-    "layers_rasterized": 40,
-    "raster_s": 0.031457100001262006,
-    "views_evaluated": 12,
-    "view_search_s": 0.05075119999992239,
+    "layers_rasterized": 4,
+    "raster_s": 0.0012285000000247237,
+    "views_evaluated": 1,
+    "view_search_s": 0.004873200000020006,
     "layers_loaded": 4,
-    "render_s": 0.6605596999997942,
-    "total_s": 0.7113183999999819
+    "render_s": 0.3066708999999719,
+    "total_s": 0.3115485000000717
   },
   "config": {
     "image_size": [
@@ -185,11 +185,9 @@
     "elevations": [
       35
     ],
-    "vis_min_end": 0.5,
-    "vis_min_start": 0.5,
-    "min_trajectory_px_frac": 0.12,
-    "perturb_step_deg": 5.0,
-    "perturb_max_deg": 30.0,
+    "vis_min_end": 0.35,
+    "vis_min_start": 0.35,
+    "min_trajectory_px_frac": 0.1,
     "xray_alpha": 0.25,
     "placed_color": "#bdbdbd",
     "new_color": "#f28e2b",

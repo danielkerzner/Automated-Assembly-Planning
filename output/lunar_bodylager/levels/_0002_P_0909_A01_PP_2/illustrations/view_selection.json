@@ -1,7 +1,7 @@
 {
-  "key": "c1104e8d6cbadfa43234f290c36d6fdee030836daea5806b78f9af080c5c7eb9",
+  "key": "48769a8cdd0df6ca9a80a3f58071c4f8e1cd61c07c8ed2b10cdbf4b1943c660f",
   "global_view": [
-    285.0,
+    270.0,
     50.0
   ],
   "choices": [
@@ -9,7 +9,7 @@
       "step_index": 0,
       "warnings": [],
       "view": [
-        285.0,
+        270.0,
         50.0
       ],
       "is_global": true,
@@ -20,25 +20,25 @@
       "vis_start": 1.0,
       "vis_end_occluded": 1.0,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.12186894841494479,
+      "trajectory_px_frac": 0.11914940623239455,
       "in_frame": true
     },
     {
       "step_index": 1,
       "warnings": [],
       "view": [
-        350.0,
-        10.0
+        270.0,
+        50.0
       ],
-      "is_global": false,
-      "kind": "perturbed",
+      "is_global": true,
+      "kind": "global",
       "visible": true,
       "xray": false,
-      "vis_end": 0.5437310269774901,
+      "vis_end": 0.7979390057095113,
       "vis_start": 1.0,
-      "vis_end_occluded": 0.5437310269774901,
+      "vis_end_occluded": 0.7979390057095113,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.1203195513055821,
+      "trajectory_px_frac": 0.10212806248752693,
       "in_frame": true
     }
   ]

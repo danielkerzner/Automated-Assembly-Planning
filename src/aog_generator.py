@@ -85,6 +85,11 @@ class AoGInputs:
     contact: np.ndarray | None = None
     # (N,) BOM `group` per component (None = blank or no BOM row: a group of one). None = no group data.
     group: list[str | None] | None = None
+    # Stander bit -> one entry per option, parallel to stander_options[s] (docs/preprocessing-spec.md
+    # P5 screw-travel extension, added 2026-11-05): an override cap on that option's reported travel
+    # distance (D10), or None to keep the bbox-only distance. Screws only; empty/absent = no overrides
+    # anywhere (old behaviour, every existing caller that doesn't know about this field).
+    stander_max_travel: dict[int, list[float | None]] = field(default_factory=dict)
 
 # Dataclass for the AoG itself
 @dataclass
@@ -375,8 +380,11 @@ def compute_cache_key(inputs: AoGInputs, config: AoGConfig) -> str:
     dirs, neg, kd = extend_directions(inputs.directions, inputs.neg, inputs.stander_options)
     h.update(b"dirs:" + np.round(dirs, 9).tobytes() + b"neg:" + neg.tobytes())
     for s in sorted(inputs.stander_options):
+        max_travel = inputs.stander_max_travel.get(s, [])
         opts_repr = [
-            {"k": kd[s][o], "dir": np.round(_unit(d), 9).tolist(), "blockers": sorted(int(b) for b in blockers)}
+            {"k": kd[s][o], "dir": np.round(_unit(d), 9).tolist(), "blockers": sorted(int(b) for b in blockers),
+             "max_travel": (None if o >= len(max_travel) or max_travel[o] is None
+                           else round(float(max_travel[o]), 9))}
             for o, (d, blockers) in enumerate(inputs.stander_options[s])
         ]
         h.update(f"stander:{s}:{json.dumps(opts_repr, sort_keys=True)}:"
@@ -652,10 +660,19 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
     has_out = out_ptr[1:] > out_ptr[:-1]
     dead_ends = np.flatnonzero((node_mask != 0) & ~has_out).astype(np.int64)
 
-    # Compute the travel table for all components and directions, which gives the distance 
+    # Compute the travel table for all components and directions, which gives the distance
     # each component must move along each direction to leave the assembly bounding box, plus a margin.
     travel = compute_travel_table(inputs.bbox_lo, inputs.bbox_hi, inputs.assembly_lo,
                                   inputs.assembly_hi, dirs, config.margin)
+    # docs/preprocessing-spec.md P5 screw-travel extension (2026-11-05): a stander option with a
+    # max_travel override is reported as whichever is shorter, that cap or the bbox-based distance
+    # above (min(), not a replacement -- the override was computed against Preprocessing's own
+    # bbox-exit formula, which can differ slightly from compute_travel_table's fuller one).
+    for s, caps in inputs.stander_max_travel.items():
+        for o, cap in enumerate(caps):
+            if cap is not None:
+                col = kd[s][o]
+                travel[s, col] = min(travel[s, col], cap)
 
     # Create the AoG dataclass with all the computed information and return it.
     aog = AoG(
@@ -848,6 +865,7 @@ def collect_inputs(interference_result, prep, config: AoGConfig | None = None) -
     stander_options: dict[int, list[tuple[np.ndarray, set[int]]]] = {}
     stander_holds: dict[int, set[int]] = {}
     nut_links: dict[int, tuple[int, str]] = {}
+    stander_max_travel: dict[int, list[float | None]] = {}
     h = hashlib.sha256(b"interference:" + interference_result.cache_key.encode())
     for b, sid in enumerate(stander_ids, start=n):
         rec = prep.stander_records[sid]
@@ -862,6 +880,7 @@ def collect_inputs(interference_result, prep, config: AoGConfig | None = None) -
                                  f"{sorted(unknown)}")
             options.append((_unit(_vec3(opt.direction)), {index_all[m] for m in opt.blockers}))
         stander_options[b] = options
+        stander_max_travel[b] = [getattr(opt, "max_travel", None) for opt in rec.options]
 
         unknown_holds = set(rec.holds) - set(index)
         if unknown_holds:
@@ -888,7 +907,9 @@ def collect_inputs(interference_result, prep, config: AoGConfig | None = None) -
             "id": sid,
             "category": rec.category,
             "options": [
-                {"direction": [round(x, 9) for x in _vec3(opt.direction)], "blockers": sorted(opt.blockers)}
+                {"direction": [round(x, 9) for x in _vec3(opt.direction)], "blockers": sorted(opt.blockers),
+                 "max_travel": (None if getattr(opt, "max_travel", None) is None
+                               else round(opt.max_travel, 9))}
                 for opt in rec.options
             ],
             "holds": sorted(rec.holds),
@@ -917,6 +938,7 @@ def collect_inputs(interference_result, prep, config: AoGConfig | None = None) -
         cache_key=h.hexdigest(),
         contact=contact,
         group=read_bom_groups(getattr(prep, "bom_path", None), labels),
+        stander_max_travel=stander_max_travel,
     )
 
 

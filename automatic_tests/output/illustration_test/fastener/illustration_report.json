@@ -15,10 +15,10 @@
       ],
       "group": null,
       "is_stander": false,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\fastener\\step_01_industrial_fastner_part3.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\fastener\\step_01_industrial_fastner_part3.png",
       "view": {
-        "azimuth": 270.0,
-        "elevation": 35.0,
+        "azimuth": 285.0,
+        "elevation": 20.0,
         "is_global": true
       },
       "view_kind": "global",
@@ -28,7 +28,7 @@
       "vis_start": 1.0,
       "vis_end_occluded": 1.0,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.5612154728596033,
+      "trajectory_px_frac": 0.26838124672199204,
       "in_frame": true,
       "footnote": [
         "Step 1 / 8   industrial_fastner_part3   Tool: by hand"
@@ -42,6 +42,43 @@
       "steps": [
         2
       ],
+      "component_id": "Part__Feature002",
+      "component_label": "industrial_fastner_part1",
+      "component_ids": [
+        "Part__Feature002"
+      ],
+      "component_labels": [
+        "industrial_fastner_part1"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\fastener\\step_02_industrial_fastner_part1.png",
+      "view": {
+        "azimuth": 285.0,
+        "elevation": 20.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.4370820668693009,
+      "vis_start": 0.6559270516717325,
+      "vis_end_occluded": 0.4370820668693009,
+      "vis_start_occluded": 0.6559270516717325,
+      "trajectory_px_frac": 0.27918854524770975,
+      "in_frame": true,
+      "footnote": [
+        "Step 2 / 8   industrial_fastner_part1   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 3,
+      "steps": [
+        3
+      ],
       "component_id": "Part__Feature001",
       "component_label": "industrial_fastner_part2",
       "component_ids": [
@@ -52,61 +89,23 @@
       ],
       "group": null,
       "is_stander": false,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\fastener\\step_02_industrial_fastner_part2.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\fastener\\step_03_industrial_fastner_part2.png",
       "view": {
-        "azimuth": 270.0,
-        "elevation": 35.0,
+        "azimuth": 285.0,
+        "elevation": 20.0,
         "is_global": true
       },
       "view_kind": "global",
       "visible": true,
       "xray": false,
-      "vis_end": 1.0,
+      "vis_end": 0.7263246425567704,
       "vis_start": 1.0,
-      "vis_end_occluded": 1.0,
+      "vis_end_occluded": 0.7263246425567704,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.3245001835663905,
+      "trajectory_px_frac": 0.22695326904007374,
       "in_frame": true,
       "footnote": [
-        "Step 2 / 8   industrial_fastner_part2   Tool: by hand",
-        "Hold in place"
-      ],
-      "reorient": false,
-      "hold": true,
-      "warnings": []
-    },
-    {
-      "step": 3,
-      "steps": [
-        3
-      ],
-      "component_id": "Part__Feature006",
-      "component_label": "industrial_fastner_part5",
-      "component_ids": [
-        "Part__Feature006"
-      ],
-      "component_labels": [
-        "industrial_fastner_part5"
-      ],
-      "group": null,
-      "is_stander": false,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\fastener\\step_03_industrial_fastner_part5.png",
-      "view": {
-        "azimuth": 270.0,
-        "elevation": 35.0,
-        "is_global": true
-      },
-      "view_kind": "global",
-      "visible": true,
-      "xray": false,
-      "vis_end": 1.0,
-      "vis_start": 1.0,
-      "vis_end_occluded": 1.0,
-      "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.28476546721154,
-      "in_frame": true,
-      "footnote": [
-        "Step 3 / 8   industrial_fastner_part5   Tool: by hand",
+        "Step 3 / 8   industrial_fastner_part2   Tool: by hand",
         "Hold in place"
       ],
       "reorient": false,
@@ -118,37 +117,36 @@
       "steps": [
         4
       ],
-      "component_id": "Part__Feature007",
-      "component_label": "industrial_fastner_part6",
+      "component_id": "Part__Feature006",
+      "component_label": "industrial_fastner_part5",
       "component_ids": [
-        "Part__Feature007"
+        "Part__Feature006"
       ],
       "component_labels": [
-        "industrial_fastner_part6"
+        "industrial_fastner_part5"
       ],
       "group": null,
       "is_stander": false,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\fastener\\step_04_industrial_fastner_part6.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\fastener\\step_04_industrial_fastner_part5.png",
       "view": {
-        "azimuth": 345.0,
+        "azimuth": 285.0,
         "elevation": 20.0,
-        "is_global": false
+        "is_global": true
       },
-      "view_kind": "candidate",
+      "view_kind": "global",
       "visible": true,
       "xray": false,
-      "vis_end": 0.5272140221402214,
+      "vis_end": 0.9122328331059573,
       "vis_start": 1.0,
-      "vis_end_occluded": 0.5272140221402214,
+      "vis_end_occluded": 0.9122328331059573,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.23817350768473003,
+      "trajectory_px_frac": 0.22723766725873737,
       "in_frame": true,
       "footnote": [
-        "Step 4 / 8   industrial_fastner_part6   Tool: by hand",
-        "Hold in place"
+        "Step 4 / 8   industrial_fastner_part5   Tool: by hand"
       ],
       "reorient": false,
-      "hold": true,
+      "hold": false,
       "warnings": []
     },
     {
@@ -166,25 +164,26 @@
       ],
       "group": null,
       "is_stander": true,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\fastener\\step_05_industrial_fastner_part7.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\fastener\\step_05_industrial_fastner_part7.png",
       "view": {
-        "azimuth": 335.0,
+        "azimuth": 285.0,
         "elevation": 20.0,
-        "is_global": false
+        "is_global": true
       },
-      "view_kind": "perturbed",
+      "view_kind": "global",
       "visible": true,
       "xray": false,
-      "vis_end": 0.5117674203968621,
+      "vis_end": 0.3718674211802749,
       "vis_start": 1.0,
-      "vis_end_occluded": 0.5117674203968621,
+      "vis_end_occluded": 0.3718674211802749,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.14259354631493149,
+      "trajectory_px_frac": 0.21223045305835908,
       "in_frame": true,
       "footnote": [
-        "Step 5 / 8   industrial_fastner_part7   Tool: wrench_24"
+        "Step 5 / 8   industrial_fastner_part7   Tool: by_hand",
+        "Re-orient assembly: gravity along (-1, 0, 0)"
       ],
-      "reorient": false,
+      "reorient": true,
       "hold": false,
       "warnings": []
     },
@@ -193,96 +192,131 @@
       "steps": [
         6
       ],
-      "component_id": "Part__Feature002",
-      "component_label": "industrial_fastner_part1",
+      "component_id": "Part__Feature007",
+      "component_label": "industrial_fastner_part6",
       "component_ids": [
-        "Part__Feature002"
+        "Part__Feature007"
       ],
       "component_labels": [
-        "industrial_fastner_part1"
+        "industrial_fastner_part6"
       ],
       "group": null,
       "is_stander": false,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\fastener\\step_06_industrial_fastner_part1.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\fastener\\step_06_industrial_fastner_part6.png",
       "view": {
-        "azimuth": 270.0,
-        "elevation": 35.0,
-        "is_global": true
+        "azimuth": 0.0,
+        "elevation": 20.0,
+        "is_global": false
       },
-      "view_kind": "xray",
+      "view_kind": "candidate",
       "visible": true,
-      "xray": true,
-      "vis_end": 1.0,
+      "xray": false,
+      "vis_end": 0.39315525876460766,
       "vis_start": 1.0,
-      "vis_end_occluded": 0.13885429638854296,
-      "vis_start_occluded": 0.23661270236612703,
-      "trajectory_px_frac": 0.25225299951771807,
+      "vis_end_occluded": 0.39315525876460766,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.15820209037918143,
       "in_frame": true,
       "footnote": [
-        "Step 6 / 8   industrial_fastner_part1   Tool: by hand",
+        "Step 6 / 8   industrial_fastner_part6   Tool: by hand   Turns: 40.7 (clockwise)"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 7,
+      "steps": [
+        7
+      ],
+      "component_id": "Part__Feature005",
+      "component_label": "industrial_fastner_part001",
+      "component_ids": [
+        "Part__Feature005"
+      ],
+      "component_labels": [
+        "industrial_fastner_part001"
+      ],
+      "group": null,
+      "is_stander": true,
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\fastener\\step_07_industrial_fastner_part001.png",
+      "view": {
+        "azimuth": 120.0,
+        "elevation": 35.0,
+        "is_global": false
+      },
+      "view_kind": "stander",
+      "visible": false,
+      "xray": false,
+      "vis_end": 0.15625,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.15625,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.1034631481466333,
+      "in_frame": true,
+      "footnote": [
+        "Step 7 / 8   industrial_fastner_part001   Tool: wrenchA",
         "Hold in place"
       ],
       "reorient": false,
       "hold": true,
       "warnings": [
-        "step 6: no view shows the part unoccluded; x-ray fallback at az 270.0 el 35.0"
+        "step 7: stander not fully visible in any main view; drawn without x-ray at az 120.0 el 35.0"
       ]
     },
     {
-      "step": 7,
+      "step": 8,
       "steps": [
-        7,
         8
       ],
-      "component_id": "Part__Feature005",
-      "component_label": "industrial_fastner_part001",
+      "component_id": "Part__Feature004",
+      "component_label": "industrial_fastner_part4",
       "component_ids": [
-        "Part__Feature005",
         "Part__Feature004"
       ],
       "component_labels": [
-        "industrial_fastner_part001",
         "industrial_fastner_part4"
       ],
-      "group": "fastener_small",
+      "group": null,
       "is_stander": true,
-      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\fastener\\step_07-08_fastener_small.png",
+      "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\fastener\\step_08_industrial_fastner_part4.png",
       "view": {
-        "azimuth": 90.0,
-        "elevation": 15.0,
+        "azimuth": 120.0,
+        "elevation": 35.0,
         "is_global": false
       },
-      "view_kind": "perturbed",
-      "visible": true,
+      "view_kind": "stander",
+      "visible": false,
       "xray": false,
-      "vis_end": 0.5142857142857142,
-      "vis_start": 0.95,
-      "vis_end_occluded": 0.5142857142857142,
-      "vis_start_occluded": 0.95,
-      "trajectory_px_frac": 0.1504136694729713,
+      "vis_end": 0.14465408805031446,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.14465408805031446,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.1034631481466333,
       "in_frame": true,
       "footnote": [
-        "Steps 7-8 / 8   fastener_small   Tool: wrench_10",
-        "Parts: industrial_fastner_part001, industrial_fastner_part4",
-        "Hold in place: industrial_fastner_part001, industrial_fastner_part4"
+        "Step 8 / 8   industrial_fastner_part4   Tool: wrenchA",
+        "Hold in place"
       ],
       "reorient": false,
       "hold": true,
-      "warnings": []
+      "warnings": [
+        "step 8: stander not fully visible in any main view; drawn without x-ray at az 120.0 el 35.0"
+      ]
     }
   ],
-  "manual_path": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tests_scripts\\output\\illustration_test\\fastener\\manual.pdf",
+  "manual_path": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\fastener\\manual.pdf",
   "global_view": [
-    270.0,
-    35.0
+    285.0,
+    20.0
   ],
-  "config_hash": "72f0bb11a229604c2b0b276d445df3814219503e6c5548bebd995d0df1925817",
+  "config_hash": "99c1f9ad37b1e3720f6d7403c0f46ce90f12d6f467a1bf03ea01ddd60effbf5e",
   "stats": {
     "views_cached": true,
-    "view_search_s": 0.0012558000162243843,
-    "layers_loaded": 25,
-    "render_s": 4.492502299981425,
-    "total_s": 4.493761000019731
+    "view_search_s": 0.007944299999962823,
+    "layers_loaded": 22,
+    "render_s": 4.067026699999815,
+    "total_s": 4.0749737000001005
   },
   "config": {
     "image_size": [
@@ -330,11 +364,9 @@
       35,
       50
     ],
-    "vis_min_end": 0.5,
-    "vis_min_start": 0.5,
-    "min_trajectory_px_frac": 0.12,
-    "perturb_step_deg": 5.0,
-    "perturb_max_deg": 30.0,
+    "vis_min_end": 0.35,
+    "vis_min_start": 0.35,
+    "min_trajectory_px_frac": 0.1,
     "xray_alpha": 0.25,
     "placed_color": "#a0a0c0",
     "new_color": "#f28e2b",

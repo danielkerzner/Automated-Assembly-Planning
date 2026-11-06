@@ -6,7 +6,7 @@
   "label": "0013-A-0100-A01_3",
   "status": "complete",
   "locked_parts": [],
-  "total_cost": 0.018098419446941377,
+  "total_cost": 0.018098419446941405,
   "inseparable_pairs": [],
   "steps": [
    {
@@ -45,6 +45,10 @@
      "stability": 0.0,
      "gravity_change": 0.0
     },
+    "turns": null,
+    "turns_pitch": null,
+    "turns_note": null,
+    "turns_nut_label": null,
     "kind": "subassembly",
     "members": {
      "leaf_ids": [
@@ -108,6 +112,10 @@
         "stability": 0.0,
         "gravity_change": 0.0
        },
+       "turns": null,
+       "turns_pitch": null,
+       "turns_note": null,
+       "turns_nut_label": null,
        "kind": "part",
        "sub_plan": null
       },
@@ -147,6 +155,10 @@
         "stability": 0.0,
         "gravity_change": 0.0
        },
+       "turns": null,
+       "turns_pitch": null,
+       "turns_note": null,
+       "turns_nut_label": null,
        "kind": "part",
        "sub_plan": null
       },
@@ -186,6 +198,10 @@
         "stability": 0.0,
         "gravity_change": 0.017857142857142856
        },
+       "turns": null,
+       "turns_pitch": null,
+       "turns_note": null,
+       "turns_nut_label": null,
        "kind": "part",
        "sub_plan": null
       },
@@ -225,6 +241,10 @@
         "stability": 0.0,
         "gravity_change": 0.03571428571428571
        },
+       "turns": null,
+       "turns_pitch": null,
+       "turns_note": null,
+       "turns_nut_label": null,
        "kind": "part",
        "sub_plan": null
       },
@@ -264,6 +284,10 @@
         "stability": 0.061224489795918366,
         "gravity_change": 0.0
        },
+       "turns": null,
+       "turns_pitch": null,
+       "turns_note": null,
+       "turns_nut_label": null,
        "kind": "part",
        "sub_plan": null
       }
@@ -299,13 +323,17 @@
     "stability_class": 2,
     "costs": {
      "travel": 0.007154831962764408,
-     "size_contacts": 0.011173213893355021,
+     "size_contacts": 0.011173213893355016,
      "direction_change": 0.00510204081632653,
      "tool_change": 0.0,
      "grouping": 0.0,
      "stability": 0.0,
      "gravity_change": 0.0
     },
+    "turns": null,
+    "turns_pitch": null,
+    "turns_note": null,
+    "turns_nut_label": null,
     "kind": "part",
     "sub_plan": null
    },
@@ -338,13 +366,17 @@
     "stability_class": 2,
     "costs": {
      "travel": 0.00653058487876483,
-     "size_contacts": 0.02347580674014433,
+     "size_contacts": 0.023475806740144316,
      "direction_change": 0.0,
      "tool_change": 0.0,
      "grouping": 0.0,
      "stability": 0.0,
      "gravity_change": 0.0
     },
+    "turns": null,
+    "turns_pitch": null,
+    "turns_note": null,
+    "turns_nut_label": null,
     "kind": "part",
     "sub_plan": null
    },
@@ -377,13 +409,17 @@
     "stability_class": 2,
     "costs": {
      "travel": 0.006722660904610853,
-     "size_contacts": 0.014247642021800387,
+     "size_contacts": 0.014247642021800377,
      "direction_change": 0.0,
      "tool_change": 0.0,
      "grouping": 0.0,
      "stability": 0.0,
      "gravity_change": 0.0
     },
+    "turns": null,
+    "turns_pitch": null,
+    "turns_note": null,
+    "turns_nut_label": null,
     "kind": "part",
     "sub_plan": null
    },
@@ -416,13 +452,17 @@
     "stability_class": 2,
     "costs": {
      "travel": 0.007154831962764412,
-     "size_contacts": 0.053698315688213996,
+     "size_contacts": 0.05369831568821389,
      "direction_change": 0.0,
      "tool_change": 0.0,
      "grouping": 0.0,
      "stability": 0.0,
      "gravity_change": 0.0
     },
+    "turns": null,
+    "turns_pitch": null,
+    "turns_note": null,
+    "turns_nut_label": null,
     "kind": "part",
     "sub_plan": null
    }

@@ -18,7 +18,7 @@
       "notes": [
         "random cases: V from 1 to 524, 131 non-trivial"
       ],
-      "seconds": 18.454
+      "seconds": 5.698
     },
     "A2": {
       "passed": true,
@@ -33,7 +33,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.254
+      "seconds": 0.126
     },
     "A2b": {
       "passed": true,
@@ -82,7 +82,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.004
+      "seconds": 0.002
     },
     "A4": {
       "passed": true,
@@ -101,7 +101,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.003
+      "seconds": 0.001
     },
     "A5": {
       "passed": true,
@@ -116,11 +116,11 @@
         }
       ],
       "notes": [
-        "N=12: 0.59 s, arrays 0.5 MB, peak traced 1.2 MB",
-        "N=16: 1.15 s, arrays 10.1 MB, peak traced 23.7 MB",
+        "N=12: 0.17 s, arrays 0.5 MB, peak traced 1.2 MB",
+        "N=16: 0.38 s, arrays 10.1 MB, peak traced 23.7 MB",
         "N = 20 skipped (run with --groups scale)"
       ],
-      "seconds": 1.751
+      "seconds": 0.554
     },
     "A6": {
       "passed": true,
@@ -147,7 +147,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.003
+      "seconds": 0.002
     },
     "A7": {
       "passed": true,
@@ -174,7 +174,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.003
+      "seconds": 0.001
     },
     "A8": {
       "passed": true,
@@ -223,7 +223,7 @@
       "notes": [
         "industrial_fastner assembly-box check skipped (run with --groups real)"
       ],
-      "seconds": 0.005
+      "seconds": 0.003
     },
     "A9": {
       "passed": true,
@@ -274,7 +274,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.091
+      "seconds": 0.037
     },
     "A10": {
       "passed": true,
@@ -297,7 +297,7 @@
         }
       ],
       "notes": [],
-      "seconds": 1.48
+      "seconds": 0.434
     },
     "A11": {
       "passed": true,
@@ -312,7 +312,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.12
+      "seconds": 0.029
     },
     "A12": {
       "passed": true,
@@ -363,7 +363,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.425
+      "seconds": 0.126
     },
     "A13": {
       "passed": true,
@@ -418,7 +418,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.351
+      "seconds": 0.101
     }
   }
 }

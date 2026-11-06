@@ -1,5 +1,5 @@
 {
- "cache_key": "d495cffca234b5999beaa162374b15469a58e8d829a56985a87b875d4a67ad4f",
+ "cache_key": "b449af9c3777c9b15284066654e2a186c3121b9be700c168ea75062e1f38b334",
  "component_ids": [
   "Part__Feature012",
   "Part__Feature013"
@@ -21,14 +21,14 @@
   "0,1,0": {
    "phase": "step",
    "iterations": 1,
-   "t_block": 4.0,
-   "volume": 516.7193473269026
+   "t_block": 5.0,
+   "volume": 485.4308868761076
   },
   "0,1,1": {
    "phase": "step",
    "iterations": 1,
-   "t_block": 4.0,
-   "volume": 516.7193473186262
+   "t_block": 5.0,
+   "volume": 485.4308868695678
   },
   "0,1,2": {
    "phase": "step",
@@ -39,24 +39,24 @@
   "0,1,3": {
    "phase": "step",
    "iterations": 1,
-   "t_block": 4.0,
-   "volume": 215.24739886913028
+   "t_block": 5.0,
+   "volume": 216.93443412750878
   },
   "0,1,4": {
    "phase": "step",
    "iterations": 1,
-   "t_block": 4.0,
-   "volume": 516.7193473305922
+   "t_block": 5.0,
+   "volume": 485.4308868702536
   },
   "0,1,5": {
    "phase": "step",
    "iterations": 1,
-   "t_block": 4.0,
-   "volume": 516.7193473164274
+   "t_block": 5.0,
+   "volume": 485.4308868687503
   }
  },
  "config": {
-  "step": 4.0,
+  "step": 5.0,
   "volume_epsilon": 1e-06,
   "overlap_tol": 1.0,
   "margin": 1.0,
@@ -75,8 +75,8 @@
   "broad_phase_settled": 0,
   "broad_phase_share": 0.0,
   "stepped_tests": 6,
-  "mean_test_time_s": 0.8548196333334394,
-  "max_test_time_s": 0.9580103999760468,
+  "mean_test_time_s": 1.3263410999998086,
+  "max_test_time_s": 2.0009952999989764,
   "iterations": 7,
   "mean_iterations": 1.1666666666666667,
   "max_iterations": 2,
@@ -84,11 +84,11 @@
   "distToShape_calls": 7,
   "gap_travel_share": 0.0,
   "pair_times_s": {
-   "0,1": 5.1320219000044744
+   "0,1": 7.961921699999948
   },
-  "matrix_time_s": 5.1320219000044744,
-  "total_time_s": 5.984695399994962
+  "matrix_time_s": 7.961921699999948,
+  "total_time_s": 9.211330000000089
  },
  "freecad_version": "1.1.0",
- "date": "2026-10-31T10:44:41"
+ "date": "2026-11-05T16:54:39"
 }

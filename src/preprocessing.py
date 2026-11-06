@@ -56,6 +56,9 @@ class PreprocessingConfig:
     nut_rotation_angles_deg: tuple[float, ...] = (15.0, 30.0, 45.0)  # rotation lock test (P8)
     pairing_min_fill: float = 0.25  # min fraction of bore volume a partner must occupy (P7)
     bore_clip_margin: float = 0.2  # mm, radial margin added to the bore when clipping the partner (P8)
+    # A screw only needs to travel this many times its own length along its direction, or clear
+    # the whole-assembly bbox -- whichever comes first (P5 extension, added 2026-11-05).
+    screw_travel_factor: float = 1.5
 
 
 # Dataclass for one removal option of a stander: a direction, where its trajectory exits the
@@ -65,6 +68,12 @@ class RemovalOption:
     direction: FreeCAD.Vector
     exit_point: FreeCAD.Vector
     blockers: set[str]  # component Names that must already be removed
+    # Screws only (docs/preprocessing-spec.md P5 extension, added 2026-11-05): the stander only
+    # needs to travel min(screw_travel_factor * its own length along `direction`, the distance to
+    # clear the whole-assembly bbox), plus margin -- whichever comes first -- rather than always
+    # clearing the whole assembly. None = no override, use the bbox-only distance (D10) as before
+    # (nuts, category-3 "other", and any screw this wasn't computed for).
+    max_travel: float | None = None
 
 
 # Dataclass for storing the contact and dismantle information for a stander component. Replaces
@@ -351,6 +360,21 @@ def _axial_extent(shape: Part.Shape, base: FreeCAD.Vector, axis_dir: FreeCAD.Vec
     return min(projections), max(projections)
 
 
+def _bbox_exit_distance(shape: Part.Shape, direction: FreeCAD.Vector, assembly_bbox) -> float:
+    """Raw distance (no margin -- callers add their own) along `direction` for `shape`'s own
+    extent to clear the whole-assembly bounding box (a `FreeCAD.BoundBox`), same per-axis
+    projection convention as `collision.sweep_length` (treating the assembly box as the "other
+    shape"). Used by the P5 screw-travel extension (2026-11-05) to find "the distance to clear
+    the assembly bbox" without re-deriving `aog_generator.compute_travel_table`'s fuller
+    multi-axis formula here: a cutoff for how far the stepped sweep needs to run only has to be a
+    safe upper bound, not exact."""
+    from collision import _extent
+
+    _, box_max_d = _extent(assembly_bbox, direction)
+    shape_min_d, _ = _extent(shape.BoundBox, direction)
+    return box_max_d - shape_min_d
+
+
 def _axial_solid(radius: float, base: FreeCAD.Vector, axis_dir: FreeCAD.Vector,
                  t_min: float, t_max: float) -> Part.Shape:
     """A cylinder of `radius`, centered on the axis, spanning from `t_min` to `t_max` along
@@ -415,9 +439,15 @@ def _signed_axis_direction(
 def _sweep_blockers(
     shape: Part.Shape, direction: FreeCAD.Vector, candidates: list, shapes: dict[str, Part.Shape],
     v0_cache: dict, collision_config, config: PreprocessingConfig, name: str, stats,
+    max_length: float | None = None,
 ) -> set[str]:
     """P5: every candidate the stander's own solid cannot sweep past along `direction` (the
-    collision core's stepped sweep, contact counts as free, threshold per P3) is a blocker."""
+    collision core's stepped sweep, contact counts as free, threshold per P3) is a blocker.
+
+    `max_length`, when given, caps the sweep (2026-11-05 screw-travel extension): a component the
+    stander would only reach *after* `max_length` is not a blocker, since the stander is
+    considered clear of the assembly by then regardless.
+    """
     from collision import is_free_detail
 
     blockers: set[str] = set()
@@ -426,7 +456,8 @@ def _sweep_blockers(
             continue
         other_shape = shapes[other.Name]
         threshold = max(config.volume_epsilon, 2 * _v0(name, other.Name, shapes, v0_cache))
-        outcome = is_free_detail(shape, other_shape, direction, collision_config, stats, threshold=threshold)
+        outcome = is_free_detail(shape, other_shape, direction, collision_config, stats, threshold=threshold,
+                                 max_length=max_length)
         if not outcome.free:
             blockers.add(other.Name)
     return blockers
@@ -538,32 +569,13 @@ def process_standers(
 
     records: dict[str, StanderRecord] = {}
 
-    # Pass 2: screws.
-    for obj in stander_objs:
-        name = obj.Name
-        if category[name] != 1:
-            continue
-        base, axis_dir, _radius = axes[name]
-        shape = shapes[name]
-        d = _signed_axis_direction(shape, axis_dir, config.probe_displacement, all_components,
-                                   shapes, v0_cache, config, name)
-        if d is None:
-            log.warning("Screw stander %r: both axis sides free or both blocked (P4); treating "
-                       "as category 3", obj.Label)
-            category[name] = 3
-            continue
-        holds = _screw_holds(shape, axis_dir, non_standers, shapes, v0_cache, config, name)
-        blockers = _sweep_blockers(shape, d, non_standers, shapes, v0_cache, collision_config,
-                                   config, name, stats) - holds
-        exit_point = assembly_bbox.getIntersectionPoint(base, d)
-        records[name] = StanderRecord(
-            category=1, options=[RemovalOption(direction=d, exit_point=exit_point, blockers=blockers)],
-            holds=holds, contact_neighbors=set(), bbox=_bbox_to_tuple(shape.BoundBox),
-        )
-
-    # Pass 3: nuts. The partner (P7, generalised 2026-11-04) can be any component -- stander or
-    # movable -- so this pass needs nothing from pass 2; the precedence it derives (P8) lives
-    # entirely on the nut's own record (`partner`/`nut_rule`), never mutating anyone else's.
+    # Pass 1.5: nut bore/partner info, computed early (before screws) purely so screws know which
+    # nuts are partnered to them (P11 exception below) -- nothing else about nut processing
+    # depends on screws, so moving this earlier changes no result, it only makes the mapping
+    # available sooner. A nut demoted to category 3 here (no partner) gets no entry.
+    nut_bore: dict[str, tuple[float, Part.Shape, float]] = {}  # name -> (bore_radius, bore_solid, bore_volume)
+    partner_of: dict[str, str] = {}       # nut name -> partner name
+    nuts_of_partner: dict[str, set[str]] = {}  # partner name -> set of nut names
     for obj in stander_objs:
         name = obj.Name
         if category[name] != 2:
@@ -582,6 +594,61 @@ def process_standers(
                      "treating as category 3", obj.Label)
             category[name] = 3
             continue
+        nut_bore[name] = (bore_radius, bore_solid, bore_volume)
+        partner_of[name] = partner
+        nuts_of_partner.setdefault(partner, set()).add(name)
+
+    # Pass 2: screws. A nut's own partner always physically overlaps/grazes it along the axis as
+    # it (un)screws -- that is not a blocking collision, it is already modeled by the nut's own
+    # `partner`/`nut_rule` (P7/P8), so a screw excludes any nut partnered to it from its blocker
+    # sweep, the same way a nut excludes its partner below. Every *other* stander is now a fair
+    # candidate (P11 revised: a screw/nut can be blocked by an unrelated stander, confirmed on
+    # `lunar_bodylager` where a nut's real removal path collides with an unrelated spacer stander
+    # that categories 1/2 previously could never see).
+    for obj in stander_objs:
+        name = obj.Name
+        if category[name] != 1:
+            continue
+        base, axis_dir, _radius = axes[name]
+        shape = shapes[name]
+        d = _signed_axis_direction(shape, axis_dir, config.probe_displacement, all_components,
+                                   shapes, v0_cache, config, name)
+        if d is None:
+            log.warning("Screw stander %r: both axis sides free or both blocked (P4); treating "
+                       "as category 3", obj.Label)
+            category[name] = 3
+            continue
+        holds = _screw_holds(shape, axis_dir, non_standers, shapes, v0_cache, config, name)
+        # P5 extension (2026-11-05): the screw only needs to travel screw_travel_factor times its
+        # own length along d, or clear the whole-assembly bbox -- whichever comes first (plus the
+        # usual sweep margin) -- rather than always sweeping all the way to the bbox.
+        t_min, t_max = _axial_extent(shape, base, axis_dir)
+        own_length = t_max - t_min
+        bbox_exit = _bbox_exit_distance(shape, d, assembly_bbox)
+        max_travel = min(config.screw_travel_factor * own_length, bbox_exit) + collision_config.margin
+        own_nuts = nuts_of_partner.get(name, set())
+        blocker_candidates = [o for o in all_components if o.Name not in own_nuts]
+        blockers = _sweep_blockers(shape, d, blocker_candidates, shapes, v0_cache, collision_config,
+                                   config, name, stats, max_length=max_travel) - holds
+        exit_point = assembly_bbox.getIntersectionPoint(base, d)
+        records[name] = StanderRecord(
+            category=1,
+            options=[RemovalOption(direction=d, exit_point=exit_point, blockers=blockers, max_travel=max_travel)],
+            holds=holds, contact_neighbors=set(), bbox=_bbox_to_tuple(shape.BoundBox),
+        )
+
+    # Pass 3: nuts. The partner (P7, generalised 2026-11-04) can be any component -- stander or
+    # movable -- so this pass needs nothing from pass 2; the precedence it derives (P8) lives
+    # entirely on the nut's own record (`partner`/`nut_rule`), never mutating anyone else's.
+    for obj in stander_objs:
+        name = obj.Name
+        if category[name] != 2:
+            continue
+        base, axis_dir, _radius = axes[name]
+        shape = shapes[name]
+        bore_radius, bore_solid, bore_volume = nut_bore[name]
+        t_min, t_max = _axial_extent(shape, base, axis_dir)
+        partner = partner_of[name]
         d = _signed_axis_direction(shape, axis_dir, config.probe_displacement, all_components,
                                    shapes, v0_cache, config, name)
         if d is None:
@@ -593,7 +660,12 @@ def process_standers(
         if partner_rec is not None and len(partner_rec.options) == 1 and d.dot(partner_rec.options[0].direction) > 0:
             log.warning("Nut stander %r's direction is not opposite its partner %r's (P1 sanity "
                        "check); keeping it anyway", obj.Label, partner)
-        blockers = _sweep_blockers(shape, d, non_standers, shapes, v0_cache, collision_config,
+        # P11 revised (see pass 2 comment): every other component, standers included, is now a
+        # candidate blocker -- except the partner itself, which always overlaps/grazes the nut
+        # along its own axis and is already governed by `partner`/`nut_rule`, not by a translation
+        # blocker (including it here would contradict `nut_rule` for at least one of the two).
+        blocker_candidates = [o for o in all_components if o.Name != partner]
+        blockers = _sweep_blockers(shape, d, blocker_candidates, shapes, v0_cache, collision_config,
                                    config, name, stats)
         clip_solid = _axial_solid(bore_radius + config.bore_clip_margin, base, axis_dir, t_min, t_max)
         partner_clip_shape = shapes[partner].cut(clip_solid)

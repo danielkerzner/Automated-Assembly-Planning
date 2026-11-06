@@ -28,7 +28,7 @@ from preprocessing import PreprocessingConfig
 @dataclass
 class CollisionConfig:
     # Step size h. Industrial_fastner is stable at 2.0, 0.5 is the conservative default.
-    step: float = 0.5
+    step: float = 5
 
     # Minimum threshold to consider a contact
     volume_epsilon: float = PreprocessingConfig().volume_epsilon
@@ -169,9 +169,17 @@ def is_free_detail(
     config: CollisionConfig,
     stats: Stats | None = None,
     threshold: float | None = None,
+    max_length: float | None = None,
 ) -> Outcome:
-    """Core of the colision test."""
-    
+    """Core of the colision test.
+
+    `max_length`, when given, caps how far i is swept (still at least the broad-phase check):
+    i is free as soon as it travels `max_length` even if it has not fully cleared j. A caller
+    that needs a *shorter* stopping distance than "fully past j" (e.g. a part that only needs to
+    travel a fixed multiple of its own length, docs/preprocessing-spec.md P5) passes it here
+    instead of re-implementing the stepped sweep.
+    """
+
     stats = stats if stats is not None else Stats()
     stats.calls += 1
     d = unit(d)
@@ -188,6 +196,8 @@ def is_free_detail(
     t0 = time.perf_counter()
     h = config.step
     length = sweep_length(shape_i, shape_j, d, config.margin)
+    if max_length is not None:
+        length = min(length, max_length)
     t, iters = 0.0, 0
     outcome = None
     
@@ -229,5 +239,6 @@ def is_free_detail(
     return outcome
 
 
-def is_free(shape_i, shape_j, d, config: CollisionConfig, stats: Stats | None = None, threshold=None) -> bool:
-    return is_free_detail(shape_i, shape_j, d, config, stats, threshold).free
+def is_free(shape_i, shape_j, d, config: CollisionConfig, stats: Stats | None = None, threshold=None,
+           max_length: float | None = None) -> bool:
+    return is_free_detail(shape_i, shape_j, d, config, stats, threshold, max_length).free

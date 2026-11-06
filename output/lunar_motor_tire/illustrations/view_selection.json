@@ -1,7 +1,7 @@
 {
-  "key": "6674c09c5dbd5bffc5c87407bdb14d4b61fd127dd6eaee25edeae22b3f7ef5c8",
+  "key": "abf40ef0184b0429d42a4f610d2556963334be7f6f8e5282e6e0c673cd566569",
   "global_view": [
-    105.0,
+    90.0,
     20.0
   ],
   "choices": [
@@ -9,7 +9,7 @@
       "step_index": 0,
       "warnings": [],
       "view": [
-        105.0,
+        90.0,
         20.0
       ],
       "is_global": true,
@@ -20,14 +20,14 @@
       "vis_start": 1.0,
       "vis_end_occluded": 1.0,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.13185532676350942,
+      "trajectory_px_frac": 0.10544653889589871,
       "in_frame": true
     },
     {
       "step_index": 1,
       "warnings": [],
       "view": [
-        105.0,
+        90.0,
         20.0
       ],
       "is_global": true,
@@ -38,14 +38,14 @@
       "vis_start": 1.0,
       "vis_end_occluded": 1.0,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.23761334132207573,
+      "trajectory_px_frac": 0.19002269421273585,
       "in_frame": true
     },
     {
       "step_index": 2,
       "warnings": [],
       "view": [
-        105.0,
+        90.0,
         20.0
       ],
       "is_global": true,
@@ -56,32 +56,32 @@
       "vis_start": 1.0,
       "vis_end_occluded": 1.0,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.21688197597182757,
+      "trajectory_px_frac": 0.17344353297269854,
       "in_frame": true
     },
     {
       "step_index": 3,
       "warnings": [],
       "view": [
-        105.0,
+        90.0,
         20.0
       ],
       "is_global": true,
       "kind": "global",
       "visible": true,
       "xray": false,
-      "vis_end": 0.988399071925754,
+      "vis_end": 0.9940535183349851,
       "vis_start": 1.0,
-      "vis_end_occluded": 0.988399071925754,
+      "vis_end_occluded": 0.9940535183349851,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.22326085761805778,
+      "trajectory_px_frac": 0.1785448133542485,
       "in_frame": true
     },
     {
       "step_index": 4,
       "warnings": [],
       "view": [
-        105.0,
+        90.0,
         20.0
       ],
       "is_global": true,
@@ -92,7 +92,7 @@
       "vis_start": 1.0,
       "vis_end_occluded": 1.0,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.2376133413220759,
+      "trajectory_px_frac": 0.19002269421273596,
       "in_frame": true
     }
   ]

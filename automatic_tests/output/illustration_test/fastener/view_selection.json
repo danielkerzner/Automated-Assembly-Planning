@@ -1,16 +1,16 @@
 {
-  "key": "1990825b921285f59ce05184d26b9f4b793a744b9f873277ab87985a19ca0496",
+  "key": "dbff66c334ded95e0bd30a2f3fc31d66df6654d5fbd9e2836af6cb6a7abd74c0",
   "global_view": [
-    270.0,
-    35.0
+    285.0,
+    20.0
   ],
   "choices": [
     {
       "step_index": 0,
       "warnings": [],
       "view": [
-        270.0,
-        35.0
+        285.0,
+        20.0
       ],
       "is_global": true,
       "kind": "global",
@@ -20,117 +20,137 @@
       "vis_start": 1.0,
       "vis_end_occluded": 1.0,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.5612154728596033,
+      "trajectory_px_frac": 0.26838124672199204,
       "in_frame": true
     },
     {
       "step_index": 1,
       "warnings": [],
       "view": [
-        270.0,
-        35.0
+        285.0,
+        20.0
       ],
       "is_global": true,
       "kind": "global",
       "visible": true,
       "xray": false,
-      "vis_end": 1.0,
-      "vis_start": 1.0,
-      "vis_end_occluded": 1.0,
-      "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.3245001835663905,
+      "vis_end": 0.4370820668693009,
+      "vis_start": 0.6559270516717325,
+      "vis_end_occluded": 0.4370820668693009,
+      "vis_start_occluded": 0.6559270516717325,
+      "trajectory_px_frac": 0.27918854524770975,
       "in_frame": true
     },
     {
       "step_index": 2,
       "warnings": [],
       "view": [
-        270.0,
-        35.0
+        285.0,
+        20.0
       ],
       "is_global": true,
       "kind": "global",
       "visible": true,
       "xray": false,
-      "vis_end": 1.0,
+      "vis_end": 0.7263246425567704,
       "vis_start": 1.0,
-      "vis_end_occluded": 1.0,
+      "vis_end_occluded": 0.7263246425567704,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.28476546721154,
+      "trajectory_px_frac": 0.22695326904007374,
       "in_frame": true
     },
     {
       "step_index": 3,
       "warnings": [],
       "view": [
-        345.0,
+        285.0,
         20.0
       ],
-      "is_global": false,
-      "kind": "candidate",
+      "is_global": true,
+      "kind": "global",
       "visible": true,
       "xray": false,
-      "vis_end": 0.5272140221402214,
+      "vis_end": 0.9122328331059573,
       "vis_start": 1.0,
-      "vis_end_occluded": 0.5272140221402214,
+      "vis_end_occluded": 0.9122328331059573,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.23817350768473003,
+      "trajectory_px_frac": 0.22723766725873737,
       "in_frame": true
     },
     {
       "step_index": 4,
       "warnings": [],
       "view": [
-        335.0,
+        285.0,
         20.0
       ],
-      "is_global": false,
-      "kind": "perturbed",
+      "is_global": true,
+      "kind": "global",
       "visible": true,
       "xray": false,
-      "vis_end": 0.5117674203968621,
+      "vis_end": 0.3718674211802749,
       "vis_start": 1.0,
-      "vis_end_occluded": 0.5117674203968621,
+      "vis_end_occluded": 0.3718674211802749,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.14259354631493149,
+      "trajectory_px_frac": 0.21223045305835908,
       "in_frame": true
     },
     {
       "step_index": 5,
-      "warnings": [
-        "step 6: no view shows the part unoccluded; x-ray fallback at az 270.0 el 35.0"
-      ],
+      "warnings": [],
       "view": [
-        270.0,
-        35.0
+        0.0,
+        20.0
       ],
-      "is_global": true,
-      "kind": "xray",
+      "is_global": false,
+      "kind": "candidate",
       "visible": true,
-      "xray": true,
-      "vis_end": 1.0,
+      "xray": false,
+      "vis_end": 0.39315525876460766,
       "vis_start": 1.0,
-      "vis_end_occluded": 0.13885429638854296,
-      "vis_start_occluded": 0.23661270236612703,
-      "trajectory_px_frac": 0.25225299951771807,
+      "vis_end_occluded": 0.39315525876460766,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.15820209037918143,
       "in_frame": true
     },
     {
       "step_index": 6,
-      "warnings": [],
+      "warnings": [
+        "step 7: stander not fully visible in any main view; drawn without x-ray at az 120.0 el 35.0"
+      ],
       "view": [
-        90.0,
-        15.0
+        120.0,
+        35.0
       ],
       "is_global": false,
-      "kind": "perturbed",
-      "visible": true,
+      "kind": "stander",
+      "visible": false,
       "xray": false,
-      "vis_end": 0.5142857142857142,
-      "vis_start": 0.95,
-      "vis_end_occluded": 0.5142857142857142,
-      "vis_start_occluded": 0.95,
-      "trajectory_px_frac": 0.1504136694729713,
+      "vis_end": 0.15625,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.15625,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.1034631481466333,
+      "in_frame": true
+    },
+    {
+      "step_index": 7,
+      "warnings": [
+        "step 8: stander not fully visible in any main view; drawn without x-ray at az 120.0 el 35.0"
+      ],
+      "view": [
+        120.0,
+        35.0
+      ],
+      "is_global": false,
+      "kind": "stander",
+      "visible": false,
+      "xray": false,
+      "vis_end": 0.14465408805031446,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.14465408805031446,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.1034631481466333,
       "in_frame": true
     }
   ]
