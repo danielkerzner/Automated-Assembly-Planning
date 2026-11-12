@@ -96,7 +96,19 @@
       "passed": true,
       "checks": [
         {
-          "label": "is_stander=true on a container row raises and names the row (BOM row for container 'ContainerX' [containerX] sets is_stander=true, but a container cannot be a stander (CLAUDE.md: standers are flagged on leaf rows only) -- fix the row or confirm it should not be a container)",
+          "label": "is_stander=true with 'processed' blank defaults processed to false",
+          "passed": true
+        },
+        {
+          "label": "is_stander=true with an explicit processed=false does not raise",
+          "passed": true
+        },
+        {
+          "label": "is_stander=true + processed=true raises and names the row (BOM row for container 'ContainerX' [containerX] sets is_stander=true and processed=true; a stander subassembly is fused into one rigid component (docs/preprocessing-spec.md P1/P2, 'other' category) and cannot also be recursively processed as its own level -- set processed=false or leave it blank)",
+          "passed": true
+        },
+        {
+          "label": "is_stander=true on the root raises and names it (BOM row for the root container 'Assembly' [root] sets is_stander=true, but the root cannot be a stander)",
           "passed": true
         },
         {
@@ -108,12 +120,12 @@
           "passed": true
         },
         {
-          "label": "is_stander=true on a leaf row is unaffected (standers are only flagged on leaves)",
+          "label": "is_stander=true on a leaf row is unaffected (unchanged leaf-stander path)",
           "passed": true
         }
       ],
       "notes": [],
-      "seconds": 0.0
+      "seconds": 0.001
     },
     "H5": {
       "passed": true,
@@ -159,7 +171,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.003
+      "seconds": 0.005
     },
     "H8": {
       "passed": true,
@@ -178,7 +190,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.004
+      "seconds": 0.006
     },
     "H9": {
       "passed": true,
@@ -201,7 +213,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.003
+      "seconds": 0.005
     },
     "H13": {
       "passed": true,
@@ -216,7 +228,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.001
+      "seconds": 0.002
     },
     "R3": {
       "passed": true,
@@ -243,7 +255,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.003
+      "seconds": 0.004
     },
     "R4": {
       "passed": true,
@@ -258,7 +270,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.055
+      "seconds": 0.103
     },
     "R5": {
       "passed": true,
@@ -273,7 +285,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.05
+      "seconds": 0.165
     },
     "R8": {
       "passed": true,
@@ -312,7 +324,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.009
+      "seconds": 0.019
     }
   }
 }

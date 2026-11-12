@@ -1,19 +1,17 @@
 {
- "cache_key": "8ef3a4f129e50c00065fe0c51914cb4e49078647e8fe61ed2063a1dc56e21f06",
+ "schema_version": 2,
+ "cache_key": "09a92d79386dff41079090b0042c70e0221fc7e212e5abccbb0514add019e807",
  "component_ids": [
-  "Part__Feature",
-  "Part__Feature001",
   "Part__Feature002",
-  "Part__Feature003"
+  "Part__Feature003",
+  "auto_0"
  ],
  "component_labels": [
-  "component",
-  "component001",
   "component002",
-  "component003"
+  "component003",
+  "auto_0 (component + component001)"
  ],
  "config": {
-  "stander_gate": "prerequisites+contacts",
   "margin": 1.0,
   "group_consecutive": true,
   "group_one_order": true
@@ -23,39 +21,35 @@
   "group_one_order": false,
   "groups": {},
   "group_order_pruned_edges": 0,
-  "N": 4,
-  "n_movable": 4,
+  "N": 3,
+  "n_movable": 3,
   "n_standers": 0,
   "D": 6,
   "D_prime": 6,
-  "V": 1,
-  "E": 0,
+  "V": 5,
+  "E": 5,
   "nodes_per_level": [
    1,
-   0,
-   0,
-   0,
-   0
+   1,
+   2,
+   1
   ],
   "connectivity_rule": true,
   "disconnected_dropped": 0,
-  "dead_ends": 1,
-  "live_nodes": 0,
-  "complete": false,
-  "time_s": 0.0024190999974962324,
-  "array_bytes": 470
+  "dead_ends": 0,
+  "live_nodes": 5,
+  "complete": true,
+  "time_s": 0.0022909000035724603,
+  "array_bytes": 562
  },
- "complete": false,
+ "complete": true,
  "root": 0,
- "terminal": null,
- "dead_ends": [
-  0
- ],
+ "terminal": 4,
+ "dead_ends": [],
  "component_groups": [
-  "component",
-  "component001",
   "component002",
-  "component003"
+  "component003",
+  null
  ],
- "date": "2026-11-01T11:09:56"
+ "date": "2026-11-10T10:00:35"
 }

@@ -1,6 +1,6 @@
 label,is_stander,screw,nut,pitch,tool,group,processed,subassembly
 0013-A-0100-A01_3,False,False,False,,By_hand,0013-A-0100-A01_3,true,
-0013-P-0101-A01-PP-motor,False,False,False,,By_hand,0013-P-0101-A01-PP-motor,,0013-A-0100-A01_3
+0013-P-0101-A01-PP-motor,True,False,False,,By_hand,0013-P-0101-A01-PP-motor,,0013-A-0100-A01_3
 0013-P-0102-A02-PP,False,False,False,,By_hand,0013-P-0102-A02-PP,,0013-A-0100-A01_3
 0013-P-0103-A02-AM,False,False,False,,By_hand,0013-P-0103-A02-AM,,0013-A-0100-A01_3
 0013-P-0105-A01-PP,False,False,False,,By_hand,0013-P-0105-A01-PP,,0013-A-0100-A01_3

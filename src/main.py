@@ -41,9 +41,15 @@ def _read_bom_rows(bom_path: Path) -> list[dict]:
 
 
 def _step_kind(hier: Hierarchy, container_id: str, step: dict) -> str:
+    # is_stander wins over "is a child container": a stander-flagged sub-assembly (docs/
+    # subassembly-spec.md section 3) is fused into one rigid component and treated exactly like
+    # any other stander downstream -- it is never recursed into, so it should not be reported as
+    # "subassembly" even though it is structurally a container.
+    if step["is_stander"]:
+        return "stander"
     if step["component_id"] in hier.containers[container_id].child_ids:
         return "subassembly"
-    return "stander" if step["is_stander"] else "part"
+    return "part"
 
 
 def _level_to_json(hier: Hierarchy, plan: LevelPlan) -> dict:
@@ -67,7 +73,10 @@ def _level_to_json(hier: Hierarchy, plan: LevelPlan) -> dict:
         kind = _step_kind(hier, plan.container_id, step)
         entry = dict(step)
         entry["kind"] = kind
-        if kind == "subassembly":
+        # A stander-flagged sub-assembly is still a real container (docs/subassembly-spec.md
+        # section 3): report its members/processed/auto like "subassembly" would, just under
+        # kind "stander" and with no sub_plan (it is fused, never recursed into).
+        if cid in hier.containers[plan.container_id].child_ids:
             child = hier.containers[cid]
             entry["members"] = {
                 "leaf_ids": list(child.all_leaf_ids),
@@ -169,12 +178,58 @@ def _parse_args() -> argparse.Namespace:
         help="Size guard: raise before any geometry work if a processed level has more components "
              "than this (AoG target size; default 20).",
     )
+    parser.add_argument(
+        "--mode",
+        choices=("manual", "robot"),
+        default=None,
+        help="manual (illustrated human instructions) or robot (gripper/tool feasibility loop, "
+             "docs/robotic-gripper_spec.md). If omitted you are asked; without a terminal, manual.",
+    )
     return parser.parse_args()
+
+
+def resolve_mode(flag: str | None, ask=input, interactive: bool | None = None) -> str:
+    """The --mode flag wins; without it ask on a terminal (empty answer = manual); no terminal = manual."""
+    if flag is not None:
+        if flag not in ("manual", "robot"):
+            raise ValueError(f"mode must be 'manual' or 'robot', got {flag!r}")
+        return flag
+    if interactive is None:
+        interactive = sys.stdin is not None and sys.stdin.isatty()
+    if not interactive:
+        log.info("No --mode given and no terminal to ask; using manual mode")
+        return "manual"
+    while True:
+        answer = ask("Mode [manual/robot] (Enter = manual): ").strip().lower()
+        if answer in ("", "manual", "m"):
+            return "manual"
+        if answer in ("robot", "r"):
+            return "robot"
+        print(f"Please answer 'manual' or 'robot' (got {answer!r}).", file=sys.stderr)
+
+
+def _main_robot(args) -> int:
+    from robot_loop_robotic import run_robot_pipeline  # robot modules only load in robot mode
+
+    plan_dict = run_robot_pipeline(
+        args.step_path, args.bom_path, args.output_dir,
+        collision_config=CollisionConfig(step=args.step),
+        force_interference=args.force_interference,
+        max_level_components=args.max_level_components,
+    )
+    robot = plan_dict["robot"]
+    if not robot["feasible"]:
+        print(f"Robot plan: the chosen sequence still has {len(robot['failing_steps'])} infeasible step(s): "
+              + ", ".join(f"step {f['step']} {f['label']} ({f['reason']})" for f in robot["failing_steps"])
+              + ". See plan.json -> robot.", file=sys.stderr)
+    return 0
 
 
 def main() -> int:
     args = _parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s: %(message)s")
+    if resolve_mode(args.mode) == "robot":
+        return _main_robot(args)
     plan_dict = run_pipeline(
         args.step_path,
         args.bom_path,

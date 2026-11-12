@@ -532,6 +532,7 @@ def process_standers(
     config: PreprocessingConfig,
     collision_config=None,
     bom_categories: dict[str, str | None] | None = None,
+    compound_ids: frozenset[str] = frozenset(),
 ) -> tuple[dict[str, StanderRecord], set[str], tuple[FreeCAD.Vector, FreeCAD.Vector]]:
     """Return stander records, the set of stander object Names, and the whole-assembly bbox.
 
@@ -542,6 +543,12 @@ def process_standers(
     screw pass -- the precedence it derives (P8) lives entirely on the nut's own record
     (`partner`/`nut_rule`), the AoG reads it from there instead of it being pushed into anyone
     else's blockers.
+
+    `compound_ids` names this document's fused sub-assembly components (docs/subassembly-
+    spec.md): for a stander whose id is in there (a stander subassembly, added 2026-11-11), pass
+    4 tries the cheap P4 probe-displacement sign test before paying for a full sweep in both
+    directions (docs/stander_processing-spec.md section 14) -- a plain leaf "other" stander is
+    unaffected (its shape is small enough that two full sweeps are already cheap).
     """
     from collision import CollisionConfig, Stats
 
@@ -688,12 +695,42 @@ def process_standers(
         shape = shapes[name]
         others = [o for o in stander_objs + non_standers if o.Name != name]
         options = []
-        for sign in (1.0, -1.0):
-            d = axis_dir * sign
-            blockers = _sweep_blockers(shape, d, others, shapes, v0_cache, collision_config,
+        probe_dir = None
+        sweep_config = collision_config
+        if name in compound_ids:
+            # Stander subassembly (added 2026-11-11, docs/stander_processing-spec.md section 14):
+            # try the cheap P4 probe-displacement sign test (same helper as screws/nuts) before
+            # paying for a full sweep in both directions. Exactly one free side at the probe
+            # displacement -- the same "is this the unique dismantle direction" test used for
+            # screws -- is taken as that unique direction, and the opposite side's full sweep is
+            # skipped entirely. Both free or both blocked: fall back to the original two-sweep pass.
+            probe_dir = _signed_axis_direction(shape, axis_dir, config.probe_displacement,
+                                               stander_objs + non_standers, shapes, v0_cache, config, name)
+            # gap_skip off for this sweep (measured 2026-11-11 on lunar_motor_tire_complete:
+            # distToShape() between two large fused shapes near contact cost 18-90 s per call,
+            # vs. 0.7-3.5 s for common() on the same pair -- gap_skip's per-step distToShape()
+            # dominated the whole sweep). Fixed-step common()-only checks still cover the entire
+            # travel distance (unlike a single short jump, which could miss a blocker further down
+            # the path), so this keeps the same correctness guarantee, just without the expensive
+            # distance query.
+            sweep_config = replace(collision_config, gap_skip=False)
+        if probe_dir is not None:
+            blockers = _sweep_blockers(shape, probe_dir, others, shapes, v0_cache, sweep_config,
                                        config, name, stats)
-            exit_point = assembly_bbox.getIntersectionPoint(base, d)
-            options.append(RemovalOption(direction=d, exit_point=exit_point, blockers=blockers))
+            exit_point = assembly_bbox.getIntersectionPoint(base, probe_dir)
+            options = [RemovalOption(direction=probe_dir, exit_point=exit_point, blockers=blockers)]
+            log.info("Stander subassembly %r: probe test (P4) found a unique free side; skipping "
+                     "the opposite direction's full sweep", obj.Label)
+        else:
+            if name in compound_ids:
+                log.info("Stander subassembly %r: probe test (P4) found both sides free or both "
+                         "blocked; falling back to a full sweep in both directions", obj.Label)
+            for sign in (1.0, -1.0):
+                d = axis_dir * sign
+                blockers = _sweep_blockers(shape, d, others, shapes, v0_cache, sweep_config,
+                                           config, name, stats)
+                exit_point = assembly_bbox.getIntersectionPoint(base, d)
+                options.append(RemovalOption(direction=d, exit_point=exit_point, blockers=blockers))
         records[name] = StanderRecord(
             category=3, options=options, holds=set(), contact_neighbors=set(),
             bbox=_bbox_to_tuple(shape.BoundBox),
@@ -903,7 +940,8 @@ def run_preprocessing_on_document(
     members = members or {}
 
     stander_records, stander_ids, assembly_bbox = process_standers(
-        doc, bom_labels, config, collision_config=collision_config, bom_categories=bom_categories)
+        doc, bom_labels, config, collision_config=collision_config, bom_categories=bom_categories,
+        compound_ids=compound_ids)
     reduced_assembly = build_stander_reduced_assembly(doc, stander_ids)
 
     skip_ids = compound_ids if config.compound_directions == "none" else frozenset()

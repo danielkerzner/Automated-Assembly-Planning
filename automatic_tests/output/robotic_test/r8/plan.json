@@ -1,0 +1,767 @@
+{
+ "assembly": "Toy",
+ "levels_independent": true,
+ "level": {
+  "container_id": "root",
+  "label": "Toy",
+  "status": "complete",
+  "locked_parts": [],
+  "total_cost": 0.0,
+  "inseparable_pairs": [],
+  "steps": [
+   {
+    "step": 1,
+    "component": 2,
+    "component_id": "c2",
+    "component_label": "c2",
+    "is_stander": false,
+    "edge": 11,
+    "removal_direction_index": 1,
+    "direction_index": 0,
+    "direction": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "travel": 2.0,
+    "start_offset": [
+     -2.0,
+     0.0,
+     0.0
+    ],
+    "gravity_index": null,
+    "gravity": null,
+    "stability_class": null,
+    "costs": {
+     "travel": 0.006734006734006734
+    },
+    "kind": "part",
+    "sub_plan": null
+   },
+   {
+    "step": 2,
+    "component": 1,
+    "component_id": "c1",
+    "component_label": "c1",
+    "is_stander": false,
+    "edge": 7,
+    "removal_direction_index": 1,
+    "direction_index": 0,
+    "direction": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "travel": 2.0,
+    "start_offset": [
+     -2.0,
+     0.0,
+     0.0
+    ],
+    "gravity_index": null,
+    "gravity": null,
+    "stability_class": null,
+    "costs": {
+     "travel": 0.006734006734006734
+    },
+    "kind": "part",
+    "sub_plan": null
+   },
+   {
+    "step": 3,
+    "component": 0,
+    "component_id": "c0",
+    "component_label": "c0",
+    "is_stander": false,
+    "edge": 0,
+    "removal_direction_index": 1,
+    "direction_index": 0,
+    "direction": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "travel": 2.0,
+    "start_offset": [
+     -2.0,
+     0.0,
+     0.0
+    ],
+    "gravity_index": null,
+    "gravity": null,
+    "stability_class": null,
+    "costs": {
+     "travel": 0.006734006734006734
+    },
+    "kind": "part",
+    "sub_plan": null
+   }
+  ]
+ },
+ "robot": {
+  "mode": "robot",
+  "feasible": true,
+  "failing_steps": [],
+  "steps": [
+   {
+    "step": 1,
+    "component_id": "c2",
+    "component_label": "c2",
+    "edge": 11,
+    "state": 4,
+    "feasible": true,
+    "end_effector": "gripper",
+    "tcp": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axes": [
+     [
+      1.0,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      1.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.0,
+      1.0
+     ]
+    ],
+    "grasp_width": 10.0,
+    "contact_area": 1.0,
+    "score": 0.6,
+    "score_alone": 0.6,
+    "score_relative": 1.0,
+    "rotation_checked": false,
+    "angles": [],
+    "rotation": null,
+    "reason": null,
+    "intrinsically_infeasible": false
+   },
+   {
+    "step": 2,
+    "component_id": "c1",
+    "component_label": "c1",
+    "edge": 7,
+    "state": 6,
+    "feasible": true,
+    "end_effector": "gripper",
+    "tcp": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axes": [
+     [
+      1.0,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      1.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.0,
+      1.0
+     ]
+    ],
+    "grasp_width": 10.0,
+    "contact_area": 1.0,
+    "score": 0.68,
+    "score_alone": 0.8,
+    "score_relative": 0.85,
+    "rotation_checked": false,
+    "angles": [],
+    "rotation": null,
+    "reason": null,
+    "intrinsically_infeasible": false
+   },
+   {
+    "step": 3,
+    "component_id": "c0",
+    "component_label": "c0",
+    "edge": 0,
+    "state": 7,
+    "feasible": true,
+    "end_effector": "gripper",
+    "tcp": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "axes": [
+     [
+      1.0,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      1.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.0,
+      1.0
+     ]
+    ],
+    "grasp_width": 10.0,
+    "contact_area": 1.0,
+    "score": 0.63,
+    "score_alone": 0.9,
+    "score_relative": 0.7,
+    "rotation_checked": false,
+    "angles": [],
+    "rotation": null,
+    "reason": null,
+    "intrinsically_infeasible": false
+   }
+  ],
+  "loop": {
+   "iterations": 3,
+   "stop_reason": "no path left after pruning (The 3 blocked edge(s) disconnect the root from the terminal)",
+   "chosen_iteration": 1,
+   "blocked_edges": [
+    {
+     "state": 7,
+     "state_components": [
+      "c0",
+      "c1",
+      "c2"
+     ],
+     "component": 0,
+     "component_label": "c0",
+     "iteration": 1,
+     "reason": "worst quarter (relative score 0.700)"
+    },
+    {
+     "state": 7,
+     "state_components": [
+      "c0",
+      "c1",
+      "c2"
+     ],
+     "component": 1,
+     "component_label": "c1",
+     "iteration": 2,
+     "reason": "worst quarter (relative score 0.700)"
+    },
+    {
+     "state": 7,
+     "state_components": [
+      "c0",
+      "c1",
+      "c2"
+     ],
+     "component": 2,
+     "component_label": "c2",
+     "iteration": 3,
+     "reason": "infeasible grasp (score 0.420 below absolute floor 0.5)"
+    }
+   ],
+   "sequences": [
+    {
+     "iteration": 1,
+     "chosen": true,
+     "total_cost": 0.0,
+     "n_infeasible": 0,
+     "min_relative": 0.7,
+     "sum_relative": 2.55,
+     "edge_path": [
+      0,
+      7,
+      11
+     ],
+     "order": [
+      "c2",
+      "c1",
+      "c0"
+     ],
+     "pruned": [
+      {
+       "state": 7,
+       "component_label": "c0"
+      }
+     ],
+     "steps": [
+      {
+       "step": 1,
+       "component_id": "c2",
+       "component_label": "c2",
+       "edge": 11,
+       "state": 4,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "axes": [
+        [
+         1.0,
+         0.0,
+         0.0
+        ],
+        [
+         0.0,
+         1.0,
+         0.0
+        ],
+        [
+         0.0,
+         0.0,
+         1.0
+        ]
+       ],
+       "grasp_width": 10.0,
+       "contact_area": 1.0,
+       "score": 0.6,
+       "score_alone": 0.6,
+       "score_relative": 1.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 2,
+       "component_id": "c1",
+       "component_label": "c1",
+       "edge": 7,
+       "state": 6,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "axes": [
+        [
+         1.0,
+         0.0,
+         0.0
+        ],
+        [
+         0.0,
+         1.0,
+         0.0
+        ],
+        [
+         0.0,
+         0.0,
+         1.0
+        ]
+       ],
+       "grasp_width": 10.0,
+       "contact_area": 1.0,
+       "score": 0.68,
+       "score_alone": 0.8,
+       "score_relative": 0.85,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 3,
+       "component_id": "c0",
+       "component_label": "c0",
+       "edge": 0,
+       "state": 7,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "axes": [
+        [
+         1.0,
+         0.0,
+         0.0
+        ],
+        [
+         0.0,
+         1.0,
+         0.0
+        ],
+        [
+         0.0,
+         0.0,
+         1.0
+        ]
+       ],
+       "grasp_width": 10.0,
+       "contact_area": 1.0,
+       "score": 0.63,
+       "score_alone": 0.9,
+       "score_relative": 0.7,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      }
+     ]
+    },
+    {
+     "iteration": 2,
+     "chosen": false,
+     "total_cost": 0.0,
+     "n_infeasible": 0,
+     "min_relative": 0.6999999999999998,
+     "sum_relative": 2.55,
+     "edge_path": [
+      1,
+      5,
+      11
+     ],
+     "order": [
+      "c2",
+      "c0",
+      "c1"
+     ],
+     "pruned": [
+      {
+       "state": 7,
+       "component_label": "c1"
+      }
+     ],
+     "steps": [
+      {
+       "step": 1,
+       "component_id": "c2",
+       "component_label": "c2",
+       "edge": 11,
+       "state": 4,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "axes": [
+        [
+         1.0,
+         0.0,
+         0.0
+        ],
+        [
+         0.0,
+         1.0,
+         0.0
+        ],
+        [
+         0.0,
+         0.0,
+         1.0
+        ]
+       ],
+       "grasp_width": 10.0,
+       "contact_area": 1.0,
+       "score": 0.6,
+       "score_alone": 0.6,
+       "score_relative": 1.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 2,
+       "component_id": "c0",
+       "component_label": "c0",
+       "edge": 5,
+       "state": 5,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "axes": [
+        [
+         1.0,
+         0.0,
+         0.0
+        ],
+        [
+         0.0,
+         1.0,
+         0.0
+        ],
+        [
+         0.0,
+         0.0,
+         1.0
+        ]
+       ],
+       "grasp_width": 10.0,
+       "contact_area": 1.0,
+       "score": 0.765,
+       "score_alone": 0.9,
+       "score_relative": 0.85,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 3,
+       "component_id": "c1",
+       "component_label": "c1",
+       "edge": 1,
+       "state": 7,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "axes": [
+        [
+         1.0,
+         0.0,
+         0.0
+        ],
+        [
+         0.0,
+         1.0,
+         0.0
+        ],
+        [
+         0.0,
+         0.0,
+         1.0
+        ]
+       ],
+       "grasp_width": 10.0,
+       "contact_area": 1.0,
+       "score": 0.5599999999999999,
+       "score_alone": 0.8,
+       "score_relative": 0.6999999999999998,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      }
+     ]
+    },
+    {
+     "iteration": 3,
+     "chosen": false,
+     "total_cost": 0.0,
+     "n_infeasible": 1,
+     "min_relative": 0.7,
+     "sum_relative": 2.55,
+     "edge_path": [
+      2,
+      3,
+      10
+     ],
+     "order": [
+      "c1",
+      "c0",
+      "c2"
+     ],
+     "pruned": [
+      {
+       "state": 7,
+       "component_label": "c2"
+      }
+     ],
+     "steps": [
+      {
+       "step": 1,
+       "component_id": "c1",
+       "component_label": "c1",
+       "edge": 10,
+       "state": 2,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "axes": [
+        [
+         1.0,
+         0.0,
+         0.0
+        ],
+        [
+         0.0,
+         1.0,
+         0.0
+        ],
+        [
+         0.0,
+         0.0,
+         1.0
+        ]
+       ],
+       "grasp_width": 10.0,
+       "contact_area": 1.0,
+       "score": 0.8,
+       "score_alone": 0.8,
+       "score_relative": 1.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 2,
+       "component_id": "c0",
+       "component_label": "c0",
+       "edge": 3,
+       "state": 3,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "axes": [
+        [
+         1.0,
+         0.0,
+         0.0
+        ],
+        [
+         0.0,
+         1.0,
+         0.0
+        ],
+        [
+         0.0,
+         0.0,
+         1.0
+        ]
+       ],
+       "grasp_width": 10.0,
+       "contact_area": 1.0,
+       "score": 0.765,
+       "score_alone": 0.9,
+       "score_relative": 0.85,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 3,
+       "component_id": "c2",
+       "component_label": "c2",
+       "edge": 2,
+       "state": 7,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "axes": [
+        [
+         1.0,
+         0.0,
+         0.0
+        ],
+        [
+         0.0,
+         1.0,
+         0.0
+        ],
+        [
+         0.0,
+         0.0,
+         1.0
+        ]
+       ],
+       "grasp_width": 10.0,
+       "contact_area": 1.0,
+       "score": 0.42,
+       "score_alone": 0.6,
+       "score_relative": 0.7,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "score 0.420 below absolute floor 0.5",
+       "intrinsically_infeasible": false
+      }
+     ]
+    }
+   ],
+   "wall_time_s": 0.09263300000020536
+  },
+  "alone_scores": {
+   "c0": 0.9,
+   "c1": 0.8,
+   "c2": 0.6
+  },
+  "intrinsically_infeasible": [],
+  "thresholds": {
+   "grasp_rel_threshold": 0.5,
+   "grasp_abs_floor": 0.5,
+   "boundary_inclusive": true,
+   "grasp_rotation_step_deg": 90.0,
+   "grasp_quarter_fraction": 0.25,
+   "tool_contact_volume_tol_mm3": 0.001
+  },
+  "config": {
+   "robot_max_iterations": 10,
+   "grasp_quarter_fraction": 0.25,
+   "grasp_rel_threshold": 0.5,
+   "grasp_abs_floor": 0.5,
+   "grasp_boundary_inclusive": true,
+   "grasp_rotation_step_deg": 90.0,
+   "grasp_match_tol_mm": 0.5,
+   "grasp_match_angle_deg": 5.0,
+   "pcd_spacing_mm": 0.3,
+   "pcd_max_points": 60000,
+   "pcd_seed": 1,
+   "engine_python": null,
+   "engine_repo": null,
+   "gripper_yaml": null,
+   "engine_timeout_s": 1800.0,
+   "engine_mode": "worker",
+   "engine_seed": 1,
+   "tool_dir": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tools\\gripper",
+   "tools": {
+    "1": "screwing_effector.step",
+    "2": null,
+    "3": null
+   },
+   "tool_engage_depth_mm": 0.0,
+   "tool_contact_volume_tol": 0.001,
+   "disk_cache": true
+  },
+  "engine": {}
+ }
+}

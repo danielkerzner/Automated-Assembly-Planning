@@ -2,5 +2,17 @@ digraph AoG {
   rankdir=TB;
   node [shape=box, fontsize=9];
   { rank=same; n0; }
-  n0 [label="0\ncomponent\ncomponent001\ncomponent002\ncomponent003", style=dashed, color=red];
+  n0 [label="0\ncomponent002\ncomponent003\nauto_0 (component + component001)"];
+  { rank=same; n1; }
+  n1 [label="1\ncomponent002\ncomponent003"];
+  { rank=same; n2; n3; }
+  n2 [label="2\ncomponent002"];
+  n3 [label="3\ncomponent003"];
+  { rank=same; n4; }
+  n4 [label="4\n(empty)"];
+  n0 -> n1 [label="auto_0 (component + component001)\n[0]", fontsize=8];
+  n1 -> n3 [label="component002\n[4]", fontsize=8];
+  n1 -> n2 [label="component003\n[5]", fontsize=8];
+  n2 -> n4 [label="component002\n[0 1 2 3 4 5]", fontsize=8];
+  n3 -> n4 [label="component003\n[0 1 2 3 4 5]", fontsize=8];
 }

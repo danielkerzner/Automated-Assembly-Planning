@@ -17,8 +17,8 @@
       "is_stander": false,
       "png": "output\\lunar_motor_tire\\illustrations\\step_01_0013-A-0300-A01_3.png",
       "view": {
-        "azimuth": 90.0,
-        "elevation": 20.0,
+        "azimuth": 45.0,
+        "elevation": 35.0,
         "is_global": true
       },
       "view_kind": "global",
@@ -28,7 +28,7 @@
       "vis_start": 1.0,
       "vis_end_occluded": 1.0,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.10544653889589871,
+      "trajectory_px_frac": 0.5192648659717513,
       "in_frame": true,
       "footnote": [
         "Step 1 / 5   0013-A-0300-A01_3   Tool: By_hand"
@@ -42,6 +42,43 @@
       "steps": [
         2
       ],
+      "component_id": "Part__Feature",
+      "component_label": "0013-P-0101-A01-PP-motor",
+      "component_ids": [
+        "Part__Feature"
+      ],
+      "component_labels": [
+        "0013-P-0101-A01-PP-motor"
+      ],
+      "group": null,
+      "is_stander": true,
+      "png": "output\\lunar_motor_tire\\illustrations\\step_02_0013-P-0101-A01-PP-motor.png",
+      "view": {
+        "azimuth": 45.0,
+        "elevation": 35.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.40582851546534454,
+      "in_frame": true,
+      "footnote": [
+        "Step 2 / 5   0013-P-0101-A01-PP-motor   Tool: By_hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 3,
+      "steps": [
+        3
+      ],
       "component_id": "Part__Feature002",
       "component_label": "0013-P-0103-A02-AM",
       "component_ids": [
@@ -52,32 +89,32 @@
       ],
       "group": null,
       "is_stander": false,
-      "png": "output\\lunar_motor_tire\\illustrations\\step_02_0013-P-0103-A02-AM.png",
+      "png": "output\\lunar_motor_tire\\illustrations\\step_03_0013-P-0103-A02-AM.png",
       "view": {
-        "azimuth": 90.0,
-        "elevation": 20.0,
+        "azimuth": 45.0,
+        "elevation": 35.0,
         "is_global": true
       },
       "view_kind": "global",
       "visible": true,
       "xray": false,
-      "vis_end": 1.0,
+      "vis_end": 0.5964653902798233,
       "vis_start": 1.0,
-      "vis_end_occluded": 1.0,
+      "vis_end_occluded": 0.5964653902798233,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.19002269421273585,
+      "trajectory_px_frac": 0.40582851546534426,
       "in_frame": true,
       "footnote": [
-        "Step 2 / 5   0013-P-0103-A02-AM   Tool: By_hand"
+        "Step 3 / 5   0013-P-0103-A02-AM   Tool: By_hand"
       ],
       "reorient": false,
       "hold": false,
       "warnings": []
     },
     {
-      "step": 3,
+      "step": 4,
       "steps": [
-        3
+        4
       ],
       "component_id": "Part__Feature003",
       "component_label": "0013-P-0105-A01-PP",
@@ -89,32 +126,32 @@
       ],
       "group": null,
       "is_stander": false,
-      "png": "output\\lunar_motor_tire\\illustrations\\step_03_0013-P-0105-A01-PP.png",
+      "png": "output\\lunar_motor_tire\\illustrations\\step_04_0013-P-0105-A01-PP.png",
       "view": {
-        "azimuth": 90.0,
-        "elevation": 20.0,
+        "azimuth": 45.0,
+        "elevation": 35.0,
         "is_global": true
       },
       "view_kind": "global",
       "visible": true,
       "xray": false,
-      "vis_end": 1.0,
+      "vis_end": 0.37322515212981744,
       "vis_start": 1.0,
-      "vis_end_occluded": 1.0,
+      "vis_end_occluded": 0.37322515212981744,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.17344353297269854,
+      "trajectory_px_frac": 0.370420658411321,
       "in_frame": true,
       "footnote": [
-        "Step 3 / 5   0013-P-0105-A01-PP   Tool: By_hand"
+        "Step 4 / 5   0013-P-0105-A01-PP   Tool: By_hand"
       ],
       "reorient": false,
       "hold": false,
       "warnings": []
     },
     {
-      "step": 4,
+      "step": 5,
       "steps": [
-        4
+        5
       ],
       "component_id": "Part__Feature001",
       "component_label": "0013-P-0102-A02-PP",
@@ -126,60 +163,23 @@
       ],
       "group": null,
       "is_stander": false,
-      "png": "output\\lunar_motor_tire\\illustrations\\step_04_0013-P-0102-A02-PP.png",
+      "png": "output\\lunar_motor_tire\\illustrations\\step_05_0013-P-0102-A02-PP.png",
       "view": {
-        "azimuth": 90.0,
-        "elevation": 20.0,
+        "azimuth": 45.0,
+        "elevation": 35.0,
         "is_global": true
       },
       "view_kind": "global",
       "visible": true,
       "xray": false,
-      "vis_end": 0.9940535183349851,
+      "vis_end": 0.5006877579092159,
       "vis_start": 1.0,
-      "vis_end_occluded": 0.9940535183349851,
+      "vis_end_occluded": 0.5006877579092159,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.1785448133542485,
+      "trajectory_px_frac": 0.3813153836587128,
       "in_frame": true,
       "footnote": [
-        "Step 4 / 5   0013-P-0102-A02-PP   Tool: By_hand"
-      ],
-      "reorient": false,
-      "hold": false,
-      "warnings": []
-    },
-    {
-      "step": 5,
-      "steps": [
-        5
-      ],
-      "component_id": "Part__Feature",
-      "component_label": "0013-P-0101-A01-PP-motor",
-      "component_ids": [
-        "Part__Feature"
-      ],
-      "component_labels": [
-        "0013-P-0101-A01-PP-motor"
-      ],
-      "group": null,
-      "is_stander": false,
-      "png": "output\\lunar_motor_tire\\illustrations\\step_05_0013-P-0101-A01-PP-motor.png",
-      "view": {
-        "azimuth": 90.0,
-        "elevation": 20.0,
-        "is_global": true
-      },
-      "view_kind": "global",
-      "visible": true,
-      "xray": false,
-      "vis_end": 1.0,
-      "vis_start": 1.0,
-      "vis_end_occluded": 1.0,
-      "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.19002269421273596,
-      "in_frame": true,
-      "footnote": [
-        "Step 5 / 5   0013-P-0101-A01-PP-motor   Tool: By_hand"
+        "Step 5 / 5   0013-P-0102-A02-PP   Tool: By_hand"
       ],
       "reorient": false,
       "hold": false,
@@ -188,17 +188,17 @@
   ],
   "manual_path": "output\\lunar_motor_tire\\illustrations\\manual.pdf",
   "global_view": [
-    90.0,
-    20.0
+    45.0,
+    35.0
   ],
-  "config_hash": "c7373fb2ee49c145582e03f95b61cd2108bfda8f1d666a10e48084213e83b6fc",
+  "config_hash": "3d607b0b8212bf1559ad4c42032e4934d197a4ef1a0f40d04e3086be910b8e3f",
   "stats": {
     "layers_rasterized": 370,
-    "raster_s": 14.217954500019914,
+    "raster_s": 20.104216200095834,
     "views_evaluated": 73,
-    "view_search_s": 14.634557899998981,
-    "render_s": 4.9509519999992335,
-    "total_s": 19.58551500000067
+    "view_search_s": 17.78198880000855,
+    "render_s": 8.993727599998238,
+    "total_s": 26.77572350000264
   },
   "config": {
     "image_size": [

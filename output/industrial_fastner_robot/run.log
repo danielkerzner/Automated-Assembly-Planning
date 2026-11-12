@@ -1,0 +1,184 @@
+2026-11-12 12:09:05,031 aap.preprocessing INFO: Processed 3 stander(s): 0 screw, 1 nut, 2 other; 57.70 s
+2026-11-12 12:09:05,781 aap.interference INFO: Loaded cached interference matrix from output\industrial_fastner_robot\interference (5 components x 6 directions)
+2026-11-12 12:09:05,832 aap.aog INFO: Loaded cached AoG from output\industrial_fastner_robot\aog (V=61, E=141)
+2026-11-12 12:09:05,879 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part3': 60000 points
+2026-11-12 12:09:05,925 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part2': 60000 points
+2026-11-12 12:09:05,945 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part1': 16934 points
+2026-11-12 12:09:05,988 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part5': 60000 points
+2026-11-12 12:09:06,007 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part6': 21179 points
+2026-11-12 12:09:06,031 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part7': 16760 points
+2026-11-12 12:09:06,048 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part4': 4181 points
+2026-11-12 12:09:06,058 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part001': 4181 points
+2026-11-12 12:09:06,073 aap.robot.engine INFO: Starting grasp engine worker: C:\Users\danie\miniconda3\envs\parallelgrippercode\python.exe
+2026-11-12 12:09:14,362 aap.robot.engine INFO: Grasp engine worker ready (function copy 1, source sha 9d29272f7d9c...)
+2026-11-12 12:09:27,921 aap.robot.gripper INFO: Engine: industrial_fastner_part3 with 0 obstacle(s) -> 173 grasps, best 0.946 (21.8 s)
+2026-11-12 12:09:41,464 aap.robot.gripper INFO: Engine: industrial_fastner_part2 with 0 obstacle(s) -> 115 grasps, best 0.804 (13.5 s)
+2026-11-12 12:09:42,904 aap.robot.gripper INFO: Engine: industrial_fastner_part1 with 0 obstacle(s) -> 0 grasps, best 0.000 (1.4 s)
+2026-11-12 12:10:08,788 aap.robot.gripper INFO: Engine: industrial_fastner_part5 with 0 obstacle(s) -> 26 grasps, best 0.509 (25.9 s)
+2026-11-12 12:10:11,806 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 0 obstacle(s) -> 66 grasps, best 0.505 (3.0 s)
+2026-11-12 12:10:11,823 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot\optimization
+2026-11-12 12:10:11,894 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot\optimization (total cost 0.2671)
+2026-11-12 12:10:31,793 aap.robot.gripper INFO: Engine: industrial_fastner_part2 with 2 obstacle(s) -> 60 grasps, best 0.748 (19.9 s)
+2026-11-12 12:22:46,746 aap.robot.gripper INFO: Engine: industrial_fastner_part5 with 3 obstacle(s) -> 0 grasps, best 0.000 (734.9 s)
+2026-11-12 12:23:01,459 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 5 obstacle(s) -> 0 grasps, best 0.000 (14.7 s)
+2026-11-12 12:23:08,591 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 5 obstacle(s), rotated 90 deg -> 0 grasps, best 0.000 (7.1 s)
+2026-11-12 12:23:14,565 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 5 obstacle(s), rotated 180 deg -> 0 grasps, best 0.000 (6.0 s)
+2026-11-12 12:23:20,472 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 5 obstacle(s), rotated 270 deg -> 0 grasps, best 0.000 (5.9 s)
+2026-11-12 12:23:20,476 aap.robot INFO: Robot loop: iteration 1: cost 0.2671, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (2 blocked)
+2026-11-12 12:23:20,476 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-12 12:23:20,476 aap.robot INFO:     step 2 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-12 12:23:20,476 aap.robot INFO:     step 3 industrial_fastner_part2: gripper ok (S=0.748, S_rel=0.930)
+2026-11-12 12:23:20,476 aap.robot INFO:     step 4 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-12 12:23:20,476 aap.robot INFO:     step 5 industrial_fastner_part7: tool (none, unchecked) ok
+2026-11-12 12:23:20,476 aap.robot INFO:     step 6 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-12 12:23:20,476 aap.robot INFO:     step 7 industrial_fastner_part001: tool (none, unchecked) ok
+2026-11-12 12:23:20,476 aap.robot INFO:     step 8 industrial_fastner_part4: tool (none, unchecked) ok
+2026-11-12 12:23:20,478 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot\optimization
+2026-11-12 12:23:20,557 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot\optimization\blocked\d68bc042830697e5 (total cost 0.2979)
+2026-11-12 12:23:24,717 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 2 obstacle(s) -> 0 grasps, best 0.000 (4.2 s)
+2026-11-12 12:23:28,753 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 2 obstacle(s), rotated 90 deg -> 0 grasps, best 0.000 (4.0 s)
+2026-11-12 12:23:33,035 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 2 obstacle(s), rotated 180 deg -> 0 grasps, best 0.000 (4.3 s)
+2026-11-12 12:23:36,936 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 2 obstacle(s), rotated 270 deg -> 0 grasps, best 0.000 (3.9 s)
+2026-11-12 12:23:53,473 aap.robot.gripper INFO: Engine: industrial_fastner_part2 with 3 obstacle(s) -> 71 grasps, best 0.749 (16.5 s)
+2026-11-12 12:24:36,533 aap.robot.gripper INFO: Engine: industrial_fastner_part5 with 4 obstacle(s) -> 0 grasps, best 0.000 (43.1 s)
+2026-11-12 12:24:36,538 aap.robot INFO: Robot loop: iteration 2: cost 0.2979, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (4 blocked)
+2026-11-12 12:24:36,538 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-12 12:24:36,538 aap.robot INFO:     step 2 industrial_fastner_part7: tool (none, unchecked) ok
+2026-11-12 12:24:36,538 aap.robot INFO:     step 3 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-12 12:24:36,538 aap.robot INFO:     step 4 industrial_fastner_part2: gripper ok (S=0.749, S_rel=0.931)
+2026-11-12 12:24:36,538 aap.robot INFO:     step 5 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-12 12:24:36,538 aap.robot INFO:     step 6 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-12 12:24:36,538 aap.robot INFO:     step 7 industrial_fastner_part4: tool (none, unchecked) ok
+2026-11-12 12:24:36,538 aap.robot INFO:     step 8 industrial_fastner_part001: tool (none, unchecked) ok
+2026-11-12 12:24:36,540 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot\optimization
+2026-11-12 12:24:36,587 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot\optimization\blocked\3d85ba17fb8152bf (total cost 0.2946)
+2026-11-12 12:24:41,833 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 4 obstacle(s) -> 0 grasps, best 0.000 (5.2 s)
+2026-11-12 12:24:47,067 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 4 obstacle(s), rotated 90 deg -> 0 grasps, best 0.000 (5.2 s)
+2026-11-12 12:24:52,289 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 4 obstacle(s), rotated 180 deg -> 0 grasps, best 0.000 (5.2 s)
+2026-11-12 12:24:57,468 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 4 obstacle(s), rotated 270 deg -> 0 grasps, best 0.000 (5.2 s)
+2026-11-12 12:25:41,231 aap.robot.gripper INFO: Engine: industrial_fastner_part5 with 5 obstacle(s) -> 0 grasps, best 0.000 (43.8 s)
+2026-11-12 12:25:41,233 aap.robot INFO: Robot loop: iteration 3: cost 0.2946, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (6 blocked)
+2026-11-12 12:25:41,233 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-12 12:25:41,233 aap.robot INFO:     step 2 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-12 12:25:41,233 aap.robot INFO:     step 3 industrial_fastner_part2: gripper ok (S=0.748, S_rel=0.930)
+2026-11-12 12:25:41,233 aap.robot INFO:     step 4 industrial_fastner_part7: tool (none, unchecked) ok
+2026-11-12 12:25:41,233 aap.robot INFO:     step 5 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-12 12:25:41,233 aap.robot INFO:     step 6 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-12 12:25:41,233 aap.robot INFO:     step 7 industrial_fastner_part001: tool (none, unchecked) ok
+2026-11-12 12:25:41,233 aap.robot INFO:     step 8 industrial_fastner_part4: tool (none, unchecked) ok
+2026-11-12 12:25:41,235 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot\optimization
+2026-11-12 12:25:41,287 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot\optimization\blocked\bc0e195062523b47 (total cost 0.2970)
+2026-11-12 12:32:51,547 aap.robot.gripper INFO: Engine: industrial_fastner_part5 with 4 obstacle(s) -> 0 grasps, best 0.000 (430.3 s)
+2026-11-12 12:32:58,055 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 7 obstacle(s) -> 0 grasps, best 0.000 (6.5 s)
+2026-11-12 12:33:04,795 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 7 obstacle(s), rotated 90 deg -> 0 grasps, best 0.000 (6.7 s)
+2026-11-12 12:33:11,412 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 7 obstacle(s), rotated 180 deg -> 0 grasps, best 0.000 (6.6 s)
+2026-11-12 12:33:18,066 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 7 obstacle(s), rotated 270 deg -> 0 grasps, best 0.000 (6.6 s)
+2026-11-12 12:33:18,069 aap.robot INFO: Robot loop: iteration 4: cost 0.2970, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (8 blocked)
+2026-11-12 12:33:18,069 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-12 12:33:18,069 aap.robot INFO:     step 2 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-12 12:33:18,069 aap.robot INFO:     step 3 industrial_fastner_part2: gripper ok (S=0.748, S_rel=0.930)
+2026-11-12 12:33:18,069 aap.robot INFO:     step 4 industrial_fastner_part4: tool (none, unchecked) ok
+2026-11-12 12:33:18,069 aap.robot INFO:     step 5 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-12 12:33:18,069 aap.robot INFO:     step 6 industrial_fastner_part001: tool (none, unchecked) ok
+2026-11-12 12:33:18,069 aap.robot INFO:     step 7 industrial_fastner_part7: tool (none, unchecked) ok
+2026-11-12 12:33:18,069 aap.robot INFO:     step 8 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-12 12:33:18,071 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot\optimization
+2026-11-12 12:33:18,133 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot\optimization\blocked\d35158f91643d09d (total cost 0.3032)
+2026-11-12 12:34:00,987 aap.robot.gripper INFO: Engine: industrial_fastner_part5 with 4 obstacle(s) -> 0 grasps, best 0.000 (42.8 s)
+2026-11-12 12:34:07,039 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 6 obstacle(s) -> 0 grasps, best 0.000 (6.0 s)
+2026-11-12 12:34:13,050 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 6 obstacle(s), rotated 90 deg -> 0 grasps, best 0.000 (6.0 s)
+2026-11-12 12:34:19,285 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 6 obstacle(s), rotated 180 deg -> 0 grasps, best 0.000 (6.2 s)
+2026-11-12 12:34:25,373 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 6 obstacle(s), rotated 270 deg -> 0 grasps, best 0.000 (6.1 s)
+2026-11-12 12:34:25,375 aap.robot INFO: Robot loop: iteration 5: cost 0.3032, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (10 blocked)
+2026-11-12 12:34:25,375 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-12 12:34:25,375 aap.robot INFO:     step 2 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-12 12:34:25,375 aap.robot INFO:     step 3 industrial_fastner_part2: gripper ok (S=0.748, S_rel=0.930)
+2026-11-12 12:34:25,375 aap.robot INFO:     step 4 industrial_fastner_part7: tool (none, unchecked) ok
+2026-11-12 12:34:25,375 aap.robot INFO:     step 5 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-12 12:34:25,375 aap.robot INFO:     step 6 industrial_fastner_part001: tool (none, unchecked) ok
+2026-11-12 12:34:25,375 aap.robot INFO:     step 7 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-12 12:34:25,375 aap.robot INFO:     step 8 industrial_fastner_part4: tool (none, unchecked) ok
+2026-11-12 12:34:25,378 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot\optimization
+2026-11-12 12:34:25,446 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot\optimization\blocked\ee43da851be41c78 (total cost 0.3032)
+2026-11-12 12:35:08,639 aap.robot.gripper INFO: Engine: industrial_fastner_part5 with 5 obstacle(s) -> 0 grasps, best 0.000 (43.2 s)
+2026-11-12 12:35:15,778 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 6 obstacle(s) -> 0 grasps, best 0.000 (7.1 s)
+2026-11-12 12:35:23,142 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 6 obstacle(s), rotated 90 deg -> 0 grasps, best 0.000 (7.3 s)
+2026-11-12 12:35:29,381 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 6 obstacle(s), rotated 180 deg -> 0 grasps, best 0.000 (6.2 s)
+2026-11-12 12:42:57,967 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 6 obstacle(s), rotated 270 deg -> 0 grasps, best 0.000 (448.6 s)
+2026-11-12 12:42:57,969 aap.robot INFO: Robot loop: iteration 6: cost 0.3032, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (12 blocked)
+2026-11-12 12:42:57,969 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-12 12:42:57,969 aap.robot INFO:     step 2 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-12 12:42:57,969 aap.robot INFO:     step 3 industrial_fastner_part2: gripper ok (S=0.748, S_rel=0.930)
+2026-11-12 12:42:57,969 aap.robot INFO:     step 4 industrial_fastner_part7: tool (none, unchecked) ok
+2026-11-12 12:42:57,969 aap.robot INFO:     step 5 industrial_fastner_part4: tool (none, unchecked) ok
+2026-11-12 12:42:57,969 aap.robot INFO:     step 6 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-12 12:42:57,969 aap.robot INFO:     step 7 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-12 12:42:57,969 aap.robot INFO:     step 8 industrial_fastner_part001: tool (none, unchecked) ok
+2026-11-12 12:42:57,973 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot\optimization
+2026-11-12 12:42:58,040 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot\optimization\blocked\52fb92e5f8866c62 (total cost 0.3281)
+2026-11-12 12:43:04,644 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 6 obstacle(s) -> 0 grasps, best 0.000 (6.6 s)
+2026-11-12 12:43:10,356 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 6 obstacle(s), rotated 90 deg -> 0 grasps, best 0.000 (5.7 s)
+2026-11-12 12:43:16,186 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 6 obstacle(s), rotated 180 deg -> 0 grasps, best 0.000 (5.8 s)
+2026-11-12 12:43:21,856 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 6 obstacle(s), rotated 270 deg -> 0 grasps, best 0.000 (5.7 s)
+2026-11-12 12:44:07,189 aap.robot.gripper INFO: Engine: industrial_fastner_part5 with 7 obstacle(s) -> 0 grasps, best 0.000 (45.3 s)
+2026-11-12 12:44:07,193 aap.robot INFO: Robot loop: iteration 7: cost 0.3281, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (14 blocked)
+2026-11-12 12:44:07,193 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-12 12:44:07,193 aap.robot INFO:     step 2 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-12 12:44:07,193 aap.robot INFO:     step 3 industrial_fastner_part2: gripper ok (S=0.748, S_rel=0.930)
+2026-11-12 12:44:07,193 aap.robot INFO:     step 4 industrial_fastner_part001: tool (none, unchecked) ok
+2026-11-12 12:44:07,193 aap.robot INFO:     step 5 industrial_fastner_part4: tool (none, unchecked) ok
+2026-11-12 12:44:07,193 aap.robot INFO:     step 6 industrial_fastner_part7: tool (none, unchecked) ok
+2026-11-12 12:44:07,193 aap.robot INFO:     step 7 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-12 12:44:07,193 aap.robot INFO:     step 8 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-12 12:44:07,193 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot\optimization
+2026-11-12 12:44:07,258 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot\optimization\blocked\92eceff21f96b7da (total cost 0.4272)
+2026-11-12 12:44:10,351 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 1 obstacle(s) -> 0 grasps, best 0.000 (3.1 s)
+2026-11-12 12:44:13,391 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 1 obstacle(s), rotated 90 deg -> 0 grasps, best 0.000 (3.0 s)
+2026-11-12 12:44:16,490 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 1 obstacle(s), rotated 180 deg -> 0 grasps, best 0.000 (3.1 s)
+2026-11-12 12:44:19,687 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 1 obstacle(s), rotated 270 deg -> 0 grasps, best 0.000 (3.2 s)
+2026-11-12 12:44:34,757 aap.robot.gripper INFO: Engine: industrial_fastner_part3 with 2 obstacle(s) -> 138 grasps, best 0.815 (15.1 s)
+2026-11-12 12:45:20,211 aap.robot.gripper INFO: Engine: industrial_fastner_part5 with 5 obstacle(s) -> 0 grasps, best 0.000 (45.4 s)
+2026-11-12 12:45:20,215 aap.robot INFO: Robot loop: iteration 8: cost 0.4272, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (16 blocked)
+2026-11-12 12:45:20,215 aap.robot INFO:     step 1 industrial_fastner_part7: tool (none, unchecked) ok
+2026-11-12 12:45:20,215 aap.robot INFO:     step 2 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-12 12:45:20,215 aap.robot INFO:     step 3 industrial_fastner_part3: gripper ok (S=0.815, S_rel=0.862)
+2026-11-12 12:45:20,215 aap.robot INFO:     step 4 industrial_fastner_part2: gripper ok (S=0.749, S_rel=0.931)
+2026-11-12 12:45:20,215 aap.robot INFO:     step 5 industrial_fastner_part4: tool (none, unchecked) ok
+2026-11-12 12:45:20,215 aap.robot INFO:     step 6 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-12 12:45:20,215 aap.robot INFO:     step 7 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-12 12:45:20,215 aap.robot INFO:     step 8 industrial_fastner_part001: tool (none, unchecked) ok
+2026-11-12 12:45:20,217 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot\optimization
+2026-11-12 12:45:20,278 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot\optimization\blocked\f8b5dc5787baf4ba (total cost 0.3150)
+2026-11-12 12:45:26,112 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 5 obstacle(s) -> 0 grasps, best 0.000 (5.8 s)
+2026-11-12 12:45:31,653 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 5 obstacle(s), rotated 90 deg -> 0 grasps, best 0.000 (5.5 s)
+2026-11-12 12:45:36,912 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 5 obstacle(s), rotated 180 deg -> 0 grasps, best 0.000 (5.2 s)
+2026-11-12 12:45:42,268 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 5 obstacle(s), rotated 270 deg -> 0 grasps, best 0.000 (5.3 s)
+2026-11-12 12:53:33,573 aap.robot.gripper INFO: Engine: industrial_fastner_part5 with 6 obstacle(s) -> 0 grasps, best 0.000 (471.3 s)
+2026-11-12 12:53:33,576 aap.robot INFO: Robot loop: iteration 9: cost 0.3150, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (18 blocked)
+2026-11-12 12:53:33,576 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-12 12:53:33,576 aap.robot INFO:     step 2 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-12 12:53:33,576 aap.robot INFO:     step 3 industrial_fastner_part2: gripper ok (S=0.748, S_rel=0.930)
+2026-11-12 12:53:33,576 aap.robot INFO:     step 4 industrial_fastner_part7: tool (none, unchecked) ok
+2026-11-12 12:53:33,576 aap.robot INFO:     step 5 industrial_fastner_part4: tool (none, unchecked) ok
+2026-11-12 12:53:33,576 aap.robot INFO:     step 6 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-12 12:53:33,576 aap.robot INFO:     step 7 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-12 12:53:33,576 aap.robot INFO:     step 8 industrial_fastner_part001: tool (none, unchecked) ok
+2026-11-12 12:53:33,576 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot\optimization
+2026-11-12 12:53:33,650 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot\optimization\blocked\50f8bf8619dc1f9d (total cost 0.3150)
+2026-11-12 12:53:38,924 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 5 obstacle(s) -> 0 grasps, best 0.000 (5.3 s)
+2026-11-12 12:53:44,243 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 5 obstacle(s), rotated 90 deg -> 0 grasps, best 0.000 (5.3 s)
+2026-11-12 12:53:49,482 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 5 obstacle(s), rotated 180 deg -> 0 grasps, best 0.000 (5.2 s)
+2026-11-12 12:53:54,866 aap.robot.gripper INFO: Engine: industrial_fastner_part6 with 5 obstacle(s), rotated 270 deg -> 0 grasps, best 0.000 (5.4 s)
+2026-11-12 12:54:40,016 aap.robot.gripper INFO: Engine: industrial_fastner_part5 with 6 obstacle(s) -> 0 grasps, best 0.000 (45.1 s)
+2026-11-12 12:54:40,022 aap.robot INFO: Robot loop: iteration 10: cost 0.3150, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (20 blocked)
+2026-11-12 12:54:40,022 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-12 12:54:40,022 aap.robot INFO:     step 2 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-12 12:54:40,022 aap.robot INFO:     step 3 industrial_fastner_part2: gripper ok (S=0.748, S_rel=0.930)
+2026-11-12 12:54:40,022 aap.robot INFO:     step 4 industrial_fastner_part7: tool (none, unchecked) ok
+2026-11-12 12:54:40,022 aap.robot INFO:     step 5 industrial_fastner_part001: tool (none, unchecked) ok
+2026-11-12 12:54:40,022 aap.robot INFO:     step 6 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-12 12:54:40,022 aap.robot INFO:     step 7 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-12 12:54:40,022 aap.robot INFO:     step 8 industrial_fastner_part4: tool (none, unchecked) ok
+2026-11-12 12:54:40,522 aap.robot WARNING: Robot plan written to output\industrial_fastner_robot\plan.json: chosen sequence (iteration 2) still has 3 infeasible step(s): ['3 industrial_fastner_part6', '5 industrial_fastner_part5', '6 industrial_fastner_part1']
+Robot plan: the chosen sequence still has 3 infeasible step(s): step 3 industrial_fastner_part6 (relative score 0.000 below 0.5), step 5 industrial_fastner_part5 (relative score 0.000 below 0.5), step 6 industrial_fastner_part1 (no grasp even alone (S_alone = 0)). See plan.json -> robot.
+exit 0

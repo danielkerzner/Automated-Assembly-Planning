@@ -8,7 +8,7 @@
       "checks": [],
       "notes": [],
       "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
-      "seconds": 0.001
+      "seconds": 0.002
     },
     "O2": {
       "passed": true,
@@ -39,21 +39,21 @@
         }
       ],
       "notes": [],
-      "seconds": 0.0
+      "seconds": 0.001
     },
     "O3": {
       "passed": false,
       "checks": [],
       "notes": [],
       "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
-      "seconds": 0.0
+      "seconds": 0.001
     },
     "O4": {
       "passed": false,
       "checks": [],
       "notes": [],
       "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
-      "seconds": 0.0
+      "seconds": 0.001
     },
     "O5": {
       "passed": true,
@@ -100,7 +100,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.048
+      "seconds": 0.047
     },
     "O6": {
       "passed": true,
@@ -123,7 +123,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.002
+      "seconds": 0.006
     },
     "O7": {
       "passed": true,
@@ -146,7 +146,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.002
+      "seconds": 0.007
     },
     "O8": {
       "passed": true,
@@ -169,7 +169,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.055
+      "seconds": 0.149
     },
     "O9": {
       "passed": true,
@@ -282,14 +282,14 @@
       "notes": [
         "FreeCAD geometry variant skipped (run with --groups real)"
       ],
-      "seconds": 0.026
+      "seconds": 0.063
     },
     "O10": {
       "passed": false,
       "checks": [],
       "notes": [],
       "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
-      "seconds": 0.001
+      "seconds": 0.002
     },
     "O11": {
       "passed": false,
@@ -303,28 +303,28 @@
       "checks": [],
       "notes": [],
       "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
-      "seconds": 0.0
+      "seconds": 0.001
     },
     "O13": {
       "passed": false,
       "checks": [],
       "notes": [],
       "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
-      "seconds": 0.0
+      "seconds": 0.001
     },
     "O14": {
       "passed": true,
       "checks": [
         {
-          "label": "N=12: 3.8 s < 60 s and 6.5 MB < 32.2 MB",
+          "label": "N=12: 9.5 s < 60 s and 6.5 MB < 32.2 MB",
           "passed": true
         }
       ],
       "notes": [
-        "N=12: V=587, E=1540, moves=6610, 91 iterations, 3.8 s, peak traced 6.5 MB (estimate 32.2 MB), cost 0.3297 (greedy 0.3367)",
+        "N=12: V=587, E=1540, moves=6610, 91 iterations, 9.5 s, peak traced 6.5 MB (estimate 32.2 MB), cost 0.3297 (greedy 0.3367)",
         "N = 20 skipped (run with --groups scale)"
       ],
-      "seconds": 3.802
+      "seconds": 9.51
     },
     "O15": {
       "passed": true,

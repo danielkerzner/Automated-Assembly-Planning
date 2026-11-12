@@ -1,0 +1,13 @@
+
+=== R11: Engine wrapper (spec 4/10): runs (UTF-8), deterministic, empty obstacles, crash raises, alone scores.
+  note: alone scores part1 0.000 (spec 0.488), part2 0.804 (spec 0.754), part3 0.946 (spec 0.937), part5 0.526 (spec 0.551), part6 0.461 (spec 0.498); 63 s
+  [FAIL] alone scores within 0.06 of spec 5.2
+  [PASS] None and an empty obstacle cloud agree
+  [PASS] same input twice -> identical score (seeded)
+  [PASS] an engine crash raises EngineError (not a score of 0)
+
+| test | result | time | notes |
+|---|---|---|---|
+| R11 | FAIL | 96.6 s | alone scores part1 0.000 (spec 0.488), part2 0.804 (spec 0.754), part3 0.946 (spec 0.937), part5 0.526 (spec 0.551), part6 0.461 (spec 0.498); 63 s |
+ERROR conda.cli.main_run:execute(148): `conda run python automatic_tests/test_robotic.py --tests R11` failed. (See above for error)
+exit 1

@@ -1,0 +1,12 @@
+label,is_stander,screw,nut,pitch,tool,group,processed,subassembly
+0013-A-0100-A01_3_complete,False,False,False,,By_hand,0013-A-0100-A01_3_complete,true,
+v30013-P-0101-A01-PP-motor-complete038,True,False,False,,By_hand,v30013-P-0101-A01-PP-motor-complete038,False,0013-A-0100-A01_3_complete
+0013-P-0102-A02-PP,False,False,False,,By_hand,0013-P-0102-A02-PP,,0013-A-0100-A01_3_complete
+0013-P-0103-A02-AM,False,False,False,,By_hand,0013-P-0103-A02-AM,,0013-A-0100-A01_3_complete
+0013-P-0105-A01-PP,False,False,False,,By_hand,0013-P-0105-A01-PP,,0013-A-0100-A01_3_complete
+0013-A-0300-A01_3,False,False,False,,By_hand,0013-A-0300-A01_3,true,0013-A-0100-A01_3_complete
+0013-P-0301-A01-PP,False,False,False,,By_hand,0013-P-0301-A01-PP,,0013-A-0300-A01_3
+0013-P-0302-A01-PP,False,False,False,,By_hand,0013-P-0302-A01-PP,,0013-A-0300-A01_3
+0013-P-0303-A01-PP,False,False,False,,By_hand,0013-P-0303-A01-PP,,0013-A-0300-A01_3
+0013-P-0304-A01-PP,False,False,False,,By_hand,0013-P-0304-A01-PP,,0013-A-0300-A01_3
+0013-P-0104-A01-AM,False,False,False,,By_hand,0013-P-0104-A01-AM,,0013-A-0300-A01_3

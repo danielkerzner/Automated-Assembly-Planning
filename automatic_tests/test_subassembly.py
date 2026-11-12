@@ -336,16 +336,36 @@ def test_h4b(rec, args):
 
 
 def test_h4c(rec, args):
-    """A container cannot be a stander (CLAUDE.md, confirmed by the real BOM edit that marked
-    0002-P-0909-A01-PP_3 is_stander=true on 2026-11-01 and broke its level's connectivity): a BOM
-    row for a container that sets is_stander=true now raises, naming the row, instead of silently
-    being accepted and misread downstream as a fastener."""
+    """A container CAN be a stander (docs/subassembly-spec.md section 3, added 2026-11-11, for
+    lunar_motor_tire_complete's motor sub-assembly): is_stander=true forces processed=false (blank
+    defaults to false here, not true); is_stander=true with an explicit processed=true is a
+    ValueError (a stander subassembly is fused as one rigid component, it cannot also be
+    recursively processed as its own level); is_stander=true on the root is also a ValueError."""
+    hier = build_hierarchy(nested_tree(), bom_rows=[{"label": "ContainerX", "is_stander": "true"}], is_leaf=leaf_is)
+    rec.check(hier.containers["containerX"].processed is False,
+              "is_stander=true with 'processed' blank defaults processed to false")
+
+    hier = build_hierarchy(nested_tree(),
+                           bom_rows=[{"label": "ContainerX", "is_stander": "true", "processed": "false"}],
+                           is_leaf=leaf_is)
+    rec.check(hier.containers["containerX"].processed is False,
+              "is_stander=true with an explicit processed=false does not raise")
+
     try:
-        build_hierarchy(nested_tree(), bom_rows=[{"label": "ContainerX", "is_stander": "true"}], is_leaf=leaf_is)
-        rec.check(False, "is_stander=true on a container row raises")
+        build_hierarchy(nested_tree(),
+                        bom_rows=[{"label": "ContainerX", "is_stander": "true", "processed": "true"}],
+                        is_leaf=leaf_is)
+        rec.check(False, "is_stander=true with an explicit processed=true raises")
     except ValueError as exc:
-        rec.check("ContainerX" in str(exc) and "is_stander" in str(exc),
-                  f"is_stander=true on a container row raises and names the row ({exc})")
+        rec.check("ContainerX" in str(exc) and "is_stander" in str(exc) and "processed" in str(exc),
+                  f"is_stander=true + processed=true raises and names the row ({exc})")
+
+    try:
+        build_hierarchy(nested_tree(), bom_rows=[{"label": "Assembly", "is_stander": "true"}], is_leaf=leaf_is)
+        rec.check(False, "is_stander=true on the root raises")
+    except ValueError as exc:
+        rec.check("Assembly" in str(exc) and "is_stander" in str(exc),
+                  f"is_stander=true on the root raises and names it ({exc})")
 
     build_hierarchy(nested_tree(), bom_rows=[{"label": "ContainerX", "is_stander": "false"}], is_leaf=leaf_is)
     rec.check(True, "is_stander=false on a container row does not raise")
@@ -354,7 +374,7 @@ def test_h4c(rec, args):
     rec.check(True, "blank is_stander on a container row does not raise")
 
     build_hierarchy(nested_tree(), bom_rows=[{"label": "LeafA", "is_stander": "true"}], is_leaf=leaf_is)
-    rec.check(True, "is_stander=true on a leaf row is unaffected (standers are only flagged on leaves)")
+    rec.check(True, "is_stander=true on a leaf row is unaffected (unchanged leaf-stander path)")
 
 
 def test_h5(rec, args):

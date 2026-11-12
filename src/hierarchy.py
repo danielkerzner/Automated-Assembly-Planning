@@ -137,13 +137,30 @@ def _resolve_bom(containers: dict[str, Container], leaf_label: dict[str, str], l
         row = by_label.get(c.label) if c.label else None
         if row is not None:
             used_labels.add(c.label)
-            if (row.get("is_stander") or "").strip().lower() in _TRUE:
+            is_stander = (row.get("is_stander") or "").strip().lower() in _TRUE
+            if is_stander and cid == root_id:
                 raise ValueError(
-                    f"BOM row for container {c.label!r} [{cid}] sets is_stander=true, but a "
-                    "container cannot be a stander (CLAUDE.md: standers are flagged on leaf rows "
-                    "only) -- fix the row or confirm it should not be a container"
+                    f"BOM row for the root container {c.label!r} [{cid}] sets is_stander=true, but "
+                    "the root cannot be a stander"
                 )
-            processed = _parse_processed(row.get("processed"), f"container {c.label!r} [{cid}]")
+            raw_processed = (row.get("processed") or "").strip()
+            if is_stander and raw_processed and _parse_processed(raw_processed, f"container {c.label!r} [{cid}]"):
+                raise ValueError(
+                    f"BOM row for container {c.label!r} [{cid}] sets is_stander=true and "
+                    "processed=true; a stander subassembly is fused into one rigid component "
+                    "(docs/preprocessing-spec.md P1/P2, 'other' category) and cannot also be "
+                    "recursively processed as its own level -- set processed=false or leave it blank"
+                )
+            if is_stander:
+                # A stander subassembly is always fused as a single rigid component: unlike a plain
+                # container, blank 'processed' here defaults to false, not true (docs/subassembly-
+                # spec.md section 3).
+                if not raw_processed:
+                    log.info("Container %r [%s] sets is_stander=true with 'processed' blank; "
+                             "defaulting to processed=false", c.label, cid)
+                processed = False
+            else:
+                processed = _parse_processed(row.get("processed"), f"container {c.label!r} [{cid}]")
             sub = (row.get("subassembly") or "").strip()
             if sub:
                 parent_label = containers[c.parent].label if c.parent else ""

@@ -1,8 +1,6 @@
 {
   "groups": [
-    "core",
-    "real",
-    "scale"
+    "core"
   ],
   "results": {
     "L1": {
@@ -90,7 +88,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.658
+      "seconds": 2.136
     },
     "L2": {
       "passed": true,
@@ -129,7 +127,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.03
+      "seconds": 0.137
     },
     "L3": {
       "passed": true,
@@ -180,7 +178,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.051
+      "seconds": 0.15
     },
     "L4": {
       "passed": true,
@@ -195,7 +193,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.246
+      "seconds": 0.587
     },
     "L5": {
       "passed": true,
@@ -218,7 +216,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.017
+      "seconds": 0.037
     },
     "L6": {
       "passed": true,
@@ -243,7 +241,7 @@
       "notes": [
         "visible counts: [3, 4], 4 view(s) tied on count"
       ],
-      "seconds": 0.068
+      "seconds": 0.161
     },
     "L7": {
       "passed": true,
@@ -298,7 +296,7 @@
         }
       ],
       "notes": [],
-      "seconds": 1.052
+      "seconds": 2.29
     },
     "L8": {
       "passed": true,
@@ -325,7 +323,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.609
+      "seconds": 1.581
     },
     "L9": {
       "passed": true,
@@ -344,7 +342,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.552
+      "seconds": 1.805
     },
     "L10": {
       "passed": true,
@@ -379,49 +377,15 @@
         }
       ],
       "notes": [],
-      "seconds": 0.497
+      "seconds": 1.333
     },
     "L11": {
       "passed": true,
-      "checks": [
-        {
-          "label": "8 PNGs = 8 frames for N = 8 (group blocks [(0, 0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7)])",
-          "passed": true
-        },
-        {
-          "label": "every step is in one frame",
-          "passed": true
-        },
-        {
-          "label": "manual.pdf written",
-          "passed": true
-        },
-        {
-          "label": "every frame visible or carries a warning",
-          "passed": true
-        },
-        {
-          "label": "every x-ray frame carries a warning",
-          "passed": true
-        },
-        {
-          "label": "end to end in 19.5 s (target about 1 min)",
-          "passed": true
-        },
-        {
-          "label": "colour change does not re-tessellate",
-          "passed": true
-        },
-        {
-          "label": "colour change does not re-rasterize layers",
-          "passed": true
-        }
-      ],
+      "checks": [],
       "notes": [
-        "sequence from output\\industrial_fastner\\optimization\\optimization_result.json",
-        "global view (285.0, 20.0); 1:global; 2:global; 3:global; 4:global; 5:global; 6:candidate; 7:stander; 8:stander"
+        "skipped (run with --groups real)"
       ],
-      "seconds": 160.263
+      "seconds": 0.0
     },
     "L12": {
       "passed": true,
@@ -460,7 +424,7 @@
         }
       ],
       "notes": [],
-      "seconds": 2.01
+      "seconds": 4.033
     },
     "L13": {
       "passed": true,
@@ -470,33 +434,20 @@
           "passed": true
         },
         {
-          "label": "N = 8 within 60 s (8.5 s: search 4.1 s, render 4.4 s)",
+          "label": "N = 8 within 60 s (17.8 s: search 8.5 s, render 9.3 s)",
           "passed": true
         },
         {
           "label": "peak traced memory 354 MB < 2 GB",
-          "passed": true
-        },
-        {
-          "label": "N = 20: 20 frames",
-          "passed": true
-        },
-        {
-          "label": "N = 20 within 300 s (19.8 s: search 8.6 s, render 11.2 s)",
-          "passed": true
-        },
-        {
-          "label": "peak traced memory 454 MB < 2 GB",
           "passed": true
         }
       ],
       "notes": [
         "N = 8: 113280 triangles",
         "views evaluated 73, layers rasterized 592, kinds ['global', 'global', 'global', 'global', 'global', 'global', 'global', 'global']",
-        "N = 20: 283200 triangles",
-        "views evaluated 73, layers rasterized 1480, kinds ['global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global', 'global']"
+        "N = 20 skipped (run with --groups scale)"
       ],
-      "seconds": 29.391
+      "seconds": 18.519
     },
     "L14": {
       "passed": true,
@@ -559,7 +510,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.711
+      "seconds": 1.131
     },
     "cache": {
       "passed": true,

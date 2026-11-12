@@ -1576,3 +1576,525 @@ UG to STEP
 ! INFO-      
 ! INFO-     End of Translation: 4-NOV-2026  4:13:38 PM
 ! INFO-      
+UG to STEP
+! INFO-     NX STEP AP214 - V2412.1700
+! INFO-      
+! INFO-     Start of Translation: 10-NOV-2026  6:12:53 PM
+! INFO-      
+! STATUS-   Converting Part: C:\Users\danie\Documents\documentosprincipal\Master Thesis\parts\lunarcart\0013-A-0100-A01_3.prt
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: C:\Users\danie\Documents\documentosprincipal\Master Thesis\parts\lunarcart\0013-A-0100-A01_3.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Component ...................:     5
+! SUMMARY-                                 -----
+! SUMMARY-  Total                             12
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-P-0101-A01-PP-motor.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Reference Set ...............:     1
+! SUMMARY-  Solid/Sheet .................:
+! SUMMARY-     Body .....................:     1
+! SUMMARY-                                 -----
+! SUMMARY-  Total                              9
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-P-0102-A02-PP.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Reference Set ...............:     1
+! SUMMARY-  Solid/Sheet .................:
+! SUMMARY-     Body .....................:     1
+! SUMMARY-                                 -----
+! SUMMARY-  Total                              9
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-P-0103-A02-AM.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Reference Set ...............:     1
+! SUMMARY-  Solid/Sheet .................:
+! SUMMARY-     Body .....................:     1
+! SUMMARY-                                 -----
+! SUMMARY-  Total                              9
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-P-0105-A01-PP.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Reference Set ...............:     1
+! SUMMARY-  Solid/Sheet .................:
+! SUMMARY-     Body .....................:     1
+! SUMMARY-                                 -----
+! SUMMARY-  Total                              9
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-A-0300-A01_3.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Component ...................:     5
+! SUMMARY-                                 -----
+! SUMMARY-  Total                             12
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-P-0301-A01-PP.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Reference Set ...............:     1
+! SUMMARY-  Solid/Sheet .................:
+! SUMMARY-     Body .....................:     1
+! SUMMARY-                                 -----
+! SUMMARY-  Total                              9
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-P-0302-A01-PP.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Reference Set ...............:     1
+! SUMMARY-  Solid/Sheet .................:
+! SUMMARY-     Body .....................:     1
+! SUMMARY-                                 -----
+! SUMMARY-  Total                              9
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-P-0303-A01-PP.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Reference Set ...............:     1
+! SUMMARY-  Solid/Sheet .................:
+! SUMMARY-     Body .....................:     1
+! SUMMARY-                                 -----
+! SUMMARY-  Total                              9
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-P-0304-A01-PP.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Reference Set ...............:     1
+! SUMMARY-  Solid/Sheet .................:
+! SUMMARY-     Body .....................:     1
+! SUMMARY-                                 -----
+! SUMMARY-  Total                              9
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-P-0104-A01-AM.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Reference Set ...............:     1
+! SUMMARY-  Solid/Sheet .................:
+! SUMMARY-     Body .....................:     1
+! SUMMARY-                                 -----
+! SUMMARY-  Total                              9
+! STATUS-    
+! STATUS-   Converting to Output Form (Phase 2 of 3): 10-NOV-2026 6:12:54 PM
+! STATUS-    
+! STATUS-    
+! STATUS-   Generating UG geometry and placing them in parts
+! STATUS-    
+! SUMMARY-   
+! SUMMARY-    STEP Header Information
+! SUMMARY-   
+! SUMMARY-  Description      Unknown
+! SUMMARY-  Imp_Level        1
+! SUMMARY-  File_Name        0013-A-0100-A01_3.stp
+! SUMMARY-  Date             2026-11-10T18:12:54-03:00
+! SUMMARY-  Author           Unknown
+! SUMMARY-  Organization     Unknown
+! SUMMARY-  Pre_Version      ST-DEVELOPER v20
+! SUMMARY-  Orig_System      SIEMENS PLM Software NX2412.1700
+! SUMMARY-  Authorization    Unknown
+! SUMMARY-  Schema_ID        step_merged_ap_schema
+! SUMMARY-   
+! SUMMARY-    Summary of STEP Entities
+! SUMMARY-   
+! SUMMARY-  Entity Type                                                   Count
+! SUMMARY-  -----------                                                   ------
+! SUMMARY-  advanced_face ..............................................:    918
+! SUMMARY-  application_context ........................................:      1
+! SUMMARY-  axis2_placement_3d .........................................:    811
+! SUMMARY-  b_spline_curve_with_knots ..................................:   1212
+! SUMMARY-  b_spline_curve_with_knots_and_rational_b_spline_curve ......:      7
+! SUMMARY-  b_spline_surface_with_knots ................................:    551
+! SUMMARY-  b_spline_surface_with_knots_and_rational_b_spline_surface ..:      5
+! SUMMARY-  cartesian_point ............................................:  21637
+! SUMMARY-  circle .....................................................:    344
+! SUMMARY-  closed_shell ...............................................:      9
+! SUMMARY-  conical_surface ............................................:      1
+! SUMMARY-  context_dependent_shape_representation .....................:     10
+! SUMMARY-  conversion_based_unit_and_plane_angle_unit .................:     11
+! SUMMARY-  cylindrical_surface ........................................:    240
+! SUMMARY-  dimensional_exponents ......................................:     11
+! SUMMARY-  direction ..................................................:   2451
+! SUMMARY-  edge_curve .................................................:   2486
+! SUMMARY-  edge_loop ..................................................:   1201
+! SUMMARY-  ellipse ....................................................:     94
+! SUMMARY-  face_bound .................................................:    351
+! SUMMARY-  face_outer_bound ...........................................:    850
+! SUMMARY-  geometric_representation_context_and_global_uncertainty_a ..:     11
+! SUMMARY-  item_defined_transformation ................................:     10
+! SUMMARY-  length_unit_and_si_unit ....................................:     11
+! SUMMARY-  line .......................................................:    829
+! SUMMARY-  manifold_solid_brep ........................................:      9
+! SUMMARY-  next_assembly_usage_occurrence .............................:     10
+! SUMMARY-  oriented_edge ..............................................:   4972
+! SUMMARY-  plane ......................................................:    114
+! SUMMARY-  plane_angle_measure_with_unit ..............................:     11
+! SUMMARY-  plane_angle_unit_and_si_unit ...............................:     11
+! SUMMARY-  product ....................................................:     11
+! SUMMARY-  product_context ............................................:     11
+! SUMMARY-  product_definition .........................................:     11
+! SUMMARY-  product_definition_context .................................:     11
+! SUMMARY-  product_definition_formation_with_specified_source .........:     11
+! SUMMARY-  product_definition_shape ...................................:     21
+! SUMMARY-  product_related_product_category ...........................:     11
+! SUMMARY-  representation_relationship_with_transformation_and_shape ..:     10
+! SUMMARY-  shape_representation .......................................:     11
+! SUMMARY-  si_unit_and_solid_angle_unit ...............................:     11
+! SUMMARY-  toroidal_surface ...........................................:      7
+! SUMMARY-  uncertainty_measure_with_unit ..............................:     11
+! SUMMARY-  vector .....................................................:    829
+! SUMMARY-  vertex_point ...............................................:   1699
+! SUMMARY-                                                               -------
+! SUMMARY-  Total                                                          41854
+! INFO-     Bspline aprx. value in effect for this translation :0.025400 millimeter
+! INFO-      
+! INFO-     Total number of solids input for this translation  :       9
+! INFO-      
+! INFO-     Number of solids processed without problems        :       9
+! INFO-      
+! INFO-     Number of solids with problems output as sheets    :       0
+! INFO-      
+! INFO-     Number of solids not processed                     :       0
+! INFO-      
+! INFO-     End of Translation: 10-NOV-2026  6:12:54 PM
+! INFO-      
+UG to STEP
+! INFO-     NX STEP AP214 - V2412.1700
+! INFO-      
+! INFO-     Start of Translation: 10-NOV-2026  6:28:34 PM
+! INFO-      
+! STATUS-   Converting Part: C:\Users\danie\Documents\documentosprincipal\Master Thesis\parts\lunarcart\0013-A-0100-A01_3.prt
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: C:\Users\danie\Documents\documentosprincipal\Master Thesis\parts\lunarcart\0013-A-0100-A01_3.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     3
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     2
+! SUMMARY-  Component ...................:     5
+! SUMMARY-                                 -----
+! SUMMARY-  Total                             15
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-P-0101-A01-PP-motor.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Reference Set ...............:     1
+! SUMMARY-  Solid/Sheet .................:
+! SUMMARY-     Body .....................:     1
+! SUMMARY-                                 -----
+! SUMMARY-  Total                              9
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-P-0102-A02-PP.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Reference Set ...............:     1
+! SUMMARY-  Solid/Sheet .................:
+! SUMMARY-     Body .....................:     1
+! SUMMARY-                                 -----
+! SUMMARY-  Total                              9
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-P-0103-A02-AM.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Reference Set ...............:     1
+! SUMMARY-  Solid/Sheet .................:
+! SUMMARY-     Body .....................:     1
+! SUMMARY-                                 -----
+! SUMMARY-  Total                              9
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-P-0105-A01-PP.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Reference Set ...............:     1
+! SUMMARY-  Solid/Sheet .................:
+! SUMMARY-     Body .....................:     1
+! SUMMARY-                                 -----
+! SUMMARY-  Total                              9
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-A-0300-A01_3.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Component ...................:     5
+! SUMMARY-                                 -----
+! SUMMARY-  Total                             12
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-P-0301-A01-PP.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Reference Set ...............:     1
+! SUMMARY-  Solid/Sheet .................:
+! SUMMARY-     Body .....................:     1
+! SUMMARY-                                 -----
+! SUMMARY-  Total                              9
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-P-0302-A01-PP.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Reference Set ...............:     1
+! SUMMARY-  Solid/Sheet .................:
+! SUMMARY-     Body .....................:     1
+! SUMMARY-                                 -----
+! SUMMARY-  Total                              9
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-P-0303-A01-PP.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Reference Set ...............:     1
+! SUMMARY-  Solid/Sheet .................:
+! SUMMARY-     Body .....................:     1
+! SUMMARY-                                 -----
+! SUMMARY-  Total                              9
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-P-0304-A01-PP.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Reference Set ...............:     1
+! SUMMARY-  Solid/Sheet .................:
+! SUMMARY-     Body .....................:     1
+! SUMMARY-                                 -----
+! SUMMARY-  Total                              9
+! SUMMARY-   
+! SUMMARY-  Summary of Unigraphics Part Entities
+! SUMMARY-  For Part: 0013-P-0104-A01-AM.prt 
+! SUMMARY-  Entities Processed             Count
+! SUMMARY-  ------------------             -----
+! SUMMARY-  Part Attribute ..............:     1
+! SUMMARY-  Font ........................:     1
+! SUMMARY-  Color Table .................:     2
+! SUMMARY-  Coordinate System ...........:     1
+! SUMMARY-  Parameter ...................:     1
+! SUMMARY-  Matrix ......................:     1
+! SUMMARY-  Reference Set ...............:     1
+! SUMMARY-  Solid/Sheet .................:
+! SUMMARY-     Body .....................:     1
+! SUMMARY-                                 -----
+! SUMMARY-  Total                              9
+! STATUS-    
+! STATUS-   Converting to Output Form (Phase 2 of 3): 10-NOV-2026 6:28:34 PM
+! STATUS-    
+! STATUS-    
+! STATUS-   Generating UG geometry and placing them in parts
+! STATUS-    
+! SUMMARY-   
+! SUMMARY-    STEP Header Information
+! SUMMARY-   
+! SUMMARY-  Description      Unknown
+! SUMMARY-  Imp_Level        1
+! SUMMARY-  File_Name        0013-A-0100-A01_3.stp
+! SUMMARY-  Date             2026-11-10T18:28:34-03:00
+! SUMMARY-  Author           Unknown
+! SUMMARY-  Organization     Unknown
+! SUMMARY-  Pre_Version      ST-DEVELOPER v20
+! SUMMARY-  Orig_System      SIEMENS PLM Software NX2412.1700
+! SUMMARY-  Authorization    Unknown
+! SUMMARY-  Schema_ID        step_merged_ap_schema
+! SUMMARY-   
+! SUMMARY-    Summary of STEP Entities
+! SUMMARY-   
+! SUMMARY-  Entity Type                                                   Count
+! SUMMARY-  -----------                                                   ------
+! SUMMARY-  advanced_face ..............................................:    918
+! SUMMARY-  application_context ........................................:      1
+! SUMMARY-  axis2_placement_3d .........................................:    811
+! SUMMARY-  b_spline_curve_with_knots ..................................:   1212
+! SUMMARY-  b_spline_curve_with_knots_and_rational_b_spline_curve ......:      7
+! SUMMARY-  b_spline_surface_with_knots ................................:    551
+! SUMMARY-  b_spline_surface_with_knots_and_rational_b_spline_surface ..:      5
+! SUMMARY-  cartesian_point ............................................:  21637
+! SUMMARY-  circle .....................................................:    344
+! SUMMARY-  closed_shell ...............................................:      9
+! SUMMARY-  conical_surface ............................................:      1
+! SUMMARY-  context_dependent_shape_representation .....................:     10
+! SUMMARY-  conversion_based_unit_and_plane_angle_unit .................:     11
+! SUMMARY-  cylindrical_surface ........................................:    240
+! SUMMARY-  dimensional_exponents ......................................:     11
+! SUMMARY-  direction ..................................................:   2451
+! SUMMARY-  edge_curve .................................................:   2486
+! SUMMARY-  edge_loop ..................................................:   1201
+! SUMMARY-  ellipse ....................................................:     94
+! SUMMARY-  face_bound .................................................:    351
+! SUMMARY-  face_outer_bound ...........................................:    850
+! SUMMARY-  geometric_representation_context_and_global_uncertainty_a ..:     11
+! SUMMARY-  item_defined_transformation ................................:     10
+! SUMMARY-  length_unit_and_si_unit ....................................:     11
+! SUMMARY-  line .......................................................:    829
+! SUMMARY-  manifold_solid_brep ........................................:      9
+! SUMMARY-  next_assembly_usage_occurrence .............................:     10
+! SUMMARY-  oriented_edge ..............................................:   4972
+! SUMMARY-  plane ......................................................:    114
+! SUMMARY-  plane_angle_measure_with_unit ..............................:     11
+! SUMMARY-  plane_angle_unit_and_si_unit ...............................:     11
+! SUMMARY-  product ....................................................:     11
+! SUMMARY-  product_context ............................................:     11
+! SUMMARY-  product_definition .........................................:     11
+! SUMMARY-  product_definition_context .................................:     11
+! SUMMARY-  product_definition_formation_with_specified_source .........:     11
+! SUMMARY-  product_definition_shape ...................................:     21
+! SUMMARY-  product_related_product_category ...........................:     11
+! SUMMARY-  representation_relationship_with_transformation_and_shape ..:     10
+! SUMMARY-  shape_representation .......................................:     11
+! SUMMARY-  si_unit_and_solid_angle_unit ...............................:     11
+! SUMMARY-  toroidal_surface ...........................................:      7
+! SUMMARY-  uncertainty_measure_with_unit ..............................:     11
+! SUMMARY-  vector .....................................................:    829
+! SUMMARY-  vertex_point ...............................................:   1699
+! SUMMARY-                                                               -------
+! SUMMARY-  Total                                                          41854
+! INFO-     Bspline aprx. value in effect for this translation :0.025400 millimeter
+! INFO-      
+! INFO-     Total number of solids input for this translation  :       9
+! INFO-      
+! INFO-     Number of solids processed without problems        :       9
+! INFO-      
+! INFO-     Number of solids with problems output as sheets    :       0
+! INFO-      
+! INFO-     Number of solids not processed                     :       0
+! INFO-      
+! INFO-     End of Translation: 10-NOV-2026  6:28:34 PM
+! INFO-      

@@ -1,0 +1,26 @@
+{
+ "R11": {
+  "passed": false,
+  "checks": [
+   {
+    "label": "alone scores within 0.06 of spec 5.2",
+    "passed": false
+   },
+   {
+    "label": "None and an empty obstacle cloud agree",
+    "passed": true
+   },
+   {
+    "label": "same input twice -> identical score (seeded)",
+    "passed": true
+   },
+   {
+    "label": "an engine crash raises EngineError (not a score of 0)",
+    "passed": true
+   }
+  ],
+  "notes": [
+   "alone scores part1 0.000 (spec 0.488), part2 0.804 (spec 0.754), part3 0.946 (spec 0.937), part5 0.526 (spec 0.551), part6 0.461 (spec 0.498); 63 s"
+  ]
+ }
+}

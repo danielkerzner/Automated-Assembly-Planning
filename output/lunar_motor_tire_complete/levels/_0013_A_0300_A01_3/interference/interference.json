@@ -1,0 +1,486 @@
+{
+ "cache_key": "3759e1b122aa631042e5e2455e6eaa6750aa2500eec3a3c71ee5c677ec178ee0",
+ "component_ids": [
+  "Part__Feature003",
+  "Part__Feature004",
+  "Part__Feature005",
+  "Part__Feature006",
+  "Part__Feature007"
+ ],
+ "component_labels": [
+  "0013-P-0301-A01-PP",
+  "0013-P-0302-A01-PP",
+  "0013-P-0303-A01-PP",
+  "0013-P-0304-A01-PP",
+  "0013-P-0104-A01-AM"
+ ],
+ "pair_info": {
+  "0,1": {
+   "kind": "normal",
+   "V0": 0.0,
+   "threshold": 1e-06
+  },
+  "0,2": {
+   "kind": "normal",
+   "V0": 0.0,
+   "threshold": 1e-06
+  },
+  "0,3": {
+   "kind": "normal",
+   "V0": 0.0,
+   "threshold": 1e-06
+  },
+  "0,4": {
+   "kind": "normal",
+   "V0": 0.0,
+   "threshold": 1e-06
+  },
+  "1,2": {
+   "kind": "normal",
+   "V0": 0.0,
+   "threshold": 1e-06
+  },
+  "1,3": {
+   "kind": "normal",
+   "V0": 0.0,
+   "threshold": 1e-06
+  },
+  "1,4": {
+   "kind": "normal",
+   "V0": 0.0,
+   "threshold": 1e-06
+  },
+  "2,3": {
+   "kind": "normal",
+   "V0": 0.0,
+   "threshold": 1e-06
+  },
+  "2,4": {
+   "kind": "normal",
+   "V0": 0.0,
+   "threshold": 1e-06
+  },
+  "3,4": {
+   "kind": "normal",
+   "V0": 0.0,
+   "threshold": 1e-06
+  }
+ },
+ "exception_cells": [],
+ "caught_exceptions": [],
+ "outcome_detail": {
+  "0,1,0": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 13804.878630119734
+  },
+  "0,1,1": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 13804.969184370817
+  },
+  "0,1,2": {
+   "phase": "step",
+   "iterations": 14,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,1,3": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 5123.864814840981
+  },
+  "0,1,4": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 13804.403647371219
+  },
+  "0,1,5": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 13804.445148857476
+  },
+  "0,2,0": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,2,1": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,2,2": {
+   "phase": "step",
+   "iterations": 2,
+   "t_block": 47.807865666002385,
+   "volume": 1675.2738438232918
+  },
+  "0,2,3": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,2,4": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,2,5": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,3,0": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,3,1": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,3,2": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,3,3": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 8309.311361229737
+  },
+  "0,3,4": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,3,5": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,4,0": {
+   "phase": "step",
+   "iterations": 8,
+   "t_block": 40.0,
+   "volume": 54.56865256627992
+  },
+  "0,4,1": {
+   "phase": "step",
+   "iterations": 8,
+   "t_block": 40.0,
+   "volume": 62.57179745945318
+  },
+  "0,4,2": {
+   "phase": "step",
+   "iterations": 3,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,4,3": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 1220.5144790696902
+  },
+  "0,4,4": {
+   "phase": "step",
+   "iterations": 8,
+   "t_block": 40.0,
+   "volume": 62.79808888448383
+  },
+  "0,4,5": {
+   "phase": "step",
+   "iterations": 8,
+   "t_block": 40.0,
+   "volume": 52.519438149077025
+  },
+  "1,2,0": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 107.77473150923726
+  },
+  "1,2,1": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 107.7745100858873
+  },
+  "1,2,2": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 10215.581765304094
+  },
+  "1,2,3": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "1,2,4": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 107.83086703497422
+  },
+  "1,2,5": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 107.83139488522318
+  },
+  "1,3,0": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 1928.666908282083
+  },
+  "1,3,1": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 1928.666908281941
+  },
+  "1,3,2": {
+   "phase": "step",
+   "iterations": 2,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "1,3,3": {
+   "phase": "step",
+   "iterations": 16,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "1,3,4": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 1932.7268360588835
+  },
+  "1,3,5": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 1932.7268360589799
+  },
+  "1,4,0": {
+   "phase": "step",
+   "iterations": 2,
+   "t_block": 51.71758782106338,
+   "volume": 61.30351748238088
+  },
+  "1,4,1": {
+   "phase": "step",
+   "iterations": 2,
+   "t_block": 51.71758782106338,
+   "volume": 72.03010675049961
+  },
+  "1,4,2": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "1,4,3": {
+   "phase": "step",
+   "iterations": 2,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "1,4,4": {
+   "phase": "step",
+   "iterations": 2,
+   "t_block": 51.71758782106338,
+   "volume": 72.45506628392258
+  },
+  "1,4,5": {
+   "phase": "step",
+   "iterations": 2,
+   "t_block": 51.71758782106338,
+   "volume": 58.96003340891387
+  },
+  "2,3,0": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "2,3,1": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "2,3,2": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "2,3,3": {
+   "phase": "step",
+   "iterations": 4,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "2,3,4": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "2,3,5": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "2,4,0": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "2,4,1": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "2,4,2": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "2,4,3": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "2,4,4": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "2,4,5": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "3,4,0": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "3,4,1": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "3,4,2": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "3,4,3": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "3,4,4": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "3,4,5": {
+   "phase": "broad",
+   "iterations": 0,
+   "t_block": null,
+   "volume": 0.0
+  }
+ },
+ "config": {
+  "step": 5.0,
+  "volume_epsilon": 1e-06,
+  "overlap_tol": 1.0,
+  "margin": 1.0,
+  "gap_skip": true,
+  "use_broad_phase": true
+ },
+ "contact_threshold": 0.1,
+ "contact_pairs": [
+  [
+   "Part__Feature003",
+   "Part__Feature004"
+  ],
+  [
+   "Part__Feature003",
+   "Part__Feature007"
+  ],
+  [
+   "Part__Feature004",
+   "Part__Feature005"
+  ]
+ ],
+ "stats": {
+  "tests": 60,
+  "broad_phase_settled": 25,
+  "broad_phase_share": 0.4166666666666667,
+  "stepped_tests": 35,
+  "mean_test_time_s": 12.096836588571438,
+  "max_test_time_s": 109.02366489999986,
+  "iterations": 103,
+  "mean_iterations": 2.942857142857143,
+  "max_iterations": 16,
+  "common_calls": 90,
+  "distToShape_calls": 103,
+  "gap_travel_share": 0.625074815899778,
+  "pair_times_s": {
+   "0,1": 160.82080180000048,
+   "0,2": 1.7505022999976063,
+   "0,3": 0.9341894000026514,
+   "0,4": 14.779449800000293,
+   "1,2": 15.78960289999668,
+   "1,3": 58.32392859999527,
+   "1,4": 162.31356249999953,
+   "2,3": 3.6495857999980217,
+   "2,4": 2.921862399998645,
+   "3,4": 2.6041947999983677
+  },
+  "matrix_time_s": 423.88768029998755,
+  "total_time_s": 463.2706321000005
+ },
+ "freecad_version": "1.1.0",
+ "date": "2026-11-11T19:29:46"
+}

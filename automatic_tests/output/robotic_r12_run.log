@@ -1,0 +1,11 @@
+
+=== R12: Function copy == unchanged script (same seed): alone and with obstacles (spec 4).
+  note: alone: worker 173 grasps best 0.9460 (39 s), script 173 grasps best 0.9460 (169 s)
+  [PASS] alone: identical grasps from the function copy and the unchanged script
+  note: assembly: worker 102 grasps best 0.7631 (34 s), script 102 grasps best 0.7631 (202 s)
+  [PASS] assembly: identical grasps from the function copy and the unchanged script
+
+| test | result | time | notes |
+|---|---|---|---|
+| R12 | PASS | 448.0 s | alone: worker 173 grasps best 0.9460 (39 s), script 173 grasps best 0.9460 (169 s); assembly: worker 102 grasps best 0.7631 (34 s), script 102 grasps best 0.7631 (202 s) |
+exit 0

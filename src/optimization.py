@@ -276,6 +276,32 @@ def _point_in_hull(pts: np.ndarray, p: np.ndarray, tol: float = HULL_TOL) -> boo
 # ---------------------------------------------------------------------------
 
 
+class NoPathError(ValueError):
+    """Robot mode: the blocked edges leave no root-to-terminal path (docs/robotic-gripper_spec.md 6.1)."""
+
+
+def blocked_liveness(aog, blocked_edges) -> tuple[np.ndarray, np.ndarray]:
+    """(edge_ok, live) with the (state mask, component) edges in `blocked_edges` removed: edge_ok[e] is
+    False for a blocked edge, live[v] is True iff v reaches the terminal over the remaining edges."""
+    blocked = {(int(s), int(c)) for s, c in blocked_edges}
+    src_mask = aog.node_mask[aog.edge_src]
+    edge_ok = np.array([(int(m), int(c)) not in blocked for m, c in zip(src_mask, aog.edge_comp)], dtype=bool)
+    live = np.zeros(aog.n_nodes, dtype=bool)
+    if aog.terminal is not None:
+        live[aog.terminal] = True
+    for L in range(aog.n_components - 1, -1, -1):
+        a, b = aog.out_ptr[aog.level_offsets[L]], aog.out_ptr[aog.level_offsets[L + 1]]
+        es = np.arange(a, b)
+        es = es[edge_ok[a:b] & live[aog.edge_dst[a:b]]]
+        live[aog.edge_src[es]] = True
+    return edge_ok, live & aog.live
+
+
+def blocked_key(blocked_edges) -> str:
+    """Canonical text of a blocked-edge set, for cache keys."""
+    return ";".join(f"{int(s)}:{int(c)}" for s, c in sorted({(int(s), int(c)) for s, c in blocked_edges}))
+
+
 class CostModel:
     """All cost terms of the spec on one AoG; pure numpy (the geometry is in `tables`).
 
@@ -284,7 +310,8 @@ class CostModel:
     subtracts that constant offset, so every reported normalized term lies in [0, 1].
     """
 
-    def __init__(self, aog, tables: TermTables, config: OptimizationConfig):
+    def __init__(self, aog, tables: TermTables, config: OptimizationConfig,
+                 blocked_edges: set[tuple[int, int]] | None = None):
         validate_config(config, tables.has_tool_column, tables.has_group_column)
         if not aog.complete:
             raise ValueError("The AoG is incomplete (root cannot reach the terminal); nothing to optimize")
@@ -308,7 +335,16 @@ class CostModel:
         self.popcount = (N - aog.node_level.astype(np.int64))  # t of the out-edges of each node
 
         # Live edges in CSR form (edges are sorted by src, so the filtered list stays sorted).
-        self.live_edge = aog.live[aog.edge_src] & aog.live[aog.edge_dst]
+        # Robot mode (docs/robotic-gripper_spec.md 6.1): forbidden (state, component) edges are dropped
+        # and node liveness recomputed without them; None/empty leaves this exactly as before.
+        live, edge_ok = aog.live, None
+        if blocked_edges:
+            edge_ok, live = blocked_liveness(aog, blocked_edges)
+            if not live[aog.root]:
+                raise NoPathError(f"The {len(blocked_edges)} blocked edge(s) disconnect the root from the terminal")
+        self.live_edge = live[aog.edge_src] & live[aog.edge_dst]
+        if edge_ok is not None:
+            self.live_edge &= edge_ok
         self.lv_edges = np.flatnonzero(self.live_edge).astype(np.int64)
         counts = np.bincount(aog.edge_src[self.lv_edges], minlength=aog.n_nodes)
         self.lv_ptr = np.concatenate(([0], np.cumsum(counts))).astype(np.int64)
@@ -890,25 +926,31 @@ def _apply_turns(aog, prep, tables: TermTables, steps: list[dict]) -> None:
         steps[i]["turns_nut_label"] = aog.component_labels[first_nut]
 
 
-def compute_config_hash(aog, tables: TermTables, config: OptimizationConfig) -> str:
+def compute_config_hash(aog, tables: TermTables, config: OptimizationConfig, blocked_edges=None) -> str:
     cfg = asdict(config)
     cfg.pop("force")
     h = hashlib.sha256()
     h.update(f"aog:{aog.cache_key};tables:{tables.cache_key};".encode())
     h.update(json.dumps(cfg, sort_keys=True, default=list).encode())
     h.update(json.dumps(resolve_weights(config), sort_keys=True).encode())
+    if blocked_edges:  # robot mode only; manual-mode keys are unchanged
+        h.update(f"blocked:{blocked_key(blocked_edges)}".encode())
     return h.hexdigest()
 
 
 def optimize(aog, tables: TermTables, config: OptimizationConfig | None = None,
-             stability_cache: dict | None = None) -> OptimizationResult:
-    """Run the ACO on an AoG with ready term tables (pure numpy, no FreeCAD, no disk cache)."""
+             stability_cache: dict | None = None, blocked_edges=None) -> OptimizationResult:
+    """Run the ACO on an AoG with ready term tables (pure numpy, no FreeCAD, no disk cache).
+
+    `blocked_edges`: optional set of (state mask, component) AoG edges the sequence must not use (robot
+    mode, docs/robotic-gripper_spec.md 6.1); raises NoPathError when they leave no path."""
     config = config or OptimizationConfig()
-    model = CostModel(aog, tables, config)
+    model = CostModel(aog, tables, config, blocked_edges=blocked_edges)
     if stability_cache:
         model.stability_cache.update(stability_cache)
     edges, ks, ev, history = run_aco(model)
-    result = _build_result(model, edges, ks, ev, history, compute_config_hash(aog, tables, config))
+    result = _build_result(model, edges, ks, ev, history,
+                           compute_config_hash(aog, tables, config, blocked_edges))
     result.history["stability_cache"] = model.stability_cache  # handed back for caching, not saved
     _log_summary(result)
     return result
@@ -1199,12 +1241,33 @@ def collect_tables(aog, interference_result, prep, config: OptimizationConfig, c
 
 
 def _collect_patches(aog, prep, tables, key, cache_dir, force, shapes, threshold):
-    """Contact patches for every touching pair, checkpointed per pair (resumes after a crash)."""
+    """Contact patches for every touching pair, checkpointed per pair (resumes after a crash).
+
+    A pair where *both* components are fused sub-assemblies (`prep.compound_ids`, docs/
+    subassembly-spec.md) is skipped entirely (added 2026-11-11, docs/stander_processing-spec.md
+    section 14): `extract_contact_patches` is O(faces_i * faces_j), and two large fused shapes
+    merely grazing at one near-point (the `_contact_neighbors`/interference contact test is a
+    single whole-shape distance check, not an area check) can cost minutes for zero real contact
+    area, as measured on `lunar_motor_tire_complete` (tire vs. motor: 895.87 s, 0 triangles). A
+    pair with only *one* side a fused sub-assembly (a leaf resting on it) is NOT skipped: that
+    contact can carry real, non-trivial support area the stability/gravity_change cost terms
+    need (same run: 0013-P-0103-A02-AM vs. the tire, 387.0 mm^2 in 79.64 s). A skipped pair simply
+    never gets a `tables.patches` entry; `TermTables.contact_triangles` already returns the empty
+    fallback for any pair it has no patches for, so no caller needs to know about this skip.
+    """
     path = cache_dir / PATCHES_NAME
     data = None if force else _read_json(path, key)
     data = data or {"key": key, "pairs": {}}
+    compound_ids = getattr(prep, "compound_ids", None) or frozenset()
     pairs = [(i, j) for i, j in zip(*np.nonzero(np.triu(tables.contact, 1)))]
-    todo = [(int(i), int(j)) for i, j in pairs if f"{i}|{j}" not in data["pairs"]]
+    skipped = [(int(i), int(j)) for i, j in pairs
+              if aog.component_ids[int(i)] in compound_ids and aog.component_ids[int(j)] in compound_ids]
+    if skipped:
+        log.info("Skipping contact-patch extraction for %d sub-assembly/sub-assembly pair(s) "
+                 "(docs/stander_processing-spec.md section 14): %s", len(skipped),
+                 [(aog.component_labels[i], aog.component_labels[j]) for i, j in skipped])
+    skip_set = set(skipped)
+    todo = [(int(i), int(j)) for i, j in pairs if (int(i), int(j)) not in skip_set and f"{i}|{j}" not in data["pairs"]]
     if todo:
         shapes = shapes or _component_shapes(aog, prep)
         log.info("Extracting contact patches for %d pair(s)", len(todo))
@@ -1286,8 +1349,14 @@ def _default_cache_dir(prep) -> Path:
 
 
 def optimize_sequence(aog, interference_result, prep, config: OptimizationConfig | None = None,
-                      cache_dir: str | Path | None = None, force: bool | None = None) -> OptimizationResult:
-    """Optimized assembly sequence for the pipeline objects, with on-disk caching (spec 7)."""
+                      cache_dir: str | Path | None = None, force: bool | None = None,
+                      blocked_edges=None) -> OptimizationResult:
+    """Optimized assembly sequence for the pipeline objects, with on-disk caching (spec 7).
+
+    `blocked_edges` (robot mode, docs/robotic-gripper_spec.md 6.1): optional set of (state mask,
+    component) edges to forbid. None/empty is the unchanged manual path. Otherwise the term tables and
+    stability cache are still shared from `cache_dir`, but the result is cached in its own folder
+    `cache_dir/blocked/<hash prefix>/`, so the manual result file is never overwritten."""
     config = config or OptimizationConfig()
     force = config.force if force is None else force
     cache_dir = Path(cache_dir) if cache_dir is not None else _default_cache_dir(prep)
@@ -1295,11 +1364,12 @@ def optimize_sequence(aog, interference_result, prep, config: OptimizationConfig
     validate_config(config, "tool" in columns, "group" in columns)  # fail before any geometry work
 
     tables = collect_tables(aog, interference_result, prep, config, cache_dir, force)
-    config_hash = compute_config_hash(aog, tables, config)
+    config_hash = compute_config_hash(aog, tables, config, blocked_edges)
+    result_dir = cache_dir / "blocked" / config_hash[:16] if blocked_edges else cache_dir
     if not force:
-        cached = load_result(cache_dir, config_hash)
+        cached = load_result(result_dir, config_hash)
         if cached is not None:
-            log.info("Loaded cached optimization result from %s (total cost %.4f)", cache_dir, cached.total_cost)
+            log.info("Loaded cached optimization result from %s (total cost %.4f)", result_dir, cached.total_cost)
             return cached
 
     stab_path, stab_key = cache_dir / STABILITY_NAME, _stability_key(tables, config)
@@ -1311,11 +1381,11 @@ def optimize_sequence(aog, interference_result, prep, config: OptimizationConfig
             S, i = (int(x) for x in name.split("|"))
             stability[(S, i)] = np.array([(bits >> g) & 1 for g in range(G)], dtype=bool)
 
-    result = optimize(aog, tables, config, stability_cache=stability)
+    result = optimize(aog, tables, config, stability_cache=stability, blocked_edges=blocked_edges)
     new_cache = result.history.pop("stability_cache")
     if config.use_stability:
         _write_json_atomic(stab_path, {"key": stab_key, "classes": {
             f"{S}|{i}": int(sum(1 << g for g, b in enumerate(cls) if b)) for (S, i), cls in new_cache.items()}})
     _apply_turns(aog, prep, tables, result.steps)
-    save_result(result, cache_dir)
+    save_result(result, result_dir)
     return result

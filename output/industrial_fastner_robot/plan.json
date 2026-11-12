@@ -1,0 +1,3605 @@
+{
+ "assembly": "industrial_fastner",
+ "levels_independent": true,
+ "level": {
+  "container_id": "industrial_fastner",
+  "label": "industrial_fastner",
+  "status": "complete",
+  "locked_parts": [],
+  "total_cost": 0.2979355929332099,
+  "inseparable_pairs": [],
+  "steps": [
+   {
+    "step": 1,
+    "component": 0,
+    "component_id": "Part__Feature",
+    "component_label": "industrial_fastner_part3",
+    "is_stander": false,
+    "edge": 136,
+    "removal_direction_index": 0,
+    "direction_index": 1,
+    "direction": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "travel": 66.34152163843196,
+    "start_offset": [
+     66.34152163843196,
+     0.0,
+     0.0
+    ],
+    "gravity_index": 1,
+    "gravity": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "stability_class": 2,
+    "costs": {
+     "travel": 0.005465352313827976,
+     "size_contacts": 0.042567790079394235,
+     "direction_change": 0.0,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.0,
+     "gravity_change": 0.0
+    },
+    "turns": null,
+    "turns_pitch": null,
+    "turns_note": null,
+    "turns_nut_label": null,
+    "kind": "part",
+    "sub_plan": null
+   },
+   {
+    "step": 2,
+    "component": 5,
+    "component_id": "Part__Feature003",
+    "component_label": "industrial_fastner_part7",
+    "is_stander": true,
+    "edge": 130,
+    "removal_direction_index": 0,
+    "direction_index": 1,
+    "direction": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "travel": 34.244353682645276,
+    "start_offset": [
+     34.244353682645276,
+     0.0,
+     0.0
+    ],
+    "gravity_index": 1,
+    "gravity": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "stability_class": 2,
+    "costs": {
+     "travel": 0.0028211209663687865,
+     "size_contacts": 0.011622870171266276,
+     "direction_change": 0.0,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.0,
+     "gravity_change": 0.0
+    },
+    "turns": null,
+    "turns_pitch": null,
+    "turns_note": null,
+    "turns_nut_label": null,
+    "kind": "stander",
+    "sub_plan": null
+   },
+   {
+    "step": 3,
+    "component": 4,
+    "component_id": "Part__Feature007",
+    "component_label": "industrial_fastner_part6",
+    "is_stander": false,
+    "edge": 114,
+    "removal_direction_index": 1,
+    "direction_index": 0,
+    "direction": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "travel": 64.20624962045933,
+    "start_offset": [
+     -64.20624962045933,
+     0.0,
+     0.0
+    ],
+    "gravity_index": 1,
+    "gravity": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "stability_class": 1,
+    "costs": {
+     "travel": 0.005289444170995776,
+     "size_contacts": 0.032497294130315664,
+     "direction_change": 0.0029154518950437317,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.03498542274052478,
+     "gravity_change": 0.0
+    },
+    "turns": 36.68928549740533,
+    "turns_pitch": 1.75,
+    "turns_note": "nut",
+    "turns_nut_label": "industrial_fastner_part7",
+    "kind": "part",
+    "sub_plan": null
+   },
+   {
+    "step": 4,
+    "component": 1,
+    "component_id": "Part__Feature001",
+    "component_label": "industrial_fastner_part2",
+    "is_stander": false,
+    "edge": 87,
+    "removal_direction_index": 1,
+    "direction_index": 0,
+    "direction": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "travel": 49.00000000026934,
+    "start_offset": [
+     -49.00000000026934,
+     0.0,
+     0.0
+    ],
+    "gravity_index": 1,
+    "gravity": [
+     -1.0,
+     0.0,
+     0.0
+    ],
+    "stability_class": 1,
+    "costs": {
+     "travel": 0.004036721750800237,
+     "size_contacts": 0.10515623813604941,
+     "direction_change": 0.0,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.03498542274052478,
+     "gravity_change": 0.0
+    },
+    "turns": null,
+    "turns_pitch": null,
+    "turns_note": null,
+    "turns_nut_label": null,
+    "kind": "part",
+    "sub_plan": null
+   },
+   {
+    "step": 5,
+    "component": 3,
+    "component_id": "Part__Feature006",
+    "component_label": "industrial_fastner_part5",
+    "is_stander": false,
+    "edge": 58,
+    "removal_direction_index": 1,
+    "direction_index": 0,
+    "direction": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "travel": 43.00000000116668,
+    "start_offset": [
+     -43.00000000116668,
+     0.0,
+     0.0
+    ],
+    "gravity_index": 2,
+    "gravity": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "stability_class": 2,
+    "costs": {
+     "travel": 0.0035424292915952173,
+     "size_contacts": 0.06771011852525423,
+     "direction_change": 0.0,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.0,
+     "gravity_change": 0.01020408163265306
+    },
+    "turns": null,
+    "turns_pitch": null,
+    "turns_note": null,
+    "turns_nut_label": null,
+    "kind": "part",
+    "sub_plan": null
+   },
+   {
+    "step": 6,
+    "component": 2,
+    "component_id": "Part__Feature002",
+    "component_label": "industrial_fastner_part1",
+    "is_stander": false,
+    "edge": 24,
+    "removal_direction_index": 5,
+    "direction_index": 4,
+    "direction": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "travel": 46.5,
+    "start_offset": [
+     0.0,
+     0.0,
+     -46.5
+    ],
+    "gravity_index": 2,
+    "gravity": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "stability_class": 2,
+    "costs": {
+     "travel": 0.0038307665594118213,
+     "size_contacts": 0.03609944426308248,
+     "direction_change": 0.011661807580174927,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.0,
+     "gravity_change": 0.0
+    },
+    "turns": null,
+    "turns_pitch": null,
+    "turns_note": null,
+    "turns_nut_label": null,
+    "kind": "part",
+    "sub_plan": null
+   },
+   {
+    "step": 7,
+    "component": 6,
+    "component_id": "Part__Feature004",
+    "component_label": "industrial_fastner_part4",
+    "is_stander": true,
+    "edge": 8,
+    "removal_direction_index": 2,
+    "direction_index": 3,
+    "direction": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "travel": 24.904946450912306,
+    "start_offset": [
+     0.0,
+     24.904946450912306,
+     0.0
+    ],
+    "gravity_index": 2,
+    "gravity": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "stability_class": 1,
+    "costs": {
+     "travel": 0.0020517212049053113,
+     "size_contacts": 0.015888914907198456,
+     "direction_change": 0.011661807580174927,
+     "tool_change": 0.11224489795918367,
+     "grouping": 0.0,
+     "stability": 0.03498542274052478,
+     "gravity_change": 0.0
+    },
+    "turns": null,
+    "turns_pitch": null,
+    "turns_note": null,
+    "turns_nut_label": null,
+    "kind": "stander",
+    "sub_plan": null
+   },
+   {
+    "step": 8,
+    "component": 7,
+    "component_id": "Part__Feature005",
+    "component_label": "industrial_fastner_part001",
+    "is_stander": true,
+    "edge": 4,
+    "removal_direction_index": 2,
+    "direction_index": 3,
+    "direction": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "travel": 24.904946450912306,
+    "start_offset": [
+     0.0,
+     24.904946450912306,
+     0.0
+    ],
+    "gravity_index": 2,
+    "gravity": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "stability_class": 1,
+    "costs": {
+     "travel": 0.0020517212049053113,
+     "size_contacts": 0.01815875989394109,
+     "direction_change": 0.0,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.03498542274052478,
+     "gravity_change": 0.0
+    },
+    "turns": null,
+    "turns_pitch": null,
+    "turns_note": null,
+    "turns_nut_label": null,
+    "kind": "stander",
+    "sub_plan": null
+   }
+  ]
+ },
+ "robot": {
+  "mode": "robot",
+  "feasible": false,
+  "failing_steps": [
+   {
+    "step": 3,
+    "label": "industrial_fastner_part6",
+    "end_effector": "gripper",
+    "reason": "relative score 0.000 below 0.5",
+    "score": 0.0,
+    "score_relative": 0.0,
+    "intrinsically_infeasible": false
+   },
+   {
+    "step": 5,
+    "label": "industrial_fastner_part5",
+    "end_effector": "gripper",
+    "reason": "relative score 0.000 below 0.5",
+    "score": 0.0,
+    "score_relative": 0.0,
+    "intrinsically_infeasible": false
+   },
+   {
+    "step": 6,
+    "label": "industrial_fastner_part1",
+    "end_effector": "gripper",
+    "reason": "no grasp even alone (S_alone = 0)",
+    "score": null,
+    "score_relative": null,
+    "intrinsically_infeasible": true
+   }
+  ],
+  "steps": [
+   {
+    "step": 1,
+    "component_id": "Part__Feature",
+    "component_label": "industrial_fastner_part3",
+    "edge": 136,
+    "state": 1,
+    "feasible": true,
+    "end_effector": "gripper",
+    "tcp": [
+     8.714957332048506,
+     17.1300870248999,
+     -0.00014453648078488875
+    ],
+    "axes": [
+     [
+      -0.0396411488614628,
+      -0.9992139807429542,
+      2.18231652050529e-06
+     ],
+     [
+      -0.9992139807420811,
+      0.039641148866814614,
+      2.4663507997535935e-06
+     ],
+     [
+      -2.5509217345942163e-06,
+      -2.082832198495679e-06,
+      -0.9999999999945773
+     ]
+    ],
+    "grasp_width": 34.99814937959769,
+    "contact_area": 312.36302093824474,
+    "score": 0.9459815574847295,
+    "score_alone": 0.9459815574847295,
+    "score_relative": 1.0,
+    "rotation_checked": false,
+    "angles": [],
+    "rotation": null,
+    "reason": null,
+    "intrinsically_infeasible": false
+   },
+   {
+    "step": 2,
+    "component_id": "Part__Feature003",
+    "component_label": "industrial_fastner_part7",
+    "edge": 130,
+    "state": 33,
+    "feasible": true,
+    "end_effector": "tool (none)",
+    "tool": null,
+    "checked": false,
+    "sense": 0,
+    "sense_direction": [
+     1.0,
+     0.0,
+     0.0
+    ],
+    "contact": null,
+    "senses": [],
+    "reason": null
+   },
+   {
+    "step": 3,
+    "component_id": "Part__Feature007",
+    "component_label": "industrial_fastner_part6",
+    "edge": 114,
+    "state": 49,
+    "feasible": false,
+    "end_effector": "gripper",
+    "tcp": null,
+    "axes": null,
+    "grasp_width": null,
+    "contact_area": null,
+    "score": 0.0,
+    "score_alone": 0.5053679011396035,
+    "score_relative": 0.0,
+    "rotation_checked": true,
+    "angles": [
+     0.0,
+     90.0,
+     180.0,
+     270.0
+    ],
+    "rotation": {
+     "axis_point": [
+      8.24999999999999,
+      -34.747950681976604,
+      -2.504663143554353e-13
+     ],
+     "axis_dir": [
+      1.0,
+      -0.0,
+      -0.0
+     ],
+     "nut_id": "Part__Feature003",
+     "nut_label": "industrial_fastner_part7"
+    },
+    "reason": "relative score 0.000 below 0.5",
+    "intrinsically_infeasible": false
+   },
+   {
+    "step": 4,
+    "component_id": "Part__Feature001",
+    "component_label": "industrial_fastner_part2",
+    "edge": 87,
+    "state": 51,
+    "feasible": true,
+    "end_effector": "gripper",
+    "tcp": [
+     -8.570573121060232,
+     10.038629154184406,
+     -0.0573660021205761
+    ],
+    "axes": [
+     [
+      0.4734017379040109,
+      -0.8808378514309346,
+      0.003933705123262517
+     ],
+     [
+      -0.880846411280531,
+      -0.47339371343069864,
+      0.0028269804568433225
+     ],
+     [
+      -0.0006279201158005071,
+      -0.004803287502151931,
+      -0.9999882670039183
+     ]
+    ],
+    "grasp_width": 34.9434650365855,
+    "contact_area": 242.41181737044795,
+    "score": 0.7486534247992338,
+    "score_alone": 0.8040148419748444,
+    "score_relative": 0.9311437870479725,
+    "rotation_checked": false,
+    "angles": [],
+    "rotation": null,
+    "reason": null,
+    "intrinsically_infeasible": false
+   },
+   {
+    "step": 5,
+    "component_id": "Part__Feature006",
+    "component_label": "industrial_fastner_part5",
+    "edge": 58,
+    "state": 59,
+    "feasible": false,
+    "end_effector": "gripper",
+    "tcp": null,
+    "axes": null,
+    "grasp_width": null,
+    "contact_area": null,
+    "score": 0.0,
+    "score_alone": 0.5087850363966777,
+    "score_relative": 0.0,
+    "rotation_checked": false,
+    "angles": [],
+    "rotation": null,
+    "reason": "relative score 0.000 below 0.5",
+    "intrinsically_infeasible": false
+   },
+   {
+    "step": 6,
+    "component_id": "Part__Feature002",
+    "component_label": "industrial_fastner_part1",
+    "edge": 24,
+    "state": 63,
+    "feasible": false,
+    "end_effector": "gripper",
+    "tcp": null,
+    "axes": null,
+    "grasp_width": null,
+    "contact_area": null,
+    "score": null,
+    "score_alone": 0.0,
+    "score_relative": null,
+    "rotation_checked": false,
+    "angles": [],
+    "rotation": null,
+    "reason": "no grasp even alone (S_alone = 0)",
+    "intrinsically_infeasible": true
+   },
+   {
+    "step": 7,
+    "component_id": "Part__Feature004",
+    "component_label": "industrial_fastner_part4",
+    "edge": 8,
+    "state": 127,
+    "feasible": true,
+    "end_effector": "tool (none)",
+    "tool": null,
+    "checked": false,
+    "sense": 2,
+    "sense_direction": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "contact": null,
+    "senses": [],
+    "reason": null
+   },
+   {
+    "step": 8,
+    "component_id": "Part__Feature005",
+    "component_label": "industrial_fastner_part001",
+    "edge": 4,
+    "state": 255,
+    "feasible": true,
+    "end_effector": "tool (none)",
+    "tool": null,
+    "checked": false,
+    "sense": 2,
+    "sense_direction": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "contact": null,
+    "senses": [],
+    "reason": null
+   }
+  ],
+  "loop": {
+   "iterations": 10,
+   "stop_reason": "reached robot_max_iterations (10)",
+   "chosen_iteration": 2,
+   "blocked_edges": [
+    {
+     "state": 15,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part1",
+      "industrial_fastner_part5"
+     ],
+     "component": 3,
+     "component_label": "industrial_fastner_part5",
+     "iteration": 1,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 63,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part1",
+      "industrial_fastner_part5",
+      "industrial_fastner_part6",
+      "industrial_fastner_part7"
+     ],
+     "component": 4,
+     "component_label": "industrial_fastner_part6",
+     "iteration": 1,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 49,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part6",
+      "industrial_fastner_part7"
+     ],
+     "component": 4,
+     "component_label": "industrial_fastner_part6",
+     "iteration": 2,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 59,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part5",
+      "industrial_fastner_part6",
+      "industrial_fastner_part7"
+     ],
+     "component": 3,
+     "component_label": "industrial_fastner_part5",
+     "iteration": 2,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 55,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part1",
+      "industrial_fastner_part6",
+      "industrial_fastner_part7"
+     ],
+     "component": 4,
+     "component_label": "industrial_fastner_part6",
+     "iteration": 3,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 63,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part1",
+      "industrial_fastner_part5",
+      "industrial_fastner_part6",
+      "industrial_fastner_part7"
+     ],
+     "component": 3,
+     "component_label": "industrial_fastner_part5",
+     "iteration": 3,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 79,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part1",
+      "industrial_fastner_part5",
+      "industrial_fastner_part4"
+     ],
+     "component": 3,
+     "component_label": "industrial_fastner_part5",
+     "iteration": 4,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 255,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part1",
+      "industrial_fastner_part5",
+      "industrial_fastner_part6",
+      "industrial_fastner_part7",
+      "industrial_fastner_part4",
+      "industrial_fastner_part001"
+     ],
+     "component": 4,
+     "component_label": "industrial_fastner_part6",
+     "iteration": 4,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 47,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part1",
+      "industrial_fastner_part5",
+      "industrial_fastner_part7"
+     ],
+     "component": 3,
+     "component_label": "industrial_fastner_part5",
+     "iteration": 5,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 191,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part1",
+      "industrial_fastner_part5",
+      "industrial_fastner_part6",
+      "industrial_fastner_part7",
+      "industrial_fastner_part001"
+     ],
+     "component": 4,
+     "component_label": "industrial_fastner_part6",
+     "iteration": 5,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 111,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part1",
+      "industrial_fastner_part5",
+      "industrial_fastner_part7",
+      "industrial_fastner_part4"
+     ],
+     "component": 3,
+     "component_label": "industrial_fastner_part5",
+     "iteration": 6,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 127,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part1",
+      "industrial_fastner_part5",
+      "industrial_fastner_part6",
+      "industrial_fastner_part7",
+      "industrial_fastner_part4"
+     ],
+     "component": 4,
+     "component_label": "industrial_fastner_part6",
+     "iteration": 6,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 247,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part1",
+      "industrial_fastner_part6",
+      "industrial_fastner_part7",
+      "industrial_fastner_part4",
+      "industrial_fastner_part001"
+     ],
+     "component": 4,
+     "component_label": "industrial_fastner_part6",
+     "iteration": 7,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 255,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part1",
+      "industrial_fastner_part5",
+      "industrial_fastner_part6",
+      "industrial_fastner_part7",
+      "industrial_fastner_part4",
+      "industrial_fastner_part001"
+     ],
+     "component": 3,
+     "component_label": "industrial_fastner_part5",
+     "iteration": 7,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 48,
+     "state_components": [
+      "industrial_fastner_part6",
+      "industrial_fastner_part7"
+     ],
+     "component": 4,
+     "component_label": "industrial_fastner_part6",
+     "iteration": 8,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 123,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part5",
+      "industrial_fastner_part6",
+      "industrial_fastner_part7",
+      "industrial_fastner_part4"
+     ],
+     "component": 3,
+     "component_label": "industrial_fastner_part5",
+     "iteration": 8,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 119,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part1",
+      "industrial_fastner_part6",
+      "industrial_fastner_part7",
+      "industrial_fastner_part4"
+     ],
+     "component": 4,
+     "component_label": "industrial_fastner_part6",
+     "iteration": 9,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 127,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part1",
+      "industrial_fastner_part5",
+      "industrial_fastner_part6",
+      "industrial_fastner_part7",
+      "industrial_fastner_part4"
+     ],
+     "component": 3,
+     "component_label": "industrial_fastner_part5",
+     "iteration": 9,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 183,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part1",
+      "industrial_fastner_part6",
+      "industrial_fastner_part7",
+      "industrial_fastner_part001"
+     ],
+     "component": 4,
+     "component_label": "industrial_fastner_part6",
+     "iteration": 10,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    },
+    {
+     "state": 191,
+     "state_components": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part1",
+      "industrial_fastner_part5",
+      "industrial_fastner_part6",
+      "industrial_fastner_part7",
+      "industrial_fastner_part001"
+     ],
+     "component": 3,
+     "component_label": "industrial_fastner_part5",
+     "iteration": 10,
+     "reason": "infeasible grasp (relative score 0.000 below 0.5)"
+    }
+   ],
+   "sequences": [
+    {
+     "iteration": 1,
+     "chosen": false,
+     "total_cost": 0.26707842903503975,
+     "n_infeasible": 3,
+     "min_relative": 0.0,
+     "sum_relative": 1.929978161217251,
+     "edge_path": [
+      3,
+      12,
+      26,
+      54,
+      83,
+      110,
+      128,
+      136
+     ],
+     "order": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part1",
+      "industrial_fastner_part2",
+      "industrial_fastner_part5",
+      "industrial_fastner_part7",
+      "industrial_fastner_part6",
+      "industrial_fastner_part001",
+      "industrial_fastner_part4"
+     ],
+     "pruned": [
+      {
+       "state": 15,
+       "component_label": "industrial_fastner_part5"
+      },
+      {
+       "state": 63,
+       "component_label": "industrial_fastner_part6"
+      }
+     ],
+     "steps": [
+      {
+       "step": 1,
+       "component_id": "Part__Feature",
+       "component_label": "industrial_fastner_part3",
+       "edge": 136,
+       "state": 1,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        8.714957332048506,
+        17.1300870248999,
+        -0.00014453648078488875
+       ],
+       "axes": [
+        [
+         -0.0396411488614628,
+         -0.9992139807429542,
+         2.18231652050529e-06
+        ],
+        [
+         -0.9992139807420811,
+         0.039641148866814614,
+         2.4663507997535935e-06
+        ],
+        [
+         -2.5509217345942163e-06,
+         -2.082832198495679e-06,
+         -0.9999999999945773
+        ]
+       ],
+       "grasp_width": 34.99814937959769,
+       "contact_area": 312.36302093824474,
+       "score": 0.9459815574847295,
+       "score_alone": 0.9459815574847295,
+       "score_relative": 1.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 2,
+       "component_id": "Part__Feature002",
+       "component_label": "industrial_fastner_part1",
+       "edge": 128,
+       "state": 5,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": null,
+       "score_alone": 0.0,
+       "score_relative": null,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "no grasp even alone (S_alone = 0)",
+       "intrinsically_infeasible": true
+      },
+      {
+       "step": 3,
+       "component_id": "Part__Feature001",
+       "component_label": "industrial_fastner_part2",
+       "edge": 110,
+       "state": 7,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        -8.468761581105653,
+        10.680232884214119,
+        -0.060511775721669464
+       ],
+       "axes": [
+        [
+         0.8979301570080009,
+         -0.44013524029470347,
+         0.0015502858802931103
+        ],
+        [
+         -0.44013752265844724,
+         -0.8979186481412975,
+         0.004589386472015593
+        ],
+        [
+         -0.0006279201158005136,
+         -0.004803287502151937,
+         -0.9999882670039184
+        ]
+       ],
+       "grasp_width": 34.9434650365855,
+       "contact_area": 202.10713197582055,
+       "score": 0.7477162443311445,
+       "score_alone": 0.8040148419748444,
+       "score_relative": 0.9299781612172511,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 4,
+       "component_id": "Part__Feature006",
+       "component_label": "industrial_fastner_part5",
+       "edge": 83,
+       "state": 15,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5087850363966777,
+       "score_relative": 0.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 5,
+       "component_id": "Part__Feature003",
+       "component_label": "industrial_fastner_part7",
+       "edge": 54,
+       "state": 47,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 0,
+       "sense_direction": [
+        1.0,
+        0.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 6,
+       "component_id": "Part__Feature007",
+       "component_label": "industrial_fastner_part6",
+       "edge": 26,
+       "state": 63,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5053679011396035,
+       "score_relative": 0.0,
+       "rotation_checked": true,
+       "angles": [
+        0.0,
+        90.0,
+        180.0,
+        270.0
+       ],
+       "rotation": {
+        "axis_point": [
+         8.24999999999999,
+         -34.747950681976604,
+         -2.504663143554353e-13
+        ],
+        "axis_dir": [
+         1.0,
+         -0.0,
+         -0.0
+        ],
+        "nut_id": "Part__Feature003",
+        "nut_label": "industrial_fastner_part7"
+       },
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 7,
+       "component_id": "Part__Feature005",
+       "component_label": "industrial_fastner_part001",
+       "edge": 12,
+       "state": 191,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 2,
+       "sense_direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 8,
+       "component_id": "Part__Feature004",
+       "component_label": "industrial_fastner_part4",
+       "edge": 3,
+       "state": 255,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 2,
+       "sense_direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      }
+     ]
+    },
+    {
+     "iteration": 2,
+     "chosen": true,
+     "total_cost": 0.2979355929332099,
+     "n_infeasible": 3,
+     "min_relative": 0.0,
+     "sum_relative": 1.9311437870479726,
+     "edge_path": [
+      4,
+      8,
+      24,
+      58,
+      87,
+      114,
+      130,
+      136
+     ],
+     "order": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part7",
+      "industrial_fastner_part6",
+      "industrial_fastner_part2",
+      "industrial_fastner_part5",
+      "industrial_fastner_part1",
+      "industrial_fastner_part4",
+      "industrial_fastner_part001"
+     ],
+     "pruned": [
+      {
+       "state": 49,
+       "component_label": "industrial_fastner_part6"
+      },
+      {
+       "state": 59,
+       "component_label": "industrial_fastner_part5"
+      }
+     ],
+     "steps": [
+      {
+       "step": 1,
+       "component_id": "Part__Feature",
+       "component_label": "industrial_fastner_part3",
+       "edge": 136,
+       "state": 1,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        8.714957332048506,
+        17.1300870248999,
+        -0.00014453648078488875
+       ],
+       "axes": [
+        [
+         -0.0396411488614628,
+         -0.9992139807429542,
+         2.18231652050529e-06
+        ],
+        [
+         -0.9992139807420811,
+         0.039641148866814614,
+         2.4663507997535935e-06
+        ],
+        [
+         -2.5509217345942163e-06,
+         -2.082832198495679e-06,
+         -0.9999999999945773
+        ]
+       ],
+       "grasp_width": 34.99814937959769,
+       "contact_area": 312.36302093824474,
+       "score": 0.9459815574847295,
+       "score_alone": 0.9459815574847295,
+       "score_relative": 1.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 2,
+       "component_id": "Part__Feature003",
+       "component_label": "industrial_fastner_part7",
+       "edge": 130,
+       "state": 33,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 0,
+       "sense_direction": [
+        1.0,
+        0.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 3,
+       "component_id": "Part__Feature007",
+       "component_label": "industrial_fastner_part6",
+       "edge": 114,
+       "state": 49,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5053679011396035,
+       "score_relative": 0.0,
+       "rotation_checked": true,
+       "angles": [
+        0.0,
+        90.0,
+        180.0,
+        270.0
+       ],
+       "rotation": {
+        "axis_point": [
+         8.24999999999999,
+         -34.747950681976604,
+         -2.504663143554353e-13
+        ],
+        "axis_dir": [
+         1.0,
+         -0.0,
+         -0.0
+        ],
+        "nut_id": "Part__Feature003",
+        "nut_label": "industrial_fastner_part7"
+       },
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 4,
+       "component_id": "Part__Feature001",
+       "component_label": "industrial_fastner_part2",
+       "edge": 87,
+       "state": 51,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        -8.570573121060232,
+        10.038629154184406,
+        -0.0573660021205761
+       ],
+       "axes": [
+        [
+         0.4734017379040109,
+         -0.8808378514309346,
+         0.003933705123262517
+        ],
+        [
+         -0.880846411280531,
+         -0.47339371343069864,
+         0.0028269804568433225
+        ],
+        [
+         -0.0006279201158005071,
+         -0.004803287502151931,
+         -0.9999882670039183
+        ]
+       ],
+       "grasp_width": 34.9434650365855,
+       "contact_area": 242.41181737044795,
+       "score": 0.7486534247992338,
+       "score_alone": 0.8040148419748444,
+       "score_relative": 0.9311437870479725,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 5,
+       "component_id": "Part__Feature006",
+       "component_label": "industrial_fastner_part5",
+       "edge": 58,
+       "state": 59,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5087850363966777,
+       "score_relative": 0.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 6,
+       "component_id": "Part__Feature002",
+       "component_label": "industrial_fastner_part1",
+       "edge": 24,
+       "state": 63,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": null,
+       "score_alone": 0.0,
+       "score_relative": null,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "no grasp even alone (S_alone = 0)",
+       "intrinsically_infeasible": true
+      },
+      {
+       "step": 7,
+       "component_id": "Part__Feature004",
+       "component_label": "industrial_fastner_part4",
+       "edge": 8,
+       "state": 127,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 2,
+       "sense_direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 8,
+       "component_id": "Part__Feature005",
+       "component_label": "industrial_fastner_part001",
+       "edge": 4,
+       "state": 255,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 2,
+       "sense_direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      }
+     ]
+    },
+    {
+     "iteration": 3,
+     "chosen": false,
+     "total_cost": 0.29461989299917113,
+     "n_infeasible": 3,
+     "min_relative": 0.0,
+     "sum_relative": 1.929978161217251,
+     "edge_path": [
+      3,
+      12,
+      25,
+      56,
+      85,
+      110,
+      128,
+      136
+     ],
+     "order": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part1",
+      "industrial_fastner_part2",
+      "industrial_fastner_part7",
+      "industrial_fastner_part6",
+      "industrial_fastner_part5",
+      "industrial_fastner_part001",
+      "industrial_fastner_part4"
+     ],
+     "pruned": [
+      {
+       "state": 55,
+       "component_label": "industrial_fastner_part6"
+      },
+      {
+       "state": 63,
+       "component_label": "industrial_fastner_part5"
+      }
+     ],
+     "steps": [
+      {
+       "step": 1,
+       "component_id": "Part__Feature",
+       "component_label": "industrial_fastner_part3",
+       "edge": 136,
+       "state": 1,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        8.714957332048506,
+        17.1300870248999,
+        -0.00014453648078488875
+       ],
+       "axes": [
+        [
+         -0.0396411488614628,
+         -0.9992139807429542,
+         2.18231652050529e-06
+        ],
+        [
+         -0.9992139807420811,
+         0.039641148866814614,
+         2.4663507997535935e-06
+        ],
+        [
+         -2.5509217345942163e-06,
+         -2.082832198495679e-06,
+         -0.9999999999945773
+        ]
+       ],
+       "grasp_width": 34.99814937959769,
+       "contact_area": 312.36302093824474,
+       "score": 0.9459815574847295,
+       "score_alone": 0.9459815574847295,
+       "score_relative": 1.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 2,
+       "component_id": "Part__Feature002",
+       "component_label": "industrial_fastner_part1",
+       "edge": 128,
+       "state": 5,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": null,
+       "score_alone": 0.0,
+       "score_relative": null,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "no grasp even alone (S_alone = 0)",
+       "intrinsically_infeasible": true
+      },
+      {
+       "step": 3,
+       "component_id": "Part__Feature001",
+       "component_label": "industrial_fastner_part2",
+       "edge": 110,
+       "state": 7,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        -8.468761581105653,
+        10.680232884214119,
+        -0.060511775721669464
+       ],
+       "axes": [
+        [
+         0.8979301570080009,
+         -0.44013524029470347,
+         0.0015502858802931103
+        ],
+        [
+         -0.44013752265844724,
+         -0.8979186481412975,
+         0.004589386472015593
+        ],
+        [
+         -0.0006279201158005136,
+         -0.004803287502151937,
+         -0.9999882670039184
+        ]
+       ],
+       "grasp_width": 34.9434650365855,
+       "contact_area": 202.10713197582055,
+       "score": 0.7477162443311445,
+       "score_alone": 0.8040148419748444,
+       "score_relative": 0.9299781612172511,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 4,
+       "component_id": "Part__Feature003",
+       "component_label": "industrial_fastner_part7",
+       "edge": 85,
+       "state": 39,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 0,
+       "sense_direction": [
+        1.0,
+        0.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 5,
+       "component_id": "Part__Feature007",
+       "component_label": "industrial_fastner_part6",
+       "edge": 56,
+       "state": 55,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5053679011396035,
+       "score_relative": 0.0,
+       "rotation_checked": true,
+       "angles": [
+        0.0,
+        90.0,
+        180.0,
+        270.0
+       ],
+       "rotation": {
+        "axis_point": [
+         8.24999999999999,
+         -34.747950681976604,
+         -2.504663143554353e-13
+        ],
+        "axis_dir": [
+         1.0,
+         -0.0,
+         -0.0
+        ],
+        "nut_id": "Part__Feature003",
+        "nut_label": "industrial_fastner_part7"
+       },
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 6,
+       "component_id": "Part__Feature006",
+       "component_label": "industrial_fastner_part5",
+       "edge": 25,
+       "state": 63,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5087850363966777,
+       "score_relative": 0.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 7,
+       "component_id": "Part__Feature005",
+       "component_label": "industrial_fastner_part001",
+       "edge": 12,
+       "state": 191,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 2,
+       "sense_direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 8,
+       "component_id": "Part__Feature004",
+       "component_label": "industrial_fastner_part4",
+       "edge": 3,
+       "state": 255,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 2,
+       "sense_direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      }
+     ]
+    },
+    {
+     "iteration": 4,
+     "chosen": false,
+     "total_cost": 0.297048761037877,
+     "n_infeasible": 3,
+     "min_relative": 0.0,
+     "sum_relative": 1.929978161217251,
+     "edge_path": [
+      2,
+      14,
+      45,
+      59,
+      91,
+      110,
+      128,
+      136
+     ],
+     "order": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part1",
+      "industrial_fastner_part2",
+      "industrial_fastner_part4",
+      "industrial_fastner_part5",
+      "industrial_fastner_part001",
+      "industrial_fastner_part7",
+      "industrial_fastner_part6"
+     ],
+     "pruned": [
+      {
+       "state": 79,
+       "component_label": "industrial_fastner_part5"
+      },
+      {
+       "state": 255,
+       "component_label": "industrial_fastner_part6"
+      }
+     ],
+     "steps": [
+      {
+       "step": 1,
+       "component_id": "Part__Feature",
+       "component_label": "industrial_fastner_part3",
+       "edge": 136,
+       "state": 1,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        8.714957332048506,
+        17.1300870248999,
+        -0.00014453648078488875
+       ],
+       "axes": [
+        [
+         -0.0396411488614628,
+         -0.9992139807429542,
+         2.18231652050529e-06
+        ],
+        [
+         -0.9992139807420811,
+         0.039641148866814614,
+         2.4663507997535935e-06
+        ],
+        [
+         -2.5509217345942163e-06,
+         -2.082832198495679e-06,
+         -0.9999999999945773
+        ]
+       ],
+       "grasp_width": 34.99814937959769,
+       "contact_area": 312.36302093824474,
+       "score": 0.9459815574847295,
+       "score_alone": 0.9459815574847295,
+       "score_relative": 1.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 2,
+       "component_id": "Part__Feature002",
+       "component_label": "industrial_fastner_part1",
+       "edge": 128,
+       "state": 5,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": null,
+       "score_alone": 0.0,
+       "score_relative": null,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "no grasp even alone (S_alone = 0)",
+       "intrinsically_infeasible": true
+      },
+      {
+       "step": 3,
+       "component_id": "Part__Feature001",
+       "component_label": "industrial_fastner_part2",
+       "edge": 110,
+       "state": 7,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        -8.468761581105653,
+        10.680232884214119,
+        -0.060511775721669464
+       ],
+       "axes": [
+        [
+         0.8979301570080009,
+         -0.44013524029470347,
+         0.0015502858802931103
+        ],
+        [
+         -0.44013752265844724,
+         -0.8979186481412975,
+         0.004589386472015593
+        ],
+        [
+         -0.0006279201158005136,
+         -0.004803287502151937,
+         -0.9999882670039184
+        ]
+       ],
+       "grasp_width": 34.9434650365855,
+       "contact_area": 202.10713197582055,
+       "score": 0.7477162443311445,
+       "score_alone": 0.8040148419748444,
+       "score_relative": 0.9299781612172511,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 4,
+       "component_id": "Part__Feature004",
+       "component_label": "industrial_fastner_part4",
+       "edge": 91,
+       "state": 71,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 3,
+       "sense_direction": [
+        0.0,
+        -1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 5,
+       "component_id": "Part__Feature006",
+       "component_label": "industrial_fastner_part5",
+       "edge": 59,
+       "state": 79,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5087850363966777,
+       "score_relative": 0.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 6,
+       "component_id": "Part__Feature005",
+       "component_label": "industrial_fastner_part001",
+       "edge": 45,
+       "state": 207,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 3,
+       "sense_direction": [
+        0.0,
+        -1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 7,
+       "component_id": "Part__Feature003",
+       "component_label": "industrial_fastner_part7",
+       "edge": 14,
+       "state": 239,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 0,
+       "sense_direction": [
+        1.0,
+        0.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 8,
+       "component_id": "Part__Feature007",
+       "component_label": "industrial_fastner_part6",
+       "edge": 2,
+       "state": 255,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5053679011396035,
+       "score_relative": 0.0,
+       "rotation_checked": true,
+       "angles": [
+        0.0,
+        90.0,
+        180.0,
+        270.0
+       ],
+       "rotation": {
+        "axis_point": [
+         8.24999999999999,
+         -34.747950681976604,
+         -2.504663143554353e-13
+        ],
+        "axis_dir": [
+         1.0,
+         -0.0,
+         -0.0
+        ],
+        "nut_id": "Part__Feature003",
+        "nut_label": "industrial_fastner_part7"
+       },
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      }
+     ]
+    },
+    {
+     "iteration": 5,
+     "chosen": false,
+     "total_cost": 0.30324544814796567,
+     "n_infeasible": 3,
+     "min_relative": 0.0,
+     "sum_relative": 1.929978161217251,
+     "edge_path": [
+      3,
+      11,
+      37,
+      53,
+      85,
+      110,
+      128,
+      136
+     ],
+     "order": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part1",
+      "industrial_fastner_part2",
+      "industrial_fastner_part7",
+      "industrial_fastner_part5",
+      "industrial_fastner_part001",
+      "industrial_fastner_part6",
+      "industrial_fastner_part4"
+     ],
+     "pruned": [
+      {
+       "state": 47,
+       "component_label": "industrial_fastner_part5"
+      },
+      {
+       "state": 191,
+       "component_label": "industrial_fastner_part6"
+      }
+     ],
+     "steps": [
+      {
+       "step": 1,
+       "component_id": "Part__Feature",
+       "component_label": "industrial_fastner_part3",
+       "edge": 136,
+       "state": 1,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        8.714957332048506,
+        17.1300870248999,
+        -0.00014453648078488875
+       ],
+       "axes": [
+        [
+         -0.0396411488614628,
+         -0.9992139807429542,
+         2.18231652050529e-06
+        ],
+        [
+         -0.9992139807420811,
+         0.039641148866814614,
+         2.4663507997535935e-06
+        ],
+        [
+         -2.5509217345942163e-06,
+         -2.082832198495679e-06,
+         -0.9999999999945773
+        ]
+       ],
+       "grasp_width": 34.99814937959769,
+       "contact_area": 312.36302093824474,
+       "score": 0.9459815574847295,
+       "score_alone": 0.9459815574847295,
+       "score_relative": 1.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 2,
+       "component_id": "Part__Feature002",
+       "component_label": "industrial_fastner_part1",
+       "edge": 128,
+       "state": 5,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": null,
+       "score_alone": 0.0,
+       "score_relative": null,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "no grasp even alone (S_alone = 0)",
+       "intrinsically_infeasible": true
+      },
+      {
+       "step": 3,
+       "component_id": "Part__Feature001",
+       "component_label": "industrial_fastner_part2",
+       "edge": 110,
+       "state": 7,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        -8.468761581105653,
+        10.680232884214119,
+        -0.060511775721669464
+       ],
+       "axes": [
+        [
+         0.8979301570080009,
+         -0.44013524029470347,
+         0.0015502858802931103
+        ],
+        [
+         -0.44013752265844724,
+         -0.8979186481412975,
+         0.004589386472015593
+        ],
+        [
+         -0.0006279201158005136,
+         -0.004803287502151937,
+         -0.9999882670039184
+        ]
+       ],
+       "grasp_width": 34.9434650365855,
+       "contact_area": 202.10713197582055,
+       "score": 0.7477162443311445,
+       "score_alone": 0.8040148419748444,
+       "score_relative": 0.9299781612172511,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 4,
+       "component_id": "Part__Feature003",
+       "component_label": "industrial_fastner_part7",
+       "edge": 85,
+       "state": 39,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 0,
+       "sense_direction": [
+        1.0,
+        0.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 5,
+       "component_id": "Part__Feature006",
+       "component_label": "industrial_fastner_part5",
+       "edge": 53,
+       "state": 47,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5087850363966777,
+       "score_relative": 0.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 6,
+       "component_id": "Part__Feature005",
+       "component_label": "industrial_fastner_part001",
+       "edge": 37,
+       "state": 175,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 2,
+       "sense_direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 7,
+       "component_id": "Part__Feature007",
+       "component_label": "industrial_fastner_part6",
+       "edge": 11,
+       "state": 191,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5053679011396035,
+       "score_relative": 0.0,
+       "rotation_checked": true,
+       "angles": [
+        0.0,
+        90.0,
+        180.0,
+        270.0
+       ],
+       "rotation": {
+        "axis_point": [
+         8.24999999999999,
+         -34.747950681976604,
+         -2.504663143554353e-13
+        ],
+        "axis_dir": [
+         1.0,
+         -0.0,
+         -0.0
+        ],
+        "nut_id": "Part__Feature003",
+        "nut_label": "industrial_fastner_part7"
+       },
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 8,
+       "component_id": "Part__Feature004",
+       "component_label": "industrial_fastner_part4",
+       "edge": 3,
+       "state": 255,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 2,
+       "sense_direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      }
+     ]
+    },
+    {
+     "iteration": 6,
+     "chosen": false,
+     "total_cost": 0.3032454481479656,
+     "n_infeasible": 3,
+     "min_relative": 0.0,
+     "sum_relative": 1.929978161217251,
+     "edge_path": [
+      4,
+      7,
+      27,
+      63,
+      85,
+      110,
+      128,
+      136
+     ],
+     "order": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part1",
+      "industrial_fastner_part2",
+      "industrial_fastner_part7",
+      "industrial_fastner_part4",
+      "industrial_fastner_part5",
+      "industrial_fastner_part6",
+      "industrial_fastner_part001"
+     ],
+     "pruned": [
+      {
+       "state": 111,
+       "component_label": "industrial_fastner_part5"
+      },
+      {
+       "state": 127,
+       "component_label": "industrial_fastner_part6"
+      }
+     ],
+     "steps": [
+      {
+       "step": 1,
+       "component_id": "Part__Feature",
+       "component_label": "industrial_fastner_part3",
+       "edge": 136,
+       "state": 1,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        8.714957332048506,
+        17.1300870248999,
+        -0.00014453648078488875
+       ],
+       "axes": [
+        [
+         -0.0396411488614628,
+         -0.9992139807429542,
+         2.18231652050529e-06
+        ],
+        [
+         -0.9992139807420811,
+         0.039641148866814614,
+         2.4663507997535935e-06
+        ],
+        [
+         -2.5509217345942163e-06,
+         -2.082832198495679e-06,
+         -0.9999999999945773
+        ]
+       ],
+       "grasp_width": 34.99814937959769,
+       "contact_area": 312.36302093824474,
+       "score": 0.9459815574847295,
+       "score_alone": 0.9459815574847295,
+       "score_relative": 1.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 2,
+       "component_id": "Part__Feature002",
+       "component_label": "industrial_fastner_part1",
+       "edge": 128,
+       "state": 5,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": null,
+       "score_alone": 0.0,
+       "score_relative": null,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "no grasp even alone (S_alone = 0)",
+       "intrinsically_infeasible": true
+      },
+      {
+       "step": 3,
+       "component_id": "Part__Feature001",
+       "component_label": "industrial_fastner_part2",
+       "edge": 110,
+       "state": 7,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        -8.468761581105653,
+        10.680232884214119,
+        -0.060511775721669464
+       ],
+       "axes": [
+        [
+         0.8979301570080009,
+         -0.44013524029470347,
+         0.0015502858802931103
+        ],
+        [
+         -0.44013752265844724,
+         -0.8979186481412975,
+         0.004589386472015593
+        ],
+        [
+         -0.0006279201158005136,
+         -0.004803287502151937,
+         -0.9999882670039184
+        ]
+       ],
+       "grasp_width": 34.9434650365855,
+       "contact_area": 202.10713197582055,
+       "score": 0.7477162443311445,
+       "score_alone": 0.8040148419748444,
+       "score_relative": 0.9299781612172511,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 4,
+       "component_id": "Part__Feature003",
+       "component_label": "industrial_fastner_part7",
+       "edge": 85,
+       "state": 39,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 0,
+       "sense_direction": [
+        1.0,
+        0.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 5,
+       "component_id": "Part__Feature004",
+       "component_label": "industrial_fastner_part4",
+       "edge": 63,
+       "state": 103,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 2,
+       "sense_direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 6,
+       "component_id": "Part__Feature006",
+       "component_label": "industrial_fastner_part5",
+       "edge": 27,
+       "state": 111,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5087850363966777,
+       "score_relative": 0.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 7,
+       "component_id": "Part__Feature007",
+       "component_label": "industrial_fastner_part6",
+       "edge": 7,
+       "state": 127,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5053679011396035,
+       "score_relative": 0.0,
+       "rotation_checked": true,
+       "angles": [
+        0.0,
+        90.0,
+        180.0,
+        270.0
+       ],
+       "rotation": {
+        "axis_point": [
+         8.24999999999999,
+         -34.747950681976604,
+         -2.504663143554353e-13
+        ],
+        "axis_dir": [
+         1.0,
+         -0.0,
+         -0.0
+        ],
+        "nut_id": "Part__Feature003",
+        "nut_label": "industrial_fastner_part7"
+       },
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 8,
+       "component_id": "Part__Feature005",
+       "component_label": "industrial_fastner_part001",
+       "edge": 4,
+       "state": 255,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 2,
+       "sense_direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      }
+     ]
+    },
+    {
+     "iteration": 7,
+     "chosen": false,
+     "total_cost": 0.32808396039001614,
+     "n_infeasible": 3,
+     "min_relative": 0.0,
+     "sum_relative": 1.929978161217251,
+     "edge_path": [
+      1,
+      18,
+      47,
+      74,
+      98,
+      110,
+      128,
+      136
+     ],
+     "order": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part1",
+      "industrial_fastner_part2",
+      "industrial_fastner_part001",
+      "industrial_fastner_part4",
+      "industrial_fastner_part7",
+      "industrial_fastner_part6",
+      "industrial_fastner_part5"
+     ],
+     "pruned": [
+      {
+       "state": 247,
+       "component_label": "industrial_fastner_part6"
+      },
+      {
+       "state": 255,
+       "component_label": "industrial_fastner_part5"
+      }
+     ],
+     "steps": [
+      {
+       "step": 1,
+       "component_id": "Part__Feature",
+       "component_label": "industrial_fastner_part3",
+       "edge": 136,
+       "state": 1,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        8.714957332048506,
+        17.1300870248999,
+        -0.00014453648078488875
+       ],
+       "axes": [
+        [
+         -0.0396411488614628,
+         -0.9992139807429542,
+         2.18231652050529e-06
+        ],
+        [
+         -0.9992139807420811,
+         0.039641148866814614,
+         2.4663507997535935e-06
+        ],
+        [
+         -2.5509217345942163e-06,
+         -2.082832198495679e-06,
+         -0.9999999999945773
+        ]
+       ],
+       "grasp_width": 34.99814937959769,
+       "contact_area": 312.36302093824474,
+       "score": 0.9459815574847295,
+       "score_alone": 0.9459815574847295,
+       "score_relative": 1.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 2,
+       "component_id": "Part__Feature002",
+       "component_label": "industrial_fastner_part1",
+       "edge": 128,
+       "state": 5,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": null,
+       "score_alone": 0.0,
+       "score_relative": null,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "no grasp even alone (S_alone = 0)",
+       "intrinsically_infeasible": true
+      },
+      {
+       "step": 3,
+       "component_id": "Part__Feature001",
+       "component_label": "industrial_fastner_part2",
+       "edge": 110,
+       "state": 7,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        -8.468761581105653,
+        10.680232884214119,
+        -0.060511775721669464
+       ],
+       "axes": [
+        [
+         0.8979301570080009,
+         -0.44013524029470347,
+         0.0015502858802931103
+        ],
+        [
+         -0.44013752265844724,
+         -0.8979186481412975,
+         0.004589386472015593
+        ],
+        [
+         -0.0006279201158005136,
+         -0.004803287502151937,
+         -0.9999882670039184
+        ]
+       ],
+       "grasp_width": 34.9434650365855,
+       "contact_area": 202.10713197582055,
+       "score": 0.7477162443311445,
+       "score_alone": 0.8040148419748444,
+       "score_relative": 0.9299781612172511,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 4,
+       "component_id": "Part__Feature005",
+       "component_label": "industrial_fastner_part001",
+       "edge": 98,
+       "state": 135,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 2,
+       "sense_direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 5,
+       "component_id": "Part__Feature004",
+       "component_label": "industrial_fastner_part4",
+       "edge": 74,
+       "state": 199,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 2,
+       "sense_direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 6,
+       "component_id": "Part__Feature003",
+       "component_label": "industrial_fastner_part7",
+       "edge": 47,
+       "state": 231,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 0,
+       "sense_direction": [
+        1.0,
+        0.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 7,
+       "component_id": "Part__Feature007",
+       "component_label": "industrial_fastner_part6",
+       "edge": 18,
+       "state": 247,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5053679011396035,
+       "score_relative": 0.0,
+       "rotation_checked": true,
+       "angles": [
+        0.0,
+        90.0,
+        180.0,
+        270.0
+       ],
+       "rotation": {
+        "axis_point": [
+         8.24999999999999,
+         -34.747950681976604,
+         -2.504663143554353e-13
+        ],
+        "axis_dir": [
+         1.0,
+         -0.0,
+         -0.0
+        ],
+        "nut_id": "Part__Feature003",
+        "nut_label": "industrial_fastner_part7"
+       },
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 8,
+       "component_id": "Part__Feature006",
+       "component_label": "industrial_fastner_part5",
+       "edge": 1,
+       "state": 255,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5087850363966777,
+       "score_relative": 0.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      }
+     ]
+    },
+    {
+     "iteration": 8,
+     "chosen": false,
+     "total_cost": 0.4272408699719072,
+     "n_infeasible": 3,
+     "min_relative": 0.0,
+     "sum_relative": 1.7929737875499625,
+     "edge_path": [
+      4,
+      5,
+      33,
+      65,
+      87,
+      113,
+      131,
+      138
+     ],
+     "order": [
+      "industrial_fastner_part7",
+      "industrial_fastner_part6",
+      "industrial_fastner_part3",
+      "industrial_fastner_part2",
+      "industrial_fastner_part4",
+      "industrial_fastner_part5",
+      "industrial_fastner_part1",
+      "industrial_fastner_part001"
+     ],
+     "pruned": [
+      {
+       "state": 48,
+       "component_label": "industrial_fastner_part6"
+      },
+      {
+       "state": 123,
+       "component_label": "industrial_fastner_part5"
+      }
+     ],
+     "steps": [
+      {
+       "step": 1,
+       "component_id": "Part__Feature003",
+       "component_label": "industrial_fastner_part7",
+       "edge": 138,
+       "state": 32,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 0,
+       "sense_direction": [
+        1.0,
+        0.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 2,
+       "component_id": "Part__Feature007",
+       "component_label": "industrial_fastner_part6",
+       "edge": 131,
+       "state": 48,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5053679011396035,
+       "score_relative": 0.0,
+       "rotation_checked": true,
+       "angles": [
+        0.0,
+        90.0,
+        180.0,
+        270.0
+       ],
+       "rotation": {
+        "axis_point": [
+         8.24999999999999,
+         -34.747950681976604,
+         -2.504663143554353e-13
+        ],
+        "axis_dir": [
+         1.0,
+         -0.0,
+         -0.0
+        ],
+        "nut_id": "Part__Feature003",
+        "nut_label": "industrial_fastner_part7"
+       },
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 3,
+       "component_id": "Part__Feature",
+       "component_label": "industrial_fastner_part3",
+       "edge": 113,
+       "state": 49,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        9.198502894206287,
+        17.698058110732347,
+        -0.0001469529561344634
+       ],
+       "axes": [
+        [
+         0.00014854346416322273,
+         -0.9999999889652512,
+         2.0824532527718717e-06
+        ],
+        [
+         -0.999999988964166,
+         -0.00014854345885026435,
+         2.5512310975514806e-06
+        ],
+        [
+         -2.550921734590226e-06,
+         -2.082832198495375e-06,
+         -0.9999999999945773
+        ]
+       ],
+       "grasp_width": 34.99814937959769,
+       "contact_area": 314.8631697839204,
+       "score": 0.8152752861619378,
+       "score_alone": 0.9459815574847295,
+       "score_relative": 0.8618300005019901,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 4,
+       "component_id": "Part__Feature001",
+       "component_label": "industrial_fastner_part2",
+       "edge": 87,
+       "state": 51,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        -8.570573121060232,
+        10.038629154184406,
+        -0.0573660021205761
+       ],
+       "axes": [
+        [
+         0.4734017379040109,
+         -0.8808378514309346,
+         0.003933705123262517
+        ],
+        [
+         -0.880846411280531,
+         -0.47339371343069864,
+         0.0028269804568433225
+        ],
+        [
+         -0.0006279201158005071,
+         -0.004803287502151931,
+         -0.9999882670039183
+        ]
+       ],
+       "grasp_width": 34.9434650365855,
+       "contact_area": 242.41181737044795,
+       "score": 0.7486534247992338,
+       "score_alone": 0.8040148419748444,
+       "score_relative": 0.9311437870479725,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 5,
+       "component_id": "Part__Feature004",
+       "component_label": "industrial_fastner_part4",
+       "edge": 65,
+       "state": 115,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 2,
+       "sense_direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 6,
+       "component_id": "Part__Feature006",
+       "component_label": "industrial_fastner_part5",
+       "edge": 33,
+       "state": 123,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5087850363966777,
+       "score_relative": 0.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 7,
+       "component_id": "Part__Feature002",
+       "component_label": "industrial_fastner_part1",
+       "edge": 5,
+       "state": 127,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": null,
+       "score_alone": 0.0,
+       "score_relative": null,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "no grasp even alone (S_alone = 0)",
+       "intrinsically_infeasible": true
+      },
+      {
+       "step": 8,
+       "component_id": "Part__Feature005",
+       "component_label": "industrial_fastner_part001",
+       "edge": 4,
+       "state": 255,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 2,
+       "sense_direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      }
+     ]
+    },
+    {
+     "iteration": 9,
+     "chosen": false,
+     "total_cost": 0.31499503790938754,
+     "n_infeasible": 3,
+     "min_relative": 0.0,
+     "sum_relative": 1.929978161217251,
+     "edge_path": [
+      4,
+      6,
+      31,
+      63,
+      85,
+      110,
+      128,
+      136
+     ],
+     "order": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part1",
+      "industrial_fastner_part2",
+      "industrial_fastner_part7",
+      "industrial_fastner_part4",
+      "industrial_fastner_part6",
+      "industrial_fastner_part5",
+      "industrial_fastner_part001"
+     ],
+     "pruned": [
+      {
+       "state": 119,
+       "component_label": "industrial_fastner_part6"
+      },
+      {
+       "state": 127,
+       "component_label": "industrial_fastner_part5"
+      }
+     ],
+     "steps": [
+      {
+       "step": 1,
+       "component_id": "Part__Feature",
+       "component_label": "industrial_fastner_part3",
+       "edge": 136,
+       "state": 1,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        8.714957332048506,
+        17.1300870248999,
+        -0.00014453648078488875
+       ],
+       "axes": [
+        [
+         -0.0396411488614628,
+         -0.9992139807429542,
+         2.18231652050529e-06
+        ],
+        [
+         -0.9992139807420811,
+         0.039641148866814614,
+         2.4663507997535935e-06
+        ],
+        [
+         -2.5509217345942163e-06,
+         -2.082832198495679e-06,
+         -0.9999999999945773
+        ]
+       ],
+       "grasp_width": 34.99814937959769,
+       "contact_area": 312.36302093824474,
+       "score": 0.9459815574847295,
+       "score_alone": 0.9459815574847295,
+       "score_relative": 1.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 2,
+       "component_id": "Part__Feature002",
+       "component_label": "industrial_fastner_part1",
+       "edge": 128,
+       "state": 5,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": null,
+       "score_alone": 0.0,
+       "score_relative": null,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "no grasp even alone (S_alone = 0)",
+       "intrinsically_infeasible": true
+      },
+      {
+       "step": 3,
+       "component_id": "Part__Feature001",
+       "component_label": "industrial_fastner_part2",
+       "edge": 110,
+       "state": 7,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        -8.468761581105653,
+        10.680232884214119,
+        -0.060511775721669464
+       ],
+       "axes": [
+        [
+         0.8979301570080009,
+         -0.44013524029470347,
+         0.0015502858802931103
+        ],
+        [
+         -0.44013752265844724,
+         -0.8979186481412975,
+         0.004589386472015593
+        ],
+        [
+         -0.0006279201158005136,
+         -0.004803287502151937,
+         -0.9999882670039184
+        ]
+       ],
+       "grasp_width": 34.9434650365855,
+       "contact_area": 202.10713197582055,
+       "score": 0.7477162443311445,
+       "score_alone": 0.8040148419748444,
+       "score_relative": 0.9299781612172511,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 4,
+       "component_id": "Part__Feature003",
+       "component_label": "industrial_fastner_part7",
+       "edge": 85,
+       "state": 39,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 0,
+       "sense_direction": [
+        1.0,
+        0.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 5,
+       "component_id": "Part__Feature004",
+       "component_label": "industrial_fastner_part4",
+       "edge": 63,
+       "state": 103,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 2,
+       "sense_direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 6,
+       "component_id": "Part__Feature007",
+       "component_label": "industrial_fastner_part6",
+       "edge": 31,
+       "state": 119,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5053679011396035,
+       "score_relative": 0.0,
+       "rotation_checked": true,
+       "angles": [
+        0.0,
+        90.0,
+        180.0,
+        270.0
+       ],
+       "rotation": {
+        "axis_point": [
+         8.24999999999999,
+         -34.747950681976604,
+         -2.504663143554353e-13
+        ],
+        "axis_dir": [
+         1.0,
+         -0.0,
+         -0.0
+        ],
+        "nut_id": "Part__Feature003",
+        "nut_label": "industrial_fastner_part7"
+       },
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 7,
+       "component_id": "Part__Feature006",
+       "component_label": "industrial_fastner_part5",
+       "edge": 6,
+       "state": 127,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5087850363966777,
+       "score_relative": 0.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 8,
+       "component_id": "Part__Feature005",
+       "component_label": "industrial_fastner_part001",
+       "edge": 4,
+       "state": 255,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 2,
+       "sense_direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      }
+     ]
+    },
+    {
+     "iteration": 10,
+     "chosen": false,
+     "total_cost": 0.31499503790938754,
+     "n_infeasible": 3,
+     "min_relative": 0.0,
+     "sum_relative": 1.929978161217251,
+     "edge_path": [
+      3,
+      10,
+      39,
+      70,
+      85,
+      110,
+      128,
+      136
+     ],
+     "order": [
+      "industrial_fastner_part3",
+      "industrial_fastner_part1",
+      "industrial_fastner_part2",
+      "industrial_fastner_part7",
+      "industrial_fastner_part001",
+      "industrial_fastner_part6",
+      "industrial_fastner_part5",
+      "industrial_fastner_part4"
+     ],
+     "pruned": [
+      {
+       "state": 183,
+       "component_label": "industrial_fastner_part6"
+      },
+      {
+       "state": 191,
+       "component_label": "industrial_fastner_part5"
+      }
+     ],
+     "steps": [
+      {
+       "step": 1,
+       "component_id": "Part__Feature",
+       "component_label": "industrial_fastner_part3",
+       "edge": 136,
+       "state": 1,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        8.714957332048506,
+        17.1300870248999,
+        -0.00014453648078488875
+       ],
+       "axes": [
+        [
+         -0.0396411488614628,
+         -0.9992139807429542,
+         2.18231652050529e-06
+        ],
+        [
+         -0.9992139807420811,
+         0.039641148866814614,
+         2.4663507997535935e-06
+        ],
+        [
+         -2.5509217345942163e-06,
+         -2.082832198495679e-06,
+         -0.9999999999945773
+        ]
+       ],
+       "grasp_width": 34.99814937959769,
+       "contact_area": 312.36302093824474,
+       "score": 0.9459815574847295,
+       "score_alone": 0.9459815574847295,
+       "score_relative": 1.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 2,
+       "component_id": "Part__Feature002",
+       "component_label": "industrial_fastner_part1",
+       "edge": 128,
+       "state": 5,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": null,
+       "score_alone": 0.0,
+       "score_relative": null,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "no grasp even alone (S_alone = 0)",
+       "intrinsically_infeasible": true
+      },
+      {
+       "step": 3,
+       "component_id": "Part__Feature001",
+       "component_label": "industrial_fastner_part2",
+       "edge": 110,
+       "state": 7,
+       "feasible": true,
+       "end_effector": "gripper",
+       "tcp": [
+        -8.468761581105653,
+        10.680232884214119,
+        -0.060511775721669464
+       ],
+       "axes": [
+        [
+         0.8979301570080009,
+         -0.44013524029470347,
+         0.0015502858802931103
+        ],
+        [
+         -0.44013752265844724,
+         -0.8979186481412975,
+         0.004589386472015593
+        ],
+        [
+         -0.0006279201158005136,
+         -0.004803287502151937,
+         -0.9999882670039184
+        ]
+       ],
+       "grasp_width": 34.9434650365855,
+       "contact_area": 202.10713197582055,
+       "score": 0.7477162443311445,
+       "score_alone": 0.8040148419748444,
+       "score_relative": 0.9299781612172511,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": null,
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 4,
+       "component_id": "Part__Feature003",
+       "component_label": "industrial_fastner_part7",
+       "edge": 85,
+       "state": 39,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 0,
+       "sense_direction": [
+        1.0,
+        0.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 5,
+       "component_id": "Part__Feature005",
+       "component_label": "industrial_fastner_part001",
+       "edge": 70,
+       "state": 167,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 2,
+       "sense_direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      },
+      {
+       "step": 6,
+       "component_id": "Part__Feature007",
+       "component_label": "industrial_fastner_part6",
+       "edge": 39,
+       "state": 183,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5053679011396035,
+       "score_relative": 0.0,
+       "rotation_checked": true,
+       "angles": [
+        0.0,
+        90.0,
+        180.0,
+        270.0
+       ],
+       "rotation": {
+        "axis_point": [
+         8.24999999999999,
+         -34.747950681976604,
+         -2.504663143554353e-13
+        ],
+        "axis_dir": [
+         1.0,
+         -0.0,
+         -0.0
+        ],
+        "nut_id": "Part__Feature003",
+        "nut_label": "industrial_fastner_part7"
+       },
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 7,
+       "component_id": "Part__Feature006",
+       "component_label": "industrial_fastner_part5",
+       "edge": 10,
+       "state": 191,
+       "feasible": false,
+       "end_effector": "gripper",
+       "tcp": null,
+       "axes": null,
+       "grasp_width": null,
+       "contact_area": null,
+       "score": 0.0,
+       "score_alone": 0.5087850363966777,
+       "score_relative": 0.0,
+       "rotation_checked": false,
+       "angles": [],
+       "rotation": null,
+       "reason": "relative score 0.000 below 0.5",
+       "intrinsically_infeasible": false
+      },
+      {
+       "step": 8,
+       "component_id": "Part__Feature004",
+       "component_label": "industrial_fastner_part4",
+       "edge": 3,
+       "state": 255,
+       "feasible": true,
+       "end_effector": "tool (none)",
+       "tool": null,
+       "checked": false,
+       "sense": 2,
+       "sense_direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "contact": null,
+       "senses": [],
+       "reason": null
+      }
+     ]
+    }
+   ],
+   "wall_time_s": 2668.2120809
+  },
+  "alone_scores": {
+   "industrial_fastner_part3": 0.9459815574847295,
+   "industrial_fastner_part2": 0.8040148419748444,
+   "industrial_fastner_part1": 0.0,
+   "industrial_fastner_part5": 0.5087850363966777,
+   "industrial_fastner_part6": 0.5053679011396035
+  },
+  "intrinsically_infeasible": [
+   "industrial_fastner_part1"
+  ],
+  "thresholds": {
+   "grasp_rel_threshold": 0.5,
+   "grasp_abs_floor": 0.5,
+   "boundary_inclusive": true,
+   "grasp_rotation_step_deg": 90.0,
+   "grasp_quarter_fraction": 0.25,
+   "tool_contact_volume_tol_mm3": 0.001
+  },
+  "config": {
+   "robot_max_iterations": 10,
+   "grasp_quarter_fraction": 0.25,
+   "grasp_rel_threshold": 0.5,
+   "grasp_abs_floor": 0.5,
+   "grasp_boundary_inclusive": true,
+   "grasp_rotation_step_deg": 90.0,
+   "grasp_match_tol_mm": 0.5,
+   "grasp_match_angle_deg": 5.0,
+   "pcd_spacing_mm": 0.3,
+   "pcd_max_points": 60000,
+   "pcd_seed": 1,
+   "engine_python": null,
+   "engine_repo": null,
+   "gripper_yaml": null,
+   "engine_timeout_s": 1800.0,
+   "engine_mode": "worker",
+   "engine_seed": 1,
+   "tool_dir": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tools\\gripper",
+   "tools": {
+    "1": "screwing_effector.step",
+    "2": null,
+    "3": null
+   },
+   "tool_engage_depth_mm": 0.0,
+   "tool_contact_volume_tol": 0.001,
+   "disk_cache": true
+  },
+  "engine": {
+   "python": "C:\\Users\\danie\\miniconda3\\envs\\parallelgrippercode\\python.exe",
+   "gripper_yaml": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\gripperparallel\\Adaptive-In-Orbit-Servicing-of-Altered-Satellite-Components\\JMS\\gripper_parameter\\Franka.yaml",
+   "mode": "worker",
+   "calls": 58,
+   "disk_cache_hits": 0
+  }
+ }
+}

@@ -1,2 +1,6 @@
 ﻿node,level,mask,live,dead_end,components
-0,0,15,False,True,component; component001; component002; component003
+0,0,7,True,False,component002; component003; auto_0 (component + component001)
+1,1,3,True,False,component002; component003
+2,2,1,True,False,component002
+3,2,2,True,False,component003
+4,3,0,True,False,(empty)
