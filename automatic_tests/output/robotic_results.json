@@ -1,26 +1,62 @@
 {
- "R11": {
-  "passed": false,
+ "R13": {
+  "passed": true,
   "checks": [
    {
-    "label": "alone scores within 0.06 of spec 5.2",
-    "passed": false
-   },
-   {
-    "label": "None and an empty obstacle cloud agree",
+    "label": "off by default",
     "passed": true
    },
    {
-    "label": "same input twice -> identical score (seeded)",
+    "label": "off: no sub-assembly calls, no node fields, all part steps feasible",
     "passed": true
    },
    {
-    "label": "an engine crash raises EngineError (not a score of 0)",
+    "label": "edges into/out of the 3-part node infeasible ([3, 4])",
+    "passed": true
+   },
+   {
+    "label": "the part checks themselves still pass",
+    "passed": true
+   },
+   {
+    "label": "node failures are pruned with their reason",
+    "passed": true
+   },
+   {
+    "label": "one engine call per distinct multi-part node (3 = 3)",
+    "passed": true
+   },
+   {
+    "label": "a one-part node reuses that part's alone call (no new engine call)",
+    "passed": true
+   },
+   {
+    "label": "re-evaluating a sequence makes no new calls (nodes cached)",
+    "passed": true
+   },
+   {
+    "label": "the step producing the full assembly is infeasible",
+    "passed": true
+   },
+   {
+    "label": "a failure of the full-assembly node is never a pruning reason (reason given: worst quarter (relative score 0.850))",
+    "passed": true
+   },
+   {
+    "label": "every sequence crosses a 3-part node: >= 2 infeasible",
+    "passed": true
+   },
+   {
+    "label": "plan robot block has subassembly_scores and per-step node results",
+    "passed": true
+   },
+   {
+    "label": "thresholds report the option and the node floor (default = absolute floor)",
     "passed": true
    }
   ],
   "notes": [
-   "alone scores part1 0.000 (spec 0.488), part2 0.804 (spec 0.754), part3 0.946 (spec 0.937), part5 0.526 (spec 0.551), part6 0.461 (spec 0.498); 63 s"
+   "loop: 4 iteration(s), stop: no path left after pruning (The 8 blocked edge(s) disconnect the root from the terminal)"
   ]
  }
 }

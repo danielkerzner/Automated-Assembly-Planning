@@ -1,0 +1,240 @@
+2026-11-13 09:40:08,643 aap.preprocessing INFO: Processed 3 stander(s): 0 screw, 1 nut, 2 other; 67.49 s
+2026-11-13 09:40:09,284 aap.interference INFO: Loaded cached interference matrix from output\industrial_fastner_robot_nodes\interference (5 components x 6 directions)
+2026-11-13 09:40:09,292 aap.aog INFO: Loaded cached AoG from output\industrial_fastner_robot_nodes\aog (V=61, E=141)
+2026-11-13 09:40:09,312 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part3': 60000 points
+2026-11-13 09:40:09,338 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part2': 60000 points
+2026-11-13 09:40:09,344 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part1': 16934 points
+2026-11-13 09:40:09,360 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part5': 60000 points
+2026-11-13 09:40:09,363 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part6': 21179 points
+2026-11-13 09:40:09,373 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part7': 16760 points
+2026-11-13 09:40:09,375 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part4': 4181 points
+2026-11-13 09:40:09,375 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part001': 4181 points
+2026-11-13 09:40:09,383 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot_nodes\optimization
+2026-11-13 09:40:09,429 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot_nodes\optimization (total cost 0.2671)
+2026-11-13 09:40:09,437 aap.robot.engine INFO: Starting grasp engine worker: C:\Users\danie\miniconda3\envs\parallelgrippercode\python.exe
+2026-11-13 09:40:15,855 aap.robot.engine INFO: Grasp engine worker ready (function copy 1, source sha 9d29272f7d9c...)
+2026-11-13 09:40:48,952 aap.robot.gripper INFO: Engine: sub-assembly of 2 parts with 0 obstacle(s) -> 111 grasps, best 0.950 (39.5 s)
+2026-11-13 09:42:25,746 aap.robot.gripper INFO: Engine: sub-assembly of 3 parts with 0 obstacle(s) -> 181 grasps, best 0.924 (96.8 s)
+2026-11-13 09:45:25,520 aap.robot.gripper INFO: Engine: sub-assembly of 4 parts with 0 obstacle(s) -> 145 grasps, best 0.810 (179.7 s)
+2026-11-13 09:45:26,676 aap.robot.tools INFO: Tool nut_effector.stp: 9 solid(s), working element meets the axis up to z = 238.00 mm, interface plane z = 238.00 mm
+2026-11-13 09:48:48,949 aap.robot.gripper INFO: Engine: sub-assembly of 5 parts with 0 obstacle(s) -> 147 grasps, best 0.808 (198.9 s)
+2026-11-13 09:52:31,268 aap.robot.gripper INFO: Engine: sub-assembly of 6 parts with 0 obstacle(s) -> 143 grasps, best 0.794 (222.3 s)
+2026-11-13 09:52:32,435 aap.robot.tools INFO: Tool bushing_effector.stp: 8 solid(s), working element meets the axis up to z = 239.00 mm, interface plane z = 239.00 mm
+2026-11-13 09:55:43,348 aap.robot.gripper INFO: Engine: sub-assembly of 7 parts with 0 obstacle(s) -> 135 grasps, best 0.778 (187.4 s)
+2026-11-13 09:59:04,081 aap.robot.gripper INFO: Engine: sub-assembly of 8 parts with 0 obstacle(s) -> 141 grasps, best 0.805 (197.3 s)
+2026-11-13 09:59:04,089 aap.robot INFO: Robot loop: iteration 1: cost 0.2671, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (2 blocked)
+2026-11-13 09:59:04,090 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-13 09:59:04,090 aap.robot INFO:         sub-assemblies: after insertion (1 parts) 0.946, before (0 parts) -
+2026-11-13 09:59:04,090 aap.robot INFO:     step 2 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-13 09:59:04,090 aap.robot INFO:         sub-assemblies: after insertion (2 parts) 0.950, before (1 parts) 0.946
+2026-11-13 09:59:04,090 aap.robot INFO:     step 3 industrial_fastner_part2: gripper ok (S=0.748, S_rel=0.930)
+2026-11-13 09:59:04,090 aap.robot INFO:         sub-assemblies: after insertion (3 parts) 0.924, before (2 parts) 0.950
+2026-11-13 09:59:04,090 aap.robot INFO:     step 4 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-13 09:59:04,090 aap.robot INFO:         sub-assemblies: after insertion (4 parts) 0.810, before (3 parts) 0.924
+2026-11-13 09:59:04,090 aap.robot INFO:     step 5 industrial_fastner_part7: tool nut_effector ok
+2026-11-13 09:59:04,090 aap.robot INFO:         sub-assemblies: after insertion (5 parts) 0.808, before (4 parts) 0.810
+2026-11-13 09:59:04,090 aap.robot INFO:     step 6 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-13 09:59:04,090 aap.robot INFO:         sub-assemblies: after insertion (6 parts) 0.794, before (5 parts) 0.808
+2026-11-13 09:59:04,090 aap.robot INFO:     step 7 industrial_fastner_part001: tool bushing_effector ok
+2026-11-13 09:59:04,090 aap.robot INFO:         sub-assemblies: after insertion (7 parts) 0.778, before (6 parts) 0.794
+2026-11-13 09:59:04,090 aap.robot INFO:     step 8 industrial_fastner_part4: tool bushing_effector ok
+2026-11-13 09:59:04,090 aap.robot INFO:         sub-assemblies: after insertion (8 parts) 0.805, before (7 parts) 0.778
+2026-11-13 09:59:04,092 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot_nodes\optimization
+2026-11-13 09:59:04,153 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot_nodes\optimization\blocked\d68bc042830697e5 (total cost 0.2979)
+2026-11-13 09:59:36,887 aap.robot.gripper INFO: Engine: sub-assembly of 2 parts with 0 obstacle(s) -> 153 grasps, best 0.870 (32.7 s)
+2026-11-13 10:00:39,109 aap.robot.gripper INFO: Engine: sub-assembly of 3 parts with 0 obstacle(s) -> 140 grasps, best 0.815 (62.2 s)
+2026-11-13 10:02:56,933 aap.robot.gripper INFO: Engine: sub-assembly of 4 parts with 0 obstacle(s) -> 254 grasps, best 0.836 (137.8 s)
+2026-11-13 10:05:40,561 aap.robot.gripper INFO: Engine: sub-assembly of 5 parts with 0 obstacle(s) -> 212 grasps, best 0.781 (163.6 s)
+2026-11-13 10:08:36,585 aap.robot.gripper INFO: Engine: sub-assembly of 7 parts with 0 obstacle(s) -> 139 grasps, best 0.777 (176.0 s)
+2026-11-13 10:08:36,593 aap.robot INFO: Robot loop: iteration 2: cost 0.2979, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (4 blocked)
+2026-11-13 10:08:36,593 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-13 10:08:36,593 aap.robot INFO:         sub-assemblies: after insertion (1 parts) 0.946, before (0 parts) -
+2026-11-13 10:08:36,593 aap.robot INFO:     step 2 industrial_fastner_part7: tool nut_effector ok
+2026-11-13 10:08:36,593 aap.robot INFO:         sub-assemblies: after insertion (2 parts) 0.870, before (1 parts) 0.946
+2026-11-13 10:08:36,593 aap.robot INFO:     step 3 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-13 10:08:36,593 aap.robot INFO:         sub-assemblies: after insertion (3 parts) 0.815, before (2 parts) 0.870
+2026-11-13 10:08:36,593 aap.robot INFO:     step 4 industrial_fastner_part2: gripper ok (S=0.749, S_rel=0.931)
+2026-11-13 10:08:36,593 aap.robot INFO:         sub-assemblies: after insertion (4 parts) 0.836, before (3 parts) 0.815
+2026-11-13 10:08:36,593 aap.robot INFO:     step 5 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-13 10:08:36,593 aap.robot INFO:         sub-assemblies: after insertion (5 parts) 0.781, before (4 parts) 0.836
+2026-11-13 10:08:36,593 aap.robot INFO:     step 6 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-13 10:08:36,593 aap.robot INFO:         sub-assemblies: after insertion (6 parts) 0.794, before (5 parts) 0.781
+2026-11-13 10:08:36,593 aap.robot INFO:     step 7 industrial_fastner_part4: tool bushing_effector ok
+2026-11-13 10:08:36,593 aap.robot INFO:         sub-assemblies: after insertion (7 parts) 0.777, before (6 parts) 0.794
+2026-11-13 10:08:36,593 aap.robot INFO:     step 8 industrial_fastner_part001: tool bushing_effector ok
+2026-11-13 10:08:36,593 aap.robot INFO:         sub-assemblies: after insertion (8 parts) 0.805, before (7 parts) 0.777
+2026-11-13 10:08:36,595 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot_nodes\optimization
+2026-11-13 10:08:36,636 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot_nodes\optimization\blocked\3d85ba17fb8152bf (total cost 0.2946)
+2026-11-13 10:09:54,534 aap.robot.gripper INFO: Engine: sub-assembly of 4 parts with 0 obstacle(s) -> 175 grasps, best 0.894 (77.9 s)
+2026-11-13 10:11:37,688 aap.robot.gripper INFO: Engine: sub-assembly of 5 parts with 0 obstacle(s) -> 159 grasps, best 0.841 (103.1 s)
+2026-11-13 10:11:37,698 aap.robot INFO: Robot loop: iteration 3: cost 0.2946, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (6 blocked)
+2026-11-13 10:11:37,698 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-13 10:11:37,698 aap.robot INFO:         sub-assemblies: after insertion (1 parts) 0.946, before (0 parts) -
+2026-11-13 10:11:37,698 aap.robot INFO:     step 2 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-13 10:11:37,698 aap.robot INFO:         sub-assemblies: after insertion (2 parts) 0.950, before (1 parts) 0.946
+2026-11-13 10:11:37,698 aap.robot INFO:     step 3 industrial_fastner_part2: gripper ok (S=0.748, S_rel=0.930)
+2026-11-13 10:11:37,698 aap.robot INFO:         sub-assemblies: after insertion (3 parts) 0.924, before (2 parts) 0.950
+2026-11-13 10:11:37,698 aap.robot INFO:     step 4 industrial_fastner_part7: tool nut_effector ok
+2026-11-13 10:11:37,698 aap.robot INFO:         sub-assemblies: after insertion (4 parts) 0.894, before (3 parts) 0.924
+2026-11-13 10:11:37,698 aap.robot INFO:     step 5 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-13 10:11:37,698 aap.robot INFO:         sub-assemblies: after insertion (5 parts) 0.841, before (4 parts) 0.894
+2026-11-13 10:11:37,698 aap.robot INFO:     step 6 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-13 10:11:37,698 aap.robot INFO:         sub-assemblies: after insertion (6 parts) 0.794, before (5 parts) 0.841
+2026-11-13 10:11:37,698 aap.robot INFO:     step 7 industrial_fastner_part001: tool bushing_effector ok
+2026-11-13 10:11:37,698 aap.robot INFO:         sub-assemblies: after insertion (7 parts) 0.778, before (6 parts) 0.794
+2026-11-13 10:11:37,698 aap.robot INFO:     step 8 industrial_fastner_part4: tool bushing_effector ok
+2026-11-13 10:11:37,698 aap.robot INFO:         sub-assemblies: after insertion (8 parts) 0.805, before (7 parts) 0.778
+2026-11-13 10:11:37,698 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot_nodes\optimization
+2026-11-13 10:11:37,736 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot_nodes\optimization\blocked\bc0e195062523b47 (total cost 0.2970)
+2026-11-13 10:12:51,940 aap.robot.gripper INFO: Engine: sub-assembly of 4 parts with 0 obstacle(s) -> 159 grasps, best 0.935 (74.2 s)
+2026-11-13 10:15:09,239 aap.robot.gripper INFO: Engine: sub-assembly of 5 parts with 0 obstacle(s) -> 139 grasps, best 0.825 (137.3 s)
+2026-11-13 10:17:11,273 aap.robot.gripper INFO: Engine: sub-assembly of 6 parts with 0 obstacle(s) -> 123 grasps, best 0.794 (122.0 s)
+2026-11-13 10:19:41,982 aap.robot.gripper INFO: Engine: sub-assembly of 7 parts with 0 obstacle(s) -> 132 grasps, best 0.790 (150.7 s)
+2026-11-13 10:19:41,995 aap.robot INFO: Robot loop: iteration 4: cost 0.2970, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (8 blocked)
+2026-11-13 10:19:41,995 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-13 10:19:41,995 aap.robot INFO:         sub-assemblies: after insertion (1 parts) 0.946, before (0 parts) -
+2026-11-13 10:19:41,995 aap.robot INFO:     step 2 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-13 10:19:41,995 aap.robot INFO:         sub-assemblies: after insertion (2 parts) 0.950, before (1 parts) 0.946
+2026-11-13 10:19:41,995 aap.robot INFO:     step 3 industrial_fastner_part2: gripper ok (S=0.748, S_rel=0.930)
+2026-11-13 10:19:41,995 aap.robot INFO:         sub-assemblies: after insertion (3 parts) 0.924, before (2 parts) 0.950
+2026-11-13 10:19:41,995 aap.robot INFO:     step 4 industrial_fastner_part4: tool bushing_effector ok
+2026-11-13 10:19:41,995 aap.robot INFO:         sub-assemblies: after insertion (4 parts) 0.935, before (3 parts) 0.924
+2026-11-13 10:19:41,995 aap.robot INFO:     step 5 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-13 10:19:41,995 aap.robot INFO:         sub-assemblies: after insertion (5 parts) 0.825, before (4 parts) 0.935
+2026-11-13 10:19:41,995 aap.robot INFO:     step 6 industrial_fastner_part001: tool bushing_effector ok
+2026-11-13 10:19:41,995 aap.robot INFO:         sub-assemblies: after insertion (6 parts) 0.794, before (5 parts) 0.825
+2026-11-13 10:19:41,995 aap.robot INFO:     step 7 industrial_fastner_part7: tool nut_effector ok
+2026-11-13 10:19:41,995 aap.robot INFO:         sub-assemblies: after insertion (7 parts) 0.790, before (6 parts) 0.794
+2026-11-13 10:19:41,995 aap.robot INFO:     step 8 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-13 10:19:41,995 aap.robot INFO:         sub-assemblies: after insertion (8 parts) 0.805, before (7 parts) 0.790
+2026-11-13 10:19:41,997 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot_nodes\optimization
+2026-11-13 10:19:42,037 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot_nodes\optimization\blocked\d35158f91643d09d (total cost 0.3032)
+2026-11-13 10:22:34,387 aap.robot.gripper INFO: Engine: sub-assembly of 6 parts with 0 obstacle(s) -> 156 grasps, best 0.811 (172.3 s)
+2026-11-13 10:22:34,389 aap.robot INFO: Robot loop: iteration 5: cost 0.3032, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (10 blocked)
+2026-11-13 10:22:34,389 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-13 10:22:34,389 aap.robot INFO:         sub-assemblies: after insertion (1 parts) 0.946, before (0 parts) -
+2026-11-13 10:22:34,389 aap.robot INFO:     step 2 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-13 10:22:34,389 aap.robot INFO:         sub-assemblies: after insertion (2 parts) 0.950, before (1 parts) 0.946
+2026-11-13 10:22:34,389 aap.robot INFO:     step 3 industrial_fastner_part2: gripper ok (S=0.748, S_rel=0.930)
+2026-11-13 10:22:34,389 aap.robot INFO:         sub-assemblies: after insertion (3 parts) 0.924, before (2 parts) 0.950
+2026-11-13 10:22:34,389 aap.robot INFO:     step 4 industrial_fastner_part7: tool nut_effector ok
+2026-11-13 10:22:34,389 aap.robot INFO:         sub-assemblies: after insertion (4 parts) 0.894, before (3 parts) 0.924
+2026-11-13 10:22:34,389 aap.robot INFO:     step 5 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-13 10:22:34,389 aap.robot INFO:         sub-assemblies: after insertion (5 parts) 0.808, before (4 parts) 0.894
+2026-11-13 10:22:34,389 aap.robot INFO:     step 6 industrial_fastner_part001: tool bushing_effector ok
+2026-11-13 10:22:34,389 aap.robot INFO:         sub-assemblies: after insertion (6 parts) 0.811, before (5 parts) 0.808
+2026-11-13 10:22:34,389 aap.robot INFO:     step 7 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-13 10:22:34,389 aap.robot INFO:         sub-assemblies: after insertion (7 parts) 0.778, before (6 parts) 0.811
+2026-11-13 10:22:34,389 aap.robot INFO:     step 8 industrial_fastner_part4: tool bushing_effector ok
+2026-11-13 10:22:34,389 aap.robot INFO:         sub-assemblies: after insertion (8 parts) 0.805, before (7 parts) 0.778
+2026-11-13 10:22:34,396 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot_nodes\optimization
+2026-11-13 10:22:34,426 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot_nodes\optimization\blocked\ee43da851be41c78 (total cost 0.3032)
+2026-11-13 10:24:10,520 aap.robot.gripper INFO: Engine: sub-assembly of 5 parts with 0 obstacle(s) -> 179 grasps, best 0.891 (96.1 s)
+2026-11-13 10:27:18,451 aap.robot.gripper INFO: Engine: sub-assembly of 6 parts with 0 obstacle(s) -> 138 grasps, best 0.811 (187.9 s)
+2026-11-13 10:27:18,451 aap.robot INFO: Robot loop: iteration 6: cost 0.3032, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (12 blocked)
+2026-11-13 10:27:18,451 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-13 10:27:18,451 aap.robot INFO:         sub-assemblies: after insertion (1 parts) 0.946, before (0 parts) -
+2026-11-13 10:27:18,451 aap.robot INFO:     step 2 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-13 10:27:18,451 aap.robot INFO:         sub-assemblies: after insertion (2 parts) 0.950, before (1 parts) 0.946
+2026-11-13 10:27:18,451 aap.robot INFO:     step 3 industrial_fastner_part2: gripper ok (S=0.748, S_rel=0.930)
+2026-11-13 10:27:18,451 aap.robot INFO:         sub-assemblies: after insertion (3 parts) 0.924, before (2 parts) 0.950
+2026-11-13 10:27:18,461 aap.robot INFO:     step 4 industrial_fastner_part7: tool nut_effector ok
+2026-11-13 10:27:18,461 aap.robot INFO:         sub-assemblies: after insertion (4 parts) 0.894, before (3 parts) 0.924
+2026-11-13 10:27:18,461 aap.robot INFO:     step 5 industrial_fastner_part4: tool bushing_effector ok
+2026-11-13 10:27:18,461 aap.robot INFO:         sub-assemblies: after insertion (5 parts) 0.891, before (4 parts) 0.894
+2026-11-13 10:27:18,461 aap.robot INFO:     step 6 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-13 10:27:18,461 aap.robot INFO:         sub-assemblies: after insertion (6 parts) 0.811, before (5 parts) 0.891
+2026-11-13 10:27:18,461 aap.robot INFO:     step 7 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-13 10:27:18,461 aap.robot INFO:         sub-assemblies: after insertion (7 parts) 0.777, before (6 parts) 0.811
+2026-11-13 10:27:18,461 aap.robot INFO:     step 8 industrial_fastner_part001: tool bushing_effector ok
+2026-11-13 10:27:18,461 aap.robot INFO:         sub-assemblies: after insertion (8 parts) 0.805, before (7 parts) 0.777
+2026-11-13 10:27:18,461 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot_nodes\optimization
+2026-11-13 10:27:18,492 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot_nodes\optimization\blocked\52fb92e5f8866c62 (total cost 0.3281)
+2026-11-13 10:28:41,369 aap.robot.gripper INFO: Engine: sub-assembly of 4 parts with 0 obstacle(s) -> 162 grasps, best 0.926 (82.9 s)
+2026-11-13 10:30:03,888 aap.robot.gripper INFO: Engine: sub-assembly of 5 parts with 0 obstacle(s) -> 175 grasps, best 0.930 (82.5 s)
+2026-11-13 10:31:32,226 aap.robot.gripper INFO: Engine: sub-assembly of 6 parts with 0 obstacle(s) -> 161 grasps, best 0.904 (88.3 s)
+2026-11-13 10:33:14,973 aap.robot.gripper INFO: Engine: sub-assembly of 7 parts with 0 obstacle(s) -> 155 grasps, best 0.837 (102.7 s)
+2026-11-13 10:33:14,979 aap.robot INFO: Robot loop: iteration 7: cost 0.3281, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (14 blocked)
+2026-11-13 10:33:14,979 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-13 10:33:14,979 aap.robot INFO:         sub-assemblies: after insertion (1 parts) 0.946, before (0 parts) -
+2026-11-13 10:33:14,979 aap.robot INFO:     step 2 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-13 10:33:14,979 aap.robot INFO:         sub-assemblies: after insertion (2 parts) 0.950, before (1 parts) 0.946
+2026-11-13 10:33:14,979 aap.robot INFO:     step 3 industrial_fastner_part2: gripper ok (S=0.748, S_rel=0.930)
+2026-11-13 10:33:14,979 aap.robot INFO:         sub-assemblies: after insertion (3 parts) 0.924, before (2 parts) 0.950
+2026-11-13 10:33:14,979 aap.robot INFO:     step 4 industrial_fastner_part001: tool bushing_effector ok
+2026-11-13 10:33:14,979 aap.robot INFO:         sub-assemblies: after insertion (4 parts) 0.926, before (3 parts) 0.924
+2026-11-13 10:33:14,979 aap.robot INFO:     step 5 industrial_fastner_part4: tool bushing_effector ok
+2026-11-13 10:33:14,979 aap.robot INFO:         sub-assemblies: after insertion (5 parts) 0.930, before (4 parts) 0.926
+2026-11-13 10:33:14,979 aap.robot INFO:     step 6 industrial_fastner_part7: tool nut_effector ok
+2026-11-13 10:33:14,979 aap.robot INFO:         sub-assemblies: after insertion (6 parts) 0.904, before (5 parts) 0.930
+2026-11-13 10:33:14,979 aap.robot INFO:     step 7 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-13 10:33:14,979 aap.robot INFO:         sub-assemblies: after insertion (7 parts) 0.837, before (6 parts) 0.904
+2026-11-13 10:33:14,979 aap.robot INFO:     step 8 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-13 10:33:14,979 aap.robot INFO:         sub-assemblies: after insertion (8 parts) 0.805, before (7 parts) 0.837
+2026-11-13 10:33:14,983 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot_nodes\optimization
+2026-11-13 10:33:15,032 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot_nodes\optimization\blocked\92eceff21f96b7da (total cost 0.4272)
+2026-11-13 10:33:18,022 aap.robot.gripper INFO: Engine: industrial_fastner_part7 with 0 obstacle(s) -> 185 grasps, best 0.504 (3.0 s)
+2026-11-13 10:33:26,177 aap.robot.gripper INFO: Engine: sub-assembly of 2 parts with 0 obstacle(s) -> 95 grasps, best 0.616 (8.1 s)
+2026-11-13 10:35:06,821 aap.robot.gripper INFO: Engine: sub-assembly of 5 parts with 0 obstacle(s) -> 232 grasps, best 0.825 (100.6 s)
+2026-11-13 10:38:18,308 aap.robot.gripper INFO: Engine: sub-assembly of 6 parts with 0 obstacle(s) -> 199 grasps, best 0.795 (191.5 s)
+2026-11-13 10:38:18,314 aap.robot INFO: Robot loop: iteration 8: cost 0.4272, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (16 blocked)
+2026-11-13 10:38:18,314 aap.robot INFO:     step 1 industrial_fastner_part7: tool nut_effector ok
+2026-11-13 10:38:18,314 aap.robot INFO:         sub-assemblies: after insertion (1 parts) 0.504, before (0 parts) -
+2026-11-13 10:38:18,314 aap.robot INFO:     step 2 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-13 10:38:18,314 aap.robot INFO:         sub-assemblies: after insertion (2 parts) 0.616, before (1 parts) 0.504
+2026-11-13 10:38:18,314 aap.robot INFO:     step 3 industrial_fastner_part3: gripper ok (S=0.815, S_rel=0.862)
+2026-11-13 10:38:18,314 aap.robot INFO:         sub-assemblies: after insertion (3 parts) 0.815, before (2 parts) 0.616
+2026-11-13 10:38:18,314 aap.robot INFO:     step 4 industrial_fastner_part2: gripper ok (S=0.749, S_rel=0.931)
+2026-11-13 10:38:18,314 aap.robot INFO:         sub-assemblies: after insertion (4 parts) 0.836, before (3 parts) 0.815
+2026-11-13 10:38:18,314 aap.robot INFO:     step 5 industrial_fastner_part4: tool bushing_effector ok
+2026-11-13 10:38:18,314 aap.robot INFO:         sub-assemblies: after insertion (5 parts) 0.825, before (4 parts) 0.836
+2026-11-13 10:38:18,314 aap.robot INFO:     step 6 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-13 10:38:18,314 aap.robot INFO:         sub-assemblies: after insertion (6 parts) 0.795, before (5 parts) 0.825
+2026-11-13 10:38:18,314 aap.robot INFO:     step 7 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-13 10:38:18,314 aap.robot INFO:         sub-assemblies: after insertion (7 parts) 0.777, before (6 parts) 0.795
+2026-11-13 10:38:18,314 aap.robot INFO:     step 8 industrial_fastner_part001: tool bushing_effector ok
+2026-11-13 10:38:18,314 aap.robot INFO:         sub-assemblies: after insertion (8 parts) 0.805, before (7 parts) 0.777
+2026-11-13 10:38:18,317 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot_nodes\optimization
+2026-11-13 10:38:18,375 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot_nodes\optimization\blocked\f8b5dc5787baf4ba (total cost 0.3150)
+2026-11-13 10:40:12,127 aap.robot.gripper INFO: Engine: sub-assembly of 6 parts with 0 obstacle(s) -> 162 grasps, best 0.855 (113.7 s)
+2026-11-13 10:40:12,135 aap.robot INFO: Robot loop: iteration 9: cost 0.3150, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (18 blocked)
+2026-11-13 10:40:12,135 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-13 10:40:12,135 aap.robot INFO:         sub-assemblies: after insertion (1 parts) 0.946, before (0 parts) -
+2026-11-13 10:40:12,135 aap.robot INFO:     step 2 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-13 10:40:12,135 aap.robot INFO:         sub-assemblies: after insertion (2 parts) 0.950, before (1 parts) 0.946
+2026-11-13 10:40:12,135 aap.robot INFO:     step 3 industrial_fastner_part2: gripper ok (S=0.748, S_rel=0.930)
+2026-11-13 10:40:12,135 aap.robot INFO:         sub-assemblies: after insertion (3 parts) 0.924, before (2 parts) 0.950
+2026-11-13 10:40:12,135 aap.robot INFO:     step 4 industrial_fastner_part7: tool nut_effector ok
+2026-11-13 10:40:12,135 aap.robot INFO:         sub-assemblies: after insertion (4 parts) 0.894, before (3 parts) 0.924
+2026-11-13 10:40:12,135 aap.robot INFO:     step 5 industrial_fastner_part4: tool bushing_effector ok
+2026-11-13 10:40:12,135 aap.robot INFO:         sub-assemblies: after insertion (5 parts) 0.891, before (4 parts) 0.894
+2026-11-13 10:40:12,138 aap.robot INFO:     step 6 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-13 10:40:12,138 aap.robot INFO:         sub-assemblies: after insertion (6 parts) 0.855, before (5 parts) 0.891
+2026-11-13 10:40:12,138 aap.robot INFO:     step 7 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-13 10:40:12,138 aap.robot INFO:         sub-assemblies: after insertion (7 parts) 0.777, before (6 parts) 0.855
+2026-11-13 10:40:12,138 aap.robot INFO:     step 8 industrial_fastner_part001: tool bushing_effector ok
+2026-11-13 10:40:12,138 aap.robot INFO:         sub-assemblies: after insertion (8 parts) 0.805, before (7 parts) 0.777
+2026-11-13 10:40:12,138 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot_nodes\optimization
+2026-11-13 10:40:12,175 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot_nodes\optimization\blocked\50f8bf8619dc1f9d (total cost 0.3150)
+2026-11-13 10:41:39,739 aap.robot.gripper INFO: Engine: sub-assembly of 5 parts with 0 obstacle(s) -> 190 grasps, best 0.892 (87.6 s)
+2026-11-13 10:43:24,649 aap.robot.gripper INFO: Engine: sub-assembly of 6 parts with 0 obstacle(s) -> 155 grasps, best 0.855 (104.9 s)
+2026-11-13 10:43:24,654 aap.robot INFO: Robot loop: iteration 10: cost 0.3150, 3 infeasible step(s), weakest relative 0.000, pruned 2 new edge(s) (20 blocked)
+2026-11-13 10:43:24,654 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-13 10:43:24,654 aap.robot INFO:         sub-assemblies: after insertion (1 parts) 0.946, before (0 parts) -
+2026-11-13 10:43:24,654 aap.robot INFO:     step 2 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-13 10:43:24,654 aap.robot INFO:         sub-assemblies: after insertion (2 parts) 0.950, before (1 parts) 0.946
+2026-11-13 10:43:24,654 aap.robot INFO:     step 3 industrial_fastner_part2: gripper ok (S=0.748, S_rel=0.930)
+2026-11-13 10:43:24,659 aap.robot INFO:         sub-assemblies: after insertion (3 parts) 0.924, before (2 parts) 0.950
+2026-11-13 10:43:24,659 aap.robot INFO:     step 4 industrial_fastner_part7: tool nut_effector ok
+2026-11-13 10:43:24,659 aap.robot INFO:         sub-assemblies: after insertion (4 parts) 0.894, before (3 parts) 0.924
+2026-11-13 10:43:24,659 aap.robot INFO:     step 5 industrial_fastner_part001: tool bushing_effector ok
+2026-11-13 10:43:24,659 aap.robot INFO:         sub-assemblies: after insertion (5 parts) 0.892, before (4 parts) 0.894
+2026-11-13 10:43:24,659 aap.robot INFO:     step 6 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-13 10:43:24,659 aap.robot INFO:         sub-assemblies: after insertion (6 parts) 0.855, before (5 parts) 0.892
+2026-11-13 10:43:24,659 aap.robot INFO:     step 7 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-13 10:43:24,659 aap.robot INFO:         sub-assemblies: after insertion (7 parts) 0.778, before (6 parts) 0.855
+2026-11-13 10:43:24,659 aap.robot INFO:     step 8 industrial_fastner_part4: tool bushing_effector ok
+2026-11-13 10:43:24,659 aap.robot INFO:         sub-assemblies: after insertion (8 parts) 0.805, before (7 parts) 0.778
+2026-11-13 10:43:25,163 aap.robot WARNING: Robot plan written to output\industrial_fastner_robot_nodes\plan.json: chosen sequence (iteration 2) still has 3 infeasible step(s): ['3 industrial_fastner_part6', '5 industrial_fastner_part5', '6 industrial_fastner_part1']
+Robot plan: the chosen sequence still has 3 infeasible step(s): step 3 industrial_fastner_part6 (relative score 0.000 below 0.5), step 5 industrial_fastner_part5 (relative score 0.000 below 0.5), step 6 industrial_fastner_part1 (no grasp even alone (S_alone = 0)). See plan.json -> robot.
+exit 0

@@ -168,6 +168,22 @@ class StepGrasp:
                 "rotation": None if self.rotation is None else self.rotation.to_json(), "n_grasps": self.n_grasps}
 
 
+@dataclass
+class NodeGrasp:
+    """Optional sub-assembly check: grasp score of a whole AoG state grasped as one object, nothing around."""
+    state: int
+    n_components: int
+    score: float | None  # None for the empty state
+    feasible: bool
+    best: Grasp | None
+    reason: str | None
+
+    def to_json(self) -> dict:
+        return {"state": self.state, "n_components": self.n_components, "score": self.score,
+                "feasible": self.feasible, "reason": self.reason,
+                "best": None if self.best is None else self.best.to_json()}
+
+
 class GripperAnalysis:
     """Scores per (state, component) with caching. `clouds[c]`/`cloud_keys[c]` by AoG component index."""
 
@@ -181,17 +197,36 @@ class GripperAnalysis:
         self._calls: dict[str, EngineResult] = {}
         self._alone: dict[int, float] = {}
         self._steps: dict[tuple[int, int, bool], StepGrasp] = {}
+        self._nodes: dict[int, NodeGrasp] = {}
         self.n_engine_calls = 0  # calls actually sent to the engine (not served from a cache)
         self.n_disk_hits = 0
 
     # -- engine calls with cache --
-    def _call_key(self, target: int, obstacles: tuple[int, ...], rotation: Rotation | None, angle: float) -> str:
+    # `target` is one component index, or a tuple of indices for a sub-assembly grasped as one object (node check);
+    # a one-element tuple is the same call as that component alone (same key, shared cache entry).
+    def _target_key(self, target) -> str:
+        ids = (target,) if isinstance(target, int) else tuple(sorted(target))
+        if len(ids) == 1:
+            return self.cloud_keys[ids[0]]
+        return "node:" + hashlib.sha256(",".join(sorted(self.cloud_keys[i] for i in ids)).encode()).hexdigest()
+
+    def _target_cloud(self, target):
+        if isinstance(target, int):
+            return self.clouds[target]
+        return merge_clouds([self.clouds[i] for i in target])
+
+    def _target_label(self, target) -> str:
+        if isinstance(target, int):
+            return self.labels[target]
+        return self.labels[target[0]] if len(target) == 1 else f"sub-assembly of {len(target)} parts"
+
+    def _call_key(self, target, obstacles: tuple[int, ...], rotation: Rotation | None, angle: float) -> str:
         rot = "none" if rotation is None or angle % 360 == 0 else f"{rotation.key()}@{angle % 360:.6f}"
-        h = hashlib.sha256(f"engine:{self.engine_tag};target:{self.cloud_keys[target]};".encode())
+        h = hashlib.sha256(f"engine:{self.engine_tag};target:{self._target_key(target)};".encode())
         h.update(("obstacles:" + ",".join(sorted(self.cloud_keys[o] for o in obstacles)) + f";rot:{rot}").encode())
         return h.hexdigest()
 
-    def _call(self, target: int, obstacles: tuple[int, ...], rotation: Rotation | None = None,
+    def _call(self, target, obstacles: tuple[int, ...], rotation: Rotation | None = None,
               angle: float = 0.0) -> EngineResult:
         key = self._call_key(target, obstacles, rotation, angle)
         if key in self._calls:
@@ -209,9 +244,9 @@ class GripperAnalysis:
         if obst is not None and rotation is not None and angle % 360 != 0:
             # The part turns by +angle about the nut axis; in its own frame the rest turns by -angle.
             obst = rotate_cloud(obst, rotation.axis_point, rotation.axis_dir, -angle)
-        res = self.engine.evaluate(self.clouds[target], obst)
+        res = self.engine.evaluate(self._target_cloud(target), obst)
         self.n_engine_calls += 1
-        log.info("Engine: %s with %d obstacle(s)%s -> %d grasps, best %.3f (%.1f s)", self.labels[target],
+        log.info("Engine: %s with %d obstacle(s)%s -> %d grasps, best %.3f (%.1f s)", self._target_label(target),
                  len(obstacles), "" if rotation is None or angle % 360 == 0 else f", rotated {angle:g} deg",
                  len(res.grasps), res.score, res.wall_time_s)
         self._calls[key] = res
@@ -229,6 +264,28 @@ class GripperAnalysis:
 
     def alone_scores(self) -> dict[int, float]:
         return dict(self._alone)
+
+    def node(self, state: int) -> "NodeGrasp":
+        """Is the sub-assembly `state` (all its components as one object, nothing around) graspable?
+        Optional sub-assembly check (RobotConfig.check_subassembly_grasp); the empty state is trivially fine."""
+        state = int(state)
+        if state in self._nodes:
+            return self._nodes[state]
+        ids = tuple(i for i in range(len(self.clouds)) if (state >> i) & 1)
+        floor = self.config.subassembly_floor()
+        if not ids:
+            out = NodeGrasp(state=state, n_components=0, score=None, feasible=True, best=None, reason=None)
+        else:
+            res = self._call(ids, ())
+            s = res.score
+            ok = _ge(s, floor, self.config.grasp_boundary_inclusive)
+            out = NodeGrasp(state=state, n_components=len(ids), score=s, feasible=ok, best=res.best,
+                            reason=None if ok else f"sub-assembly score {s:.3f} below {floor}")
+        self._nodes[state] = out
+        return out
+
+    def node_scores(self) -> dict[int, "NodeGrasp"]:
+        return dict(self._nodes)
 
     def step(self, state: int, c: int, rotation: Rotation | None = None) -> StepGrasp:
         key = (int(state), int(c), rotation is not None)

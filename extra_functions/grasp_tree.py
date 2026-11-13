@@ -10,9 +10,12 @@ the robot loop explored (the union of every recorded sequence; `--chosen-only` f
                   score alone (S_alone)
   edge label      on the edge to the removed part: its grasp score in that state (S), coloured red -> yellow ->
                   green; "-" = no grasp (S = 0 or not evaluated because the part fails even alone),
-                  "tool" = a stander removed by a tool (no grasp score). A red frame = infeasible step.
-  plain edge      parent -> remaining sub-assembly (only single parts move in this pipeline, so a sub-assembly
-                  is never grasped and carries no score)
+                  "tool" = a stander removed by a tool (no grasp score): green = the tool check passed,
+                  red = the tool collides in every free sense. A red frame = infeasible step.
+  plain edge      parent -> remaining sub-assembly
+  sub-assembly    its own grasp score (red frame = not graspable), ONLY if the plan was made with
+  score           `main.py --mode robot --check-subassembly-grasp` (robot.subassembly_scores); a plan from a
+                  run without that flag has no sub-assembly scores, and those boxes stay blank
   yellow box      standers
   bold edges      the chosen sequence
 
@@ -230,7 +233,8 @@ def draw_tree(output_dir: str | Path, step_path: str | Path, chosen_only: bool =
         (px, py), (qx, qy) = (x[("part", (s, b))], y(("part", (s, b))) + 0.38), (x[("state", s)], y(("state", s)) - 0.38)
         mx, my = px + 0.3 * (qx - px), py + 0.3 * (qy - py)
         if st["end_effector"] != "gripper":
-            txt, fc = "tool", "#d0d0d0"
+            # the tool check alone (part_feasible), not the edge's sub-assembly checks: green = tool fits, red = contact
+            txt, fc = "tool", ("#66bb6a" if st.get("part_feasible", st["feasible"]) else "#e53935")
         elif st.get("score") is None or st["score"] <= 0:
             txt, fc = "-", "#b71c1c"
         else:
@@ -240,14 +244,26 @@ def draw_tree(output_dir: str | Path, step_path: str | Path, chosen_only: bool =
                 bbox=dict(boxstyle="round,pad=0.25", facecolor=fc, edgecolor="black" if bold else "gray",
                           linewidth=1.4 if bold else 0.5))
 
+    # Optional sub-assembly check (robot.subassembly_scores): sub-assembly nodes show their own grasp score.
+    sub = plan["robot"].get("subassembly_scores") or {}
+    if not sub:
+        print(f"Note: {output_dir}/plan.json has no sub-assembly scores (robot.subassembly_scores is empty); "
+              "sub-assembly boxes are left blank. Re-run main.py with --mode robot --check-subassembly-grasp "
+              "to get them.")
     for r in rows:
         for item in r:
             kind, v = item
             if kind == "state":
                 ids = ids_of(v)
+                ns = sub.get(str(v))
                 if len(ids) == 1:  # a single part left
                     a = alone.get(label[ids[0]])
-                    node(item, ids, "#5e8f6b", "" if a is None else f"{a:.2f}", stander=ids[0] in standers)
+                    ok = ns is None or ns["feasible"]
+                    node(item, ids, "#5e8f6b", "" if a is None else f"{a:.2f}", stander=ids[0] in standers,
+                         frame="black" if ok else "#c0392b", lw=0.8 if ok else 1.8)
+                elif ns is not None:
+                    node(item, ids, "#9aa3ad", f"{ns['score']:.2f}", frame="black" if ns["feasible"] else "#c0392b",
+                         lw=0.8 if ns["feasible"] else 1.8)
                 else:
                     node(item, ids, "#9aa3ad", "")
             else:
@@ -255,17 +271,20 @@ def draw_tree(output_dir: str | Path, step_path: str | Path, chosen_only: bool =
                 cid = comp_id[b]
                 st = edges[(s, b)]
                 a = alone.get(label[cid])
+                ok = st.get("part_feasible", st["feasible"])  # the part's own check (edge feasibility may add nodes)
                 col = "#c9a227" if cid in standers else (_score_color(st["score"]) if st.get("score") else "#c0392b")
                 node(item, [cid], col, "" if a is None else f"{a:.2f}", stander=cid in standers,
-                     frame="black" if st["feasible"] else "#c0392b", lw=0.8 if st["feasible"] else 1.8)
+                     frame="black" if ok else "#c0392b", lw=0.8 if ok else 1.8)
 
     for i in range(len(rows)):
         ax.text(x_lo - 0.1, -ROW_GAP * i, str(i), ha="right", va="center", fontsize=16)
     n_seq = len(plan["robot"]["loop"]["sequences"])
     what = "chosen sequence" if chosen_only else f"{n_seq} recorded sequences"
+    sub_txt = ("sub-assembly node = its own grasp score (red frame = not graspable)\n" if sub else "")
     ax.set_title(f"{plan['assembly']}: grasp scores ({what}, chosen in bold)\n"
-                 f"node = score alone; edge label = score in that state\n"
-                 f"yellow = stander; red frame = infeasible step", fontsize=9)
+                 f"part node = score alone; edge label = score in that state\n{sub_txt}"
+                 f"yellow = stander; \"tool\" green = tool removal possible, red = tool collides\n"
+                 f"red frame on a part = infeasible part step", fontsize=9)
     fig.tight_layout()
     if save:
         fig.savefig(save, dpi=150)

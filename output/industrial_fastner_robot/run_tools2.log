@@ -1,0 +1,151 @@
+2026-11-12 18:48:49,551 aap.preprocessing INFO: Processed 3 stander(s): 0 screw, 1 nut, 2 other; 51.56 s
+2026-11-12 18:48:50,078 aap.interference INFO: Loaded cached interference matrix from output\industrial_fastner_robot\interference (5 components x 6 directions)
+2026-11-12 18:48:50,086 aap.aog INFO: Loaded cached AoG from output\industrial_fastner_robot\aog (V=61, E=141)
+2026-11-12 18:48:50,111 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part3': 60000 points
+2026-11-12 18:48:50,125 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part2': 60000 points
+2026-11-12 18:48:50,127 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part1': 16934 points
+2026-11-12 18:48:50,147 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part5': 60000 points
+2026-11-12 18:48:50,147 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part6': 21179 points
+2026-11-12 18:48:50,147 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part7': 16760 points
+2026-11-12 18:48:50,158 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part4': 4181 points
+2026-11-12 18:48:50,158 aap.robot.pointclouds INFO: Point cloud 'industrial_fastner_part001': 4181 points
+2026-11-12 18:48:50,168 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot\optimization
+2026-11-12 18:48:50,204 aap.optimization INFO: Loaded cached optimization result from output\industrial_fastner_robot\optimization (total cost 0.2671)
+2026-11-12 18:48:51,111 aap.robot.tools INFO: Tool nut_effector.stp: 9 solid(s), working element meets the axis up to z = 238.00 mm, interface plane z = 238.00 mm
+2026-11-12 18:48:54,013 aap.robot.tools INFO: Tool bushing_effector.stp: 8 solid(s), working element meets the axis up to z = 235.00 mm, interface plane z = 235.00 mm
+2026-11-12 18:48:59,285 aap.robot INFO: Robot loop: iteration 1: cost 0.2671, 5 infeasible step(s), weakest relative 0.000, pruned 4 new edge(s) (4 blocked)
+2026-11-12 18:48:59,285 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-12 18:48:59,285 aap.robot INFO:     step 2 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-12 18:48:59,285 aap.robot INFO:     step 3 industrial_fastner_part2: gripper ok (S=0.748, S_rel=0.930)
+2026-11-12 18:48:59,285 aap.robot INFO:     step 4 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-12 18:48:59,285 aap.robot INFO:     step 5 industrial_fastner_part7: tool nut_effector ok
+2026-11-12 18:48:59,285 aap.robot INFO:     step 6 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-12 18:48:59,285 aap.robot INFO:     step 7 industrial_fastner_part001: tool bushing_effector CONTACT {2: ['industrial_fastner_part3'], 3: ['industrial_fastner_part3', 'industrial_fastner_part6', 'industrial_fastner_part7']}
+2026-11-12 18:48:59,286 aap.robot INFO:     step 8 industrial_fastner_part4: tool bushing_effector CONTACT {2: ['industrial_fastner_part3'], 3: ['industrial_fastner_part3', 'industrial_fastner_part6', 'industrial_fastner_part7']}
+2026-11-12 18:48:59,286 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot\optimization
+2026-11-12 18:48:59,527 aap.optimization INFO: Optimization: total cost 0.2979 (greedy 0.3685), 54 iterations x 16 ants, stopped by stagnation, 222 distinct paths, 0.19 s
+2026-11-12 18:48:59,527 aap.optimization INFO: Cost breakdown: travel=0.283x0.020, direction_change=0.321x0.082, tool_change=0.500x0.224, size_contacts=0.022x0.163, grouping=0.000x0.122, stability=0.571x0.245, gravity_change=0.071x0.143
+2026-11-12 18:48:59,527 aap.optimization INFO:   step 1: industrial_fastner_part3 along (-1, 0, 0), travel 66.3 mm, g=(-1, 0, 0), class 2
+2026-11-12 18:48:59,527 aap.optimization INFO:   step 2: industrial_fastner_part7 along (-1, 0, 0), travel 34.2 mm, g=(-1, 0, 0), class 2
+2026-11-12 18:48:59,527 aap.optimization INFO:   step 3: industrial_fastner_part6 along (1, 0, 0), travel 64.2 mm, g=(-1, 0, 0), class 1
+2026-11-12 18:48:59,527 aap.optimization INFO:   step 4: industrial_fastner_part2 along (1, 0, 0), travel 49.0 mm, g=(-1, 0, 0), class 1
+2026-11-12 18:48:59,527 aap.optimization INFO:   step 5: industrial_fastner_part5 along (1, 0, 0), travel 43.0 mm, g=(0, 1, 0), class 2
+2026-11-12 18:48:59,527 aap.optimization INFO:   step 6: industrial_fastner_part1 along (0, 0, 1), travel 46.5 mm, g=(0, 1, 0), class 2
+2026-11-12 18:48:59,527 aap.optimization INFO:   step 7: industrial_fastner_part4 along (0, -1, 0), travel 24.9 mm, g=(0, 1, 0), class 1
+2026-11-12 18:48:59,527 aap.optimization INFO:   step 8: industrial_fastner_part001 along (0, -1, 0), travel 24.9 mm, g=(0, 1, 0), class 1
+2026-11-12 18:48:59,537 aap.robot INFO: Robot loop: iteration 2: cost 0.2979, 5 infeasible step(s), weakest relative 0.000, pruned 4 new edge(s) (8 blocked)
+2026-11-12 18:48:59,537 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-12 18:48:59,537 aap.robot INFO:     step 2 industrial_fastner_part7: tool nut_effector ok
+2026-11-12 18:48:59,537 aap.robot INFO:     step 3 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-12 18:48:59,537 aap.robot INFO:     step 4 industrial_fastner_part2: gripper ok (S=0.749, S_rel=0.931)
+2026-11-12 18:48:59,537 aap.robot INFO:     step 5 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-12 18:48:59,537 aap.robot INFO:     step 6 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-12 18:48:59,537 aap.robot INFO:     step 7 industrial_fastner_part4: tool bushing_effector CONTACT {2: ['industrial_fastner_part3'], 3: ['industrial_fastner_part3', 'industrial_fastner_part6', 'industrial_fastner_part7']}
+2026-11-12 18:48:59,537 aap.robot INFO:     step 8 industrial_fastner_part001: tool bushing_effector CONTACT {2: ['industrial_fastner_part3'], 3: ['industrial_fastner_part3', 'industrial_fastner_part6', 'industrial_fastner_part7']}
+2026-11-12 18:48:59,537 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot\optimization
+2026-11-12 18:48:59,787 aap.optimization INFO: Optimization: total cost 0.2843 (greedy 0.4432), 61 iterations x 16 ants, stopped by stagnation, 365 distinct paths, 0.21 s
+2026-11-12 18:48:59,787 aap.optimization INFO: Cost breakdown: travel=0.145x0.020, direction_change=0.393x0.082, tool_change=0.500x0.224, size_contacts=0.071x0.163, grouping=0.000x0.122, stability=0.429x0.245, gravity_change=0.143x0.143
+2026-11-12 18:48:59,787 aap.optimization INFO:   step 1: industrial_fastner_part3 along (0, 0, 1), travel 44.7 mm, g=(1, 0, 0), class 2
+2026-11-12 18:48:59,787 aap.optimization INFO:   step 2: industrial_fastner_part1 along (0, 0, 1), travel 46.5 mm, g=(1, 0, 0), class 2
+2026-11-12 18:48:59,787 aap.optimization INFO:   step 3: industrial_fastner_part2 along (0, 0, -1), travel 37.8 mm, g=(1, 0, 0), class 1
+2026-11-12 18:48:59,787 aap.optimization INFO:   step 4: industrial_fastner_part4 along (0, -1, 0), travel 24.9 mm, g=(1, 0, 0), class 1
+2026-11-12 18:48:59,787 aap.optimization INFO:   step 5: industrial_fastner_part5 along (0, 1, 0), travel 34.5 mm, g=(1, 0, 0), class 2
+2026-11-12 18:48:59,787 aap.optimization INFO:   step 6: industrial_fastner_part001 along (0, -1, 0), travel 24.9 mm, g=(1, 0, 0), class 1
+2026-11-12 18:48:59,787 aap.optimization INFO:   step 7: industrial_fastner_part7 along (-1, 0, 0), travel 34.2 mm, g=(-1, 0, 0), class 2
+2026-11-12 18:48:59,787 aap.optimization INFO:   step 8: industrial_fastner_part6 along (-1, 0, 0), travel 71.2 mm, g=(-1, 0, 0), class 2
+2026-11-12 18:48:59,800 aap.robot INFO: Robot loop: iteration 3: cost 0.2843, 5 infeasible step(s), weakest relative 0.000, pruned 4 new edge(s) (12 blocked)
+2026-11-12 18:48:59,800 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-12 18:48:59,800 aap.robot INFO:     step 2 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-12 18:48:59,800 aap.robot INFO:     step 3 industrial_fastner_part2: gripper ok (S=0.748, S_rel=0.930)
+2026-11-12 18:48:59,800 aap.robot INFO:     step 4 industrial_fastner_part4: tool bushing_effector CONTACT {2: ['industrial_fastner_part3'], 3: ['industrial_fastner_part3']}
+2026-11-12 18:48:59,800 aap.robot INFO:     step 5 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-12 18:48:59,800 aap.robot INFO:     step 6 industrial_fastner_part001: tool bushing_effector CONTACT {2: ['industrial_fastner_part3'], 3: ['industrial_fastner_part3']}
+2026-11-12 18:48:59,800 aap.robot INFO:     step 7 industrial_fastner_part7: tool nut_effector ok
+2026-11-12 18:48:59,800 aap.robot INFO:     step 8 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-12 18:48:59,804 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot\optimization
+2026-11-12 18:49:00,031 aap.optimization INFO: Optimization: total cost 0.3557 (greedy 0.4407), 73 iterations x 16 ants, stopped by stagnation, 171 distinct paths, 0.19 s
+2026-11-12 18:49:00,031 aap.optimization INFO: Cost breakdown: travel=0.308x0.020, direction_change=0.607x0.082, tool_change=0.500x0.224, size_contacts=0.230x0.163, grouping=0.000x0.122, stability=0.571x0.245, gravity_change=0.071x0.143
+2026-11-12 18:49:00,031 aap.optimization INFO:   step 1: industrial_fastner_part3 along (-1, 0, 0), travel 66.3 mm, g=(-1, 0, 0), class 2
+2026-11-12 18:49:00,031 aap.optimization INFO:   step 2: industrial_fastner_part7 along (-1, 0, 0), travel 34.2 mm, g=(-1, 0, 0), class 2
+2026-11-12 18:49:00,031 aap.optimization INFO:   step 3: industrial_fastner_part001 along (0, -1, 0), travel 24.9 mm, g=(-1, 0, 0), class 1
+2026-11-12 18:49:00,031 aap.optimization INFO:   step 4: industrial_fastner_part6 along (-1, 0, 0), travel 71.2 mm, g=(-1, 0, 0), class 1
+2026-11-12 18:49:00,031 aap.optimization INFO:   step 5: industrial_fastner_part2 along (1, 0, 0), travel 49.0 mm, g=(-1, 0, 0), class 1
+2026-11-12 18:49:00,031 aap.optimization INFO:   step 6: industrial_fastner_part5 along (1, 0, 0), travel 43.0 mm, g=(0, 1, 0), class 2
+2026-11-12 18:49:00,031 aap.optimization INFO:   step 7: industrial_fastner_part4 along (0, -1, 0), travel 24.9 mm, g=(0, 1, 0), class 1
+2026-11-12 18:49:00,031 aap.optimization INFO:   step 8: industrial_fastner_part1 along (0, 0, 1), travel 46.5 mm, g=(0, 1, 0), class 2
+2026-11-12 18:49:00,044 aap.robot INFO: Robot loop: iteration 4: cost 0.3557, 5 infeasible step(s), weakest relative 0.000, pruned 4 new edge(s) (16 blocked)
+2026-11-12 18:49:00,044 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-12 18:49:00,044 aap.robot INFO:     step 2 industrial_fastner_part7: tool nut_effector ok
+2026-11-12 18:49:00,044 aap.robot INFO:     step 3 industrial_fastner_part001: tool bushing_effector CONTACT {2: ['industrial_fastner_part3'], 3: ['industrial_fastner_part3', 'industrial_fastner_part7']}
+2026-11-12 18:49:00,044 aap.robot INFO:     step 4 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-12 18:49:00,044 aap.robot INFO:     step 5 industrial_fastner_part2: gripper ok (S=0.736, S_rel=0.916)
+2026-11-12 18:49:00,044 aap.robot INFO:     step 6 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-12 18:49:00,044 aap.robot INFO:     step 7 industrial_fastner_part4: tool bushing_effector CONTACT {2: ['industrial_fastner_part3'], 3: ['industrial_fastner_part3', 'industrial_fastner_part6', 'industrial_fastner_part7']}
+2026-11-12 18:49:00,044 aap.robot INFO:     step 8 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-12 18:49:00,044 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot\optimization
+2026-11-12 18:49:00,260 aap.optimization INFO: Optimization: total cost 0.3557 (greedy 0.4407), 73 iterations x 16 ants, stopped by stagnation, 131 distinct paths, 0.18 s
+2026-11-12 18:49:00,260 aap.optimization INFO: Cost breakdown: travel=0.308x0.020, direction_change=0.607x0.082, tool_change=0.500x0.224, size_contacts=0.230x0.163, grouping=0.000x0.122, stability=0.571x0.245, gravity_change=0.071x0.143
+2026-11-12 18:49:00,260 aap.optimization INFO:   step 1: industrial_fastner_part3 along (-1, 0, 0), travel 66.3 mm, g=(-1, 0, 0), class 2
+2026-11-12 18:49:00,260 aap.optimization INFO:   step 2: industrial_fastner_part7 along (-1, 0, 0), travel 34.2 mm, g=(-1, 0, 0), class 2
+2026-11-12 18:49:00,260 aap.optimization INFO:   step 3: industrial_fastner_part4 along (0, -1, 0), travel 24.9 mm, g=(-1, 0, 0), class 1
+2026-11-12 18:49:00,260 aap.optimization INFO:   step 4: industrial_fastner_part6 along (-1, 0, 0), travel 71.2 mm, g=(-1, 0, 0), class 1
+2026-11-12 18:49:00,260 aap.optimization INFO:   step 5: industrial_fastner_part2 along (1, 0, 0), travel 49.0 mm, g=(-1, 0, 0), class 1
+2026-11-12 18:49:00,260 aap.optimization INFO:   step 6: industrial_fastner_part5 along (1, 0, 0), travel 43.0 mm, g=(0, 1, 0), class 2
+2026-11-12 18:49:00,260 aap.optimization INFO:   step 7: industrial_fastner_part001 along (0, -1, 0), travel 24.9 mm, g=(0, 1, 0), class 1
+2026-11-12 18:49:00,260 aap.optimization INFO:   step 8: industrial_fastner_part1 along (0, 0, 1), travel 46.5 mm, g=(0, 1, 0), class 2
+2026-11-12 18:49:00,271 aap.robot INFO: Robot loop: iteration 5: cost 0.3557, 5 infeasible step(s), weakest relative 0.000, pruned 4 new edge(s) (20 blocked)
+2026-11-12 18:49:00,271 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-12 18:49:00,271 aap.robot INFO:     step 2 industrial_fastner_part7: tool nut_effector ok
+2026-11-12 18:49:00,271 aap.robot INFO:     step 3 industrial_fastner_part4: tool bushing_effector CONTACT {2: ['industrial_fastner_part3'], 3: ['industrial_fastner_part3', 'industrial_fastner_part7']}
+2026-11-12 18:49:00,271 aap.robot INFO:     step 4 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-12 18:49:00,271 aap.robot INFO:     step 5 industrial_fastner_part2: gripper ok (S=0.736, S_rel=0.916)
+2026-11-12 18:49:00,271 aap.robot INFO:     step 6 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-12 18:49:00,271 aap.robot INFO:     step 7 industrial_fastner_part001: tool bushing_effector CONTACT {2: ['industrial_fastner_part3'], 3: ['industrial_fastner_part3', 'industrial_fastner_part6', 'industrial_fastner_part7']}
+2026-11-12 18:49:00,271 aap.robot INFO:     step 8 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-12 18:49:00,271 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot\optimization
+2026-11-12 18:49:00,527 aap.optimization INFO: Optimization: total cost 0.3570 (greedy 0.4245), 82 iterations x 16 ants, stopped by stagnation, 125 distinct paths, 0.21 s
+2026-11-12 18:49:00,527 aap.optimization INFO: Cost breakdown: travel=0.488x0.020, direction_change=0.500x0.082, tool_change=0.500x0.224, size_contacts=0.269x0.163, grouping=0.000x0.122, stability=0.571x0.245, gravity_change=0.071x0.143
+2026-11-12 18:49:00,527 aap.optimization INFO:   step 1: industrial_fastner_part3 along (-1, 0, 0), travel 66.3 mm, g=(-1, 0, 0), class 2
+2026-11-12 18:49:00,527 aap.optimization INFO:   step 2: industrial_fastner_part7 along (-1, 0, 0), travel 34.2 mm, g=(-1, 0, 0), class 2
+2026-11-12 18:49:00,527 aap.optimization INFO:   step 3: industrial_fastner_part1 along (0, 0, 1), travel 46.5 mm, g=(-1, 0, 0), class 2
+2026-11-12 18:49:00,527 aap.optimization INFO:   step 4: industrial_fastner_part2 along (0, 0, -1), travel 37.8 mm, g=(-1, 0, 0), class 1
+2026-11-12 18:49:00,527 aap.optimization INFO:   step 5: industrial_fastner_part001 along (0, -1, 0), travel 24.9 mm, g=(-1, 0, 0), class 1
+2026-11-12 18:49:00,527 aap.optimization INFO:   step 6: industrial_fastner_part4 along (0, 1, 0), travel 87.7 mm, g=(-1, 0, 0), class 1
+2026-11-12 18:49:00,527 aap.optimization INFO:   step 7: industrial_fastner_part6 along (1, 0, 0), travel 64.2 mm, g=(-1, 0, 0), class 1
+2026-11-12 18:49:00,527 aap.optimization INFO:   step 8: industrial_fastner_part5 along (1, 0, 0), travel 43.0 mm, g=(0, 1, 0), class 2
+2026-11-12 18:49:00,537 aap.robot.engine INFO: Starting grasp engine worker: C:\Users\danie\miniconda3\envs\parallelgrippercode\python.exe
+2026-11-12 18:49:04,635 aap.robot.engine INFO: Grasp engine worker ready (function copy 1, source sha 9d29272f7d9c...)
+2026-11-12 18:49:24,462 aap.robot.gripper INFO: Engine: industrial_fastner_part2 with 3 obstacle(s) -> 50 grasps, best 0.761 (23.9 s)
+2026-11-12 18:49:24,504 aap.robot INFO: Robot loop: iteration 6: cost 0.3570, 5 infeasible step(s), weakest relative 0.000, pruned 4 new edge(s) (24 blocked)
+2026-11-12 18:49:24,504 aap.robot INFO:     step 1 industrial_fastner_part3: gripper ok (S=0.946, S_rel=1.000)
+2026-11-12 18:49:24,504 aap.robot INFO:     step 2 industrial_fastner_part7: tool nut_effector ok
+2026-11-12 18:49:24,504 aap.robot INFO:     step 3 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-12 18:49:24,504 aap.robot INFO:     step 4 industrial_fastner_part2: gripper ok (S=0.761, S_rel=0.946)
+2026-11-12 18:49:24,504 aap.robot INFO:     step 5 industrial_fastner_part001: tool bushing_effector CONTACT {2: ['industrial_fastner_part3'], 3: ['industrial_fastner_part3', 'industrial_fastner_part7']}
+2026-11-12 18:49:24,504 aap.robot INFO:     step 6 industrial_fastner_part4: tool bushing_effector CONTACT {2: ['industrial_fastner_part3'], 3: ['industrial_fastner_part3', 'industrial_fastner_part7']}
+2026-11-12 18:49:24,504 aap.robot INFO:     step 7 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-12 18:49:24,504 aap.robot INFO:     step 8 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-12 18:49:24,504 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot\optimization
+2026-11-12 18:49:24,716 aap.optimization INFO: Optimization: total cost 0.3293 (greedy 0.3304), 52 iterations x 16 ants, stopped by stagnation, 89 distinct paths, 0.14 s
+2026-11-12 18:49:24,716 aap.optimization INFO: Cost breakdown: travel=0.208x0.020, direction_change=0.464x0.082, tool_change=0.500x0.224, size_contacts=-0.000x0.163, grouping=0.000x0.122, stability=0.714x0.245, gravity_change=0.000x0.143
+2026-11-12 18:49:24,716 aap.optimization INFO:   step 1: industrial_fastner_part7 along (-1, 0, 0), travel 34.2 mm, g=(1, 0, 0), class 2
+2026-11-12 18:49:24,716 aap.optimization INFO:   step 2: industrial_fastner_part6 along (-1, 0, 0), travel 71.2 mm, g=(1, 0, 0), class 1
+2026-11-12 18:49:24,716 aap.optimization INFO:   step 3: industrial_fastner_part3 along (-1, 0, 0), travel 66.3 mm, g=(1, 0, 0), class 1
+2026-11-12 18:49:24,717 aap.optimization INFO:   step 4: industrial_fastner_part2 along (1, 0, 0), travel 49.0 mm, g=(1, 0, 0), class 1
+2026-11-12 18:49:24,717 aap.optimization INFO:   step 5: industrial_fastner_part001 along (0, -1, 0), travel 24.9 mm, g=(1, 0, 0), class 1
+2026-11-12 18:49:24,717 aap.optimization INFO:   step 6: industrial_fastner_part4 along (0, -1, 0), travel 24.9 mm, g=(1, 0, 0), class 1
+2026-11-12 18:49:24,717 aap.optimization INFO:   step 7: industrial_fastner_part5 along (1, 0, 0), travel 43.0 mm, g=(1, 0, 0), class 2
+2026-11-12 18:49:24,717 aap.optimization INFO:   step 8: industrial_fastner_part1 along (0, 0, 1), travel 46.5 mm, g=(1, 0, 0), class 2
+2026-11-12 18:49:24,726 aap.robot INFO: Robot loop: iteration 7: cost 0.3293, 5 infeasible step(s), weakest relative 0.000, pruned 4 new edge(s) (28 blocked)
+2026-11-12 18:49:24,726 aap.robot INFO:     step 1 industrial_fastner_part7: tool nut_effector ok
+2026-11-12 18:49:24,726 aap.robot INFO:     step 2 industrial_fastner_part6: gripper INFEASIBLE (S=0.000, S_rel=0.000, rotated) -- relative score 0.000 below 0.5
+2026-11-12 18:49:24,726 aap.robot INFO:     step 3 industrial_fastner_part3: gripper ok (S=0.815, S_rel=0.862)
+2026-11-12 18:49:24,726 aap.robot INFO:     step 4 industrial_fastner_part2: gripper ok (S=0.749, S_rel=0.931)
+2026-11-12 18:49:24,726 aap.robot INFO:     step 5 industrial_fastner_part001: tool bushing_effector CONTACT {2: ['industrial_fastner_part3'], 3: ['industrial_fastner_part3', 'industrial_fastner_part6', 'industrial_fastner_part7']}
+2026-11-12 18:49:24,726 aap.robot INFO:     step 6 industrial_fastner_part4: tool bushing_effector CONTACT {2: ['industrial_fastner_part3'], 3: ['industrial_fastner_part3', 'industrial_fastner_part6', 'industrial_fastner_part7']}
+2026-11-12 18:49:24,726 aap.robot INFO:     step 7 industrial_fastner_part5: gripper INFEASIBLE (S=0.000, S_rel=0.000) -- relative score 0.000 below 0.5
+2026-11-12 18:49:24,726 aap.robot INFO:     step 8 industrial_fastner_part1: gripper INFEASIBLE (S=-, S_rel=-) -- no grasp even alone (S_alone = 0)
+2026-11-12 18:49:24,726 aap.optimization INFO: Loaded cached term tables from output\industrial_fastner_robot\optimization
+2026-11-12 18:49:24,760 aap.robot INFO: Robot loop: iteration 8: no path left after pruning (The 28 blocked edge(s) disconnect the root from the terminal)
+2026-11-12 18:49:25,160 aap.robot WARNING: Robot plan written to output\industrial_fastner_robot\plan.json: chosen sequence (iteration 6) still has 5 infeasible step(s): ['3 industrial_fastner_part1', '5 industrial_fastner_part001', '6 industrial_fastner_part4', '7 industrial_fastner_part6', '8 industrial_fastner_part5']
+Robot plan: the chosen sequence still has 5 infeasible step(s): step 3 industrial_fastner_part1 (no grasp even alone (S_alone = 0)), step 5 industrial_fastner_part001 (tool contact in every free sense), step 6 industrial_fastner_part4 (tool contact in every free sense), step 7 industrial_fastner_part6 (relative score 0.000 below 0.5), step 8 industrial_fastner_part5 (relative score 0.000 below 0.5). See plan.json -> robot.

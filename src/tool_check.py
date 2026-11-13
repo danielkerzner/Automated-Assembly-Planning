@@ -7,20 +7,27 @@ orientation, and checked statically in the assembled state against every other c
 that state, with the collision core's boolean (`collision._common_volume`). Contact = a common volume
 above `RobotConfig.tool_contact_volume_tol` (touching faces give ~0 volume and do not count).
 
-Conventions (defined here, 2026-11-12, to confirm with the author -- spec 7 left them open):
+Conventions (confirmed with the author 2026-11-12; spec 13.4):
   - Tool STEP frame: the tool's working axis is its +Z axis through the origin, pointing from the robot
-    flange towards the bit. The bit tip is the highest point where the Z axis line meets the tool's
-    solids (computed, not hard-coded; for tools/gripper/screwing_effector.step it is about z = 241 mm).
-  - Engagement point on the stander: its outermost point along the removal direction d (the screw head
-    face), on the line through its centre of mass along d.
+    flange towards the working element (bit, socket, pin), which connects to the stander in the max Z
+    direction. Interface plane = the bbox max Z of the solid that the Z axis line meets highest. The
+    robot body and its off-axis motor housing are taller but never on the axis. For a hollow socket the
+    axis meets only the cavity floor, so the rim (that solid's bbox max Z) is the plane. Measured:
+    screwing_effector 241 mm (bit), nut_effector 239 mm (socket), bushing_effector 235 mm (pin).
+  - Engagement point on the stander: its outermost point along the removal direction d (screw head
+    face, nut top), on the line through its centre of mass along d.
+  - Overlap (`RobotConfig.tool_overlap_fraction`, per stander category): the stander sits this fraction
+    of its own extent along d past the tool's interface plane. Screws 0 (the bit just touches the head),
+    nuts and bushings 0.5 (a 12 mm nut has 6 mm inside the socket). The extent is measured along d from
+    the stander's tessellation, which equals its bounding-box extent for an axis-aligned d.
   - Placement: tool +Z is turned onto -d (the tool comes from outside, along the removal direction)
-    with the shortest rotation, so there is no extra spin about the axis; the bit tip sits on the
-    engagement point, moved `tool_engage_depth_mm` into the stander along -d (default 0).
+    with the shortest rotation, so there is no extra spin about the axis; the interface plane sits at
+    the engagement point moved by the overlap into the stander along -d.
   - Senses: every free direction of the stander's AoG edge is a sense; the tool is placed on the side
-    the stander leaves towards.
-  - Tool per stander category: `RobotConfig.tools` (1 screw -> screwing_effector.step; nut and other
-    tools do not exist yet). A stander without a tool is reported `checked = False` and counts as
-    feasible (the spec's stub behaviour).
+    the stander leaves towards. The stander itself is ignored in the contact test.
+  - Tool per stander category: `RobotConfig.tools` (1 screw -> screwing_effector.step, 2 nut ->
+    nut_effector.stp, 3 other/bushing -> bushing_effector.stp). A category mapped to None is reported
+    `checked = False` and counts as feasible (the spec's stub behaviour).
 """
 
 from __future__ import annotations
@@ -72,27 +79,37 @@ def load_tool(path: str | Path) -> Tool:
     zmin = min(s.BoundBox.ZMin for s in solids) - 10
     zmax = max(s.BoundBox.ZMax for s in solids) + 10
     axis = Part.LineSegment(Vector(0, 0, zmin), Vector(0, 0, zmax)).toShape()
-    top = None
+    hit, element = None, None  # highest point where the Z axis meets material, and that solid
     for s in solids:
         try:
             cut = s.common(axis)
         except Exception:  # noqa: BLE001
             continue
         for v in cut.Vertexes:
-            if top is None or v.Point.z > top:
-                top = v.Point.z
-    if top is None:
-        raise ValueError(f"Tool STEP {path}: its +Z axis meets no solid; cannot find the bit tip")
-    log.info("Tool %s: %d solid(s), bit tip at z = %.2f mm", path.name, len(solids), top)
+            if hit is None or v.Point.z > hit:
+                hit, element = v.Point.z, s
+    if element is None:
+        raise ValueError(f"Tool STEP {path}: its +Z axis meets no solid; cannot find the working element")
+    # Interface plane: the element's max Z (a socket's rim, not its cavity floor). optimalBoundingBox, not BoundBox:
+    # the plain BoundBox of these STEP solids can be far too loose (the robot body reports z 339.85, really 188).
+    top = element.optimalBoundingBox().ZMax
+    log.info("Tool %s: %d solid(s), working element meets the axis up to z = %.2f mm, interface plane z = %.2f mm",
+             path.name, len(solids), hit, top)
     return Tool(name=path.stem, path=path, solids=solids, tip=Vector(0, 0, top))
+
+
+def engagement(shape, d: Vector) -> tuple[Vector, float]:
+    """(outermost point of the stander along d on the line through its centre of mass, its extent along d)."""
+    pts, _ = shape.tessellate(0.1)
+    proj = [p.dot(d) for p in pts]
+    top, bottom = max(proj), min(proj)
+    com = shape.CenterOfMass if hasattr(shape, "CenterOfMass") else shape.BoundBox.Center
+    return com + d * (top - com.dot(d)), top - bottom
 
 
 def engagement_point(shape, d: Vector) -> Vector:
     """Outermost point of the stander along d, on the line through its centre of mass along d."""
-    pts, _ = shape.tessellate(0.1)
-    top = max(p.dot(d) for p in pts)
-    com = shape.CenterOfMass if hasattr(shape, "CenterOfMass") else shape.BoundBox.Center
-    return com + d * (top - com.dot(d))
+    return engagement(shape, d)[0]
 
 
 def place_tool(tool: Tool, engage: Vector, d: Vector, depth: float = 0.0) -> list:
@@ -142,6 +159,7 @@ class ToolChecker:
         self._tools: dict[int, Tool | None] = {}
         self._placed: dict[tuple[int, int], list] = {}
         self._pair: dict[tuple[int, int, int], bool] = {}
+        self._bboxes: dict = {}
         self._steps: dict[tuple[int, int, int | None], ToolStep] = {}
 
     def tool_for(self, c: int) -> Tool | None:
@@ -160,17 +178,27 @@ class ToolChecker:
         if (c, k) not in self._placed:
             tool = self.tool_for(c)
             d = Vector(*[float(v) for v in self.directions[k]])
-            engage = engagement_point(self.shapes[c], d)
-            self._placed[(c, k)] = place_tool(tool, engage, d, self.config.tool_engage_depth_mm)
+            d.normalize()
+            engage, extent = engagement(self.shapes[c], d)
+            depth = float(self.config.tool_overlap_fraction.get(self.categories.get(c), 0.0)) * extent
+            self._placed[(c, k)] = place_tool(tool, engage, d, depth)
         return self._placed[(c, k)]
+
+    def _tight_bbox(self, key, shape):
+        """optimalBoundingBox, cached: the plain BoundBox can be far too loose (B-spline faces), which only
+        costs extra exact booleans in the pre-filter below, never a wrong answer."""
+        if key not in self._bboxes:
+            self._bboxes[key] = shape.optimalBoundingBox()
+        return self._bboxes[key]
 
     def _touches(self, c: int, k: int, o: int) -> bool:
         key = (c, k, o)
         if key not in self._pair:
             other = self.shapes[o]
+            other_bb = self._tight_bbox(("comp", o), other)
             hit = False
-            for s in self._tool_solids(c, k):
-                if not _bbox_overlap(s.BoundBox, other.BoundBox):
+            for idx, s in enumerate(self._tool_solids(c, k)):
+                if not _bbox_overlap(self._tight_bbox(("tool", c, k, idx), s), other_bb):
                     continue
                 try:
                     vol = collision._common_volume(s, other)

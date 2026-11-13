@@ -82,13 +82,28 @@ class StepEval:
     component: int
     label: str
     kind: str  # "gripper" | "tool"
-    feasible: bool
+    feasible: bool  # the edge: part check and (when enabled) both sub-assembly nodes
     grasp: object | None = None  # StepGrasp
     tool: object | None = None  # ToolStep
+    # Optional sub-assembly check (RobotConfig.check_subassembly_grasp): the two nodes of the edge, i.e. the
+    # sub-assembly after the insertion (`state`) and before it (`state` without the component). None when off.
+    node_after: object | None = None  # NodeGrasp
+    node_before: object | None = None  # NodeGrasp
+    root_state: int = 0  # the full assembly's mask (its node is in every path: never a reason to prune)
 
     @property
     def edge_key(self) -> tuple[int, int]:
         return (self.state, self.component)
+
+    @property
+    def part_feasible(self) -> bool:
+        if self.kind == "tool":
+            return bool(self.tool.feasible)
+        return bool(self.grasp.feasible)
+
+    @property
+    def failing_nodes(self) -> list:
+        return [n for n in (self.node_after, self.node_before) if n is not None and not n.feasible]
 
     @property
     def score_relative(self) -> float | None:
@@ -100,7 +115,12 @@ class StepEval:
 
 
 def evaluate_sequence(seq, aog, stander_records: dict, analysis: GripperAnalysis, tool_checker) -> list[StepEval]:
-    """Evaluate every step of an OptimizationResult (assembly order), never stopping at a failure."""
+    """Evaluate every step of an OptimizationResult (assembly order), never stopping at a failure.
+
+    With `check_subassembly_grasp` on, each edge also needs both of its nodes (the sub-assembly before and
+    after the insertion) to be graspable; node results are cached per state in the analysis."""
+    check_nodes = bool(getattr(analysis.config, "check_subassembly_grasp", False))
+    root_state = int(aog.node_mask[aog.root])
     out = []
     for s in seq.steps:
         e, c = int(s["edge"]), int(s["component"])
@@ -108,12 +128,17 @@ def evaluate_sequence(seq, aog, stander_records: dict, analysis: GripperAnalysis
         if bool(aog.is_stander[c]):
             senses = [int(k) for k in aog.edge_direction_indices(e)]
             ts = tool_checker.step(state, c, senses, preferred=int(s["removal_direction_index"]))
-            out.append(StepEval(step=int(s["step"]), edge=e, state=state, component=c, label=aog.component_labels[c],
-                                kind="tool", feasible=ts.feasible, tool=ts))
+            ev = StepEval(step=int(s["step"]), edge=e, state=state, component=c, label=aog.component_labels[c],
+                          kind="tool", feasible=ts.feasible, tool=ts, root_state=root_state)
         else:
             g = analysis.step(state, c, rotation_for(state, c, aog, stander_records))
-            out.append(StepEval(step=int(s["step"]), edge=e, state=state, component=c, label=aog.component_labels[c],
-                                kind="gripper", feasible=g.feasible, grasp=g))
+            ev = StepEval(step=int(s["step"]), edge=e, state=state, component=c, label=aog.component_labels[c],
+                          kind="gripper", feasible=g.feasible, grasp=g, root_state=root_state)
+        if check_nodes:
+            ev.node_after = analysis.node(state)
+            ev.node_before = analysis.node(state & ~(1 << c))
+            ev.feasible = ev.part_feasible and not ev.failing_nodes
+        out.append(ev)
     return out
 
 
@@ -132,12 +157,20 @@ def edges_to_prune(steps: list[StepEval], config: RobotConfig) -> list[tuple[tup
     for s in steps:
         if s.feasible or s.intrinsic:
             continue
-        if s.kind == "tool":
-            out[s.edge_key] = "tool contact in every free sense"
-        else:
-            out[s.edge_key] = f"infeasible grasp ({s.grasp.reason})"
+        if not s.part_feasible:
+            if s.kind == "tool":
+                out[s.edge_key] = "tool contact in every free sense"
+            else:
+                out[s.edge_key] = f"infeasible grasp ({s.grasp.reason})"
+            continue
+        # The part is fine, a sub-assembly node is not. The full assembly is in every path, so a failure of
+        # its node alone is reported but never pruned (pruning could only disconnect the AoG).
+        avoidable = [n for n in s.failing_nodes if n.state != s.root_state]
+        if avoidable:
+            out[s.edge_key] = "sub-assembly not graspable (" + "; ".join(n.reason for n in avoidable) + ")"
     grip = [s for s in steps if s.kind == "gripper" and not s.intrinsic]
-    grip.sort(key=lambda s: (s.feasible, s.score_relative if s.score_relative is not None else -1.0))
+    # ranked by the part's own grasp (the quarter is about grasp quality; node failures are pruned above)
+    grip.sort(key=lambda s: (s.part_feasible, s.score_relative if s.score_relative is not None else -1.0))
     for s in grip[:quarter_count(len(grip), config.grasp_quarter_fraction)]:
         out.setdefault(s.edge_key, f"worst quarter (relative score {s.score_relative:.3f})")
     return list(out.items())
@@ -219,14 +252,18 @@ def run_robot_loop(aog, interference_result, prep, analysis: GripperAnalysis, to
             if s.kind == "gripper":
                 g = s.grasp
                 log.info("    step %d %s: gripper %s (S=%s, S_rel=%s%s)%s", s.step, s.label,
-                         "ok" if s.feasible else "INFEASIBLE",
+                         "ok" if s.part_feasible else "INFEASIBLE",
                          "-" if g.score_context is None else f"{g.score_context:.3f}",
                          "-" if g.score_relative is None else f"{g.score_relative:.3f}",
-                         ", rotated" if g.rotation_checked else "", "" if s.feasible else f" -- {g.reason}")
+                         ", rotated" if g.rotation_checked else "", "" if s.part_feasible else f" -- {g.reason}")
             else:
                 t = s.tool
                 log.info("    step %d %s: tool %s %s", s.step, s.label, t.tool or "(none, unchecked)",
-                         "ok" if s.feasible else f"CONTACT {t.contact_with}")
+                         "ok" if s.part_feasible else f"CONTACT {t.contact_with}")
+            if s.node_after is not None:
+                fmt = lambda n: "-" if n.score is None else f"{n.score:.3f}{'' if n.feasible else ' NOT graspable'}"
+                log.info("        sub-assemblies: after insertion (%d parts) %s, before (%d parts) %s",
+                         s.node_after.n_components, fmt(s.node_after), s.node_before.n_components, fmt(s.node_before))
         if not new:
             stop_reason = f"no new pruning after iteration {it} (the next candidate would repeat it)"
             break

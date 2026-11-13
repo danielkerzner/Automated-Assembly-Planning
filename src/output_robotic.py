@@ -18,6 +18,10 @@ for the sequence the robot loop chose. The `robot` block is added next to it:
                              that pruned each and why), sequences (every recorded sequence with its
                              per-step results and metrics; `chosen` marks the chosen one)
   robot.alone_scores         label -> S_alone (non-stander components)
+  robot.subassembly_scores   optional sub-assembly check (RobotConfig.check_subassembly_grasp), else null:
+                             state mask -> {score, feasible, n_components, components, best}. Each step then
+                             also has part_feasible, subassembly_after, subassembly_before, and `feasible`
+                             is the edge's (part and both nodes)
   robot.intrinsically_infeasible  labels that fail even alone (never pruned; check by hand)
   robot.thresholds, robot.config, robot.engine
 """
@@ -70,6 +74,12 @@ def step_json(s, aog) -> dict:
             "senses": tj["senses"],
             "reason": None if t.feasible else "tool contact in every free sense",
         })
+    if s.node_after is not None:  # optional sub-assembly check
+        base["part_feasible"] = s.part_feasible
+        base["subassembly_after"] = s.node_after.to_json()
+        base["subassembly_before"] = s.node_before.to_json()
+        if s.part_feasible and s.failing_nodes:
+            base["reason"] = "; ".join(n.reason for n in s.failing_nodes)
     return base
 
 
@@ -79,7 +89,14 @@ def failing_json(s) -> dict:
         out.update({"reason": s.grasp.reason, "score": s.grasp.score_context,
                     "score_relative": s.grasp.score_relative, "intrinsically_infeasible": s.grasp.intrinsic})
     else:
-        out.update({"reason": "tool contact in every free sense", "contact_with": s.tool.contact_with})
+        out.update({"reason": None if s.tool.feasible else "tool contact in every free sense",
+                    "contact_with": s.tool.contact_with})
+    nodes = s.failing_nodes
+    if nodes:  # optional sub-assembly check
+        node_reason = "; ".join(n.reason for n in nodes)
+        out["reason"] = node_reason if s.part_feasible else f"{out['reason']}; {node_reason}"
+        out["subassembly_not_graspable"] = [{"state": n.state, "n_components": n.n_components, "score": n.score,
+                                             "full_assembly": n.state == s.root_state} for n in nodes]
     return out
 
 
@@ -110,6 +127,10 @@ def robot_block(loop, aog, analysis, config) -> dict:
             "wall_time_s": loop.wall_time_s,
         },
         "alone_scores": {aog.component_labels[c]: v for c, v in sorted(alone.items())},
+        # optional sub-assembly check: every evaluated node, keyed by its state mask (as a string, for JSON)
+        "subassembly_scores": ({str(st): {**n.to_json(), "components": _state_labels(aog, st)}
+                                for st, n in sorted(analysis.node_scores().items())}
+                               if config.check_subassembly_grasp else None),
         "intrinsically_infeasible": intrinsic,
         "thresholds": config.thresholds(),
         "config": config.to_json(),

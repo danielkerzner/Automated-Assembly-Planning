@@ -185,6 +185,12 @@ def _parse_args() -> argparse.Namespace:
         help="manual (illustrated human instructions) or robot (gripper/tool feasibility loop, "
              "docs/robotic-gripper_spec.md). If omitted you are asked; without a terminal, manual.",
     )
+    parser.add_argument(
+        "--check-subassembly-grasp",
+        action="store_true",
+        help="robot mode only: an edge is feasible only if both sub-assemblies it joins (before and after the "
+             "insertion) are graspable as one object (one extra grasp-engine call per distinct sub-assembly).",
+    )
     return parser.parse_args()
 
 
@@ -209,10 +215,12 @@ def resolve_mode(flag: str | None, ask=input, interactive: bool | None = None) -
 
 
 def _main_robot(args) -> int:
+    from robot_config_robotic import RobotConfig
     from robot_loop_robotic import run_robot_pipeline  # robot modules only load in robot mode
 
     plan_dict = run_robot_pipeline(
         args.step_path, args.bom_path, args.output_dir,
+        robot_config=RobotConfig(check_subassembly_grasp=args.check_subassembly_grasp),
         collision_config=CollisionConfig(step=args.step),
         force_interference=args.force_interference,
         max_level_components=args.max_level_components,
@@ -230,6 +238,8 @@ def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s: %(message)s")
     if resolve_mode(args.mode) == "robot":
         return _main_robot(args)
+    if args.check_subassembly_grasp:
+        log.warning("--check-subassembly-grasp only applies to robot mode; ignored in manual mode")
     plan_dict = run_pipeline(
         args.step_path,
         args.bom_path,

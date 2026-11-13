@@ -718,17 +718,20 @@
      ]
     }
    ],
-   "wall_time_s": 0.09263300000020536
+   "wall_time_s": 0.05871480000041629
   },
   "alone_scores": {
    "c0": 0.9,
    "c1": 0.8,
    "c2": 0.6
   },
+  "subassembly_scores": null,
   "intrinsically_infeasible": [],
   "thresholds": {
    "grasp_rel_threshold": 0.5,
    "grasp_abs_floor": 0.5,
+   "check_subassembly_grasp": false,
+   "subassembly_grasp_floor": null,
    "boundary_inclusive": true,
    "grasp_rotation_step_deg": 90.0,
    "grasp_quarter_fraction": 0.25,
@@ -740,6 +743,8 @@
    "grasp_rel_threshold": 0.5,
    "grasp_abs_floor": 0.5,
    "grasp_boundary_inclusive": true,
+   "check_subassembly_grasp": false,
+   "subassembly_grasp_floor": null,
    "grasp_rotation_step_deg": 90.0,
    "grasp_match_tol_mm": 0.5,
    "grasp_match_angle_deg": 5.0,
@@ -755,10 +760,14 @@
    "tool_dir": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\tools\\gripper",
    "tools": {
     "1": "screwing_effector.step",
-    "2": null,
-    "3": null
+    "2": "nut_effector.stp",
+    "3": "bushing_effector.stp"
    },
-   "tool_engage_depth_mm": 0.0,
+   "tool_overlap_fraction": {
+    "1": 0.0,
+    "2": 0.5,
+    "3": 0.5
+   },
    "tool_contact_volume_tol": 0.001,
    "disk_cache": true
   },

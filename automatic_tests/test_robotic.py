@@ -140,9 +140,10 @@ def fake_step(step, state, comp, kind="gripper", feasible=True, rel=1.0, intrins
     g = None
     if kind == "gripper":
         g = SimpleNamespace(score_relative=None if intrinsic else rel, intrinsic=intrinsic, reason=None if feasible else "x",
-                            score_context=None if intrinsic else rel, score_alone=1.0)
+                            score_context=None if intrinsic else rel, score_alone=1.0, feasible=feasible)
     return StepEval(step=step, edge=step, state=state, component=comp, label=f"c{comp}", kind=kind,
-                    feasible=feasible, grasp=g, tool=None if kind == "gripper" else SimpleNamespace(contact_with={}))
+                    feasible=feasible, grasp=g,
+                    tool=None if kind == "gripper" else SimpleNamespace(contact_with={}, feasible=feasible))
 
 
 def real_optimizer(aog, tables, cfg):
@@ -370,6 +371,96 @@ def test_r8(rec, args):
     rec.check(json.loads((out / "plan.json").read_text())["robot"]["mode"] == "robot", "plan.json written with the robot block")
 
 
+class NodeEngine:
+    """Sub-assembly fake: a one-part target scores 0.9 * (1 - 0.05 * obstacles); a multi-part target (a node)
+    scores node_table[number of parts]. Counts part calls and node calls separately."""
+
+    def __init__(self, node_table, n_per_cloud=10):
+        self.table, self.n_per = node_table, n_per_cloud
+        self.part_calls = self.node_calls = 0
+
+    def evaluate(self, target, obstacles):
+        n_t = len(target[0]) // self.n_per
+        k = 0 if obstacles is None else len(obstacles[0]) // self.n_per
+        if n_t == 1:
+            self.part_calls += 1
+            s = 0.9 * (1 - 0.05 * k)
+        else:
+            self.node_calls += 1
+            s = self.table[n_t]
+        return EngineResult(grasps=[Grasp(tcp=np.zeros(3), axes=np.eye(3), contact_area=1.0, grasp_width=10.0, score=s)])
+
+    @property
+    def calls(self):
+        return self.part_calls + self.node_calls
+
+
+def test_r13(rec, args):
+    """Optional sub-assembly check (spec 13.6): an edge needs both nodes graspable; nodes cached; root never pruned."""
+    from output_robotic import robot_block
+    from robot_loop_robotic import evaluate_sequence
+    aog = all_free_aog(4)
+    tables = make_tables(aog)
+    cfg_opt = only("use_travel", "use_direction_change", n_iterations=40)
+    clouds = [toy_cloud(c) for c in range(4)]
+    keys, labels = [f"k{c}" for c in range(4)], [f"c{c}" for c in range(4)]
+    prep = SimpleNamespace(stander_records={})
+    seq = op.optimize(aog, tables, cfg_opt)
+
+    # off (default): no node calls, no node fields, identical feasibility
+    eng = NodeEngine({2: 0.9, 3: 0.2, 4: 0.9})
+    an = GripperAnalysis(eng, clouds, keys, labels, RobotConfig(grasp_abs_floor=0.5))
+    steps = evaluate_sequence(seq, aog, {}, an, NoTools())
+    rec.check(RobotConfig().check_subassembly_grasp is False, "off by default")
+    rec.check(eng.node_calls == 0 and all(s.node_after is None for s in steps) and all(s.feasible for s in steps),
+              "off: no sub-assembly calls, no node fields, all part steps feasible")
+
+    # on: 3-part sub-assemblies are not graspable -> the two edges touching them are infeasible
+    cfg = RobotConfig(check_subassembly_grasp=True)
+    eng = NodeEngine({2: 0.9, 3: 0.2, 4: 0.9})
+    an = GripperAnalysis(eng, clouds, keys, labels, cfg)
+    steps = evaluate_sequence(seq, aog, {}, an, NoTools())
+    bad = [s.step for s in steps if not s.feasible]
+    pc = lambda m: bin(m).count("1")
+    expect = [s.step for s in steps if pc(s.state) == 3 or pc(s.state & ~(1 << s.component)) == 3]
+    rec.check(bad == expect and len(bad) == 2, f"edges into/out of the 3-part node infeasible ({bad})")
+    rec.check(all(s.part_feasible for s in steps), "the part checks themselves still pass")
+    pr = edges_to_prune(steps, cfg)
+    rec.check(any("sub-assembly not graspable" in why for _, why in pr), "node failures are pruned with their reason")
+    n_nodes = len({s.state for s in steps if pc(s.state) > 1} | {s.state & ~(1 << s.component) for s in steps
+                                                                  if pc(s.state & ~(1 << s.component)) > 1})
+    rec.check(eng.node_calls == n_nodes, f"one engine call per distinct multi-part node ({eng.node_calls} = {n_nodes})")
+    an.alone(0)  # already evaluated by the steps above
+    before = eng.calls
+    rec.check(an.node(1 << 0).score == an.alone(0) and eng.calls == before,
+              "a one-part node reuses that part's alone call (no new engine call)")
+    evaluate_sequence(seq, aog, {}, an, NoTools())
+    rec.check(eng.calls == before, "re-evaluating a sequence makes no new calls (nodes cached)")
+
+    # the full assembly not graspable: reported, never pruned
+    eng = NodeEngine({2: 0.9, 3: 0.9, 4: 0.2})
+    an = GripperAnalysis(eng, clouds, keys, labels, cfg)
+    steps = evaluate_sequence(seq, aog, {}, an, NoTools())
+    root_steps = [s for s in steps if s.state == s.root_state]
+    rec.check(len(root_steps) == 1 and not root_steps[0].feasible, "the step producing the full assembly is infeasible")
+    why = dict(edges_to_prune(steps, cfg)).get(root_steps[0].edge_key, "")
+    rec.check("sub-assembly" not in why,
+              f"a failure of the full-assembly node is never a pruning reason (reason given: {why or 'not pruned'})")
+
+    # loop + output
+    eng = NodeEngine({2: 0.9, 3: 0.2, 4: 0.9})
+    an = GripperAnalysis(eng, clouds, keys, labels, cfg)
+    res = run_robot_loop(aog, None, prep, an, NoTools(), cfg, optimize_fn=real_optimizer(aog, tables, cfg_opt))
+    rec.note(f"loop: {res.iterations} iteration(s), stop: {res.stop_reason}")
+    rec.check(all(r["n_infeasible"] >= 2 for r in res.records), "every sequence crosses a 3-part node: >= 2 infeasible")
+    blk = robot_block(res, aog, an, cfg)
+    st0 = blk["steps"][0]
+    rec.check(blk["subassembly_scores"] and "subassembly_after" in st0 and "part_feasible" in st0,
+              "plan robot block has subassembly_scores and per-step node results")
+    rec.check(blk["thresholds"]["check_subassembly_grasp"] is True and blk["thresholds"]["subassembly_grasp_floor"] == 0.5,
+              "thresholds report the option and the node floor (default = absolute floor)")
+
+
 # ---------------------------------------------------------------------------
 # freecad
 # ---------------------------------------------------------------------------
@@ -428,9 +519,30 @@ def test_r10(rec, args):
     rec.check(not s.feasible and s.contact_with.get(0) == ["lid"], f"both senses blocked -> infeasible ({s.contact_with})")
     s = tc.step(0b1011, 1, [0, 1], preferred=1)
     rec.check(s.feasible and s.sense == 0, "one free sense -> feasible, the free sense is reported")
-    tc2 = ToolChecker(shapes, names, [False, True, False, False], {1: 3}, dirs, RobotConfig())
+    tc2 = ToolChecker(shapes, names, [False, True, False, False], {1: 3}, dirs,
+                      RobotConfig(tools={1: "screwing_effector.step", 2: "nut_effector.stp", 3: None}))
     s = tc2.step(0b1111, 1, [0, 1], preferred=0)
-    rec.check(s.feasible and not s.checked, "category without a tool: unchecked, feasible (stub)")
+    rec.check(s.feasible and not s.checked, "category mapped to no tool: unchecked, feasible (stub)")
+
+    # Interface planes of the three tools (2026-11-12 rule: bbox max Z of the solid the axis meets highest).
+    cfg = RobotConfig()
+    tips = {cat: load_tool(Path(cfg.tool_dir) / cfg.tools[cat]).tip.z for cat in (1, 2, 3)}
+    rec.check(abs(tips[1] - 241.0) < 0.1 and abs(tips[2] - 239.0) < 0.1 and abs(tips[3] - 235.0) < 0.1,
+              f"interface planes: screw 241, nut 239 (socket rim, not cavity floor), bushing 235 ({tips})")
+
+    # Overlap: screw 0; nut / bushing half their extent along the axis (12 mm nut -> 6 mm inside the tool).
+    nut = Part.makeCylinder(8, 12, Vector(0, 0, 10), Vector(0, 0, 1)).cut(
+        Part.makeCylinder(4, 12, Vector(0, 0, 10), Vector(0, 0, 1)))  # z 10..22
+    plate2 = Part.makeBox(80, 80, 10, Vector(-40, -40, 0))
+    for cat, expect, what in ((1, 22.0, "screw: no overlap, tool face on the head (z 22)"),
+                              (2, 16.0, "nut: tool face 6 mm into the 12 mm nut (z 16)"),
+                              (3, 16.0, "bushing: tool face half its extent into it (z 16)")):
+        tcx = ToolChecker([plate2, nut], ["plate", "stander"], [False, True], {1: cat}, dirs, cfg)
+        low = min(s.optimalBoundingBox().ZMin for s in tcx._tool_solids(1, 0))  # BoundBox is loose here
+        rec.check(abs(low - expect) < 0.05, f"{what}; placed tool lowest z = {low:.2f}")
+    tcn = ToolChecker([plate2, nut, lid], ["plate", "nut", "lid"], [False, True, False], {1: 2}, dirs, cfg)
+    rec.check(not tcn.tool_contact(0b011, 1, 0), "nut socket from +z on a nut sitting on a plate: no contact")
+    rec.check(tcn.tool_contact(0b111, 1, 0), "with a lid above the nut: contact")
 
 
 # ---------------------------------------------------------------------------
@@ -518,6 +630,7 @@ def test_r12(rec, args):
 TESTS = {
     "R1": ("core", test_r1), "R2": ("core", test_r2), "R3": ("core", test_r3), "R4": ("core", test_r4),
     "R5": ("core", test_r5), "R6": ("core", test_r6), "R7": ("core", test_r7), "R8": ("core", test_r8),
+    "R13": ("core", test_r13),
     "R9": ("freecad", test_r9), "R10": ("freecad", test_r10),
     "R11": ("engine", test_r11), "R12": ("engine", test_r12),
 }
