@@ -1,6 +1,6 @@
 {
  "schema_version": 2,
- "cache_key": "e1144680933508e0b856c83cdb1c060bec517f3cc0d4d57a130e499d2877a8de",
+ "cache_key": "1a659f0dfc8da84759bacf5cef7b7a2c7fc8016fc388ee9bb2adaaca3d8ec1f2",
  "component_ids": [
   "Part__Feature",
   "Part__Feature001",
@@ -54,7 +54,7 @@
   "dead_ends": 0,
   "live_nodes": 61,
   "complete": true,
-  "time_s": 0.03757229999973788,
+  "time_s": 0.128546500010998,
   "array_bytes": 4167
  },
  "complete": true,
@@ -71,5 +71,5 @@
   "industrial_fastner_part4",
   "industrial_fastner_part001"
  ],
- "date": "2026-11-12T10:32:55"
+ "date": "2026-11-16T08:17:13"
 }

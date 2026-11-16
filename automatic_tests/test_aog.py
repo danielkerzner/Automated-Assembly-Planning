@@ -1,4 +1,16 @@
-"""Acceptance tests for the AoG generator (docs/aog-spec.md, A1-A13).
+"""Acceptance tests for the AoG generator (A1-A13).
+
+[SUPP] Automatic test file: not needed to run the pipeline. Module under test: `src/aog_generator.py`
+(`generate_aog`, `collect_inputs`, `build_aog`, the travel table, the direction extension, the cache and
+the sequence read-out).
+
+How the tests are built
+    Most tests feed `generate_aog` synthetic `AoGInputs` (tiny hand-made interference tensors, built with
+    `make_inputs`) so that the expected graph is known by construction. The two main reference sources are
+    (1) `brute_force`, an independent naive enumeration of all 2^N states written from the stander rules, and
+    (2) the cached `industrial_fastner` matrix and `report.json` committed in `output/industrial_fastner/`
+    (read-only). `random_inputs` generates random tensors with random stander gates, nut links, contacts and
+    BOM groups, so the brute-force comparison covers combinations nobody wrote by hand.
 
 Standalone runner (pytest is not installed in environmentAAP). From repo root:
 
@@ -9,9 +21,8 @@ Standalone runner (pytest is not installed in environmentAAP). From repo root:
 
 Groups:
   core   all tests on synthetic AoGInputs, plus industrial_fastner built from the cached interference
-         matrix (tests/industrial_fastner/interference/) and tests/industrial_fastner/report.json. When
-         those files are not in the working tree they are read from git HEAD (copied to the scratch
-         folder; nothing is written to tests/industrial_fastner/).
+         matrix (output/industrial_fastner/interference/) and output/industrial_fastner/report.json
+         (committed reference results; read-only).
   real   industrial_fastner through run_preprocessing + identify_interferences + build_aog (A2b, A8
          assembly-box check). Interference cache in the scratch folder (h = 2.0; ~4 min the first time).
   scale  A5 at N = 20.
@@ -25,7 +36,6 @@ import argparse
 import json
 import logging
 import shutil
-import subprocess
 import sys
 import time
 import tracemalloc
@@ -43,7 +53,7 @@ from aog_generator import AoGConfig, AoGInputs  # noqa: E402
 
 OUT_DIR = Path(__file__).resolve().parent / "output"
 SCRATCH = OUT_DIR / "aog_test"
-FASTENER_DIR = REPO_ROOT / "tests" / "industrial_fastner"
+FASTENER_DIR = REPO_ROOT / "output" / "industrial_fastner"
 FASTENER_STEP = REPO_ROOT / "data" / "industrial_fastner" / "industrial_fastner.stp"
 FASTENER_BOM = REPO_ROOT / "data" / "industrial_fastner" / "generated_bom.csv"
 # Stander IDs -> Labels of industrial_fastner (report.json stores IDs only; resolved by the real run).
@@ -57,7 +67,7 @@ AXIS_NAMES = ["+x", "-x", "+y", "-y", "+z", "-z"]
 
 
 # ---------------------------------------------------------------------------
-# Tiny test harness (same shape as test_interference.py)
+# Tiny test harness (same shape as the other test files)
 # ---------------------------------------------------------------------------
 
 
@@ -200,24 +210,14 @@ def random_inputs(rng: np.random.Generator, N: int) -> AoGInputs:
 
 
 def fixture(rel: str) -> Path:
-    """tests/industrial_fastner/<rel>, or (if absent from the working tree) its git HEAD version
-    copied to the scratch folder. Read-only with respect to tests/industrial_fastner/."""
-    path = FASTENER_DIR / rel
-    if path.exists():
-        return path
-    out = SCRATCH / "fixture_head" / rel
-    if not out.exists():
-        data = subprocess.run(["git", "show", f"HEAD:tests/industrial_fastner/{rel}"], cwd=REPO_ROOT,
-                              capture_output=True, check=True).stdout
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_bytes(data)
-    return out
+    """output/industrial_fastner/<rel> (committed reference results, read-only)."""
+    return FASTENER_DIR / rel
 
 
 def fastener_inputs_from_cache() -> AoGInputs:
     """industrial_fastner inputs from the cached matrix + report.json (no FreeCAD, no movable AABBs).
 
-    report.json (docs/stander_processing-spec.md 3.1 field names): category, options[] (direction,
+    report.json (field names): category, options[] (direction,
     exit_point, blockers), holds, contact_neighbors, bbox, partner, nut_rule.
     """
     meta = json.loads(fixture("interference/interference.json").read_text(encoding="utf-8"))
@@ -277,9 +277,9 @@ def _free_directions(free, directions, i, subset):
 def brute_force(inputs: AoGInputs):
     """(node set, edge set) with edges as (src_mask, comp, dst_mask, frozenset(direction indices)).
 
-    Independent reference for docs/stander_processing-spec.md section 3: blocker masks per
+    Independent reference for the stander model: blocker masks per
     stander option (plus nut_links folded into them / into movable `extra`), holds checked on
-    the resulting state T (section 3.4), not derived from `generate_aog`'s own mask code.
+    the resulting state T, not derived from `generate_aog`'s own mask code.
     """
     N, n = len(inputs.component_ids), inputs.n_movable
     dirs, _, kd = ag.extend_directions(inputs.directions, inputs.neg, inputs.stander_options)
@@ -302,8 +302,8 @@ def brute_force(inputs: AoGInputs):
                     stack.append(b)
         return len(seen) == len(comps)
 
-    # Fold nut_links into blocker sets / movable extra, exactly as docs/stander_processing-spec.md
-    # 3.3 describes (independently of generate_aog's own numpy mask code).
+    # Fold nut_links into blocker sets / movable extra, exactly as the stander model defines them
+    # (independently of generate_aog's own numpy mask code).
     blockers = {s: [set(b) for _d, b in inputs.stander_options[s]] for s in range(n, N)}
     holds = {s: set(inputs.stander_holds.get(s, ())) for s in range(n, N)}
     extra = {i: set() for i in range(n)}
@@ -448,6 +448,13 @@ def fastener_real():
 
 
 def test_a1(rec, args):
+    """A1 - The generated graph equals a brute-force enumeration.
+
+    Tests: `generate_aog` (states, edges and the free direction set of every edge).
+    What: compares nodes and edges with `brute_force`, an independent naive implementation of the same
+    rules, on the real industrial_fastner inputs and on 200 random synthetic cases (N up to 12, random
+    stander gates, holds, nut links, contacts and groups).
+    """
     inputs, aog = fastener_cached()
     nodes, edges = brute_force(inputs)
     m_nodes, m_edges = module_sets(aog)
@@ -470,6 +477,13 @@ def test_a1(rec, args):
 
 
 def test_a2(rec, args):
+    """A2 - The graph is structurally a valid layered DAG.
+
+    Tests: the arrays built by `generate_aog` (levels, CSR edge index, masks).
+    What: runs `structure_problems` on industrial_fastner and 20 random graphs: root is the full state,
+    terminal the empty one, popcount equals N - level, every edge removes exactly one present part and moves
+    exactly one level, edges are sorted by source, the CSR pointers are consistent, no edge without a direction.
+    """
     rng = np.random.default_rng(7)
     graphs = [("industrial_fastner", fastener_cached()[1])]
     graphs += [(f"random #{i}", ag.generate_aog(random_inputs(rng, 10))) for i in range(20)]
@@ -523,6 +537,14 @@ FASTENER_ROOT = {
 
 
 def test_a2b(rec, args):
+    """A2b - Root out-edges of industrial_fastner are the known ones.
+
+    Tests: `generate_aog` on a real assembly (and, with `--groups real`, the whole chain Preprocessing ->
+    Interference -> `build_aog`).
+    What: checks which components can leave first and in which directions (`FASTENER_ROOT`: part1 -z, part5 -x,
+    part6 +x, part4 and part001 +/-y; the nut part7 only after its partner part6). With `real`, the live
+    run must give the same graph as the cached inputs up to the candidate-direction table.
+    """
     inputs, aog = fastener_cached()
     got = _root_out(aog)
     for cid, ks in got.items():
@@ -561,6 +583,12 @@ def _a3_run():
 
 
 def test_a3(rec, args):
+    """A3 - Stander holds are gates, contact neighbours are not (rule P10).
+
+    Tests: `collect_inputs` (turning a stander record into holds) and the hold rule in `generate_aog`.
+    What: a screw s holds p and also touches p and q. Only p must appear in s's holds; p cannot leave while s
+    is present, q can; no state contains s without p.
+    """
     inputs, aog = _a3_run()
     rec.check(inputs.stander_holds == {2: {0}}, f"holds of s = {inputs.stander_holds[2]} (only p, not q)")
     root_comps = {int(aog.edge_comp[e]) for e in aog.out_edges(aog.root)}
@@ -574,6 +602,11 @@ def test_a3(rec, args):
 
 
 def test_a4(rec, args):
+    """A4 - A stack with blocked sides forces the removal order.
+
+    Tests: `generate_aog` on a hand-made tensor (A on B on C in a channel, C extractable only upward).
+    What: expects 4 nodes, 3 edges, the unique order A, B, C with the right directions, no dead ends.
+    """
     # Stack A (top), B, C (bottom) in a channel: side directions blocked. C sits in a blind seat and can
     # only be extracted upward (so free[C, :, -z] is False; not antisymmetric, fine for the AoG).
     A, B, C = 0, 1, 2
@@ -610,6 +643,12 @@ def _scale_case(rec, N):
 
 
 def test_a5(rec, args):
+    """A5 - Scaling and size of the full graph.
+
+    Tests: `generate_aog` performance and node/edge counts when nothing blocks anything.
+    What: N = 12 and 16 (and 20 with `--groups scale`) free parts must give exactly V = 2^N and E = N*2^(N-1);
+    N = 20 must finish within 120 s and 2 GB. Time and memory are reported as notes.
+    """
     for N in (12, 16):
         _scale_case(rec, N)
     if "scale" in args.groups:
@@ -621,6 +660,12 @@ def test_a5(rec, args):
 
 
 def test_a6(rec, args):
+    """A6 - Dead ends are kept, marked and reported, not pruned.
+
+    Tests: `generate_aog` handling of states where no part can move (`dead_ends`, `live`, `complete`).
+    What: two parts blocking each other give a single dead-end root; with a free third part the state {A, B}
+    is reached, kept and marked dead, the root is not live, the graph is incomplete, and the warnings are logged.
+    """
     # Two parts blocking each other in every direction.
     free = np.zeros((2, 2, 6), dtype=bool)
     free[0, 0] = free[1, 1] = True
@@ -643,6 +688,13 @@ def test_a6(rec, args):
 
 
 def test_a7(rec, args):
+    """A7 - Stander directions extend the direction table consistently.
+
+    Tests: `extend_directions` (the AoG direction table with the stander removal directions added).
+    What: a stander direction equal to a candidate reuses its index; a new one appends d and -d (and -d is then
+    reused); `dirs[neg[k]] == -dirs[k]` always; on industrial_fastner no direction is added; movable parts
+    never use the appended directions.
+    """
     diag = np.array([1, 1, 0]) / np.sqrt(2)
     stander_opts = {6: [(AXES[4] + 1e-9, set())], 7: [(diag, set())], 8: [(-diag, set())]}
     dirs, neg, kd = ag.extend_directions(AXES, AXES_NEG, stander_opts)
@@ -664,6 +716,13 @@ def test_a7(rec, args):
 
 
 def test_a8(rec, args):
+    """A8 - Travel table (distance a part must move to leave the assembly box).
+
+    Tests: `compute_travel_table` and `AoG.travel` / `edge_distances`.
+    What: hand-computed distances for axis-aligned, oblique, touching-face and already-outside cases (plus the
+    margin); travel is always >= margin and does not depend on which parts are present; with `--groups real`
+    the assembly box equals the union of the component boxes.
+    """
     m = 1.0
     box = ((0, 0, 0), (10, 10, 10))
     s2 = np.sqrt(0.5)
@@ -707,6 +766,13 @@ def _arrays_equal(a, b):
 
 
 def test_a9(rec, args):
+    """A9 - Persistence and cache key.
+
+    Tests: `save_aog`, `load_aog`, `export_csv_dot` and `compute_cache_key`.
+    What: save then load gives identical arrays and metadata, a different key returns None, the CSV/DOT
+    exports exist; changing any input that affects the graph (stander option blockers or direction, holds,
+    nut rule, margin, BOM groups, group_one_order) changes the key, identical inputs keep it.
+    """
     inputs, aog = fastener_cached()
     cache = fresh_dir("persistence")
     ag.save_aog(aog, cache)
@@ -760,6 +826,14 @@ def _sample_paths(aog, rng, count):
 
 
 def test_a10(rec, args):
+    """A10 - Every path of the graph is a valid removal order and assembly order.
+
+    Tests: `AoG.sequence` and `AoG.assembly_sequence` (the read-out used by the optimiser).
+    What: 100 random root-to-terminal paths on industrial_fastner and on random graphs are replayed
+    step by step against the original rules (component present, directions equal the free set, holds kept,
+    free nuts leave before their partner); the assembly sequence must use `neg` of the removal directions
+    and place standers after their holds.
+    """
     rng = np.random.default_rng(99)
     cases = [("industrial_fastner", *fastener_cached())]
     while len(cases) < 4:
@@ -810,6 +884,11 @@ def test_a10(rec, args):
 
 
 def test_a11(rec, args):
+    """A11 - Determinism.
+
+    Tests: `generate_aog`.
+    What: two runs on the same inputs (industrial_fastner and a random N=12 case) give byte-identical arrays.
+    """
     inputs = fastener_inputs_from_cache()
     a, b = ag.generate_aog(inputs), ag.generate_aog(fastener_inputs_from_cache())
     same = all(getattr(a, f).tobytes() == getattr(b, f).tobytes() for f in ag._ARRAY_FIELDS)
@@ -838,7 +917,14 @@ def _disconnected_nodes(aog, contact):
 
 
 def test_a12(rec, args):
-    """Connectivity rule: no state whose parts float apart (not one group through contacts)."""
+    """A12 - Connectivity rule: no state whose parts float apart.
+
+    Tests: the connectivity filter of `generate_aog` (needs the contact matrix, `AoGInputs.contact`).
+    What: a chain A-B-C drops {A, C} and B cannot go first; without contact data the rule is off (V = 8);
+    a plate with two separate parts never shows {X, Y}; two parts joined only through a bolt that holds both
+    give a dead-end root; a disconnected full assembly only warns; and every state of industrial_fastner and
+    of 50 random graphs is one connected group.
+    """
     # Chain A - B - C, all free: removing B first would leave A and C apart.
     A, B, C = 0, 1, 2
     free = np.ones((3, 3, 6), dtype=bool)
@@ -919,7 +1005,17 @@ def _blocks_contiguous(order: list[int], g: set[int]) -> bool:
 
 
 def test_a13(rec, args):
-    """BOM groups: members assembled consecutively (D12), one order per group block (D13)."""
+    """A13 - BOM groups: members are assembled consecutively (D12) in one order (D13).
+
+    Tests: the group rules of `generate_aog` (`AoGConfig.group_consecutive`, `group_one_order`) and
+    `read_bom_groups`.
+    What: 8 free parts with a group of 3 give 40320 -> 4320 -> 720 paths as the rules are switched on, with the
+    exact node/edge counts; no edge moves a non-member while a group is partly removed; sampled paths remove
+    the group contiguously in one order; the first feasible member is used when the lowest index is blocked; a
+    group that cannot be consecutive makes the graph incomplete (no fallback) unless the rule is off;
+    group_one_order without group_consecutive raises; industrial_fastner has no multi-member group so grouped
+    and ungrouped graphs are identical.
+    """
     N = 8
     free = np.ones((N, N, 6), dtype=bool)
     grp = [None, None, "M4", None, "M4", None, "M4", None]

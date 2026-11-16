@@ -1,4 +1,13 @@
-"""Acceptance tests for robot mode (docs/robotic-gripper_spec.md section 10, R1-R14).
+"""Acceptance tests for robot mode (R1-R14).
+
+[SUPP] Automatic test file: not needed to run the pipeline. Each test R<n> checks one requirement of robot mode.
+
+How the tests are built
+    The `core` tests replace the grasp engine by small fakes (`FakeEngine`, `RotEngine`, `NodeEngine`) that
+    return a score computed from the clouds they get, and run them through the REAL `GripperAnalysis`,
+    loop and output code on synthetic AoGs. This is also the model of what a replacement engine must
+    provide: an object with `evaluate(target, obstacles) -> EngineResult` (see the ENGINE SWAP POINT block
+    in `src/gripper_engine_robotic.py`). Only the `engine` group (R11, R12) needs the real engine.
 
 Standalone runner (pytest is not installed). From repo root, through the env:
 
@@ -13,7 +22,7 @@ Groups:
            tools/gripper/screwing_effector.step.
   engine   the real JMS engine in the `parallelgrippercode` env: worker vs the unchanged script
            (equivalence, same seed), crash -> EngineError, empty obstacles, alone scores on
-           industrial_fastner against spec 5.2 (a few minutes).
+           industrial_fastner against reference values (a few minutes).
 
 Results go to automatic_tests/output/robotic_results.json, scratch to automatic_tests/output/robotic_test/.
 """
@@ -54,6 +63,8 @@ SPEC_ALONE = {"industrial_fastner_part1": 0.488, "industrial_fastner_part2": 0.7
 
 
 class Recorder:
+    """[SUPP] Collects the PASS/FAIL checks and notes of each test and prints them (the test runner's reporter)."""
+
     def __init__(self):
         self.results: dict[str, dict] = {}
         self._current = None
@@ -87,14 +98,14 @@ class Recorder:
 
 
 def toy_cloud(c: int, n: int = 10):
-    """A 10-point cloud per component, offset so each target is distinguishable; extent > 1 mm."""
+    """[SUPP] A 10-point cloud per component, offset so each target is distinguishable; extent > 1 mm."""
     rng = np.random.default_rng(c)
     P = rng.random((n, 3)) * 5 + np.array([100.0 * c, 0, 0])
     return P, np.tile([0.0, 0.0, 1.0], (n, 1))
 
 
 class FakeEngine:
-    """score = base[target] * (1 - 0.15 * number of obstacle components); counts calls."""
+    """[SUPP] Fake grasp engine: score = base[target] * (1 - 0.15 * number of obstacle components); counts calls."""
 
     def __init__(self, base, n_per_cloud=10):
         self.base, self.n_per = base, n_per_cloud
@@ -110,7 +121,7 @@ class FakeEngine:
 
 
 class RotEngine:
-    """Rotation fake: obstacle centroid decides which of three grasps (A .9, B .8, C .7) survive."""
+    """[SUPP] Rotation fake: obstacle centroid decides which of three grasps (A .9, B .8, C .7) survive."""
 
     def __init__(self):
         self.calls = 0
@@ -131,12 +142,15 @@ class RotEngine:
 
 
 class NoTools:
+    """[SUPP] Fake tool checker: every stander step is feasible and unchecked."""
+
     def step(self, state, c, senses, preferred=None):
         return SimpleNamespace(feasible=True, tool=None, checked=False, senses={}, contact_with={}, sense=preferred,
                                to_json=lambda directions=None: {"sense_direction": None, "senses": []})
 
 
 def fake_step(step, state, comp, kind="gripper", feasible=True, rel=1.0, intrinsic=False):
+    """[SUPP] A synthetic `StepEval` (gripper or tool) with the given feasibility and relative score, for the pruning and choice tests."""
     g = None
     if kind == "gripper":
         g = SimpleNamespace(score_relative=None if intrinsic else rel, intrinsic=intrinsic, reason=None if feasible else "x",
@@ -147,6 +161,7 @@ def fake_step(step, state, comp, kind="gripper", feasible=True, rel=1.0, intrins
 
 
 def real_optimizer(aog, tables, cfg):
+    """[SUPP] `optimize_fn` for `run_robot_loop` that runs the real optimizer on synthetic tables."""
     return lambda blocked: op.optimize(aog, tables, cfg, blocked_edges=blocked or None)
 
 
@@ -156,7 +171,7 @@ def real_optimizer(aog, tables, cfg):
 
 
 def test_r1(rec, args):
-    """Relative score and feasibility rule (spec 5.2, decided thresholds 0.5 / 0.5)."""
+    """Relative score and feasibility rule (decided thresholds 0.5 / 0.5)."""
     cfg = RobotConfig()
     rec.check(cfg.grasp_rel_threshold == 0.5 and cfg.grasp_abs_floor == 0.5 and cfg.grasp_rotation_step_deg == 90,
               "defaults: rel 0.5, floor 0.5, rotation step 90 deg")
@@ -172,7 +187,7 @@ def test_r1(rec, args):
 
 
 def test_r2(rec, args):
-    """Quarter pruning (spec 6): worked example, N < 4, infeasible always pruned, tool steps excluded."""
+    """Quarter pruning: worked example, N < 4, infeasible always pruned, tool steps excluded."""
     cfg = RobotConfig()
     steps = [fake_step(i + 1, 100 + i, i, rel=r) for i, r in enumerate((0.9, 0.8, 0.7, 0.6))]
     pr = [k for k, _ in edges_to_prune(steps, cfg)]
@@ -194,7 +209,7 @@ def test_r2(rec, args):
 
 
 def test_r3(rec, args):
-    """Final choice ranking (spec 6): (1) infeasible count, (2) weakest S_rel, (3) sum, (4) cost."""
+    """Final choice ranking: (1) infeasible count, (2) weakest S_rel, (3) sum, (4) cost."""
     base = {"n_infeasible": 0, "min_relative": 0.5, "sum_relative": 2.0, "total_cost": 0.5}
     r = lambda **kw: {**base, **kw}
     rec.check(choose([r(n_infeasible=1, min_relative=0.9), r(n_infeasible=0, min_relative=0.1)]) == 1, "(1) fewer infeasible wins")
@@ -204,7 +219,7 @@ def test_r3(rec, args):
 
 
 def test_r4(rec, args):
-    """Loop (spec 6): blocked edges only grow, never reused, records = iterations, cache counts, choice."""
+    """Loop: blocked edges only grow, never reused, records = iterations, cache counts, choice."""
     aog = all_free_aog(4)
     tables = make_tables(aog)
     cfg_opt = only("use_travel", "use_direction_change", n_iterations=40)
@@ -254,7 +269,7 @@ def test_r4(rec, args):
 
 
 def test_r5(rec, args):
-    """Rotation (spec 5.3): engine at every angle, only grasps feasible at all angles kept; static = 1 call."""
+    """Rotation: engine at every angle, only grasps feasible at all angles kept; static = 1 call."""
     ga = [EngineResult(grasps=[Grasp(np.array([0., 0, 0]), np.eye(3), 1, 5, 0.9), Grasp(np.array([5., 0, 0]), np.eye(3), 1, 5, 0.8)]),
           EngineResult(grasps=[Grasp(np.array([0.1, 0, 0]), np.eye(3), 1, 5, 0.6)])]
     sv = surviving_grasps(ga, tol_mm=0.5, angle_deg=5)
@@ -289,7 +304,7 @@ def test_r5(rec, args):
 
 
 def test_r6(rec, args):
-    """Optimization hook (spec 6.1): None = old behaviour and key, blocked edge never used, key differs."""
+    """Optimization hook: None = old behaviour and key, blocked edge never used, key differs."""
     aog = all_free_aog(4)
     tables = make_tables(aog)
     cfg = only("use_travel", "use_direction_change", n_iterations=40)
@@ -315,7 +330,7 @@ def test_r6(rec, args):
 
 
 def test_r7(rec, args):
-    """Mode switch (spec 10): flag wins, no flag asks, invalid errors, no terminal -> manual."""
+    """Mode switch: flag wins, no flag asks, invalid errors, no terminal -> manual."""
     import main
     rec.check(main.resolve_mode("robot", ask=lambda p: "manual", interactive=True) == "robot", "flag wins over the prompt")
     rec.check(main.resolve_mode(None, ask=lambda p: "robot", interactive=True) == "robot", "no flag: asks (robot)")
@@ -335,7 +350,7 @@ def test_r7(rec, args):
 
 
 def test_r8(rec, args):
-    """Output (spec 8): plan.json keeps every old key and gains the robot block."""
+    """Output: plan.json keeps every old key and gains the robot block."""
     from hierarchy import Container, Hierarchy
     from levels import LevelPlan
     from output_robotic import write_robot_plan
@@ -372,7 +387,7 @@ def test_r8(rec, args):
 
 
 class NodeEngine:
-    """Sub-assembly fake: a one-part target scores 0.9 * (1 - 0.05 * obstacles); a multi-part target (a node)
+    """[SUPP] Sub-assembly fake: a one-part target scores 0.9 * (1 - 0.05 * obstacles); a multi-part target (a node)
     scores node_table[number of parts]. Counts part calls and node calls separately."""
 
     def __init__(self, node_table, n_per_cloud=10):
@@ -396,7 +411,7 @@ class NodeEngine:
 
 
 def test_r13(rec, args):
-    """Optional sub-assembly check (spec 13.6): an edge needs both nodes graspable; nodes cached; root never pruned."""
+    """Optional sub-assembly check: an edge needs both nodes graspable; nodes cached; root never pruned."""
     from output_robotic import robot_block
     from robot_loop_robotic import evaluate_sequence
     aog = all_free_aog(4)
@@ -467,7 +482,7 @@ def test_r13(rec, args):
 
 
 def test_r9(rec, args):
-    """Point clouds (spec 3): deterministic, mm, counts above the engine minimum, cache round trip."""
+    """Point clouds: deterministic, mm, counts above the engine minimum, cache round trip."""
     import freecad  # noqa: F401
     import Part
     from FreeCAD import Vector
@@ -494,7 +509,7 @@ def test_r9(rec, args):
 
 
 def test_r10(rec, args):
-    """Tool check (spec 7) with the real screw tool on a synthetic scene."""
+    """Tool check with the real screw tool on a synthetic scene."""
     import freecad  # noqa: F401
     import Part
     from FreeCAD import Vector
@@ -554,7 +569,7 @@ _FASTENER_CLOUDS = None
 
 
 def fastener_clouds():
-    """industrial_fastner leaf clouds at the spec's settings: {label: (P, N)}."""
+    """[SUPP] industrial_fastner leaf clouds at the engine's reference settings: {label: (P, N)}."""
     global _FASTENER_CLOUDS
     if _FASTENER_CLOUDS is None:
         import freecad  # noqa: F401
@@ -577,7 +592,7 @@ def fastener_clouds():
 
 
 def test_r11(rec, args):
-    """Engine wrapper (spec 4/10): runs (UTF-8), deterministic, empty obstacles, crash raises, alone scores."""
+    """Engine wrapper: runs (UTF-8), deterministic, empty obstacles, crash raises, alone scores."""
     from gripper_engine_robotic import EngineError, GraspEngine
     clouds = fastener_clouds()
     work = SCRATCH / "r11_engine"
@@ -587,9 +602,9 @@ def test_r11(rec, args):
         scores = {}
         for label, ref in SPEC_ALONE.items():
             scores[label] = eng.evaluate(clouds[label], None).score
-        rec.note("alone scores " + ", ".join(f"{k[-5:]} {v:.3f} (spec {SPEC_ALONE[k]})" for k, v in scores.items())
+        rec.note("alone scores " + ", ".join(f"{k[-5:]} {v:.3f} (ref {SPEC_ALONE[k]})" for k, v in scores.items())
                  + f"; {time.time() - t0:.0f} s")
-        rec.check(all(abs(scores[k] - SPEC_ALONE[k]) <= 0.06 for k in scores), "alone scores within 0.06 of spec 5.2")
+        rec.check(all(abs(scores[k] - SPEC_ALONE[k]) <= 0.06 for k in scores), "alone scores within 0.06 of the reference values")
         p3 = clouds["industrial_fastner_part3"]
         a = eng.evaluate(p3, None)
         b = eng.evaluate(p3, (np.zeros((0, 3)), np.zeros((0, 3))))
@@ -606,7 +621,7 @@ def test_r11(rec, args):
 
 
 def test_r12(rec, args):
-    """Function copy == unchanged script (same seed): alone and with obstacles (spec 4)."""
+    """Function copy == unchanged script (same seed): alone and with obstacles."""
     from gripper_engine_robotic import GraspEngine
     from pointclouds_robotic import merge_clouds
     clouds = fastener_clouds()
@@ -637,6 +652,7 @@ TESTS = {
 
 
 def main() -> int:
+    """[SUPP] Test runner: select tests by id (`--tests R5 R11`) or group (`--groups core freecad engine`, default core), run them, print the table and write the JSON."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--tests", nargs="+")
     ap.add_argument("--groups", nargs="+", default=["core"])

@@ -1,15 +1,28 @@
-"""Single-pair collision test: can part i translate along d all the way past part j?
+"""Single-pair collision test: can part i translate along direction d all the way past part j?
 
-Method: discrete stepping with gap-skipping:
+Used by: Preprocessing (stander/assembly-box checks) and Interference Identification (the pairwise
+blocking matrix).
 
+Inputs
+    - Two FreeCAD `Part.Shape` objects at global placement (i is the moving part, j the obstacle).
+    - A direction vector d (normalised internally).
+    - A `CollisionConfig` (step size, margin, thresholds, switches).
+    - Optionally a `Stats` object that accumulates counters, a precomputed overlap threshold for the pair,
+      and `max_length` to cap the sweep.
+Outputs
+    - `Outcome` (from `is_free_detail`): free or blocked, which phase decided it, and where/how it blocked.
+    - `is_free` returns just the boolean.
+    - `HardOverlapError` is raised when i and j already overlap by more than `overlap_tol` before moving.
+
+Algorithm (discrete stepping with gap-skipping)
     0. Static-overlap pre-check (classify_pair): hard error / tolerance pair / normal pair.
     1. Broad phase on bounding boxes projected onto the plane perpendicular to d.
     2. Sweep length L carries i fully past j along d.
-    3. Step i along d. Where the parts are `delta` apart, jump by delta instead of h;
-       otherwise step by h and check the overlap volume against the pair's threshold.
+    3. Step i along d. Where the parts are `delta` apart, jump by delta instead of h; otherwise step by h
+       and check the overlap volume against the pair's threshold.
 
-Contact counts as free: only penetration above the threshold blocks. Known limitation: a
-collision whose overlap window along d is shorter than h can be missed (grazing contacts).
+Contact counts as free: only penetration above the threshold blocks. Known limitation: a collision whose
+overlap window along d is shorter than h can be missed (grazing contacts).
 """
 
 from __future__ import annotations
@@ -23,67 +36,92 @@ from FreeCAD import Vector
 
 from preprocessing import PreprocessingConfig
 
-# Dataclass for collision configuration parameters. All values are tunable, but the
-# default values are based on the industrial fastner case study.
+
 @dataclass
 class CollisionConfig:
-    # Step size h. Industrial_fastner is stable at 2.0, 0.5 is the conservative default.
+    """Configuration of the collision test. Input to every function in this module.
+
+    All values are tunable. The defaults were validated on the case studies in `data/`
+    (industrial_fastner, lunar_*, nonlinearsimple, obliquesimple).
+    """
+
+    # float, mm. Step size h of the sweep: smaller = slower = safer against missed grazing collisions but slower.
+    # Recommended: 5 (every assembly in data/ disassembles correctly with it and the interference matrix did
+    #  not change with a smaller value. For other examples, it might be prudent to compare the dimensions
+    # with the used examples and tun this value accordingly).
     step: float = 5
 
-    # Minimum threshold to consider a contact
+    # float, mm^3. Overlap volume below this is numerical noise from touching geometry, not a contact.
+    # Inherited from PreprocessingConfig so both stages use the same noise floor. Recommended: keep it (1e-6).
     volume_epsilon: float = PreprocessingConfig().volume_epsilon
-    # Static overlap above this (mm^3) is a hard error: fix the model or mark the part stander.
+    # float, mm^3. Static overlap above this is a hard error (HardOverlapError): fix the model or mark the
+    # part as stander. Recommended: 1.0.
     overlap_tol: float = 1.0
 
-    # Configurations of variating stepping behavior. 
+    # float, mm. Extra distance added to the sweep length so i ends clearly past j. Recommended: 1.0.
     margin: float = 1.0
+    # bool. Jump by the measured gap instead of stepping when the parts are further apart than h
+    # (large speed-up, no effect on the result). Recommended: True.
     gap_skip: bool = True
+    # bool. Settle pairs whose projected bounding boxes are disjoint without any geometry query.
+    # Recommended: True.
     use_broad_phase: bool = True
 
 
-# Dataclass for tracking collision test statistics
 @dataclass
 class Stats:
-    calls: int = 0
-    broad_free: int = 0
-    iterations: int = 0
-    commons: int = 0
-    dists: int = 0
-    travel: float = 0.0
-    gap_travel: float = 0.0
-    times: list[float] = field(default_factory=list)  # per stepped (non-broad) test
-    iters_per_test: list[int] = field(default_factory=list)
-    # Every caught backend exception: {"call", "t", "d", "retry_ok"}.
+    """Counters accumulated over many collision tests (output, optional input to `is_free_detail`).
+
+    Pass one shared instance to collect statistics for a whole interference run; it is also where
+    backend exceptions are recorded so they can be reported afterwards.
+    """
+
+    calls: int = 0           # int. Number of is_free_detail calls (all pairs/directions).
+    broad_free: int = 0      # int. Calls settled as free by the broad phase (no geometry query needed).
+    iterations: int = 0      # int. Total sweep steps taken over all stepped tests.
+    commons: int = 0         # int. Number of boolean `common` volume queries (the expensive operation).
+    dists: int = 0           # int. Number of `distToShape` gap queries (gap-skipping).
+    travel: float = 0.0      # float, mm. Total distance swept by stepped tests.
+    gap_travel: float = 0.0  # float, mm. Part of `travel` covered by gap jumps instead of steps.
+    times: list[float] = field(default_factory=list)  # seconds per stepped (non-broad) test.
+    iters_per_test: list[int] = field(default_factory=list)  # steps per stepped test.
+    # One dict per caught backend exception: {"call", "t", "d", "retry_ok"}.
     exceptions: list[dict] = field(default_factory=list)
 
-# Dataclass for the outcome of a collision test between two parts along a direction.
+
 @dataclass
 class Outcome:
-    free: bool # True if parts are free
-    phase: str  # "broad" or "step"
-    sweep_length: float = 0.0 # distance along d to carry i fully past j
-    iterations: int = 0 # number of steps taken
-    t_block: float | None = None # position along d where blocking occurs
-    volume: float = 0.0  # overlap volume at the blocking step
-    exception_cell: bool = False  # common failed twice -> reported blocked (conservative)
+    """Result of one collision test of part i against part j along a direction (output)."""
+
+    free: bool                    # bool. True if i can translate past j along d.
+    phase: str                    # str. "broad" (decided by bounding boxes) or "step" (decided by sweeping).
+    sweep_length: float = 0.0     # float, mm. Distance along d that carries i fully past j (plus margin).
+    iterations: int = 0           # int. Steps taken before the decision.
+    t_block: float | None = None  # float, mm, or None. Position along d where blocking was detected.
+    volume: float = 0.0           # float, mm^3. Overlap volume at the blocking step (0 if free/exception).
+    exception_cell: bool = False  # bool. The geometry backend failed twice; reported as blocked (conservative).
 
 
 class HardOverlapError(Exception):
     """Static overlap above overlap_tol: the model must be fixed or the part marked as stander."""
 
-# Auxiliary functions for vector math and bounding box operations, used in the collision tests.
+
+# ---------------------------------------------------------------------------------------------------
+# Auxiliary functions: vector maths and bounding-box helpers.
+# ---------------------------------------------------------------------------------------------------
+
 def unit(v: Vector) -> Vector:
-    """Normalization of a vector"""
+    """[AUX] Return v as a unit vector (copy; the input is not modified)."""
     return Vector(v).normalize()
 
 
 def _fmt(v: Vector) -> str:
-    """Vector formatting for logging"""
+    """[SUPP] Format a vector as text for the exception log."""
     return f"({v.x:.4g}, {v.y:.4g}, {v.z:.4g})"
 
 
 def _corners(bb) -> list[Vector]:
-    """Return the 8 corners of a bounding box."""
+    """[AUX] Return the 8 corners of a bounding box."""
     return [
         Vector(x, y, z)
         for x in (bb.XMin, bb.XMax)
@@ -93,13 +131,13 @@ def _corners(bb) -> list[Vector]:
 
 
 def _extent(bb, d: Vector) -> tuple[float, float]:
-    """Return the min and max of the dot product of d with the corners of bb."""
+    """[AUX] Return (min, max) of the projection of the box onto d, i.e. its extent along that axis."""
     vals = [d.dot(p) for p in _corners(bb)]
     return min(vals), max(vals)
 
 
 def _perp_basis(d: Vector) -> tuple[Vector, Vector]:
-    """Return two unit vectors perpendicular to d and to each other."""
+    """[AUX] Return two unit vectors perpendicular to d and to each other (the plane the broad phase uses)."""
     helper = Vector(1, 0, 0) if abs(d.x) < 0.9 else Vector(0, 1, 0)
     u = d.cross(helper).normalize()
     w = d.cross(u).normalize()
@@ -107,13 +145,19 @@ def _perp_basis(d: Vector) -> tuple[Vector, Vector]:
 
 
 def broad_phase(shape_i: Part.Shape, shape_j: Part.Shape, d: Vector, tol: float = 1e-9) -> str | None:
-    """Return a reason string if the pair is free along +d without any geometry query, else None."""
+    """[AUX] Cheap free-check on bounding boxes. Returns a reason string if i is free along +d, else None.
+
+    Free when the boxes' projections onto the plane perpendicular to d are disjoint (i never meets j), or
+    when j lies entirely behind i along d. None means "unknown, run the stepped test".
+    """
     bi, bj = shape_i.BoundBox, shape_j.BoundBox
+    # Overlap test on both perpendicular axes: a gap on either one means the sweep tube misses j.
     for axis in _perp_basis(d):
         imin, imax = _extent(bi, axis)
         jmin, jmax = _extent(bj, axis)
         if imax <= jmin + tol or jmax <= imin + tol:
             return "projections disjoint"
+    # j entirely behind i along d: moving forward can never reach it.
     _, jmax_d = _extent(bj, d)
     imin_d, _ = _extent(bi, d)
     if jmax_d <= imin_d + tol:
@@ -122,14 +166,20 @@ def broad_phase(shape_i: Part.Shape, shape_j: Part.Shape, d: Vector, tol: float 
 
 
 def sweep_length(shape_i: Part.Shape, shape_j: Part.Shape, d: Vector, margin: float) -> float:
-    """Return the distance along d to carry i fully past j, plus margin."""
+    """[AUX] Distance along d that carries i fully past j (back of j minus front of i), plus margin."""
     _, jmax_d = _extent(shape_j.BoundBox, d)
     imin_d, _ = _extent(shape_i.BoundBox, d)
     return jmax_d - imin_d + margin
 
 
 def classify_pair(shape_i: Part.Shape, shape_j: Part.Shape, config: CollisionConfig) -> tuple[str, float, float]:
-    """Static-overlap pre-check (step 0). Returns (kind, V0, blocking threshold)."""
+    """[AUX] Static-overlap pre-check (step 0). Returns (kind, V0, blocking threshold).
+
+    V0 is the overlap volume of the parts at rest. Above `overlap_tol` raises HardOverlapError. Above
+    `volume_epsilon` the pair is a "tolerance" pair (slightly interpenetrating, e.g. a press fit) and its
+    blocking threshold is raised to 2*V0 so the resting overlap itself does not count as a collision;
+    otherwise it is a "normal" pair with threshold `volume_epsilon`.
+    """
     v0 = shape_i.common(shape_j).Volume
     if v0 > config.overlap_tol:
         raise HardOverlapError(f"static overlap {v0:.4f} mm^3 > overlap_tol {config.overlap_tol}")
@@ -141,15 +191,21 @@ def classify_pair(shape_i: Part.Shape, shape_j: Part.Shape, config: CollisionCon
 # Backend calls go through these module-level hooks so tests can inject failures
 # (replace them as `collision._distance = ...`, not as a local name).
 def _distance(a: Part.Shape, b: Part.Shape) -> float:
+    """[SUPP] Minimum distance between two shapes (hook for tests to inject failures)."""
     return a.distToShape(b)[0]
 
 
 def _common_volume(a: Part.Shape, b: Part.Shape) -> float:
+    """[SUPP] Volume of the boolean intersection of two shapes (hook for tests to inject failures)."""
     return a.common(b).Volume
 
 
 def safe_common(shape_i, shape_j, d: Vector, t: float, h: float, stats: Stats) -> float | None:
-    """common at t; on exception retry once at t + h/100; None if that fails too."""
+    """[AUX] Overlap volume of i moved by t along d with j. Retries once at t + h/100 if OCC fails.
+
+    OCC boolean operations occasionally fail on touching geometry; a tiny shift usually avoids it. Each
+    failure is logged in `stats.exceptions`. Returns None when the retry fails too.
+    """
     for attempt, pos in enumerate((t, t + h / 100)):
         stats.commons += 1
         try:
@@ -162,6 +218,10 @@ def safe_common(shape_i, shape_j, d: Vector, t: float, h: float, stats: Stats) -
     return None
 
 
+# ---------------------------------------------------------------------------------------------------
+# Main function: the stepped collision test.
+# ---------------------------------------------------------------------------------------------------
+
 def is_free_detail(
     shape_i: Part.Shape,
     shape_j: Part.Shape,
@@ -171,28 +231,42 @@ def is_free_detail(
     threshold: float | None = None,
     max_length: float | None = None,
 ) -> Outcome:
-    """Core of the colision test.
+    """[MAIN] Core collision test: can i translate along d past j without penetrating it?
 
-    `max_length`, when given, caps how far i is swept (still at least the broad-phase check):
-    i is free as soon as it travels `max_length` even if it has not fully cleared j. A caller
-    that needs a *shorter* stopping distance than "fully past j" (e.g. a part that only needs to
-    travel a fixed multiple of its own length, docs/preprocessing-spec.md P5) passes it here
-    instead of re-implementing the stepped sweep.
+    Inputs
+        shape_i, shape_j: moving part and obstacle, both at global placement.
+        d: translation direction (any length; normalised here).
+        config: step size, margin and switches (see CollisionConfig).
+        stats: shared counters; a throwaway one is created if omitted.
+        threshold: overlap volume (mm^3) above which the pair counts as colliding. Pass the value from
+            `classify_pair` when the caller already ran it (avoids a second boolean per call); if None
+            it is computed here, which also raises HardOverlapError for hard static overlaps.
+        max_length: caps how far i is swept (the broad-phase check still applies): i is free as soon as it
+            has travelled `max_length` even if it has not fully cleared j. A caller that needs a shorter
+            stopping distance than "fully past j" (e.g. a part that only needs to travel a fixed multiple
+            of its own length, rule P5) passes it here instead of re-implementing
+            the stepped sweep.
+    Output
+        An `Outcome`: free (True/False), the deciding phase, and for blocked results the position along d
+        and overlap volume of the first blocking step. A backend failure that survives the retry is
+        reported as blocked with `exception_cell=True` (conservative).
     """
 
     stats = stats if stats is not None else Stats()
     stats.calls += 1
     d = unit(d)
 
-    # Step 0: static overlap pre-check
-    # Step 1: broad phase on bounding boxes projected onto the plane perpendicular to d.
+    # Step 1: broad phase on bounding boxes projected onto the plane perpendicular to d. Pairs settled here
+    # need no geometry query at all, which is most pairs in a typical assembly.
     if config.use_broad_phase and broad_phase(shape_i, shape_j, d) is not None:
         stats.broad_free += 1
         return Outcome(True, "broad")
+    # Step 0 (static pre-check): runs only for pairs the broad phase could not settle. It fixes the blocking
+    # threshold, or raises HardOverlapError for a hard overlap.
     if threshold is None:
         _, _, threshold = classify_pair(shape_i, shape_j, config)
 
-    # Step 2: step i along d, checking overlap volume at each step.
+    # Step 2: set up the sweep. The length takes i fully past j (plus margin), optionally capped.
     t0 = time.perf_counter()
     h = config.step
     length = sweep_length(shape_i, shape_j, d, config.margin)
@@ -200,9 +274,10 @@ def is_free_detail(
         length = min(length, max_length)
     t, iters = 0.0, 0
     outcome = None
-    
+
     while t < length:
         iters += 1
+        # Gap measurement: how far is i from j right now? Used to skip empty space in one jump.
         delta = 0.0
         if config.gap_skip:
             stats.dists += 1
@@ -212,26 +287,29 @@ def is_free_detail(
                 delta = 0.0  # give up the jump, take a normal step
                 stats.exceptions.append({"call": "distToShape", "t": t, "d": _fmt(d), "retry_ok": None})
 
-        # If the gap is larger than the step size, jump by delta instead of h.
+        # If the gap is larger than the step size, jump by delta instead of h: nothing can collide in between.
         if delta > h:
             t += delta
             stats.gap_travel += delta
             continue
         t += h
-        # Step 3: check the overlap volume against the pair's threshold.
+        # Step 3: measure the overlap at the new position and compare it with the pair's threshold.
         n_exc = len(stats.exceptions)
         vol = safe_common(shape_i, shape_j, d, t, h, stats)
         if len(stats.exceptions) > n_exc:
             stats.exceptions[n_exc]["retry_ok"] = vol is not None
+        # Backend failed twice: treat the pair as blocked (safe side) and flag the cell.
         if vol is None:
             outcome = Outcome(False, "step", length, iters, t, 0.0, exception_cell=True)
             break
+        # Penetration above the threshold: blocked at this position.
         if vol > threshold:
             outcome = Outcome(False, "step", length, iters, t, vol)
             break
+    # Reached the end of the sweep without a blocking overlap: free.
     if outcome is None:
         outcome = Outcome(True, "step", length, iters)
-    # Update stats and return the outcome.
+    # Update the shared statistics, then return.
     stats.iterations += iters
     stats.iters_per_test.append(iters)
     stats.travel += min(t, length)
@@ -241,4 +319,5 @@ def is_free_detail(
 
 def is_free(shape_i, shape_j, d, config: CollisionConfig, stats: Stats | None = None, threshold=None,
            max_length: float | None = None) -> bool:
+    """[AUX] Boolean shortcut for `is_free_detail`: True if i can translate along d past j."""
     return is_free_detail(shape_i, shape_j, d, config, stats, threshold, max_length).free

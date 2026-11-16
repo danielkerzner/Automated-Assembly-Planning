@@ -1,19 +1,59 @@
-"""AAP pipeline entry point.
+"""AAP pipeline entry point (command line).
 
-Wires the full pipeline from CLAUDE.md, now sub-assembly aware (docs/subassembly-spec.md):
+Spec: CLAUDE.md (pipeline).
 
-    Preprocessing -> Interference Identification -> AoG generator -> Optimization (ACO)
-        -> Illustration Generator
+Inputs
+    - STEP file of the assembly (may contain nested sub-assemblies, i.e. App::Part inside App::Part).
+    - BOM CSV, one row per part or sub-assembly, matched on `label` (columns used: `is_stander`, category,
+      `tool`, `group`, `processed`, `subassembly`).
+    - An output directory.
+Outputs
+    - `<output_dir>/plan.json`: the combined plan: per level the
+      status ("complete" or "locked"), the ordered steps with their direction, travel, cost and kind
+      ("part", "stander", "subassembly"), and the nested plan of every expanded sub-assembly.
+    - Per-level folders with the stage outputs: interference matrix, AoG, optimization result and, in
+      manual mode, the illustrations and PDF manual (and in robot mode the gripper report under
+      plan.json -> "robot").
+    - Exit code 0 on success, 1 if the root level ended "locked" (manual mode).
 
-The input STEP may contain nested sub-assemblies. `hierarchy.build_hierarchy` reads the BOM's
-`processed` column to decide, per sub-assembly, whether to treat it as one rigid component or to
-recurse into it; `levels.solve_level` then runs the pipeline above once per level (the whole
-assembly, then every processed sub-assembly, depth-first), writing `plan.json` as the combined
-result. A flat assembly (no nested sub-assemblies) is just one level, the root, so its output
-layout and cache keys are unchanged from before this feature.
+What this module does
+    It loads the STEP and BOM, builds the sub-assembly hierarchy (hierarchy.py), checks the level sizes
+    and calls `levels.solve_level` for the root. That runs, once per level and depth-first:
+    Preprocessing -> Interference Identification -> AoG -> Optimization (ACO) -> Illustration Generator.
+    A flat assembly is just one level (the root). `main.py` then writes plan.json.
+    Robot mode instead calls `robot_loop_robotic.run_robot_pipeline` (see robot_*_robotic.py).
 
-Written Instructions was dropped: the optimization JSON (steps + displacement vectors) already is
-the textual result.
+How to run
+    From the repository root, in the conda environment `environmentAAP` (it provides FreeCAD):
+
+        python src/main.py <step_path> <bom_path> <output_dir> [options]
+
+    Positional arguments (all required)
+        step_path    STEP file of the assembly.
+        bom_path     BOM CSV (see Inputs).
+        output_dir   Folder for plan.json and the per-level outputs (created if missing).
+
+    Options
+        --step H                 Collision step size h in mm. Default: `CollisionConfig.step` (5.0,
+                                 intentional). Calibrate per assembly with collision test E6.
+        --force-interference     Recompute the interference matrix even if a matching cache exists.
+        --max-level-components N Size guard: abort before any geometry work if a processed level has more
+                                 than N components. Default 20 (the AoG target size). Fix: set
+                                 `processed = false` in the BOM for that sub-assembly.
+        --mode {manual,robot}    manual = illustrated instructions for a human; robot = gripper and tool
+                                 feasibility loop. Default: none; then you
+                                 are asked on a terminal (Enter = manual), and without a terminal it is
+                                 manual.
+        --check-subassembly-grasp  Robot mode only (ignored with a warning in manual mode): an edge is
+                                 feasible only if both sub-assemblies it joins (before and after the
+                                 insertion) are graspable as one object. One extra grasp-engine call per
+                                 distinct sub-assembly.
+
+    Example
+        python src/main.py data/assembly.step data/assembly_bom.csv output/assembly --mode manual --step 5
+
+    Other settings (PreprocessingConfig, OptimizationConfig, IllustrationConfig, ...) are not on the
+    command line; change them in code, or pass the config objects to `run_pipeline` from your own script.
 """
 
 from __future__ import annotations
@@ -33,17 +73,24 @@ from optimization import OptimizationConfig
 from preprocessing import PreprocessingConfig, load_assembly, load_bom, load_stander_categories
 
 log = logging.getLogger("aap.main")
-DEFAULT_MAX_LEVEL_COMPONENTS = 20
+DEFAULT_MAX_LEVEL_COMPONENTS = 20  # default of --max-level-components (AoG target size)
 
 def _read_bom_rows(bom_path: Path) -> list[dict]:
+    """[AUX] Read the BOM CSV as a list of row dicts (utf-8 with optional BOM), for `build_hierarchy`."""
     with open(bom_path, newline="", encoding="utf-8-sig") as f:
         return list(csv.DictReader(f))
 
 
 def _step_kind(hier: Hierarchy, container_id: str, step: dict) -> str:
-    # is_stander wins over "is a child container": a stander-flagged sub-assembly (docs/
-    # subassembly-spec.md section 3) is fused into one rigid component and treated exactly like
-    # any other stander downstream -- it is never recursed into, so it should not be reported as
+    """[AUX] Kind of a step for plan.json: "stander", "subassembly" or "part".
+
+    Why this order: a stander-flagged sub-assembly is structurally a container but is fused into one
+    rigid component and treated like any other stander downstream, so it is never reported as
+    "subassembly".
+    """
+    # is_stander wins over "is a child container": a stander-flagged sub-assembly is fused into one
+    # rigid component and treated exactly like any other stander downstream -- it is never recursed
+    # into, so it should not be reported as
     # "subassembly" even though it is structurally a container.
     if step["is_stander"]:
         return "stander"
@@ -53,8 +100,15 @@ def _step_kind(hier: Hierarchy, container_id: str, step: dict) -> str:
 
 
 def _level_to_json(hier: Hierarchy, plan: LevelPlan) -> dict:
+    """[MAIN] Convert one `LevelPlan` (and, recursively, its children) into the JSON dict of plan.json.
+
+    Input: the hierarchy (for labels and members) and the level's plan. Output: a dict with the level's
+    status, locked parts, total cost, inseparable pairs and steps. Each step carries its kind and, for a
+    sub-assembly step, its members and its own nested plan under "sub_plan" (None for parts, and for
+    fused standers and unprocessed containers).
+    """
     if plan.status == "locked":
-        # Phase 2 (docs/subassembly-spec.md section 10): no closed group could be found for every
+        # Phase 2: no closed group could be found for every
         # blocking dead end, or every remaining dead end is rule-induced -- no sequence, no
         # illustrations for this level.
         return {
@@ -73,9 +127,9 @@ def _level_to_json(hier: Hierarchy, plan: LevelPlan) -> dict:
         kind = _step_kind(hier, plan.container_id, step)
         entry = dict(step)
         entry["kind"] = kind
-        # A stander-flagged sub-assembly is still a real container (docs/subassembly-spec.md
-        # section 3): report its members/processed/auto like "subassembly" would, just under
-        # kind "stander" and with no sub_plan (it is fused, never recursed into).
+        # A stander-flagged sub-assembly is still a real container: report its members/processed/auto
+        # like "subassembly" would, just under kind "stander" and with no sub_plan (it is fused, never
+        # recursed into).
         if cid in hier.containers[plan.container_id].child_ids:
             child = hier.containers[cid]
             entry["members"] = {
@@ -100,7 +154,7 @@ def _level_to_json(hier: Hierarchy, plan: LevelPlan) -> dict:
 
 
 def build_plan(hier: Hierarchy, plan: LevelPlan, assembly_name: str) -> dict:
-    """plan.json contents (docs/subassembly-spec.md section 7)."""
+    """[AUX] plan.json contents: assembly name (root label, else the STEP stem) and the root level."""
     root_label = hier.containers[hier.root].label or assembly_name
     return {
         "assembly": root_label,
@@ -120,17 +174,30 @@ def run_pipeline(
     force_interference: bool = False,
     max_level_components: int = DEFAULT_MAX_LEVEL_COMPONENTS,
 ) -> dict:
+    """[MAIN] Run the full manual-mode pipeline on one assembly and write plan.json.
+
+    Inputs: STEP, BOM and output folder; optional config objects (None = each stage's defaults, which is
+    what the command line uses except for the collision step); `force_interference` to bypass the
+    interference cache; `max_level_components` for the size guard. Output: the plan.json dict (also
+    written to `output_dir/plan.json`). A "locked" root level is a normal result, not an exception.
+
+    Steps: load STEP and BOM, build the hierarchy and check sizes, solve the root level (which recurses
+    into every processed sub-assembly), then convert the result to JSON.
+    """
     step_path, bom_path, output_dir = Path(step_path), Path(bom_path), Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    # Load the inputs: FreeCAD document, BOM labels, stander categories (screw / nut / other) and raw BOM rows.
     doc = load_assembly(step_path)
     bom_labels = load_bom(bom_path)
     bom_categories = load_stander_categories(bom_path)
     bom_rows = _read_bom_rows(bom_path)
 
+    # Sub-assembly tree from the STEP, decided by the BOM `processed` column; fail early on oversized levels.
     hier = build_hierarchy(doc, bom_rows=bom_rows)
     check_level_sizes(hier, max_components=max_level_components)
 
+    # Plan the root level; levels.solve_level runs the whole per-level pipeline and recurses depth-first.
     plan = solve_level(
         hier, hier.root, doc,
         step_path=step_path, bom_path=bom_path, bom_labels=bom_labels,
@@ -142,6 +209,7 @@ def run_pipeline(
         force_interference=force_interference,
     )
 
+    # Write the combined result.
     plan_dict = build_plan(hier, plan, assembly_name=step_path.stem)
     (output_dir / "plan.json").write_text(json.dumps(plan_dict, indent=1), encoding="utf-8")
     if plan.status == "locked":
@@ -153,6 +221,7 @@ def run_pipeline(
 
 
 def _parse_args() -> argparse.Namespace:
+    """[AUX] Command-line arguments; the full list with defaults is in the module docstring ("How to run")."""
     parser = argparse.ArgumentParser(
         description="Run the AAP assembly sequence planning pipeline on a STEP assembly."
     )
@@ -182,8 +251,8 @@ def _parse_args() -> argparse.Namespace:
         "--mode",
         choices=("manual", "robot"),
         default=None,
-        help="manual (illustrated human instructions) or robot (gripper/tool feasibility loop, "
-             "docs/robotic-gripper_spec.md). If omitted you are asked; without a terminal, manual.",
+        help="manual (illustrated human instructions) or robot (gripper/tool feasibility loop). "
+             "If omitted you are asked; without a terminal, manual.",
     )
     parser.add_argument(
         "--check-subassembly-grasp",
@@ -195,7 +264,10 @@ def _parse_args() -> argparse.Namespace:
 
 
 def resolve_mode(flag: str | None, ask=input, interactive: bool | None = None) -> str:
-    """The --mode flag wins; without it ask on a terminal (empty answer = manual); no terminal = manual."""
+    """[AUX] Choose manual or robot mode: the --mode flag wins; else ask on a terminal (Enter = manual); no terminal = manual.
+
+    `ask` and `interactive` are injectable so the prompt can be tested without a terminal.
+    """
     if flag is not None:
         if flag not in ("manual", "robot"):
             raise ValueError(f"mode must be 'manual' or 'robot', got {flag!r}")
@@ -215,6 +287,12 @@ def resolve_mode(flag: str | None, ask=input, interactive: bool | None = None) -
 
 
 def _main_robot(args) -> int:
+    """[MAIN] Robot-mode run: `run_robot_pipeline` plans, checks gripper/tool feasibility per step and re-plans around failures.
+
+    The robot modules are imported here, so manual mode never loads them (they need the grasp engine
+    set-up). If the chosen sequence still has infeasible steps they are
+    listed on stderr (details in plan.json -> "robot"); the exit code stays 0 because the plan is written.
+    """
     from robot_config_robotic import RobotConfig
     from robot_loop_robotic import run_robot_pipeline  # robot modules only load in robot mode
 
@@ -234,6 +312,7 @@ def _main_robot(args) -> int:
 
 
 def main() -> int:
+    """[MAIN] Command-line entry: parse arguments, pick the mode, run it and return the exit code (1 if the root level is locked)."""
     args = _parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s: %(message)s")
     if resolve_mode(args.mode) == "robot":
@@ -251,8 +330,7 @@ def main() -> int:
     if plan_dict["level"]["status"] == "locked":
         print(f"LOCKED: the root level could not be fully disassembled -- Phase 2 found no closed "
              f"group for the remaining dead end(s). Stuck parts: "
-             f"{plan_dict['level']['locked_parts']}. See plan.json for details "
-             f"(docs/subassembly-spec.md section 10).", file=sys.stderr)
+             f"{plan_dict['level']['locked_parts']}. See plan.json for details.", file=sys.stderr)
         return 1
     return 0
 

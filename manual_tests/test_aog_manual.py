@@ -41,6 +41,12 @@ graph looks like):
 
 Add --open to open the HTML when it is written. The real run reuses the cached interference matrix
 (--force-interference recomputes it) and the cached AoG (--force-aog regenerates it).
+
+Expected result: every check S1-S10 prints PASS and the exit code is 0 (S2 is skipped when N is above
+--brute-max-n). The console gives the number of states and moves, whether the AoG is complete (root live) and its
+dead ends. For industrial_fastner the AoG is complete with no dead end (V = 61 states, E = 141 moves). The
+synthetic 'stack' is a single chain, 'lattice --n 5' has all 2^5 = 32 states, 'random' may end with dead ends.
+aog_graph.html opens in a browser and the example sequence (aog_sequence.txt) removes every part exactly once.
 """
 
 from __future__ import annotations
@@ -73,9 +79,9 @@ from aog_generator import (  # noqa: E402
     save_aog,
 )
 
-DEFAULT_STEP = REPO_ROOT / "data" / "lunar_bodylager" / "0002-A-0900-A06-bodylager_1.stp"
-DEFAULT_BOM = REPO_ROOT / "data" / "lunar_bodylager" / "generated_bom.csv"
-DEFAULT_OUT = REPO_ROOT / "output" / "lunar_bodylager"
+DEFAULT_STEP = REPO_ROOT / "data" / "industrial_fastner" / "industrial_fastner.stp"
+DEFAULT_BOM = REPO_ROOT / "data" / "industrial_fastner" / "generated_bom.csv"
+DEFAULT_OUT = REPO_ROOT / "output" / "industrial_fastner"
 DEFAULT_H = 5.0
 
 HTML_MAX_NODES = 1500  # beyond this the SVG gets too heavy to be useful
@@ -106,7 +112,7 @@ def _make_inputs(labels, n, blocked, standers, boxes, key) -> AoGInputs:
     """blocked: (i, j, k) triples meaning "i cannot leave past j along axis k" (the antisymmetric
     twin is added). standers: list of (label, unit direction, holds set of movable indices, box) --
     one RemovalOption each, no blockers of its own (these demos only model holds); holds = movable
-    indices that must stay present while the stander leaves (docs/stander_processing-spec.md P6)."""
+    indices that must stay present while the stander leaves (rule P6)."""
     free = np.ones((n, n, len(AXES)), dtype=bool)
     for i, j, k in blocked:
         free[i, j, k] = False
@@ -1057,6 +1063,9 @@ def print_summary(aog: AoG, inputs: AoGInputs, report: dict, checks: list[dict],
 
 
 def main(args: argparse.Namespace) -> int:
+    """Pipeline: get the AoG inputs (real: run_preprocessing -> identify_interferences (cached) -> build_aog
+    (cached); synthetic: a hand-built AoGInputs -> generate_aog), run the independent checks S1-S10, pick an
+    example sequence, write report / sequence text / HTML graph, print the summary."""
     logging.basicConfig(level=logging.INFO, format="%(name)s %(levelname)s: %(message)s")
     cfg = AoGConfig(margin=args.margin)
     t0 = time.perf_counter()

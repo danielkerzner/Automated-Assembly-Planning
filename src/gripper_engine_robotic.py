@@ -1,28 +1,80 @@
-"""Grasp engine wrapper for robot mode (docs/robotic-gripper_spec.md section 4).
+"""Grasp engine wrapper for robot mode.
 
-The JMS parallel-gripper engine needs open3d/shapely/opencv/scikit-learn and runs in its own conda env
-(`parallelgrippercode`), separate from `environmentAAP` (FreeCAD). This module is imported on both sides:
+Inputs
+    - A TARGET point cloud (the component to grasp) and optionally an OBSTACLE point cloud (everything
+      else present), each as (points (N, 3) float mm, normals (N, 3) float, outward unit), in the
+      assembly's global frame.
+    - A gripper description YAML (default: `Franka.yaml` of the engine repo).
+Outputs
+    - An `EngineResult`: the list of grasps the engine found, each a `Grasp` (TCP position, grasp frame,
+      contact area, width, score in 0..1). The score of the call is the best score (0 if no grasp).
 
-  client (environmentAAP)   `GraspEngine`: starts one long-lived worker subprocess and sends it
-                            evaluations (file exchange: npz clouds in, json grasps out).
-  worker (parallelgrippercode)  `python gripper_engine_robotic.py --worker`: imports the function copy
-                            `third_party/jms_grasp/jms_engine.py` once, then serves requests from stdin.
+What this module does
+    The JMS parallel-gripper engine needs open3d / shapely / opencv / scikit-learn and runs in its own
+    conda env (`parallelgrippercode`), separate from `environmentAAP` (FreeCAD). This module is imported
+    on both sides:
 
-Two runners (`RobotConfig.engine_mode`):
-  "worker"  (default) the function copy in the long-lived worker.
-  "script"  the fallback runner: a copy of the UNCHANGED engine script in a scratch folder per call
-            (the reference harness of gripper_test/run_engine_tests.py). Slow; kept for the equivalence
-            test and as a fallback.
+      client (environmentAAP)       `GraspEngine`: starts one long-lived worker subprocess and sends it
+                                    evaluations (file exchange: npz clouds in, json grasps out).
+      worker (parallelgrippercode)  `python gripper_engine_robotic.py --worker`: imports the function copy
+                                    `third_party/jms_grasp/jms_engine.py` once, then serves requests from
+                                    stdin.
 
-Both seed open3d's RNG before each evaluation (`o3d.utility.random.seed`): the engine's plane detection
-is RANSAC (`segment_plane`), so without a seed identical input does not give identical output. This is
-the only addition around the engine; the algorithm is unchanged.
+    Two runners (`RobotConfig.engine_mode`):
+      "worker"  (default) the function copy in the long-lived worker.
+      "script"  the fallback runner: a copy of the UNCHANGED engine script in a scratch folder per call
+                (the reference harness of gripper_test/run_engine_tests.py). Slow; kept for the
+                equivalence test and as a fallback.
 
-Clouds are handed over exactly as the engine would read them from the ASCII PCD files of the reference
-pipeline (values rounded to 5 decimals, parsed as double), so worker, script runner and the reference
-measurements of spec 5.2 all see the same numbers. RANSAC is sensitive to differences as small as 1e-6 mm.
+    Both seed open3d's RNG before each evaluation (`o3d.utility.random.seed`): the engine's plane
+    detection is RANSAC (`segment_plane`), so without a seed identical input does not give identical
+    output. This is the only addition around the engine; the algorithm is unchanged.
 
-No FreeCAD import here; no open3d import on the client side.
+    Clouds are handed over exactly as the engine would read them from the ASCII PCD files of the
+    reference pipeline (values rounded to 5 decimals, parsed as double), so worker, script runner and the
+    reference measurements all see the same numbers. RANSAC is sensitive to differences as
+    small as 1e-6 mm.
+
+    No FreeCAD import here; no open3d import on the client side.
+
+=======================================================================================================
+ENGINE SWAP POINT (read this if the grasping engine is changed or updated)
+=======================================================================================================
+Everything outside this file only depends on ONE call, `GraspEngine.evaluate(target, obstacles)`:
+
+    evaluate(target    = (points (N, 3), normals (N, 3)),            # point cloud, mm, global frame
+             obstacles = (points (M, 3), normals (M, 3)) or None)    # point cloud of everything around
+        -> EngineResult(grasps=[Grasp(...), ...])
+
+`gripper_analysis_robotic.py` turns the scores into the feasibility decision and `robot_loop_robotic.py`
+runs the loop; neither knows which engine is behind `evaluate`. A new engine therefore has to be a
+function that takes a target cloud and an obstacle cloud (obstacle-aware: obstacles may only remove
+candidate grasps) and returns a list of grasps, each with:
+
+    tcp (3,) mm | axes (3, 3) rows = grasp frame | contact_area | grasp_width | score in [0, 1]
+
+The score must keep its meaning (higher = better grasp, 0..1), because the feasibility rule compares
+`score_context / score_alone` and an absolute floor (RobotConfig.grasp_rel_threshold / grasp_abs_floor).
+
+Where to change the code (all in the "Worker" section at the bottom unless stated):
+  1. `_serve`: replace `import jms_engine` and the call `jms_engine.evaluate(pcd, sur, params)`. The loop
+     that converts the engine's store records (`r.TCP`, `r.pose`, `r.contact_area`, `r.grasp_width`,
+     `r.score`, `r.pair_num`, `r.edge_num`, `r.point_num`) into dicts is the adapter to edit; its output
+     must keep the keys of `Grasp.to_json`. (`pair`, `edge`, `point` are engine bookkeeping and may be None.)
+  2. `_worker_cloud`: builds open3d clouds from the npz files. Change it if the new engine wants another
+     cloud type (the exchange files themselves stay "points + normals").
+  3. `third_party/jms_grasp/` is the engine copy itself (not documented here). `robot_loop_robotic.
+     engine_tag` reads `SOURCE_SHA256` and `COPY_VERSION` from `jms_engine.py` with a regex to key the
+     on-disk grasp cache: a new engine must either define both constants or change `engine_tag`, otherwise
+     stale cached scores of the old engine would be reused.
+  4. Engine-specific constants near the top: `ENGINE_COPY_DIR`, `DEFAULT_ENGINE_REPO`, `SCRIPT_NAME`; the
+     gripper YAML and the env name `parallelgrippercode` (`default_engine_python`).
+  5. `_evaluate_script` (fallback runner) and `write_pcd` are specific to the JMS script (file names,
+     results CSV). Remove them or rewrite them together with `RobotConfig.engine_mode`.
+  6. `_check_target` encodes a JMS rule (a cloud whose longest side is <= 1 mm is read as metres). Drop it
+     if the new engine has no such rule.
+If the new engine runs in the same env as FreeCAD, `GraspEngine` can call it directly in `evaluate` and the
+worker subprocess is not needed; keep the `evaluate` signature and result type.
 """
 
 from __future__ import annotations
@@ -46,15 +98,16 @@ import numpy as np
 log = logging.getLogger("aap.robot.engine")
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-ENGINE_COPY_DIR = REPO_ROOT / "third_party" / "jms_grasp"
+ENGINE_COPY_DIR = REPO_ROOT / "third_party" / "jms_grasp"  # ENGINE SWAP POINT: folder of the engine's function copy
+# ENGINE SWAP POINT: the engine's own repository (read only), used for the gripper YAML and the script runner.
 DEFAULT_ENGINE_REPO = (REPO_ROOT.parent / "gripperparallel" / "Adaptive-In-Orbit-Servicing-of-Altered-Satellite-Components"
                        / "JMS")
-SCRIPT_NAME = "main_script_parallel_grasp_valid_assembly.py"
-PROTOCOL_PREFIX = "@@AAP@@ "
+SCRIPT_NAME = "main_script_parallel_grasp_valid_assembly.py"  # ENGINE SWAP POINT: the unchanged engine script (script runner)
+PROTOCOL_PREFIX = "@@AAP@@ "  # str. Marks the protocol lines on the worker's stdout (everything else is engine noise).
 
 
 class EngineError(RuntimeError):
-    """The engine crashed, timed out or the worker died. Never turned into a score of 0 (spec 4)."""
+    """The engine crashed, timed out or the worker died. Never turned into a score of 0."""
 
 
 # ---------------------------------------------------------------------------
@@ -64,22 +117,26 @@ class EngineError(RuntimeError):
 
 @dataclass
 class Grasp:
-    tcp: np.ndarray  # (3,) mm, assembly frame
-    axes: np.ndarray  # (3, 3) rows: X = edge normal, Y = edge direction, Z = plane normal
-    contact_area: float
-    grasp_width: float
-    score: float  # engine score 0.5 * center + 0.5 * area, in 0..1
-    pair: int | None = None
-    edge: int | None = None
-    point: int | None = None
+    """One grasp returned by the engine (output element of `GraspEngine.evaluate`; engine-independent format)."""
+
+    tcp: np.ndarray  # (3,) float, mm, assembly frame. Tool centre point of the gripper; reported in plan.json and matched across angles.
+    axes: np.ndarray  # (3, 3) float. Rows: X = edge normal, Y = edge direction, Z = plane normal (the grasp frame).
+    contact_area: float  # float, mm^2. Contact area of the grasp; reported only.
+    grasp_width: float  # float, mm. Opening of the jaws; reported only.
+    score: float  # float in 0..1. Engine score 0.5 * center + 0.5 * area; the quantity the feasibility rule uses.
+    pair: int | None = None  # int or None. Engine bookkeeping (index of the surface pair); not used by the pipeline.
+    edge: int | None = None  # int or None. Engine bookkeeping (edge index); not used by the pipeline.
+    point: int | None = None  # int or None. Engine bookkeeping (point index); not used by the pipeline.
 
     def to_json(self) -> dict:
+        """[SUPP] Serialise to a JSON-ready dict (disk cache and worker reply)."""
         return {"tcp": [float(v) for v in self.tcp], "axes": [[float(v) for v in r] for r in self.axes],
                 "contact_area": float(self.contact_area), "grasp_width": float(self.grasp_width),
                 "score": float(self.score), "pair": self.pair, "edge": self.edge, "point": self.point}
 
     @staticmethod
     def from_json(d: dict) -> "Grasp":
+        """[SUPP] Inverse of `to_json`."""
         return Grasp(tcp=np.asarray(d["tcp"], float), axes=np.asarray(d["axes"], float),
                      contact_area=float(d["contact_area"]), grasp_width=float(d["grasp_width"]),
                      score=float(d["score"]), pair=d.get("pair"), edge=d.get("edge"), point=d.get("point"))
@@ -87,24 +144,29 @@ class Grasp:
 
 @dataclass
 class EngineResult:
-    grasps: list[Grasp] = field(default_factory=list)
-    wall_time_s: float = 0.0
+    """Result of one engine call: all grasps found (output of `GraspEngine.evaluate`, input of `GripperAnalysis`)."""
+
+    grasps: list[Grasp] = field(default_factory=list)  # list[Grasp]. Every grasp the engine kept; empty = no grasp possible.
+    wall_time_s: float = 0.0  # float, s. Time of the call, for logs and the report.
 
     @property
     def best(self) -> Grasp | None:
+        """[AUX] The grasp with the highest score, or None if there is none."""
         return max(self.grasps, key=lambda g: g.score) if self.grasps else None
 
     @property
     def score(self) -> float:
-        """Score of a call = best score in the store, 0 if the store is empty (spec 4)."""
+        """Score of a call = best score in the store, 0 if the store is empty."""
         b = self.best
         return 0.0 if b is None else float(b.score)
 
     def to_json(self) -> dict:
+        """[SUPP] Serialise to a JSON-ready dict (disk cache)."""
         return {"grasps": [g.to_json() for g in self.grasps], "wall_time_s": self.wall_time_s}
 
     @staticmethod
     def from_json(d: dict) -> "EngineResult":
+        """[SUPP] Inverse of `to_json`."""
         return EngineResult(grasps=[Grasp.from_json(g) for g in d["grasps"]],
                             wall_time_s=float(d.get("wall_time_s", 0.0)))
 
@@ -124,11 +186,12 @@ def as_pcd_precision(a: np.ndarray) -> np.ndarray:
 
 
 def save_cloud_npz(path: Path, points: np.ndarray, normals: np.ndarray) -> None:
+    """[AUX] Write a cloud as an npz (arrays `points` and `normals`, both (N, 3)); the exchange format client -> worker."""
     np.savez(path, points=np.asarray(points, float).reshape(-1, 3), normals=np.asarray(normals, float).reshape(-1, 3))
 
 
 def write_pcd(path: Path, points: np.ndarray, normals: np.ndarray) -> None:
-    """ASCII PCD with normals, same format as gripper_test/make_pcds_freecad.py."""
+    """[AUX] ASCII PCD with normals, same format as gripper_test/make_pcds_freecad.py (used by the script runner only)."""
     P, N = np.asarray(points, float).reshape(-1, 3), np.asarray(normals, float).reshape(-1, 3)
     n = len(P)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -141,11 +204,12 @@ def write_pcd(path: Path, points: np.ndarray, normals: np.ndarray) -> None:
 
 
 def _check_target(points: np.ndarray) -> None:
+    """[AUX] Reject an empty target cloud or one whose longest side is <= 1 mm (the JMS engine would read it as metres; ENGINE SWAP POINT)."""
     if len(points) == 0:
         raise ValueError("Empty target cloud")
     extent = float((points.max(0) - points.min(0)).max())
     if extent <= 1.0:
-        # The engine treats such a cloud as metres and scales it by 1000 (spec 3).
+        # The engine treats such a cloud as metres and scales it by 1000.
         raise ValueError(f"Target cloud's longest bbox side is {extent:.3f} mm (<= 1); the engine would "
                          "treat it as metres")
 
@@ -156,7 +220,7 @@ def _check_target(points: np.ndarray) -> None:
 
 
 def default_engine_python() -> Path:
-    """The `parallelgrippercode` interpreter: $AAP_GRIPPER_PYTHON, else the sibling of this conda env."""
+    """[AUX] Interpreter of the engine env: $AAP_GRIPPER_PYTHON, else the sibling conda env `parallelgrippercode` (ENGINE SWAP POINT: env name)."""
     env = os.environ.get("AAP_GRIPPER_PYTHON")
     if env:
         return Path(env)
@@ -167,6 +231,7 @@ def default_engine_python() -> Path:
 
 
 def _subprocess_env(engine_python: Path) -> dict:
+    """[AUX] Environment for the worker subprocess: UTF-8, no FreeCAD PYTHONPATH, and the engine env's DLL folders first on PATH."""
     env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUTF8="1", MPLBACKEND="Agg")
     env.pop("PYTHONPATH", None)  # environmentAAP's PYTHONPATH points at FreeCAD's Library\bin
     prefix = engine_python.parent
@@ -177,11 +242,20 @@ def _subprocess_env(engine_python: Path) -> dict:
 
 
 class GraspEngine:
-    """Evaluate (target cloud, obstacle cloud) with the JMS engine. Use as a context manager."""
+    """Evaluate (target cloud, obstacle cloud) with the JMS engine. Use as a context manager.
+
+    This is the client the rest of the pipeline talks to: `evaluate` is the ONE entry point (see the
+    ENGINE SWAP POINT block at the top). It owns the worker subprocess and the scratch folder.
+    """
 
     def __init__(self, engine_python: str | Path | None = None, gripper_yaml: str | Path | None = None,
                  timeout_s: float = 1800.0, seed: int = 1, mode: str = "worker",
                  work_dir: str | Path | None = None, engine_repo: str | Path | None = None):
+        """[AUX] Resolve the engine interpreter, repo and gripper YAML (FileNotFoundError if missing) and prepare the scratch folder.
+
+        Arguments mirror `RobotConfig` (engine_python, gripper_yaml, engine_timeout_s, engine_seed,
+        engine_mode, engine_repo); `work_dir` None = a temporary folder removed on `close`.
+        """
         if mode not in ("worker", "script"):
             raise ValueError(f"engine mode must be 'worker' or 'script', got {mode!r}")
         self.engine_python = Path(engine_python) if engine_python else default_engine_python()
@@ -204,12 +278,15 @@ class GraspEngine:
 
     # -- lifecycle --
     def __enter__(self):
+        """[AUX] Context manager entry."""
         return self
 
     def __exit__(self, *exc):
+        """[AUX] Context manager exit: `close`."""
         self.close()
 
     def close(self) -> None:
+        """[AUX] Ask the worker to quit (kill it after 10 s) and remove the scratch folder if it is temporary."""
         if self._proc is not None:
             try:
                 if self._proc.poll() is None:
@@ -225,6 +302,11 @@ class GraspEngine:
             shutil.rmtree(self.work_dir, ignore_errors=True)
 
     def _start_worker(self) -> None:
+        """[AUX] Start the worker subprocess in the engine env and wait (up to 300 s) for its "ready" reply.
+
+        Two reader threads drain stdout (protocol lines, into a queue) and stderr (last 40 lines, for
+        error messages) so the worker can never block on a full pipe.
+        """
         log_path = self.work_dir / "worker_engine_output.log"
         cmd = [str(self.engine_python), "-u", str(Path(__file__).resolve()), "--worker", "--log", str(log_path)]
         log.info("Starting grasp engine worker: %s", self.engine_python)
@@ -253,6 +335,7 @@ class GraspEngine:
                  str(reply.get("source_sha256"))[:12])
 
     def _read_reply(self, timeout: float) -> dict:
+        """[AUX] Wait for the next protocol line (prefix `@@AAP@@ `) and return its JSON; EngineError on timeout (worker killed) or worker exit."""
         deadline = time.monotonic() + timeout
         while True:
             left = deadline - time.monotonic()
@@ -272,6 +355,7 @@ class GraspEngine:
                 return json.loads(line[len(PROTOCOL_PREFIX):])
 
     def _kill(self) -> None:
+        """[AUX] Kill the worker process if it is still running."""
         if self._proc is not None and self._proc.poll() is None:
             self._proc.kill()
         self._proc = None
@@ -279,13 +363,23 @@ class GraspEngine:
     # -- evaluation --
     def evaluate(self, target: tuple[np.ndarray, np.ndarray],
                  obstacles: tuple[np.ndarray, np.ndarray] | None) -> EngineResult:
-        """One engine call. `obstacles` None or empty = target alone (handled without an empty file)."""
+        """[MAIN] ENGINE SWAP POINT (client side): one grasp-engine call. `obstacles` None or empty = target alone (handled without an empty file).
+
+        Inputs: `target` = (points (N, 3), normals (N, 3)) of the component to grasp; `obstacles` = the
+        same for everything around it, or None. Both are point clouds in mm in the global frame. Output: an
+        `EngineResult` (all grasps found and the call time). Raises ValueError for a bad target and
+        `EngineError` if the engine fails; a failure is never turned into a score of 0.
+
+        This is the only function `gripper_analysis_robotic.GripperAnalysis` calls. A different engine
+        replaces what `_evaluate_worker` does (or this method) and must return the same `EngineResult`.
+        """
         tp, tn = (np.asarray(a, float).reshape(-1, 3) for a in target)
         _check_target(tp)
         if obstacles is not None and len(obstacles[0]) == 0:
             obstacles = None
         self.n_calls += 1
         t0 = time.perf_counter()
+        # Dispatch to the chosen runner.
         if self.mode == "worker":
             res = self._evaluate_worker(tp, tn, obstacles)
         else:
@@ -294,6 +388,12 @@ class GraspEngine:
         return res
 
     def _evaluate_worker(self, tp, tn, obstacles) -> EngineResult:
+        """[MAIN] Worker runner: send one request to the long-lived worker and read its grasps back.
+
+        Protocol: the clouds are written as npz files in `work_dir/exchange`, a JSON request line (ids,
+        file paths, seed, gripper YAML) goes to the worker's stdin, the worker replies with a protocol line
+        and writes the grasps as a JSON file, which is read here. The exchange files are always removed.
+        """
         if self._proc is None or self._proc.poll() is not None:
             self._start_worker()
         self._req += 1
@@ -301,6 +401,7 @@ class GraspEngine:
         tdir = self.work_dir / "exchange"
         tdir.mkdir(exist_ok=True)
         target_path, obst_path, out_path = tdir / f"t{rid}.npz", tdir / f"o{rid}.npz", tdir / f"r{rid}.json"
+        # Write the clouds and the request.
         save_cloud_npz(target_path, tp, tn)
         req = {"id": rid, "target": str(target_path), "obstacles": None, "out": str(out_path),
                "seed": self.seed, "gripper_yaml": str(self.gripper_yaml)}
@@ -313,6 +414,7 @@ class GraspEngine:
         except OSError as exc:
             self._proc = None
             raise EngineError(f"Could not send a request to the grasp engine worker: {exc}") from exc
+        # Wait for the answer, check it belongs to this request, read the grasps.
         reply = self._read_reply(self.timeout_s)
         try:
             if reply.get("id") != rid:
@@ -326,7 +428,11 @@ class GraspEngine:
                 p.unlink(missing_ok=True)
 
     def _evaluate_script(self, tp, tn, obstacles) -> EngineResult:
-        """Fallback runner: the unchanged script in a scratch folder (as gripper_test/run_engine_tests.py)."""
+        """Fallback runner: the unchanged script in a scratch folder (as gripper_test/run_engine_tests.py).
+
+        [AUX] ENGINE SWAP POINT: specific to the JMS script (its file names, `Object/unknown_*.pcd`
+        inputs and `results/*/grasp_data/*.csv` outputs). Slow (one process per call).
+        """
         import csv
 
         self._req += 1
@@ -379,6 +485,10 @@ class GraspEngine:
 
 
 def _worker_cloud(o3d, path: str | None):
+    """[AUX] ENGINE SWAP POINT (worker side): load an npz cloud as an open3d PointCloud (empty cloud for None).
+
+    Values go through `as_pcd_precision` so the worker sees what the reference ASCII-PCD pipeline would.
+    """
     pc = o3d.geometry.PointCloud()
     if path is None:
         return pc
@@ -391,6 +501,16 @@ def _worker_cloud(o3d, path: str | None):
 
 
 def _serve(log_path: str) -> int:
+    """[MAIN] ENGINE SWAP POINT (worker side): the worker loop, run in the engine env by `--worker`.
+
+    Reads one JSON request per stdin line (`quit` ends it), seeds the RNGs, loads the target and obstacle
+    clouds, calls the engine and writes the grasps to the request's `out` file, then answers with a
+    protocol line (`ok` or the traceback). A failing request does not stop the worker.
+
+    To use another engine, change the three marked places: the import of `jms_engine`, the call
+    `jms_engine.evaluate(pcd, sur, params)` (inputs: target cloud, obstacle cloud, gripper parameters from
+    the YAML) and the record -> dict conversion of `store.all()`.
+    """
     # Protocol goes to a private copy of the real stdout; everything else (the engine's prints and
     # open3d's C++ messages, which write to fd 1 directly) goes to the log file.
     proto = os.fdopen(os.dup(1), "w", encoding="utf-8", buffering=1)
@@ -407,6 +527,7 @@ def _serve(log_path: str) -> int:
     import open3d as o3d
     import yaml
 
+    # ENGINE SWAP POINT 1: import the engine (a copy of the JMS function in third_party/jms_grasp).
     sys.path.insert(0, str(ENGINE_COPY_DIR))
     import jms_engine  # noqa: E402
 
@@ -419,6 +540,7 @@ def _serve(log_path: str) -> int:
             break
         req = json.loads(line)
         try:
+            # Seed every RNG the engine may use (open3d RANSAC, random, numpy) so equal input gives equal output.
             seed = int(req["seed"])
             o3d.utility.random.seed(seed)
             random.seed(seed)
@@ -428,7 +550,9 @@ def _serve(log_path: str) -> int:
             with open(req["gripper_yaml"], "r", encoding="utf-8") as f:
                 params = yaml.safe_load(f)
             print(f"\n===== AAP request {req['id']}: target {len(pcd.points)} pts, obstacles {len(sur.points)} pts =====")
+            # ENGINE SWAP POINT 2: the engine call (target cloud, obstacle cloud, gripper parameters) -> grasp store.
             store = jms_engine.evaluate(pcd, sur, params)
+            # ENGINE SWAP POINT 3: adapter from the engine's records to the `Grasp.to_json` keys.
             grasps = []
             for r in store.all():
                 grasps.append({"tcp": [float(v) for v in np.asarray(r.TCP, float).reshape(3)],

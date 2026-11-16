@@ -1,7 +1,7 @@
 """Manual smoke test for Optimization (src/optimization.py).
 
 Counterpart of manual_tests/test_preprocessing_manual.py, manual_tests/test_interference_manual.py and
-manual_tests/test_aog_manual.py. Not an acceptance suite -- those are the O1-O14 tests in
+manual_tests/test_aog_manual.py. Not an acceptance suite -- those are the O1-O15 tests in
 automatic_tests/test_optimization.py. This
 script runs the optimizer end to end on one assembly and dumps the result in a form you can read by
 eye:
@@ -58,8 +58,14 @@ Switch criteria off and tune the run from the command line, for example:
       python manual_tests/test_optimization_manual.py --no-stability --no-gravity-change --seed 5 --beta 2
       python manual_tests/test_optimization_manual.py --synthetic demo --ablation
 
-Disabling --no-stability also requires --no-gravity-change (spec 3.1).
+Disabling --no-stability also requires --no-gravity-change.
 The exit code is 0 when every check passes, 1 otherwise.
+
+Expected result: checks K1-K7 print PASS and the exit code is 0 (2 for an invalid configuration, before any work).
+The console shows the weights used, the assembly sequence (every part exactly once, the first one class 2), the
+cost breakdown per criterion with total = sum of the weighted terms, and the greedy cost against the ACO cost.
+The same seed gives the same sequence. With --ablation a table
+shows how the sequence and cost change when each criterion is switched off in turn.
 """
 
 from __future__ import annotations
@@ -83,9 +89,9 @@ import optimization as op  # noqa: E402
 from optimization import OptimizationConfig, TermTables  # noqa: E402
 
 DEFAULT_STEP = REPO_ROOT / "data" / "industrial_fastner" / "industrial_fastner.stp"
-DEFAULT_BOM = REPO_ROOT / "data" / "industrial_fastner" / "bom.csv"
-DEFAULT_OUT = REPO_ROOT / "tests" / "industrial_fastner"
-DEFAULT_H = 2.0
+DEFAULT_BOM = REPO_ROOT / "data" / "industrial_fastner" / "generated_bom.csv"
+DEFAULT_OUT = REPO_ROOT / "output" / "industrial_fastner"
+DEFAULT_H = 5.0
 
 TOL = 1e-6
 SYNTHETIC_CONTACT_TOL = 0.1  # mm, same as the AoG contact threshold
@@ -592,6 +598,9 @@ def run_synthetic(args: argparse.Namespace):
 
 
 def main(args: argparse.Namespace) -> int:
+    """Pipeline: get the AoG and the BOM tool / group data (real: preprocessing -> interference -> AoG ->
+    contact patches, all cached; synthetic: hand-built assembly) -> validate the criteria -> optional leave-one-out
+    ablation -> run the ACO optimizer (optimize_sequence) -> checks K1-K7 -> report and summary."""
     logging.basicConfig(level=logging.INFO, format="%(name)s %(levelname)s: %(message)s")
     if args.quiet:
         logging.getLogger("aap.optimization").setLevel(logging.WARNING)
@@ -653,7 +662,7 @@ if __name__ == "__main__":
     parser.add_argument("--beta", type=float, help="heuristic exponent")
     parser.add_argument("--rho", type=float, help="evaporation rate in (0, 1)")
     parser.add_argument("--cost-to-go", action="store_true",
-                        help="add the exact remaining static cost to the heuristic (off by default, spec 6.3)")
+                        help="add the exact remaining static cost to the heuristic (off by default)")
     parser.add_argument("--support-region", choices=["hull", "union"], help="stability support region")
     parser.add_argument("--no-fall-test", action="store_true", help="skip the 'it could fall' part of class 1")
     parser.add_argument("--ablation", action="store_true",

@@ -1,0 +1,75 @@
+{
+ "schema_version": 2,
+ "cache_key": "c9e5f671e5324d19c86a3a448dedb39872ab10080f54cc95c60486ba9edb098e",
+ "component_ids": [
+  "Part__Feature",
+  "Part__Feature001",
+  "Part__Feature002",
+  "Part__Feature006",
+  "Part__Feature007",
+  "Part__Feature003",
+  "Part__Feature004",
+  "Part__Feature005"
+ ],
+ "component_labels": [
+  "industrial_fastner_part3",
+  "industrial_fastner_part2",
+  "industrial_fastner_part1",
+  "industrial_fastner_part5",
+  "industrial_fastner_part6",
+  "industrial_fastner_part7",
+  "industrial_fastner_part4",
+  "industrial_fastner_part001"
+ ],
+ "config": {
+  "margin": 1.0,
+  "group_consecutive": true,
+  "group_one_order": true
+ },
+ "stats": {
+  "group_rule": false,
+  "group_one_order": false,
+  "groups": {},
+  "group_order_pruned_edges": 0,
+  "N": 8,
+  "n_movable": 5,
+  "n_standers": 3,
+  "D": 6,
+  "D_prime": 6,
+  "V": 61,
+  "E": 141,
+  "nodes_per_level": [
+   1,
+   5,
+   10,
+   12,
+   12,
+   10,
+   5,
+   5,
+   1
+  ],
+  "connectivity_rule": true,
+  "disconnected_dropped": 47,
+  "dead_ends": 0,
+  "live_nodes": 61,
+  "complete": true,
+  "time_s": 0.0207832000014605,
+  "array_bytes": 4167
+ },
+ "complete": true,
+ "root": 0,
+ "terminal": 60,
+ "dead_ends": [],
+ "component_groups": [
+  "industrial_fastner_part3",
+  "industrial_fastner_part2",
+  "industrial_fastner_part1",
+  "industrial_fastner_part5",
+  "industrial_fastner_part6",
+  "industrial_fastner_part7",
+  "industrial_fastner_part4",
+  "industrial_fastner_part001"
+ ],
+ "date": "2026-11-16T08:23:59"
+}

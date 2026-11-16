@@ -1,11 +1,30 @@
 """Level documents, fusing, and the recursive per-level pipeline run.
 
-Implements docs/subassembly-spec.md section 5. A "level" is one Container and its direct
-children (leaves and child containers); `build_level_document` renders it as a flat FreeCAD
-document (every direct child container appears as one `Part::Feature` whose shape is its
-descendant leaves fused into one solid), so every existing module downstream of Preprocessing
-sees a flat assembly and needs no change. `solve_level` runs the existing pipeline on that
-document and recurses into every child container marked `processed` in the BOM.
+Covers levels, fusing and Phase 2 (automatic sub-assemblies).
+
+Inputs
+    - The `Hierarchy` (hierarchy.py) and the original FreeCAD document of the STEP.
+    - STEP path, BOM path, the BOM labels and stander categories, an output directory.
+    - Optional stage configs (Preprocessing, Collision, Optimization, Illustration).
+Outputs
+    - A `LevelPlan` tree: for each level its preprocessing result, interference tensor, AoG, optimised
+      sequence (or "locked"), inseparable pairs and the plans of its child levels. `main.py` turns it into
+      plan.json.
+    - On disk, per level: `<level_dir>/` with the stage caches (interference, aog, optimization,
+      illustrations) and `fused/` BREP caches. The root level lives in `output_dir`, others in
+      `output_dir/levels/<container_id>` (Phase 2 groups nest under their parent level).
+
+What this module does
+    A "level" is one `Container` plus its direct children (leaves and child containers). It is rendered as
+    a flat FreeCAD document in which every child container is ONE `Part::Feature` whose shape is all its
+    descendant leaves fused into one solid, so every module downstream of Preprocessing sees a flat
+    assembly and needs no change. `solve_level` runs the per-level pipeline on that document and recurses
+    into every child container marked `processed` in the BOM.
+
+    Phase 2: if the AoG of a level is not complete, `_solve_pipeline` finds groups of parts that block
+    each other (`aog_generator.find_candidate_groups`), merges the best group into a virtual `auto_<n>`
+    container (`_pick_winner`, `_commit_merge`), rebuilds the AoG and repeats. Each `auto_<n>` group is
+    then planned on its own as a child level. If no group can be found the level ends "locked".
 """
 
 from __future__ import annotations
@@ -21,37 +40,54 @@ from hierarchy import Container, Hierarchy
 
 log = logging.getLogger("aap.levels")
 
-FUSED_VERSION = "2"
+FUSED_VERSION = "2"  # str. Part of the fused-shape cache key; bump when the fuse procedure changes.
 
 # A small fuzzy boolean tolerance rescues real-world STEP geometry (curve-on-surface defects,
 # near-but-not-quite-touching leaves) that a zero-tolerance fuse() leaves invalid or unorientable;
 # same order of magnitude as the other contact tolerances in this codebase (see CLAUDE.md).
-_FUSE_FUZZY_TOLERANCE = 0.01
+_FUSE_FUZZY_TOLERANCE = 0.01  # mm. Fuzzy tolerance of the second fuse attempt.
 
 
 @dataclass
 class LevelPlan:
-    container_id: str
-    label: str
-    level_dir: Path
-    prep: "object"  # PreprocessingResult
-    interference: "object"  # InterferenceResult
-    aog: "object"  # AoG
-    sequence: "object"  # OptimizationResult | None (None when status == "locked")
+    """Result of planning one level (output of `solve_level` / `_solve_pipeline`, input of `main._level_to_json`).
+
+    One `LevelPlan` per container that was expanded into its own level, including Phase 2 groups; child
+    levels hang from `children`.
+    """
+
+    container_id: str  # str. Id of the container this level belongs to (hier.root for the root level).
+    label: str  # str. Container label, used in plan.json and to title the illustrations.
+    level_dir: Path  # Path. Folder holding this level's stage outputs.
+    prep: "object"  # PreprocessingResult. The level's flat document and standers (after Phase 2 merges).
+    interference: "object"  # InterferenceResult. The level's interference tensor (after Phase 2 merges).
+    aog: "object"  # AoG. The level's assembly graph (complete, or the last incomplete one when locked).
+    sequence: "object"  # OptimizationResult | None. The ordered steps; None when status == "locked".
+    # dict child container id -> LevelPlan. Plans of the child levels (real sub-assemblies and auto_<n> groups).
     children: dict[str, "LevelPlan"] = field(default_factory=dict)
+    # list of (label, label). Part pairs with no free direction at all (only warned, the plan can still be complete).
     inseparable_pairs: list[tuple[str, str]] = field(default_factory=list)
-    status: str = "complete"  # "complete" | "locked" (Phase 2, spec section 10)
-    locked_parts: list[str] = field(default_factory=list)  # labels, only set when locked
+    status: str = "complete"  # str. "complete" or "locked" (Phase 2 found no way out).
+    locked_parts: list[str] = field(default_factory=list)  # list[str]. Labels of the stuck parts; only set when locked.
 
 
 def _fuse_container(container: Container, original_doc, cache_dir: Path):
-    """Fused solid of every leaf under `container` (spec 5). Cached as BREP, keyed by the leaves'
-    geometry hashes; falls back to a compound if the fuse fails or looks suspiciously small."""
+    """[MAIN] Fuse every leaf under `container` into one solid; returns a FreeCAD shape.
+
+    Input: the container (its `all_leaf_ids` are fused), the document holding the leaves and a cache
+    folder. Output: the fused shape, so a sub-assembly can be handled as one rigid component of its
+    parent level. Cached as BREP in `<cache_dir>/fused/`, keyed by the leaves' geometry hashes.
+
+    Strategy: exact fuse, then fuzzy fuse (`_FUSE_FUZZY_TOLERANCE`) if the exact one raised or is
+    invalid; the result is then cleaned with `removeSplitter`. A result missing or under half of the
+    leaves' summed volume is distrusted and replaced by a plain compound of the leaves.
+    """
     import Part
 
     from preprocessing import _global_shape
     from shapes import shape_geometry_hash
 
+    # Collect the leaves' global shapes.
     leaves = []
     for leaf_id in container.all_leaf_ids:
         obj = original_doc.getObject(leaf_id)
@@ -61,6 +97,7 @@ def _fuse_container(container: Container, original_doc, cache_dir: Path):
         leaves.append(obj)
     shapes = [_global_shape(obj) for obj in leaves]
 
+    # Cache lookup: key = version + geometry hash of every leaf.
     h = hashlib.sha256(f"v{FUSED_VERSION};".encode())
     for shape in shapes:
         h.update(shape_geometry_hash(shape).encode())
@@ -74,6 +111,7 @@ def _fuse_container(container: Container, original_doc, cache_dir: Path):
                  container.id, cache_path)
         return fused
 
+    # Fuse: exact first, then fuzzy; accept the first valid, non-null result.
     t0 = time.perf_counter()
     if len(shapes) == 1:
         fused = shapes[0]
@@ -98,6 +136,7 @@ def _fuse_container(container: Container, original_doc, cache_dir: Path):
                          "un-refined %s fuse result", container.label, container.id, exc, attempt)
             fused = candidate
             break
+    # Sanity check on the volume; fall back to a compound if the fuse failed or lost material.
     leaf_volume = sum(s.Volume for s in shapes)
     if fused is None or fused.Volume < 0.5 * leaf_volume:
         if fused is not None:
@@ -112,6 +151,7 @@ def _fuse_container(container: Container, original_doc, cache_dir: Path):
              container.label, container.id, len(shapes), fused.Volume, leaf_volume,
              time.perf_counter() - t0)
 
+    # Save to the cache (temporary file, then rename).
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     tmp = cache_path.with_suffix(".tmp.brep")
     fused.exportBrep(str(tmp))
@@ -120,9 +160,16 @@ def _fuse_container(container: Container, original_doc, cache_dir: Path):
 
 
 def build_level_document(hier: Hierarchy, container_id: str, original_doc, cache_dir: Path):
-    """Flat FreeCAD document for one level: leaves copied as-is, child containers fused into one
-    `Part::Feature` each. Returns (doc_L, compound_ids, members): the ids of the fused-container
-    components and {container component id: descendant leaf ids}."""
+    """[MAIN] Build the flat FreeCAD document of one level.
+
+    Inputs: the hierarchy, the container to render, the original document and a cache folder. Output:
+    (doc_L, compound_ids, members): the new document, the ids of the components that are fused child
+    containers, and {container component id: descendant leaf ids}. The last two go to Preprocessing so it
+    knows which components are fused sub-assemblies and what they contain.
+
+    Direct leaves are copied as they are (global placement); each child container becomes one
+    `Part::Feature` holding its fused solid (`_fuse_container`).
+    """
     import FreeCAD
 
     from preprocessing import _global_shape
@@ -132,6 +179,7 @@ def build_level_document(hier: Hierarchy, container_id: str, original_doc, cache
     compound_ids: set[str] = set()
     members: dict[str, list[str]] = {}
 
+    # Direct leaves: copied with their global shape and label.
     for leaf_id in container.leaf_ids:
         leaf = original_doc.getObject(leaf_id)
         if leaf is None:
@@ -140,6 +188,7 @@ def build_level_document(hier: Hierarchy, container_id: str, original_doc, cache
         feature.Shape = _global_shape(leaf)
         feature.Label = leaf.Label
 
+    # Child containers: one fused feature each, remembering which leaves it contains.
     for child_id in container.child_ids:
         child = hier.containers[child_id]
         fused = _fuse_container(child, original_doc, cache_dir)
@@ -154,15 +203,17 @@ def build_level_document(hier: Hierarchy, container_id: str, original_doc, cache
 
 
 # ---------------------------------------------------------------------------
-# Phase 2 (docs/subassembly-spec.md section 10): automatic sub-assemblies.
+# Phase 2: automatic sub-assemblies.
 # ---------------------------------------------------------------------------
 
 
 def _trial_box_feature(doc, name: str, shapes: list):
-    """A bbox-matching placeholder `Part::Feature` for one Phase 2 trial -- no real boolean fuse
-    (cheap: a candidate may be discarded by the tie-break), just enough for `aog_generator.
-    collect_inputs` to read a bounding box for the travel model. Caller removes it with
-    `doc.removeObject(name)` once done; never used for the committed merge."""
+    """[AUX] Add a bounding-box placeholder `Part::Feature` named `name` for one Phase 2 trial.
+
+    No real boolean fuse (cheap: a candidate may be discarded by the tie-break); it only gives
+    `aog_generator.collect_inputs` a bounding box for the travel model. The caller removes it with
+    `doc.removeObject(name)` once done; never used for the committed merge.
+    """
     import FreeCAD
     import Part
 
@@ -178,9 +229,15 @@ def _trial_box_feature(doc, name: str, shapes: list):
 
 
 def _trial_aog(doc_L, prep_L, interf, group_ids: list[str], trial_name: str, aog_config):
-    """One Phase 2 trial: `merge_groups` (tensor only) + a bbox placeholder (no real fuse) +
-    `generate_aog` called directly, bypassing `build_aog`'s disk cache entirely -- a trial is
-    thrown away immediately after, never persisted. Returns (trial_aog, trial_interf)."""
+    """[MAIN] One Phase 2 trial: what would the AoG look like if `group_ids` were merged into one component?
+
+    Input: the level's document, preprocessing result and interference, the member ids, a temporary
+    component name and the AoG config. Output: (trial_aog, trial_interf), used only to rank candidates.
+
+    It calls `merge_groups` (tensor only), adds a bbox placeholder (no real fuse) and calls
+    `generate_aog` directly, bypassing `build_aog`'s disk cache, since a trial is thrown away at once and
+    never persisted. The placeholder is always removed again.
+    """
     from aog_generator import collect_inputs, generate_aog
     from interference_identification import merge_groups
 
@@ -197,8 +254,11 @@ def _trial_aog(doc_L, prep_L, interf, group_ids: list[str], trial_name: str, aog
 
 
 def _collect_candidates(aog, interf, blocking_dead_ends: list[int]) -> list[dict]:
-    """Every candidate group across the given blocking dead ends, deduplicated, each with how many
-    of those dead ends it is a candidate for (spec section 10's tie-break)."""
+    """[AUX] Every candidate group over the given blocking dead ends, deduplicated.
+
+    Returns dicts {"members": sorted component indices, "occurrences": number of those dead ends the
+    group is a candidate for}; `occurrences` is the second tie-break criterion.
+    """
     from aog_generator import find_candidate_groups
 
     tally: dict[frozenset, dict] = {}
@@ -216,10 +276,12 @@ def _collect_candidates(aog, interf, blocking_dead_ends: list[int]) -> list[dict
 
 def _simulate_to_completion(doc_L, prep_L, interf, aog, aog_config, max_depth: int,
                             trial_counter: list[int]) -> tuple[bool, int]:
-    """Greedy estimate of how many further merges a trial state needs (amended tie-break): repeat
-    picking the best-ranked candidate by (size, occurrences) only -- no further nested trial-
-    ranking, to keep this bounded -- until the AoG completes or no blocking dead end has a
-    candidate group (locked). Returns (complete, depth)."""
+    """[AUX] Greedy estimate of how many further merges a trial state needs (amended tie-break).
+
+    Repeatedly merges the best candidate by (size, occurrences) only, with no further nested trial
+    ranking to keep it bounded, until the AoG completes, no blocking dead end has a candidate (locked) or
+    `max_depth` merges were made. Returns (complete, depth).
+    """
     from aog_generator import classify_dead_ends
 
     depth = 0
@@ -241,13 +303,19 @@ def _simulate_to_completion(doc_L, prep_L, interf, aog, aog_config, max_depth: i
 
 
 def _pick_winner(doc_L, prep_L, interf, aog_config, candidates: list[dict]) -> list[int] | None:
-    """Rank Phase 2 merge candidates (spec section 10, amended tie-break): smallest size, then
-    most dead-end occurrences; within that tier, trial-merge each (no real fuse) and prefer one
-    whose AoG completes, then the one needing the fewest further merges (greedy simulation), and
-    only then sorted component ids. Logs every trial. Returns the winning group as movable
-    component indices, or None if there are no candidates at all."""
+    """[MAIN] Choose which candidate group to merge (amended tie-break).
+
+    Input: the level state and the candidate groups from `_collect_candidates`. Output: the winning group
+    as movable component indices, or None if there are no candidates (the level is then locked).
+
+    Ranking: smallest group first, then most dead-end occurrences. A single survivor is taken without
+    trials. Otherwise every tied candidate is trial-merged (no real fuse) and the winner is the one whose
+    AoG completes, then the one needing the fewest further merges (greedy simulation), and only then the
+    one with the smallest sorted member ids. Every trial is logged.
+    """
     if not candidates:
         return None
+    # Tier 1 and 2: smallest size, then most occurrences.
     best_size = min(len(c["members"]) for c in candidates)
     tier1 = [c for c in candidates if len(c["members"]) == best_size]
     best_occ = max(c["occurrences"] for c in tier1)
@@ -257,6 +325,7 @@ def _pick_winner(doc_L, prep_L, interf, aog_config, candidates: list[dict]) -> l
                  [interf.component_labels[c] for c in tier2[0]["members"]], best_size, best_occ)
         return tier2[0]["members"]
 
+    # Tie: trial-merge every tied candidate and measure how far it gets.
     trial_counter = [0]
     results = []
     for cand in tier2:
@@ -276,6 +345,7 @@ def _pick_winner(doc_L, prep_L, interf, aog_config, candidates: list[dict]) -> l
         log.info("Phase 2 trial: merging %s -> AoG complete=%s (merges to completion=%s)",
                  labels, complete, depth if complete else "locked")
 
+    # Best = completes, then fewest merges, then sorted member ids.
     results.sort(key=lambda r: (not r[1], r[2] if r[1] else float("inf"), r[0]["members"]))
     winner = results[0][0]
     log.info("Phase 2: chose group %s (tie-break: %s)",
@@ -286,22 +356,30 @@ def _pick_winner(doc_L, prep_L, interf, aog_config, candidates: list[dict]) -> l
 
 def _commit_merge(doc_L, prep_L, interf, group_ids: list[str], new_id: str, new_label: str,
                   level_dir: Path):
-    """Commit one Phase 2 merge for real: a fused solid (`_fuse_container`, reusing a synthetic
-    `Container` -- `doc_L`'s members are already globally placed, same as any other level, so it
-    plays the `original_doc` role unchanged), a new flat level document with the group replaced by
-    that one feature, `merge_groups` for the tensor, and stander gate remapping. Returns
-    (new_interf, new_prep, new_doc, group_shapes) -- `group_shapes` (original member id -> global
-    Shape, captured before removal) is what the group's own child level is built from."""
+    """[MAIN] Commit one Phase 2 merge for real: replace the group by one fused component in every level structure.
+
+    Input: the level's document, preprocessing result and interference, the member ids and the new
+    virtual component's id and label. Output: (new_interf, new_prep, new_doc, group_shapes), the level
+    after the merge. `group_shapes` (original member id -> global Shape, captured before removal) is what
+    the group's own child level is built from later.
+
+    Steps: fuse the members (`_fuse_container` with a synthetic `Container`; `doc_L`'s members are already
+    globally placed, so it plays the `original_doc` role unchanged); build a new flat document with the
+    group replaced by that one feature; merge the tensor (`merge_groups`); remap the stander gates;
+    update `compound_ids` / `members`; and give the new component its M7 group.
+    """
     import FreeCAD
 
     from interference_identification import merge_groups
 
+    # Fuse the members into one solid.
     group_shapes = {gid: doc_L.getObject(gid).Shape.copy() for gid in group_ids}
 
     synth = Container(id=new_id, label=new_label, parent=prep_L.level_id, leaf_ids=list(group_ids),
                       child_ids=[], processed=True, all_leaf_ids=list(group_ids), auto=True)
     fused = _fuse_container(synth, doc_L, level_dir)
 
+    # New flat document: every non-member as it was, plus the fused group.
     new_doc = FreeCAD.newDocument(f"{doc_L.Name}__{new_id}")
     group_set = set(group_ids)
     for obj in doc_L.Objects:
@@ -315,8 +393,10 @@ def _commit_merge(doc_L, prep_L, interf, group_ids: list[str], new_id: str, new_
     feature.Label = new_label
     new_doc.recompute()
 
+    # Interference tensor with the group collapsed into new_id.
     new_interf = merge_groups(interf, group_ids, new_id, new_label)
 
+    # Stander gates: every reference to a member now points to the new component.
     new_stander_records = {}
     for sid, rec in prep_L.stander_records.items():
         new_options = [
@@ -331,12 +411,13 @@ def _commit_merge(doc_L, prep_L, interf, group_ids: list[str], new_id: str, new_
             partner=(new_id if rec.partner in group_set else rec.partner),
         )
 
+    # Fused-component bookkeeping: new_id is a fused component made of the members' leaves.
     new_compound_ids = (set(prep_L.compound_ids) - group_set) | {new_id}
     new_members = {k: v for k, v in prep_L.members.items() if k not in group_set}
     new_members[new_id] = sorted({leaf for gid in group_ids for leaf in prep_L.members.get(gid, [gid])})
 
-    # M7 group inheritance (optimization.py's collect_tables, docs/subassembly-spec.md section
-    # 10): new_id's own BOM `group` -- the direct members' shared group if they agree (including a
+    # M7 group inheritance (optimization.py's collect_tables):
+    # new_id's own BOM `group` -- the direct members' shared group if they agree (including a
     # member that's itself an earlier auto_<n>, via its own override), else new_id itself, logged.
     bom_rows = {}
     if prep_L.bom_path is not None:
@@ -363,11 +444,14 @@ def _commit_merge(doc_L, prep_L, interf, group_ids: list[str], new_id: str, new_
 
 def _group_child_prep(prep_L, group_ids: list[str], group_shapes: dict, new_id: str,
                       new_label: str):
-    """PreprocessingResult for a Phase 2 group's own child level: a flat document built from the
-    captured member shapes (same global placement as every other level, not re-derived), the
-    parent's candidate-direction list and assembly_bbox (not rediscovered, per spec), and only the
-    stander records whose whole gate lies inside the group (cross-group gates dropped, same rule
-    as a real container's cross-container gates -- open item 5)."""
+    """[AUX] PreprocessingResult for a Phase 2 group's own child level.
+
+    The document is built from the captured member shapes (same global placement as every other level,
+    not re-derived). The parent's candidate-direction list is reused (not rediscovered) and
+    `assembly_bbox` is the union of the members' boxes. Only the stander records whose whole gate lies
+    inside the group are kept; cross-group gates are dropped, the same rule as a real container's
+    cross-container gates (not supported yet).
+    """
     import FreeCAD
 
     group_set = set(group_ids)
@@ -408,15 +492,20 @@ def _group_child_prep(prep_L, group_ids: list[str], group_shapes: dict, new_id: 
 
 
 def _level_output_dir(output_dir: Path, hier: Hierarchy, container_id: str) -> Path:
+    """[AUX] Output folder of a level: `output_dir` for the root, `output_dir/levels/<container_id>` otherwise."""
     return output_dir if container_id == hier.root else output_dir / "levels" / container_id
 
 
 def _solve_pipeline(hier: Hierarchy, container_id: str, label: str, prep_L, interf, level_dir: Path,
                     illustration_config=None, optimization_config=None) -> LevelPlan:
-    """AoG -> (Phase 2 merge loop, if needed) -> Optimization -> Illustrations for one level that
-    already has its Preprocessing + Interference result (a real container or a Phase 2 group), then
-    recurses into every `auto_<n>` group created at this level (nested Phase 2 is allowed: a
-    group's own child level can trigger another merge loop, via the same recursive call)."""
+    """[MAIN] AoG -> Phase 2 merge loop (if needed) -> Optimization -> Illustrations for one level.
+
+    Input: a level that already has its Preprocessing and Interference results (a real container or a
+    Phase 2 group), plus the output folder and the optional Optimization / Illustration configs. Output:
+    the level's `LevelPlan`, with the plans of every `auto_<n>` group created here in `children`
+    (nested Phase 2 is allowed: a group's own level can trigger another merge loop through the same
+    recursive call). A level that cannot be completed returns status "locked" without a sequence.
+    """
     from aog_generator import AoGConfig, build_aog, classify_dead_ends
     from illustration_generator import IllustrationConfig, generate_illustrations
     from interference_identification import sub_interference
@@ -435,6 +524,8 @@ def _solve_pipeline(hier: Hierarchy, container_id: str, label: str, prep_L, inte
     auto_groups: list[tuple] = []
     n_auto = 0
 
+    # Phase 2 loop: while the AoG cannot reach the full assembly, merge one group of mutually blocking
+    # parts into an auto_<n> component and rebuild the AoG. Stops "locked" if no group can help.
     while not aog.complete:
         kinds = classify_dead_ends(aog, interf)
         blocking = [v for v, k in kinds.items() if k == "blocking"]
@@ -462,6 +553,7 @@ def _solve_pipeline(hier: Hierarchy, container_id: str, label: str, prep_L, inte
         new_label = f"{new_id} ({' + '.join(sorted(group_labels))})"
         log.info("Level %r [%s]: merging %s into %r", label, container_id, group_labels, new_id)
 
+        # Commit the merge; keep what the group's own child level will need.
         child_interf = sub_interference(interf, group_ids)  # before the group's ids are merged away
         pre_merge_prep = prep_L
         interf, prep_L, doc_L, group_shapes = _commit_merge(
@@ -490,6 +582,7 @@ def _solve_pipeline(hier: Hierarchy, container_id: str, label: str, prep_L, inte
             status="locked", locked_parts=locked_parts,
         )
 
+    # Sequence optimisation (ACO) and illustrations for the complete AoG.
     sequence = optimize_sequence(aog, interf, prep_L, optimization_config, cache_dir=level_dir / "optimization")
 
     base_ill_config = illustration_config or IllustrationConfig()
@@ -497,6 +590,7 @@ def _solve_pipeline(hier: Hierarchy, container_id: str, label: str, prep_L, inte
     generate_illustrations(sequence, prep_L, level_dir / "illustrations",
                            config=replace(base_ill_config, title=title))
 
+    # Report part pairs with no free direction at all (warning only).
     inseparable_pairs: list[tuple[str, str]] = []
     n = len(interf.component_ids)
     for i in range(n):
@@ -511,6 +605,7 @@ def _solve_pipeline(hier: Hierarchy, container_id: str, label: str, prep_L, inte
         prep=prep_L, interference=interf, aog=aog, sequence=sequence,
         inseparable_pairs=inseparable_pairs,
     )
+    # Every auto_<n> group is planned as its own child level (this may trigger further Phase 2 inside it).
     for new_id, new_label, group_ids, group_shapes, child_interf, pre_merge_prep in auto_groups:
         child_prep = _group_child_prep(pre_merge_prep, group_ids, group_shapes, new_id, new_label)
         plan.children[new_id] = _solve_pipeline(
@@ -537,8 +632,16 @@ def solve_level(
     optimization_config=None,
     force_interference: bool = False,
 ) -> LevelPlan:
-    """Run Preprocessing -> Interference -> AoG (incl. Phase 2) -> Optimization -> Illustrations
-    for one level, then recurse depth-first into every child container marked `processed`."""
+    """[MAIN] Plan one level and, depth-first, every child container marked `processed`.
+
+    Inputs: the hierarchy, the container to plan, the original document, STEP and BOM paths, the BOM
+    labels and stander categories, the root output folder, optional stage configs and
+    `force_interference`. Output: the level's `LevelPlan`, with child plans in `children`.
+
+    Steps: build the level's flat document, run Preprocessing and Interference Identification on it, then
+    `_solve_pipeline` (AoG, Phase 2, Optimization, Illustrations). Only a complete level recurses, and
+    only into real child containers: Phase 2 `auto_<n>` groups are handled inside `_solve_pipeline`.
+    """
     from interference_identification import identify_interferences
     from preprocessing import run_preprocessing_on_document
 
@@ -546,6 +649,7 @@ def solve_level(
     level_dir = _level_output_dir(Path(output_dir), hier, container_id)
     level_dir.mkdir(parents=True, exist_ok=True)
 
+    # Flat document of this level, then Preprocessing and the interference tensor on it.
     doc_L, compound_ids, members = build_level_document(hier, container_id, original_doc, level_dir)
     prep_L = run_preprocessing_on_document(
         doc_L, bom_labels, preprocessing_config,
@@ -561,6 +665,7 @@ def solve_level(
                            illustration_config=illustration_config,
                            optimization_config=optimization_config)
 
+    # Recurse into the real child containers the BOM marked processed (not Phase 2 groups).
     if plan.status == "complete":
         for child_id in container.child_ids:
             if hier.containers[child_id].processed and not hier.containers[child_id].auto:

@@ -1,16 +1,29 @@
-"""Robot mode: verify-prune-reoptimize loop (docs/robotic-gripper_spec.md sections 1, 6).
+"""Robot mode: verify-prune-reoptimize loop.
 
-Same pipeline as manual mode up to and including Optimization (unchanged). Then, repeatedly:
+Inputs
+    - STEP file, BOM CSV and output folder (`run_robot_pipeline`), a `RobotConfig` and the usual stage configs.
+    - Internally: the AoG, interference result and preprocessing result of the (flat) assembly, the
+      per-component point clouds, a `GripperAnalysis` (grasp engine) and a `ToolChecker`.
+Outputs
+    - `plan.json` with a `robot` block (written through `output_robotic.write_robot_plan`), for the
+      sequence the loop chose, and the returned plan dict.
+    - `<output_dir>/robot/`: clouds, engine cache, engine work folder.
 
-    blocked = {}                                    # (state, component) -> iteration that pruned it
-    for it in 1..robot_max_iterations:
-        seq = optimize_sequence(..., blocked_edges=blocked)   # NoPathError -> stop
-        steps = evaluate(seq)                       # every step; cached; a repeated sequence is not re-evaluated
-        prune = infeasible edges + worst quarter of the gripper steps
-        blocked |= prune
-    choice = choose(records)
+What this module does
+    Same pipeline as manual mode up to and including Optimization (unchanged). Then, repeatedly:
 
-Implementation decisions beyond the spec (listed in the spec's status line):
+        blocked = {}                                    # (state, component) -> iteration that pruned it
+        for it in 1..robot_max_iterations:
+            seq = optimize_sequence(..., blocked_edges=blocked)   # NoPathError -> stop
+            steps = evaluate(seq)                       # every step; cached; a repeated sequence is not re-evaluated
+            prune = infeasible edges + worst quarter of the gripper steps
+            blocked |= prune
+        choice = choose(records)
+
+    A step is checked with the gripper (grasp engine, `gripper_analysis_robotic`) for normal parts, or with
+    the tool check (`tool_check`) for standers.
+
+Implementation decisions:
   - Intrinsically infeasible gripper components (fail even alone, see gripper_analysis_robotic) are
     never pruned and do not count in the quarter.
   - If an iteration adds no new blocked edge, the next optimization would return the same sequence
@@ -19,7 +32,7 @@ Implementation decisions beyond the spec (listed in the spec's status line):
     is still present), the same rule `optimization._apply_turns` uses for its "partner rotates" row,
     but without requiring a BOM pitch (the pitch only matters for the displayed turn count).
 
-Robot mode is for flat assemblies only (spec 0.4): a STEP with nested sub-assemblies is rejected.
+Robot mode is for flat assemblies only: a STEP with nested sub-assemblies is rejected.
 """
 
 from __future__ import annotations
@@ -47,7 +60,13 @@ log = logging.getLogger("aap.robot")
 
 
 def rotation_for(state: int, c: int, aog, stander_records: dict) -> Rotation | None:
-    """The nut axis component c turns about when removed from `state`, or None (spec 5.3)."""
+    """[MAIN] The nut axis component c turns about when removed from `state`, or None.
+
+    Input: the AoG state bitmask, the component index, the AoG and the stander records. Output: a
+    `Rotation` if c is the partner of a nut that is still present (so c turns while it is removed, and the
+    grasp must survive that rotation), else None. A screw never rotates here (its own thread makes it a
+    tool step anyway). With several present nuts the first one's axis is used, with a warning.
+    """
     cid = aog.component_ids[c]
     own = stander_records.get(cid)
     if own is not None and own.category == 1:
@@ -69,6 +88,7 @@ def rotation_for(state: int, c: int, aog, stander_records: dict) -> Rotation | N
 
 
 def _xyz(v) -> tuple[float, float, float]:
+    """[AUX] A FreeCAD Vector or a 3-sequence as a tuple of floats."""
     if hasattr(v, "x"):
         return (float(v.x), float(v.y), float(v.z))
     return tuple(float(a) for a in v)
@@ -76,49 +96,61 @@ def _xyz(v) -> tuple[float, float, float]:
 
 @dataclass
 class StepEval:
-    step: int  # assembly step number of the sequence
-    edge: int
-    state: int  # components present before removal (bitmask)
-    component: int
-    label: str
-    kind: str  # "gripper" | "tool"
-    feasible: bool  # the edge: part check and (when enabled) both sub-assembly nodes
-    grasp: object | None = None  # StepGrasp
-    tool: object | None = None  # ToolStep
+    """Check result of one step of a sequence (output of `evaluate_sequence`, input of pruning, choice and plan.json)."""
+
+    step: int  # int. Assembly step number of the sequence.
+    edge: int  # int. AoG edge index of the step.
+    state: int  # int bitmask. Components present before removal.
+    component: int  # int. AoG component index of the removed part.
+    label: str  # str. BOM label of the part.
+    kind: str  # str. "gripper" (normal part) or "tool" (stander).
+    feasible: bool  # bool. The edge: part check and (when enabled) both sub-assembly nodes.
+    grasp: object | None = None  # StepGrasp for a gripper step, else None.
+    tool: object | None = None  # ToolStep for a tool step, else None.
     # Optional sub-assembly check (RobotConfig.check_subassembly_grasp): the two nodes of the edge, i.e. the
     # sub-assembly after the insertion (`state`) and before it (`state` without the component). None when off.
     node_after: object | None = None  # NodeGrasp
     node_before: object | None = None  # NodeGrasp
-    root_state: int = 0  # the full assembly's mask (its node is in every path: never a reason to prune)
+    root_state: int = 0  # int bitmask. The full assembly's mask (its node is in every path: never a reason to prune).
 
     @property
     def edge_key(self) -> tuple[int, int]:
+        """[AUX] (state, component): the key under which an edge is blocked in the loop."""
         return (self.state, self.component)
 
     @property
     def part_feasible(self) -> bool:
+        """[AUX] The part's own check (tool or grasp), ignoring the optional sub-assembly nodes."""
         if self.kind == "tool":
             return bool(self.tool.feasible)
         return bool(self.grasp.feasible)
 
     @property
     def failing_nodes(self) -> list:
+        """[AUX] The sub-assembly nodes of this edge that are not graspable (empty when the check is off)."""
         return [n for n in (self.node_after, self.node_before) if n is not None and not n.feasible]
 
     @property
     def score_relative(self) -> float | None:
+        """[AUX] S_rel of a gripper step, None for a tool step."""
         return None if self.grasp is None else self.grasp.score_relative
 
     @property
     def intrinsic(self) -> bool:
+        """[AUX] True if the gripper step is intrinsically infeasible (fails even alone)."""
         return bool(self.grasp is not None and self.grasp.intrinsic)
 
 
 def evaluate_sequence(seq, aog, stander_records: dict, analysis: GripperAnalysis, tool_checker) -> list[StepEval]:
-    """Evaluate every step of an OptimizationResult (assembly order), never stopping at a failure.
+    """[MAIN] Evaluate every step of an OptimizationResult (assembly order), never stopping at a failure.
 
-    With `check_subassembly_grasp` on, each edge also needs both of its nodes (the sub-assembly before and
-    after the insertion) to be graspable; node results are cached per state in the analysis."""
+    Inputs: the sequence, the AoG, the stander records, the gripper analysis (grasp engine) and the tool
+    checker. Output: one `StepEval` per step. Standers are checked with the tool (any free sense without
+    contact is enough, the planned sense preferred); other parts with the grasp analysis, including the
+    nut-partner rotation. With `check_subassembly_grasp` on, each edge also needs both of its nodes (the
+    sub-assembly before and after the insertion) to be graspable; node results are cached per state in the
+    analysis. Every step is evaluated so the report shows all failures, not only the first.
+    """
     check_nodes = bool(getattr(analysis.config, "check_subassembly_grasp", False))
     root_state = int(aog.node_mask[aog.root])
     out = []
@@ -148,12 +180,21 @@ def evaluate_sequence(seq, aog, stander_records: dict, analysis: GripperAnalysis
 
 
 def quarter_count(n_gripper: int, fraction: float = 0.25) -> int:
+    """[AUX] How many gripper steps make up the "worst quarter": max(1, floor(n * fraction)), 0 if there are none."""
     return 0 if n_gripper <= 0 else max(1, int(math.floor(n_gripper * fraction)))
 
 
 def edges_to_prune(steps: list[StepEval], config: RobotConfig) -> list[tuple[tuple[int, int], str]]:
-    """[(edge key, reason)]: every infeasible edge + the worst quarter of the gripper steps (spec 6)."""
+    """[MAIN] [(edge key, reason)]: every infeasible edge + the worst quarter of the gripper steps.
+
+    Input: the evaluated steps of one sequence and the config. Output: the edges to block before the next
+    optimization, each with the reason. Pruning the infeasible ones forces the optimizer to find another
+    route; pruning the worst quarter pushes it towards better grasps even when nothing failed. Not pruned:
+    intrinsically infeasible steps (infeasible in every state), and a failure of the full assembly's node
+    alone (it is in every path).
+    """
     out: dict[tuple[int, int], str] = {}
+    # Every infeasible edge.
     for s in steps:
         if s.feasible or s.intrinsic:
             continue
@@ -168,6 +209,7 @@ def edges_to_prune(steps: list[StepEval], config: RobotConfig) -> list[tuple[tup
         avoidable = [n for n in s.failing_nodes if n.state != s.root_state]
         if avoidable:
             out[s.edge_key] = "sub-assembly not graspable (" + "; ".join(n.reason for n in avoidable) + ")"
+    # The worst quarter of the (non-intrinsic) gripper steps, by relative score.
     grip = [s for s in steps if s.kind == "gripper" and not s.intrinsic]
     # ranked by the part's own grasp (the quarter is about grasp quality; node failures are pruned above)
     grip.sort(key=lambda s: (s.part_feasible, s.score_relative if s.score_relative is not None else -1.0))
@@ -177,6 +219,7 @@ def edges_to_prune(steps: list[StepEval], config: RobotConfig) -> list[tuple[tup
 
 
 def sequence_metrics(steps: list[StepEval]) -> dict:
+    """[AUX] Figures that compare sequences: number of infeasible steps, weakest S_rel, sum of S_rel (gripper steps only)."""
     rel = [s.score_relative for s in steps if s.kind == "gripper" and s.score_relative is not None]
     return {"n_infeasible": sum(1 for s in steps if not s.feasible),
             "min_relative": min(rel) if rel else 1.0,
@@ -184,8 +227,8 @@ def sequence_metrics(steps: list[StepEval]) -> dict:
 
 
 def choose(records: list[dict]) -> int:
-    """Index of the chosen record (spec 6): fewer infeasible steps, higher weakest relative score,
-    higher sum of relative scores, lower optimization cost."""
+    """[MAIN] Index of the chosen record: fewer infeasible steps, higher weakest relative score,
+    higher sum of relative scores, lower optimization cost (compared in that order)."""
     if not records:
         raise ValueError("No recorded sequences to choose from")
     return min(range(len(records)), key=lambda i: (records[i]["n_infeasible"], -records[i]["min_relative"],
@@ -199,21 +242,34 @@ def choose(records: list[dict]) -> int:
 
 @dataclass
 class RobotLoopResult:
-    records: list[dict]  # per iteration: iteration, edge_path, total_cost, metrics, steps (StepEval), pruned
-    sequences: list  # OptimizationResult per record
-    blocked: dict  # (state, component) -> {"iteration", "reason"}
-    chosen: int
-    iterations: int
-    stop_reason: str
-    engine_calls: int = 0
-    wall_time_s: float = 0.0
-    extra: dict = field(default_factory=dict)
+    """Result of the robot loop (output of `run_robot_loop`, input of `output_robotic`)."""
+
+    records: list[dict]  # list of dicts, one per iteration: iteration, edge_path, total_cost, metrics, steps (StepEval), pruned.
+    sequences: list  # list of OptimizationResult, one per record.
+    blocked: dict  # dict (state, component) -> {"iteration", "reason"}. Every edge pruned so far.
+    chosen: int  # int. Index in `records` of the chosen sequence (see `choose`).
+    iterations: int  # int. Number of iterations run.
+    stop_reason: str  # str. Why the loop stopped (for the report).
+    engine_calls: int = 0  # int. Engine calls actually made (not cached).
+    wall_time_s: float = 0.0  # float, s. Duration of the loop.
+    extra: dict = field(default_factory=dict)  # dict. Free information added by the caller (engine details).
 
 
 def run_robot_loop(aog, interference_result, prep, analysis: GripperAnalysis, tool_checker,
                    config: RobotConfig, optimization_config: OptimizationConfig | None = None,
                    optimization_cache_dir: str | Path | None = None, optimize_fn=None) -> RobotLoopResult:
-    """`optimize_fn(blocked_edges)` may replace the real optimizer (tests); default optimize_sequence."""
+    """[MAIN] The verify-prune-reoptimize loop.
+
+    Inputs: the AoG, interference result and preprocessing result, the gripper analysis and tool checker,
+    the config and the optimization settings. `optimize_fn(blocked_edges)` may replace the real optimizer
+    (tests); default `optimize_sequence`. Output: a `RobotLoopResult` with every sequence tried and the
+    chosen one.
+
+    Each iteration optimizes with the blocked edges, evaluates every step of the new sequence (a sequence
+    already tried is not re-evaluated), prunes the infeasible edges and the worst quarter, and stops when
+    nothing new is pruned, no path is left (`NoPathError`) or the iteration limit is reached. The best
+    recorded sequence is chosen at the end.
+    """
     t0 = time.perf_counter()
     if optimize_fn is None:
         def optimize_fn(blocked):
@@ -224,12 +280,14 @@ def run_robot_loop(aog, interference_result, prep, analysis: GripperAnalysis, to
     seen: dict[tuple[int, ...], int] = {}
     stop_reason = f"reached robot_max_iterations ({config.robot_max_iterations})"
     for it in range(1, config.robot_max_iterations + 1):
+        # 1. Optimize with the edges blocked so far.
         try:
             seq = optimize_fn(set(blocked))
         except NoPathError as exc:
             stop_reason = f"no path left after pruning ({exc})"
             log.info("Robot loop: iteration %d: %s", it, stop_reason)
             break
+        # 2. Evaluate every step (reuse the result of an identical earlier sequence).
         key = tuple(int(e) for e in seq.edge_path)
         if key in seen:
             steps = records[seen[key]]["steps"]  # a sequence already tried is not re-evaluated
@@ -237,6 +295,7 @@ def run_robot_loop(aog, interference_result, prep, analysis: GripperAnalysis, to
         else:
             steps = evaluate_sequence(seq, aog, prep.stander_records, analysis, tool_checker)
             seen[key] = len(records)
+        # 3. Record it and block the edges to prune.
         metrics = sequence_metrics(steps)
         prune = edges_to_prune(steps, config)
         new = [(k, why) for k, why in prune if k not in blocked]
@@ -264,6 +323,7 @@ def run_robot_loop(aog, interference_result, prep, analysis: GripperAnalysis, to
                 fmt = lambda n: "-" if n.score is None else f"{n.score:.3f}{'' if n.feasible else ' NOT graspable'}"
                 log.info("        sub-assemblies: after insertion (%d parts) %s, before (%d parts) %s",
                          s.node_after.n_components, fmt(s.node_after), s.node_before.n_components, fmt(s.node_before))
+        # 4. Nothing new blocked: the next optimization would return the same sequence.
         if not new:
             stop_reason = f"no new pruning after iteration {it} (the next candidate would repeat it)"
             break
@@ -282,7 +342,12 @@ def run_robot_loop(aog, interference_result, prep, analysis: GripperAnalysis, to
 
 
 def engine_tag(config: RobotConfig, gripper_yaml: Path) -> str:
-    """Identity of the engine for the grasp disk cache: YAML bytes, function copy, seed, runner."""
+    """[AUX] Identity of the engine for the grasp disk cache: YAML bytes, function copy, seed, runner.
+
+    ENGINE SWAP POINT: reads `SOURCE_SHA256` and `COPY_VERSION` from `third_party/jms_grasp/jms_engine.py`
+    with a regex. A different engine must define both (or this function must change), otherwise cached
+    scores of the old engine would be reused.
+    """
     from gripper_engine_robotic import ENGINE_COPY_DIR, TRANSFER_VERSION
     copy = (ENGINE_COPY_DIR / "jms_engine.py").read_text(encoding="utf-8")
     sha = re.search(r'SOURCE_SHA256 = "([0-9a-f]+)"', copy)
@@ -297,7 +362,16 @@ def run_robot_pipeline(step_path, bom_path, output_dir, robot_config: RobotConfi
                        preprocessing_config=None, collision_config=None,
                        optimization_config: OptimizationConfig | None = None, force_interference: bool = False,
                        max_level_components: int = 20) -> dict:
-    """Preprocessing -> Interference -> AoG -> robot loop (Optimization + grasp/tool checks) -> plan.json."""
+    """[MAIN] Robot-mode pipeline: Preprocessing -> Interference -> AoG -> robot loop (Optimization + grasp/tool checks) -> plan.json.
+
+    Inputs: STEP, BOM, output folder, optional configs (None = defaults), `force_interference`, the level
+    size guard. Output: the plan.json dict (also written), with the `robot` block. Flat assemblies only
+    (ValueError for nested sub-assemblies, or if the AoG is incomplete).
+
+    It builds the root level exactly like `levels.solve_level` (same caches), then the point clouds, the
+    tool checker and the grasp engine (as a context manager, so the worker is always closed), computes
+    S_alone for every non-stander, runs the loop and writes the plan for the chosen sequence.
+    """
     from aog_generator import AoGConfig, build_aog
     from gripper_engine_robotic import GraspEngine
     from hierarchy import build_hierarchy, check_level_sizes
@@ -316,6 +390,7 @@ def run_robot_pipeline(step_path, bom_path, output_dir, robot_config: RobotConfi
     robot_dir = output_dir / "robot"
     robot_dir.mkdir(exist_ok=True)
 
+    # Load the inputs and refuse nested sub-assemblies.
     doc = load_assembly(step_path)
     bom_labels = load_bom(bom_path)
     bom_categories = load_stander_categories(bom_path)
@@ -324,7 +399,7 @@ def run_robot_pipeline(step_path, bom_path, output_dir, robot_config: RobotConfi
     hier = build_hierarchy(doc, bom_rows=bom_rows)
     root = hier.containers[hier.root]
     if root.child_ids:
-        raise ValueError(f"Robot mode supports flat assemblies only (docs/robotic-gripper_spec.md 0.4); "
+        raise ValueError(f"Robot mode supports flat assemblies only; "
                          f"{step_path.name} has nested sub-assemblies: "
                          f"{[hier.containers[c].label for c in root.child_ids]}")
     check_level_sizes(hier, max_components=max_level_components)
@@ -340,6 +415,7 @@ def run_robot_pipeline(step_path, bom_path, output_dir, robot_config: RobotConfi
     if not aog.complete:
         raise ValueError("The AoG cannot reach the fully disassembled state; robot mode needs a complete AoG")
 
+    # Point clouds for the grasp engine and the tool checker (needs the shapes and stander categories).
     shapes = component_shapes(aog.component_ids, aog.is_stander, prep)
     clouds, keys = component_clouds(list(aog.component_ids), shapes, config.pcd_spacing_mm, config.pcd_max_points,
                                     config.pcd_seed, cache_dir=robot_dir / "clouds", labels=list(aog.component_labels))
@@ -348,13 +424,14 @@ def run_robot_pipeline(step_path, bom_path, output_dir, robot_config: RobotConfi
     tool_checker = ToolChecker(shapes, list(aog.component_labels), list(aog.is_stander), categories,
                                np.asarray(aog.directions), config)
 
+    # Grasp engine (worker subprocess lives inside this block), gripper analysis and the loop.
     with GraspEngine(engine_python=config.engine_python, gripper_yaml=config.gripper_yaml,
                      timeout_s=config.engine_timeout_s, seed=config.engine_seed, mode=config.engine_mode,
                      work_dir=robot_dir / "engine_work", engine_repo=config.engine_repo) as engine:
         analysis = GripperAnalysis(engine, clouds, keys, list(aog.component_labels), config,
                                    cache_dir=(robot_dir / "engine_cache") if config.disk_cache else None,
                                    engine_tag=engine_tag(config, engine.gripper_yaml))
-        # Alone scores for every non-stander component up front (spec 5.2; reported in the output).
+        # Alone scores for every non-stander component up front (reported in the output).
         for c in range(aog.n_components):
             if not aog.is_stander[c]:
                 analysis.alone(c)
@@ -364,6 +441,7 @@ def run_robot_pipeline(step_path, bom_path, output_dir, robot_config: RobotConfi
                                 "mode": engine.mode, "calls": analysis.n_engine_calls,
                                 "disk_cache_hits": analysis.n_disk_hits}
 
+    # Plan for the chosen sequence, with the robot block.
     chosen_seq = loop.sequences[loop.chosen]
     inseparable = [(interf.component_labels[i], interf.component_labels[j])
                    for i in range(len(interf.component_ids)) for j in range(i + 1, len(interf.component_ids))

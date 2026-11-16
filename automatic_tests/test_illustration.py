@@ -1,4 +1,5 @@
-"""Acceptance tests for the Illustration Generator (docs/illustration-spec.md, L1-L13).
+"""Acceptance tests for the Illustration Generator (L1-L14). Module under test:
+src/illustration_generator.py (config, camera/projection, rasterisation, view selection, frame composition, footnotes, caches).
 
 Standalone runner (pytest is not installed in environmentAAP). From repo root:
 
@@ -10,11 +11,11 @@ Standalone runner (pytest is not installed in environmentAAP). From repo root:
 Groups:
   core   synthetic meshes (boxes, a ring, a rod through a plate, a closed enclosure, spheres); no FreeCAD.
   real   L11: run_preprocessing on industrial_fastner + the cached optimized sequence
-         (tests/industrial_fastner/optimization/optimization_result.json, read only), then generate_illustrations;
+         (output/industrial_fastner/optimization/optimization_result.json, read only), then generate_illustrations;
          a second run with another colour checks that meshes and layers are reused.
   scale  L13 at N = 20 with the default image sizes.
 
-The suite never writes to tests/industrial_fastner/; a final "cache" check confirms the files it reads are byte-identical.
+The suite never writes to output/industrial_fastner/; a final "cache" check confirms the files it reads are byte-identical.
 Scratch output goes to automatic_tests/output/illustration_test/; results to automatic_tests/output/illustration_results.json.
 """
 
@@ -41,7 +42,7 @@ from illustration_generator import IllustrationConfig, ViewContext  # noqa: E402
 
 OUT_DIR = Path(__file__).resolve().parent / "output"
 SCRATCH = OUT_DIR / "illustration_test"
-FASTENER_DIR = REPO_ROOT / "tests" / "industrial_fastner"
+FASTENER_DIR = REPO_ROOT / "output" / "industrial_fastner"
 FASTENER_STEP = REPO_ROOT / "data" / "industrial_fastner" / "industrial_fastner.stp"
 FASTENER_BOM = REPO_ROOT / "data" / "industrial_fastner" / "generated_bom.csv"
 SEQUENCE_FILE = FASTENER_DIR / "optimization" / "optimization_result.json"
@@ -58,6 +59,8 @@ SMALL = dict(image_size=(480, 360), search_size=(240, 180))
 
 
 class Recorder:
+    """Collects PASS/FAIL checks, notes and errors per test id for the summary table and the JSON file."""
+
     def __init__(self):
         self.results: dict[str, dict] = {}
         self._current: str | None = None
@@ -89,6 +92,7 @@ CACHED_FILES = ["optimization/optimization_result.json"]
 
 
 def cache_snapshot() -> dict[str, str | None]:
+    # [SUPP] SHA-256 of the cached industrial_fastner files this suite reads (None if absent).
     import hashlib
     out = {}
     for name in CACHED_FILES:
@@ -98,12 +102,14 @@ def cache_snapshot() -> dict[str, str | None]:
 
 
 def fresh_dir(name: str) -> Path:
+    # [SUPP] Empty scratch folder under output/illustration_test/.
     path = SCRATCH / name
     shutil.rmtree(path, ignore_errors=True)
     return path
 
 
 def raises(fn, needle: str) -> bool:
+    # [SUPP] True if fn raises ValueError whose message contains needle.
     try:
         fn()
     except ValueError as exc:
@@ -120,13 +126,14 @@ BOX_FACES = [(0, 1, 3), (0, 3, 2), (4, 7, 5), (4, 6, 7), (0, 4, 5), (0, 5, 1), (
 
 
 def box(lo, hi, key="") -> ig.Mesh:
+    # [SUPP] Closed axis-aligned box mesh with outward-facing triangles.
     lo, hi = np.asarray(lo, float), np.asarray(hi, float)
     V = [[(lo, hi)[ix][0], (lo, hi)[iy][1], (lo, hi)[iz][2]] for ix in (0, 1) for iy in (0, 1) for iz in (0, 1)]
     return ig.mesh_from_arrays(V, BOX_FACES, key or f"box{lo.tolist()}{hi.tolist()}")
 
 
 def ring(center, r_in, r_out, h, n=48, key="") -> ig.Mesh:
-    """Annulus prism about +z (a ring-shaped part)."""
+    """[SUPP] Annulus prism about +z (a ring-shaped part)."""
     c = np.asarray(center, float)
     a = np.linspace(0, 2 * np.pi, n, endpoint=False)
     circ = np.stack([np.cos(a), np.sin(a), np.zeros(n)], axis=1)
@@ -143,6 +150,7 @@ def ring(center, r_in, r_out, h, n=48, key="") -> ig.Mesh:
 
 
 def sphere(center, radius, n_lat=40, n_lon=80, key="") -> ig.Mesh:
+    # [SUPP] UV sphere mesh (many triangles, used for the scale test).
     c = np.asarray(center, float)
     th = np.linspace(0, np.pi, n_lat + 1)[1:-1]
     ph = np.linspace(0, 2 * np.pi, n_lon, endpoint=False)
@@ -162,6 +170,7 @@ def sphere(center, radius, n_lat=40, n_lon=80, key="") -> ig.Mesh:
 
 
 def merged(meshes, key="merged") -> ig.Mesh:
+    # [SUPP] One mesh made of the union of the given meshes (no boolean, triangles are just concatenated).
     V, F, off = [], [], 0
     for m in meshes:
         V.append(m.vertices)
@@ -171,7 +180,7 @@ def merged(meshes, key="merged") -> ig.Mesh:
 
 
 def enclosure(lo, hi, t, key="enclosure") -> ig.Mesh:
-    """Closed hollow box made of six wall plates of thickness t."""
+    """[SUPP] Closed hollow box made of six wall plates of thickness t."""
     lo, hi = np.asarray(lo, float), np.asarray(hi, float)
     walls = []
     for ax in range(3):
@@ -185,6 +194,7 @@ def enclosure(lo, hi, t, key="enclosure") -> ig.Mesh:
 
 
 def step(t, cid, offset, stander=False, gravity=None, cls=None, label=None) -> dict:
+    # [SUPP] Step dict as the optimizer writes it; `offset` is start_offset, the direction is derived from it.
     o = np.asarray(offset, float)
     travel = float(np.linalg.norm(o))
     return {"step": t, "component_id": cid, "component_label": label or cid, "is_stander": stander,
@@ -193,7 +203,7 @@ def step(t, cid, offset, stander=False, gravity=None, cls=None, label=None) -> d
 
 
 def scene(parts):
-    """parts: [(cid, mesh, offset, extra kwargs)] -> (steps, meshes dict, mesh list, offsets)."""
+    """[SUPP] parts: [(cid, mesh, offset, extra kwargs)] -> (steps, meshes dict, mesh list, offsets)."""
     steps, meshes = [], {}
     for t, (cid, mesh, offset, *kw) in enumerate(parts, start=1):
         steps.append(step(t, cid, offset, **(kw[0] if kw else {})))
@@ -202,7 +212,7 @@ def scene(parts):
 
 
 def row_scene():
-    """Four boxes in a row, inserted from different sides."""
+    """[SUPP] Four boxes in a row, inserted from different sides."""
     return scene([
         ("A", box([0, 0, 0], [20, 20, 10]), [0, 0, -40]),
         ("B", box([0, 0, 10], [10, 10, 20]), [0, 0, 40]),
@@ -212,6 +222,7 @@ def row_scene():
 
 
 def at_pixel(ctx: ViewContext, p) -> tuple[int, int]:
+    # [SUPP] (row, col) of the pixel where the 3D point p is projected.
     col, row = ctx.to_pixel(p)
     return int(np.floor(row)), int(np.floor(col))
 
@@ -222,6 +233,12 @@ def at_pixel(ctx: ViewContext, p) -> tuple[int, int]:
 
 
 def test_l1(rec, args):
+    """Tests: validate_config, the BOM reader / tool text, and the input checks of render_illustrations.
+    What: each invalid config value (image size, empty azimuth / elevation lists, negative elevation, visibility fraction,
+          colour name, language, dpi, tessellation tolerance) must raise a ValueError naming the field. The tool text of a
+          step is the BOM tool for standers and "by hand" otherwise (no tool column, blank tool, non-stander, label absent
+          from the BOM). A step without mesh, or a component listed twice, raises.
+    """
     C = IllustrationConfig
     ig.validate_config(C())
     rec.check(True, "default config validates")
@@ -258,6 +275,12 @@ def test_l1(rec, args):
 
 
 def test_l2(rec, args):
+    """Tests: the camera model (view_basis) and the projection of ViewContext (to_pixel, shift, layer depth).
+    What: known views (az 0 / 90 el 0, el 90) give the expected right/up/view vectors; for six random views the basis is
+          orthonormal, right-handed, with the right axis horizontal and up towards +z; unit moves along right / up / view map
+          to (+scale, 0) / (0, -scale) / (0, 0) pixels; the framing centre lands on the image centre; the ghost shift equals
+          the projected start_offset in pixels and depth; the depth of a known face equals v . p.
+    """
     m = box([0, 0, 0], [10, 10, 10])
     r, u, v = ig.view_basis(0, 0)
     rec.check(np.allclose(r, [0, 1, 0]) and np.allclose(u, [0, 0, 1]) and np.allclose(v, [-1, 0, 0]),
@@ -297,6 +320,11 @@ def test_l2(rec, args):
 
 
 def test_l3(rec, args):
+    """Tests: rasterisation and the z-merge of layers (ig.zmerge, mesh layer masks, closed vs open meshes).
+    What: two overlapping boxes give the nearer one in the ID buffer and its depth where they overlap; a box behind a plate
+          is fully occluded at its end position and fully visible at its ghost position; a ring seen from above has an empty
+          hole and a covered annulus; a single triangle is an open mesh and is drawn from both sides (no back-face culling).
+    """
     A, B = box([0, 0, 0], [10, 10, 10]), box([5, 5, 5], [15, 15, 15])
     rec.check(A.closed and B.closed, "boxes are closed, outward-oriented meshes")
     ctx = ViewContext((0, 0), (480, 360), [A, B], np.zeros((2, 3)))
@@ -330,6 +358,10 @@ def test_l3(rec, args):
 
 
 def test_l4(rec, args):
+    """Tests: that merging per-part layers is equivalent to rasterising everything at once.
+    What: four overlapping parts (boxes + a ring) are rendered as separate layers and z-merged, and also as one combined mesh,
+          in three views; compares coverage masks and depth.
+    """
     parts = [box([0, 0, 0], [10, 10, 10]), box([5, 5, 5], [15, 15, 15]), ring([4, 4, 12], 3, 6, 3),
              box([-5, 8, -3], [25, 9, 2])]
     combined = merged(parts)
@@ -348,6 +380,7 @@ def test_l4(rec, args):
 
 
 def l5_case(part, offset):
+    # [SUPP] Evaluates one part behind a plate with the given start offset; returns (view evaluation, visible flag of the part).
     plate = box([10, -20, -20], [12, 20, 20])
     ctx = ViewContext((0, 0), (480, 360), [plate, part], np.array([[0, 0, 80], offset], float))
     ev = ig.evaluate_view(ctx)
@@ -355,6 +388,10 @@ def l5_case(part, offset):
 
 
 def test_l5(rec, args):
+    """Tests: the visibility rule of a step (evaluate_view + visible_mask): end, start and trajectory.
+    What: a part behind a plate at 60 mm: end hidden, start hidden, view along the insertion direction (trajectory collapses
+          to a point), and a clear case; only the clear case may count as visible.
+    """
     hidden, side = box([0, -3, -3], [4, 3, 3]), box([0, 30, -3], [4, 36, 3])
     ev, vis = l5_case(hidden, [0, 0, 60])
     rec.check(ev["end"][1] < 0.5 and ev["start"][1] >= 0.5 and not vis,
@@ -371,6 +408,11 @@ def test_l5(rec, args):
 
 
 def test_l6(rec, args):
+    """Tests: the choice of the global view (select_views).
+    What: on a scene with a wall hiding some parts, the chosen view shows the maximum number of visible steps among all
+          candidate views; ties are broken by the sum of end-visible fractions; on a full tie the default view wins (by angular
+          distance), and the default view is always the first candidate.
+    """
     cfg = IllustrationConfig(azimuths=(0, 90, 180, 270), elevations=(20, 50), search_size=(240, 180))
     _, _, mesh_list, offsets = scene([
         ("wall", box([-1, -30, -5], [1, 30, 30]), [0, 0, 60]),
@@ -401,6 +443,14 @@ def test_l6(rec, args):
 
 
 def test_l7(rec, args):
+    """Tests: per-step view fallbacks (select_views) and their report.
+    What: (1) a step hidden in the global view gets another candidate view; (2) a movable part enclosed in a box gets the x-ray
+          fallback with a warning, and only the main views are searched; (3) an enclosed stander is drawn without x-ray and
+          reported as not visible; (4) the stander's best view prefers a clear trajectory; (5) a step whose only view looks along
+          its insertion direction is reported "none" with a warning and never aborts; (6) a group frame follows the fallback of
+          its first movement; (7) end to end, render_illustrations writes the frame without x-ray and the pixels at the stander
+          stay behind the enclosure, while the x-ray version would show them.
+    """
     wall = box([-1, -30, -5], [1, 30, 40])
     _, _, mesh_list, offsets = scene([("wall", wall, [0, 0, 45]), ("p", box([2, -4, 0], [10, 4, 8]), [0, 0, 50]),
                                       ("q", box([-10, -4, 0], [-2, 4, 8]), [0, 0, 50])])
@@ -444,7 +494,7 @@ def test_l7(rec, args):
     rec.check(ch[1]["kind"] == "none" and not ch[1]["visible"] and ch[1]["warnings"],
               f"step along the only view's direction: not visible with a warning ({ch[1]['kind']})")
 
-    # A group frame takes the fallback of its first movement (the one judged, spec 12).
+    # A group frame takes the fallback of its first movement (the one judged).
     _, _, mesh_list, offsets = scene([("box", enclosure([-10, -10, -10], [10, 10, 10], 2), [0, 0, 60]),
                                       ("s", box([-4, -4, -4], [-1, 4, 4]), [0, 0, 40]),
                                       ("m", box([1, -4, -4], [4, 4, 4]), [0, 0, 40])])
@@ -473,6 +523,11 @@ def test_l7(rec, args):
 
 
 def test_l8(rec, args):
+    """Tests: the content of each frame (render_illustrations + compose_frame) in a row of four boxes.
+    What: frames keep the sequence order and one PNG per step and the manual PDF exist; at step t nothing of later steps is
+          drawn (white outside the shown parts), the parts of steps 1..t-1 are drawn, the ghost is at final position +
+          start_offset, and the trajectory arrow goes from the ghost centroid to the part centroid.
+    """
     steps, meshes, mesh_list, offsets = row_scene()
     cfg = IllustrationConfig(**SMALL)
     res = ig.render_illustrations(steps, meshes, {}, fresh_dir("l8"), cfg, title="row")
@@ -505,6 +560,10 @@ def test_l8(rec, args):
 
 
 def test_l9(rec, args):
+    """Tests: consistency between consecutive frames.
+    What: several frames share the global view; the framing is the union over all steps and independent of their order; a part
+          placed earlier has identical pixels in consecutive frames (interior pixels, same scale and offset).
+    """
     steps, meshes, mesh_list, offsets = row_scene()
     cfg = IllustrationConfig(**SMALL)
     res = ig.render_illustrations(steps, meshes, {}, fresh_dir("l9"), cfg, title="row")
@@ -532,6 +591,12 @@ def test_l9(rec, args):
 
 
 def test_l10(rec, args):
+    """Tests: the footnote lines of a step (footnote_lines) and that the frames report the same.
+    What: step line with label and tool ("by hand" or the BOM tool); a stander with stability class 1 gets "Hold in place";
+          a gravity change gets the "Re-orient assembly" line with the new direction; mark_unstable=False removes the hold mark;
+          footnote_show_vector appends the displacement; without gravity data there are no marks; the frame records carry the
+          same footnote and flags.
+    """
     bom = {"S": {"label": "S", "is_stander": "true", "tool": "wrench_10", "group": "g2"},
            "P": {"label": "P", "is_stander": "false", "tool": "", "group": "g1"}}  # distinct: one frame per step
     steps = [step(1, "p", [0, 0, -20], gravity=[1, 0, 0], cls=2, label="P"),
@@ -561,10 +626,16 @@ def test_l10(rec, args):
 
 
 def _png_bytes(res):
+    # [SUPP] Raw bytes of every frame PNG of a result (for byte-for-byte comparison).
     return [Path(f["png"]).read_bytes() for f in res.frames]
 
 
 def test_l12(rec, args):
+    """Tests: caching and reproducibility of render_illustrations.
+    What: a second run loads the cached frames; a fresh directory produces identical PNG and PDF bytes; a colour change
+          re-renders frames but re-rasterises no layer and reuses the view search; a sequence reorder invalidates the frames but
+          reuses all layers of the (order-independent) global view and removes stale PNGs.
+    """
     steps, meshes, _, _ = row_scene()
     cfg = IllustrationConfig(**SMALL)
     a, b = fresh_dir("l12a"), fresh_dir("l12b")
@@ -600,6 +671,7 @@ def test_l12(rec, args):
 
 
 def _scale_case(rec, N, budget_s, image_cfg):
+    # [SUPP] One L13 run: N spheres with mixed insertion directions, timed and memory-traced.
     rng = np.random.default_rng(7)
     parts, axes = [], [[0, 0, 1], [1, 0, 0], [0, 1, 0], [-1, 0, 0], [0, -1, 0]]
     cols = 5
@@ -625,6 +697,10 @@ def _scale_case(rec, N, budget_s, image_cfg):
 
 
 def test_l13(rec, args):
+    """Tests: scale (time and memory) of render_illustrations.
+    What: N = 8 (and N = 20 with --groups scale) spheres with many triangles and mixed insertion directions, default image
+          sizes; checks frame count, wall time (60 s / 300 s) and peak traced memory (< 2 GB).
+    """
     _scale_case(rec, 8, 60.0, IllustrationConfig())
     if "scale" in args.groups:
         _scale_case(rec, 20, 300.0, IllustrationConfig())
@@ -633,6 +709,11 @@ def test_l13(rec, args):
 
 
 def test_l11(rec, args):
+    """Tests: end to end on industrial_fastner (needs --groups real and FreeCAD).
+    What: preprocessing + the cached optimized sequence (read only) -> generate_illustrations; checks PNG count = group
+          frames, every step in exactly one frame, manual.pdf written, every frame visible or with a warning, every x-ray frame
+          with a warning, runtime; a second run with another colour must neither re-tessellate nor re-rasterise.
+    """
     if "real" not in args.groups:
         rec.note("skipped (run with --groups real)")
         return
@@ -671,7 +752,15 @@ def test_l11(rec, args):
 
 
 def test_l14(rec, args):
-    """Group frames (spec 12): consecutive steps of one BOM group share a frame; only the first movement is judged."""
+    """Group frames: consecutive steps of one BOM group share a frame; only the first movement is judged.
+
+    Tests: group_blocks, the group frame content, the view check of a block and block_footnote_lines.
+    What: runs of one non-blank group merge into a block (blanks and interrupted groups do not); group_frames=False gives one
+          frame per step. A block frame (B, C of group "pins") has its own file name and footnote with the per-part tools, draws
+          both members at their final positions in their own colours with a ghost and an arrow each, and not the later part.
+          Only the first movement has to be visible, while the other members of the block can occlude it. The block footnote
+          lists shared tool, parts, moves, re-orientation and the hold list; a one-step block keeps the normal footnote.
+    """
     groups = ["g1", "g1", "", "", "g2", "g1", "g1"]
     steps = [step(t + 1, f"c{t}", [0, 0, 10], label=f"L{t}") for t in range(len(groups))]
     bom = {f"L{t}": {"label": f"L{t}", "group": g} for t, g in enumerate(groups)}
@@ -789,7 +878,7 @@ def main() -> int:
     rec.start("cache")
     after = cache_snapshot()
     for name, digest in cache_before.items():
-        rec.check(after.get(name) == digest, f"tests/industrial_fastner/{name} byte-identical after the run")
+        rec.check(after.get(name) == digest, f"output/industrial_fastner/{name} byte-identical after the run")
     rec.results["cache"]["seconds"] = 0.0
 
     print("\n| Test | Result | Time | Notes |\n|---|---|---|---|")

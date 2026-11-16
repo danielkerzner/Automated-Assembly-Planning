@@ -1,4 +1,18 @@
-"""Tool check: does a stander's tool touch the rest of the assembly? (docs/robotic-gripper_spec.md section 7)
+"""Tool check: does a stander's tool touch the rest of the assembly?
+
+Inputs
+    - The global FreeCAD shapes of every component, their labels, stander flags and stander categories
+      (1 screw, 2 nut, 3 other), the AoG candidate directions and a `RobotConfig`.
+    - Tool STEP files (`RobotConfig.tool_dir`, one per category).
+    - Per question: an AoG state (components present), a stander and the senses (directions) to try.
+Outputs
+    - A `ToolStep` per (state, stander): which senses are free of contact, which labels were touched, and
+      whether at least one sense is free (`feasible`). Used by `robot_loop_robotic.evaluate_sequence`.
+
+What this module does
+    Places the category's tool on the stander, along each free removal direction, and tests with exact
+    booleans whether it collides with any other component present in that state. Details of the geometry
+    below.
 
 Independent module (also meant for human tools in manual mode later). Boolean only, no score.
 
@@ -7,7 +21,7 @@ orientation, and checked statically in the assembled state against every other c
 that state, with the collision core's boolean (`collision._common_volume`). Contact = a common volume
 above `RobotConfig.tool_contact_volume_tol` (touching faces give ~0 volume and do not count).
 
-Conventions (confirmed with the author 2026-11-12; spec 13.4):
+Conventions (confirmed with the author 2026-11-12):
   - Tool STEP frame: the tool's working axis is its +Z axis through the origin, pointing from the robot
     flange towards the working element (bit, socket, pin), which connects to the stander in the max Z
     direction. Interface plane = the bbox max Z of the solid that the Z axis line meets highest. The
@@ -27,7 +41,7 @@ Conventions (confirmed with the author 2026-11-12; spec 13.4):
     the stander leaves towards. The stander itself is ignored in the contact test.
   - Tool per stander category: `RobotConfig.tools` (1 screw -> screwing_effector.step, 2 nut ->
     nut_effector.stp, 3 other/bushing -> bushing_effector.stp). A category mapped to None is reported
-    `checked = False` and counts as feasible (the spec's stub behaviour).
+    `checked = False` and counts as feasible (the stub behaviour).
 """
 
 from __future__ import annotations
@@ -49,6 +63,8 @@ log = logging.getLogger("aap.robot.tools")
 
 @dataclass
 class Tool:
+    """A tool loaded from STEP (output of `load_tool`, input of `place_tool`)."""
+
     name: str
     path: Path
     solids: list  # Part.Shape in the tool frame
@@ -56,6 +72,12 @@ class Tool:
 
 
 def load_tool(path: str | Path) -> Tool:
+    """[MAIN] Load a tool STEP and find its working element and interface plane (convention in the module docstring).
+
+    Input: the STEP path. Output: a `Tool` with its solids in the tool frame and `tip` = the point on the
+    +Z axis where the tool meets the stander. The working element is the solid the +Z axis meets highest;
+    the interface plane is that solid's bounding-box max Z, so a hollow socket uses its rim, not its floor.
+    """
     import Import
 
     path = Path(path)
@@ -99,7 +121,7 @@ def load_tool(path: str | Path) -> Tool:
 
 
 def engagement(shape, d: Vector) -> tuple[Vector, float]:
-    """(outermost point of the stander along d on the line through its centre of mass, its extent along d)."""
+    """[AUX] (outermost point of the stander along d on the line through its centre of mass, its extent along d)."""
     pts, _ = shape.tessellate(0.1)
     proj = [p.dot(d) for p in pts]
     top, bottom = max(proj), min(proj)
@@ -108,11 +130,18 @@ def engagement(shape, d: Vector) -> tuple[Vector, float]:
 
 
 def engagement_point(shape, d: Vector) -> Vector:
-    """Outermost point of the stander along d, on the line through its centre of mass along d."""
+    """[AUX] Outermost point of the stander along d, on the line through its centre of mass along d."""
     return engagement(shape, d)[0]
 
 
 def place_tool(tool: Tool, engage: Vector, d: Vector, depth: float = 0.0) -> list:
+    """[MAIN] Place the tool on a stander: returns the tool's solids in the assembly frame.
+
+    Inputs: the tool, the engagement point on the stander, the removal direction d and the overlap `depth`
+    (how far the stander sits past the interface plane). The tool's +Z is turned onto -d with the shortest
+    rotation (the tool arrives from outside, along the removal direction), and its interface plane is put
+    at the engagement point moved `depth` into the stander.
+    """
     d = Vector(d)
     d.normalize()
     rot = FreeCAD.Rotation(Vector(0, 0, 1), d * -1)
@@ -129,6 +158,8 @@ def place_tool(tool: Tool, engage: Vector, d: Vector, depth: float = 0.0) -> lis
 
 @dataclass
 class ToolStep:
+    """Tool-check result of one stander step (output of `ToolChecker.step`, held by `robot_loop_robotic.StepEval`)."""
+
     state: int
     component: int
     label: str
@@ -140,6 +171,7 @@ class ToolStep:
     sense: int | None = None  # the sense reported for the step
 
     def to_json(self, directions=None) -> dict:
+        """[SUPP] JSON-ready dict for plan.json; `directions` (the AoG direction table) turns direction indices into vectors."""
         def vec(k):
             return None if directions is None else [float(v) for v in directions[k]]
         return {"state": self.state, "component": self.component, "label": self.label, "tool": self.tool,
@@ -150,10 +182,15 @@ class ToolStep:
 
 
 class ToolChecker:
-    """tool_contact(state, stander, sense) over AoG component indices; pairwise results are cached."""
+    """tool_contact(state, stander, sense) over AoG component indices; pairwise results are cached.
+
+    Holds everything needed to answer "does the tool of stander c, approaching along direction k, touch a
+    component present in state S?" and caches tools, placements, pairwise results and step results.
+    """
 
     def __init__(self, shapes: list, labels: list[str], is_stander: list[bool], categories: dict[int, int],
                  directions, config: RobotConfig):
+        """[AUX] Store the shapes, labels, stander flags, categories (AoG component index -> 1/2/3), the direction table and the config; caches start empty."""
         self.shapes, self.labels, self.is_stander = shapes, labels, list(is_stander)
         self.categories, self.directions, self.config = categories, directions, config
         self._tools: dict[int, Tool | None] = {}
@@ -163,6 +200,7 @@ class ToolChecker:
         self._steps: dict[tuple[int, int, int | None], ToolStep] = {}
 
     def tool_for(self, c: int) -> Tool | None:
+        """[AUX] The (lazily loaded, cached) `Tool` for component c's stander category, or None if that category has no tool in `RobotConfig.tools`."""
         cat = self.categories.get(c)
         if cat not in self._tools:
             fname = self.config.tools.get(cat) if cat is not None else None
@@ -175,6 +213,7 @@ class ToolChecker:
         return self._tools[cat]
 
     def _tool_solids(self, c: int, k: int) -> list:
+        """[AUX] The tool's solids placed on stander c for direction k (engagement point and overlap depth from the config), cached."""
         if (c, k) not in self._placed:
             tool = self.tool_for(c)
             d = Vector(*[float(v) for v in self.directions[k]])
@@ -192,6 +231,13 @@ class ToolChecker:
         return self._bboxes[key]
 
     def _touches(self, c: int, k: int, o: int) -> bool:
+        """[MAIN] Does the tool on stander c (direction k) touch component o? Pairwise, cached.
+
+        A cheap tight bounding-box test first, then the exact common volume
+        (`collision._common_volume`) per tool solid: a volume above `RobotConfig.tool_contact_volume_tol`
+        is a contact (touching faces give about 0 and do not count). A failing boolean counts as contact,
+        the conservative answer.
+        """
         key = (c, k, o)
         if key not in self._pair:
             other = self.shapes[o]
@@ -219,10 +265,18 @@ class ToolChecker:
         return bool(self._contacts(state, c, k))
 
     def _contacts(self, state: int, c: int, k: int) -> list[str]:
+        """[AUX] Labels of the components present in `state` (other than c) that the tool touches in direction k."""
         return [self.labels[o] for o in range(len(self.shapes))
                 if o != c and (state >> o) & 1 and self._touches(c, k, o)]
 
     def step(self, state: int, c: int, senses: list[int], preferred: int | None = None) -> ToolStep:
+        """[MAIN] Tool check of removing stander c from `state`: try every free sense and report the contacts.
+
+        Inputs: the state bitmask, the stander index, the free direction indices of its AoG edge (senses)
+        and the sense chosen by the optimizer (`preferred`). Output: a `ToolStep`, feasible if at least one
+        sense has no contact; the reported sense is the preferred one if it is free, else the first free one.
+        A category without a tool is reported unchecked and feasible (the stub behaviour). Cached.
+        """
         key = (int(state), int(c), preferred)
         if key in self._steps:
             return self._steps[key]

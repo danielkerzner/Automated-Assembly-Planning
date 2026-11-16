@@ -1,4 +1,5 @@
-"""Acceptance tests for the Optimization module (docs/optimization-spec.md, O1-O14).
+"""Acceptance tests for the Optimization module (O1-O15). Module under test: src/optimization.py
+(CostModel, optimize, the term tables, the config/weights, the stability and gravity logic, the step records).
 
 Standalone runner (pytest is not installed in environmentAAP). From repo root:
 
@@ -8,12 +9,12 @@ Standalone runner (pytest is not installed in environmentAAP). From repo root:
     python automatic_tests/test_optimization.py --groups core scale   # + O14 at N = 20
 
 Groups:
-  core   hand-built and synthetic AoGs, plus industrial_fastner from the cached AoG (tests/industrial_fastner/aog/, real
+  core   hand-built and synthetic AoGs, plus industrial_fastner from the cached AoG (output/industrial_fastner/aog/, real
          travel table) with the real BOM (tool, group) and synthetic volumes, areas, CoGs and contact patches.
   real   O9 on FreeCAD shapes through extract_contact_patches, and O13 through optimize_sequence on industrial_fastner
          (run_preprocessing + a scratch copy of the interference cache + AoG + term tables).
 
-The suite never writes to tests/industrial_fastner/; a final "cache" check confirms the cached files are byte-identical.
+The suite never writes to output/industrial_fastner/; a final "cache" check confirms the cached files are byte-identical.
   scale  O14 at N = 20 (core runs O14 at N = 12).
 
 Brute force (O4): every root-to-terminal edge path is enumerated; for each, the best direction per edge is found exactly
@@ -51,7 +52,7 @@ from test_aog import AXES, fastener_inputs_from_cache, make_inputs, random_input
 
 OUT_DIR = Path(__file__).resolve().parent / "output"
 SCRATCH = OUT_DIR / "optimization_test"
-FASTENER_DIR = REPO_ROOT / "tests" / "industrial_fastner"
+FASTENER_DIR = REPO_ROOT / "output" / "industrial_fastner"
 FASTENER_STEP = REPO_ROOT / "data" / "industrial_fastner" / "industrial_fastner.stp"
 FASTENER_BOM = REPO_ROOT / "data" / "industrial_fastner" / "generated_bom.csv"
 
@@ -66,6 +67,8 @@ TOL = 1e-9
 
 
 class Recorder:
+    """Collects PASS/FAIL checks, notes and errors per test id for the summary table and the JSON file."""
+
     def __init__(self):
         self.results: dict[str, dict] = {}
         self._current: str | None = None
@@ -97,7 +100,7 @@ CACHED_FILES = ["interference/interference.json", "interference/interference.npz
 
 
 def cache_snapshot() -> dict[str, str | None]:
-    """SHA-256 of the cached industrial_fastner files the suite reads (None if absent)."""
+    """[SUPP] SHA-256 of the cached industrial_fastner files the suite reads (None if absent)."""
     import hashlib
     out = {}
     for name in CACHED_FILES:
@@ -107,12 +110,14 @@ def cache_snapshot() -> dict[str, str | None]:
 
 
 def fresh_dir(name: str) -> Path:
+    # [SUPP] Empty scratch folder under output/optimization_test/.
     path = SCRATCH / name
     shutil.rmtree(path, ignore_errors=True)
     return path
 
 
 def raises(fn, needle: str) -> bool:
+    # [SUPP] True if fn raises ValueError whose message contains needle.
     try:
         fn()
     except ValueError as exc:
@@ -121,7 +126,7 @@ def raises(fn, needle: str) -> bool:
 
 
 def only(*flags, **extra) -> OptimizationConfig:
-    """Config with only the given flags on."""
+    """[SUPP] Config with only the given flags on."""
     return OptimizationConfig(**{f: f in flags for f in FLAGS}, **extra)
 
 
@@ -132,6 +137,7 @@ def only(*flags, **extra) -> OptimizationConfig:
 
 def make_tables(aog, volume=None, area=None, contact=None, cog=None, tool=None, group=None, pitch=None,
                 patches=None, has_tool=True, has_group=True) -> TermTables:
+    # [SUPP] TermTables with neutral defaults (unit volume/area, no contacts, tool 'T' on standers only) unless overridden.
     N = aog.n_components
     return TermTables(
         component_ids=list(aog.component_ids),
@@ -149,7 +155,7 @@ def make_tables(aog, volume=None, area=None, contact=None, cog=None, tool=None, 
 
 
 def path_for(aog, assembly_order, removal_dirs):
-    """Walk-order (edges, removal dirs) for an assembly order of components with their removal directions."""
+    """[SUPP] Walk-order (edges, removal dirs) for an assembly order of components with their removal directions."""
     edges, v = [], aog.root
     for c in reversed(assembly_order):
         es = [e for e in aog.out_edges(v) if int(aog.edge_comp[e]) == c]
@@ -161,13 +167,14 @@ def path_for(aog, assembly_order, removal_dirs):
 
 
 def all_free_aog(n, n_standers=0, stander_dir_axis=PZ):
+    # [SUPP] AoG of n parts that can leave in any of the 6 directions at any time (+ standers that are only removable along one axis).
     free = np.ones((n, n, 6), dtype=bool)
     so = {s: AXES[stander_dir_axis] for s in range(n, n + n_standers)}
     return ag.generate_aog(make_inputs(free, stander_options=so))
 
 
 def add_patch(patches, i, j, tri, normal_into_i):
-    """Store triangles between i and j with their normal pointing from j into i (key order i < j)."""
+    """[SUPP] Store triangles between i and j with their normal pointing from j into i (key order i < j)."""
     tri = np.asarray(tri, float).reshape(-1, 3, 3)
     normal = np.tile(np.asarray(normal_into_i, float), (len(tri), 1)) if np.ndim(normal_into_i) == 1 \
         else np.asarray(normal_into_i, float)
@@ -177,13 +184,13 @@ def add_patch(patches, i, j, tri, normal_into_i):
 
 
 def rect(origin, u, v):
-    """Two triangles of the parallelogram origin + [0,1] u + [0,1] v."""
+    """[SUPP] Two triangles of the parallelogram origin + [0,1] u + [0,1] v."""
     o, u, v = (np.asarray(x, float) for x in (origin, u, v))
     return [[o, o + u, o + u + v], [o, o + u + v, o + v]]
 
 
 def cylinder_strip(x0, x1, r, n=24):
-    """Triangles of a cylinder around the x axis between x0 and x1, normals pointing to the axis (from hole into pin)."""
+    """[SUPP] Triangles of a cylinder around the x axis between x0 and x1, normals pointing to the axis (from hole into pin)."""
     tris, normals = [], []
     th = np.linspace(0, 2 * np.pi, n + 1)
     for a, b in zip(th[:-1], th[1:]):
@@ -203,16 +210,17 @@ _STATE: dict = {}
 
 
 def bom_columns():
+    # [SUPP] (column names, rows by label) of the industrial_fastner BOM, as the optimizer reads it.
     columns, rows, _ = op._read_bom(FASTENER_BOM)
     return columns, rows
 
 
 def fastener():
-    """(aog, tables): cached AoG with real travel; real BOM tool/group; synthetic geometry (seeded)."""
+    """[SUPP] (aog, tables): cached AoG with real travel; real BOM tool/group; synthetic geometry (seeded)."""
     if "fastener" not in _STATE:
         aog = ag.load_aog(FASTENER_DIR / "aog")
         if aog is None:
-            raise RuntimeError("tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first")
+            raise RuntimeError("output/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first")
         inputs = fastener_inputs_from_cache()
         if list(inputs.component_ids) != list(aog.component_ids):
             raise RuntimeError("cached AoG and cached interference disagree on the component order")
@@ -238,7 +246,7 @@ def fastener():
 
 
 def edge_paths(aog, model):
-    """All root-to-terminal edge paths over live edges."""
+    """[SUPP] All root-to-terminal edge paths over live edges."""
     out = []
 
     def rec(v, es):
@@ -253,7 +261,7 @@ def edge_paths(aog, model):
 
 
 def best_directions(model, edges):
-    """Exact best removal direction per edge for a fixed edge path (chain DP over M1 + M2)."""
+    """[SUPP] Exact best removal direction per edge for a fixed edge path (chain DP over M1 + M2)."""
     ks = [model._edge_ks(e) for e in edges]
     comp = [int(model.edge_comp[e]) for e in edges]
     D = model.c_travel * model.travel[comp[0], ks[0]]
@@ -273,6 +281,7 @@ def best_directions(model, edges):
 
 
 def brute_force(aog, tables, config):
+    # [SUPP] Optimal total cost over all edge paths and directions (see the header), plus the number of edge paths.
     model = op.CostModel(aog, tables, config)
     best, n = np.inf, 0
     for es in edge_paths(aog, model):
@@ -288,6 +297,12 @@ def brute_force(aog, tables, config):
 
 
 def test_o1(rec, args):
+    """Tests: input validation of the config and of the term tables (CostModel / validate_config).
+    What: asks for impossible configurations (no term on; gravity change without stability) and for terms whose data is
+          missing (no 'tool' or 'group' column in the BOM, or a stander / part with an empty tool / group), and expects a
+          ValueError that names the offending column or part. Then checks that the very same tables are accepted when the
+          flag that needs the data is switched off, and that the industrial_fastner BOM really has both columns.
+    """
     aog, tables = fastener()
     no_tool = replace(tables, has_tool_column=False)
     no_group = replace(tables, has_group_column=False)
@@ -323,6 +338,11 @@ def test_o1(rec, args):
 
 
 def test_o2(rec, args):
+    """Tests: resolve_weights (term weights from the dominance matrix, overrides, normalisation).
+    What: with all terms on, the weights sum to 1 and equal the dominance-matrix row sums / 49. With M3 and M7 off the
+          remaining weights are renormalised to 1 with their ratios unchanged. A user override (travel = 10) replaces the
+          default before renormalising. An unknown term name raises.
+    """
     w = op.resolve_weights(OptimizationConfig(use_tool_change=True))
     rec.check(abs(sum(w.values()) - 1) < 1e-12, f"all on: sum 1 ({sum(w.values()):.12f})")
     rec.check(all(abs(w[t] - op.DOMINANCE[r].sum() / 49) < 1e-12 for r, t in enumerate(op.TERMS)),
@@ -340,6 +360,11 @@ def test_o2(rec, args):
 
 
 def test_o3(rec, args):
+    """Tests: ACO optimum vs the exact DP optimum (CostModel.dp_optimum), on a case where the DP is exact.
+    What: on five AoGs (industrial_fastner with its real travel table, plus four random complete AoGs with 8-12 parts),
+          uses only the terms that are additive per edge (travel + size_contacts, no cost-to-go) and checks that the ACO
+          result has the same total cost as the DP optimum.
+    """
     cases = [("industrial_fastner", *fastener())]
     rng = np.random.default_rng(5)
     while len(cases) < 5:
@@ -359,6 +384,13 @@ def test_o3(rec, args):
 
 
 def test_o4(rec, args):
+    """Tests: ACO optimum vs brute force over every edge path and direction, for each term and for term combinations.
+    What: on industrial_fastner (real travel table and BOM, synthetic geometry), enumerates all root-to-terminal edge paths
+          (brute_force, which finds the best direction per edge exactly) and checks that the ACO cost equals the brute-force
+          optimum on 3 seeds. Run for each single term, for the default config (with and without tool change) and for
+          stability + gravity change and travel + size_contacts. Finally REPORTS (does not assert) how often the optimum is
+          found on 10 seeds for travel only, with and without cost-to-go.
+    """
     aog, tables = fastener()
     configs = [(f[4:], only(f)) for f in FLAGS if f not in ("use_gravity_change", "use_travel")]
     configs += [("default (all flags, tool change on)", OptimizationConfig()),
@@ -381,6 +413,11 @@ def test_o4(rec, args):
 
 
 def test_o5(rec, args):
+    """Tests: the direction-change term (M1/M2: change between consecutive removal directions).
+    What: on 3 free parts and two axis ratios (0.25, 0.6), evaluates fixed removal sequences and compares the raw term with
+          the expected value: 0 for the same direction, the axis ratio for the opposite direction on the same axis, ratio + 1
+          for opposite then perpendicular, 1 per perpendicular change; normalized value = raw / (N - 1).
+    """
     aog = all_free_aog(3)
     tables = make_tables(aog)
     for ratio in (0.25, 0.6):
@@ -397,6 +434,10 @@ def test_o5(rec, args):
 
 
 def test_o6(rec, args):
+    """Tests: the grouping term (BOM groups should be finished before leaving them).
+    What: 4 free parts with groups A, A, B, C. For four assembly orders, checks the raw count (a group is penalised each
+          time the assembly leaves it while it is still unfinished; singleton groups never count) and the normalisation by 3.
+    """
     aog = all_free_aog(4)
     tables = make_tables(aog, group=["A", "A", "B", "C"])
     model = op.CostModel(aog, tables, only("use_grouping"))
@@ -411,6 +452,11 @@ def test_o6(rec, args):
 
 
 def test_o7(rec, args):
+    """Tests: the tool-change term (change of the tool needed by consecutive standers).
+    What: 2 movable parts and 3 standers with tools A, B, A. For four orders, checks the number of tool changes (only
+          standers count, movable parts in between do not break the sequence), the normalisation by 2, and that movable
+          parts have zero per-step cost.
+    """
     aog = all_free_aog(2, n_standers=3)
     tables = make_tables(aog, tool=[None, None, "A", "B", "A"])
     model = op.CostModel(aog, tables, only("use_tool_change"))
@@ -428,6 +474,11 @@ def test_o7(rec, args):
 
 
 def test_o8(rec, args):
+    """Tests: the size-and-contacts term (heavy / large / well-connected parts should go in early).
+    What: 3 parts with different volume, area and number of contact neighbours; checks the size factor S_i = alpha V/mean +
+          beta A/mean + gamma n_contacts/mean, the path value sum S_i t / N for an order, that putting the large part last
+          is more expensive, and that the optimizer inserts large -> small.
+    """
     aog = all_free_aog(3)
     vol, area = np.array([100.0, 1.0, 10.0]), np.array([60.0, 2.0, 20.0])
     contact = np.array([[0, 1, 1], [1, 0, 0], [1, 0, 0]], bool)
@@ -451,7 +502,7 @@ def test_o8(rec, args):
 
 
 def o9_cases():
-    """(name, n parts, free (n, n, 6), cog (n, 3), pair -> (tri, normal from j into i) list, part i under test,
+    """[SUPP] (name, n parts, free (n, n, 6), cog (n, 3), pair -> (tri, normal from j into i) list, part i under test,
     expectations {(support_region, gravity index): class})."""
     def free_except(n, blocked):  # blocked: (i, j) -> list of removal dirs of i blocked by j
         f = np.ones((n, n, 6), bool)
@@ -501,6 +552,7 @@ def o9_cases():
 
 
 def o9_check(rec, name, n, free, cog, patches, part, expect, prefix=""):
+    # [SUPP] Builds the AoG for one O9 case and checks the stability class of removing `part` for each (region, gravity).
     aog = ag.generate_aog(make_inputs(free))
     contact = np.zeros((n, n), bool)
     for i, j in patches:
@@ -517,6 +569,14 @@ def o9_check(rec, name, n, free, cog, patches, part, expect, prefix=""):
 
 
 def test_o9(rec, args):
+    """Tests: the stability classification (stability_classes) for 6 contact configurations and two support regions.
+    What: for each configuration builds contact patches (rectangles / cylinder strips with normals), a CoG and the free
+          directions, and checks the class (1 = unstable, 2 = stable) of removing the part for each gravity direction with the
+          convex-hull and with the union-of-patches support region: overhanging block, block on a base, block in a U-shaped
+          container, pin through one plate, block on two rails (hull stable, union not), pin through two separated plates.
+          Also a degenerate hull (line contact) with the CoG on and 1 mm off the line. With --groups real the same
+          configurations are rebuilt as FreeCAD shapes and the patches come from extract_contact_patches.
+    """
     for name, n, free, cog, pairs, part, expect in o9_cases():
         patches = {}
         for i, j, tri, normal in pairs:
@@ -578,6 +638,10 @@ def test_o9_geometry(rec):
 
 
 def test_o10(rec, args):
+    """Tests: the gravity Viterbi (CostModel._gravity_viterbi).
+    What: for 30 random stability tables (n <= 6 steps, 6 gravity directions), compares the Viterbi cost with the minimum
+          over all 6^n gravity assignments of (stability penalty + gravity switch cost).
+    """
     aog, tables = fastener()
     model = op.CostModel(aog, tables, OptimizationConfig())
     rng = np.random.default_rng(3)
@@ -596,6 +660,10 @@ def test_o10(rec, args):
 
 
 def test_o11(rec, args):
+    """Tests: the optimizer never enters dead ends.
+    What: checks that industrial_fastner's AoG has dead-end nodes, then runs 5 seeds and checks that every node on the best
+          path is live and none is a dead end.
+    """
     aog, tables = fastener()
     dead = [int(v) for v in np.flatnonzero(~aog.live)]
     labels = [sorted(aog.component_labels[c] for c in aog.state_components(v)) for v in aog.dead_ends]
@@ -607,6 +675,11 @@ def test_o11(rec, args):
 
 
 def test_o12(rec, args):
+    """Tests: the step records of the result (OptimizationResult.steps).
+    What: checks that steps are the AoG path reversed (assembly order), that the insertion direction is the opposite of the
+          removal direction (index and vector), that the step number equals the popcount of the source state, that the
+          start offset is travel x removal direction, and that each part appears exactly once.
+    """
     aog, tables = fastener()
     res = op.optimize(aog, tables, OptimizationConfig())
     rec.check([s["edge"] for s in res.steps] == list(reversed(res.edge_path)), "steps = AoG path reversed")
@@ -622,6 +695,12 @@ def test_o12(rec, args):
 
 
 def test_o13(rec, args):
+    """Tests: determinism and cache keys.
+    What: same config and seed give an identical result; the result key changes with a weight; the term-table key does NOT
+          change with weights or flags but DOES change with the gravity directions. With --groups real, runs the full pipeline
+          on a scratch copy of the industrial_fastner caches and checks that a repeated run loads the cached result, that a
+          weight change reuses the term tables, and that a gravity change recomputes them.
+    """
     aog, tables = fastener()
     a = op.optimize(aog, tables, OptimizationConfig(seed=4))
     b = op.optimize(aog, tables, OptimizationConfig(seed=4))
@@ -649,7 +728,7 @@ def test_o13_pipeline(rec):
     from preprocessing import run_preprocessing
 
     out = fresh_dir("pipeline")
-    # Work on a copy of the interference cache: the suite must never modify tests/industrial_fastner/.
+    # Work on a copy of the interference cache: the suite must never modify output/industrial_fastner/.
     shutil.copytree(FASTENER_DIR / "interference", out / "interference")
     prep = run_preprocessing(FASTENER_STEP, FASTENER_BOM)
     ir = identify_interferences(prep, CollisionConfig(step=2.0), out / "interference")
@@ -672,6 +751,7 @@ def test_o13_pipeline(rec):
 
 
 def _scale_case(rec, N, budget_s=60.0):
+    # [SUPP] One O14 run: random complete AoG with N parts, timed and memory-traced against the memory budget below.
     rng = np.random.default_rng(N)
     while True:
         inputs = random_inputs(rng, N)
@@ -698,11 +778,16 @@ def _scale_case(rec, N, budget_s=60.0):
 
 
 def memory_estimate(V, E, moves):
-    """Spec section 7: 48 bytes per edge + 16 per move + 32 per node + 32 MB."""
+    """Memory budget model: 48 bytes per edge + 16 per move + 32 per node + 32 MB."""
     return 48 * E + 16 * moves + 32 * V + 32e6
 
 
 def test_o14(rec, args):
+    """Tests: scale (time and memory of optimize) against the memory budget model (memory_estimate).
+    What: random complete AoG with N = 12 (and N = 20 with --groups scale), default config with tool change; checks that the
+          run takes < 60 s and that the peak traced memory stays below 48 B/edge + 16 B/move + 32 B/node + 32 MB. Iterations,
+          cost and greedy cost are printed as notes.
+    """
     _scale_case(rec, 12)
     if "scale" in args.groups:
         _scale_case(rec, 20)
@@ -715,8 +800,16 @@ def _stander_rec(category, partner=None, nut_rule=None):
 
 
 def test_o15(rec, args):
-    """Thread pitch and rotation counts (docs/stander_processing-spec.md section 12). Synthetic,
-    no FreeCAD: _apply_turns is pure Python over step dicts + StanderRecord-like stand-ins."""
+    """Thread pitch and rotation counts. Synthetic,
+    no FreeCAD: _apply_turns is pure Python over step dicts + StanderRecord-like stand-ins.
+
+    Tests: _apply_turns (turns = travel / pitch for threaded standers) and _fmt_turns_text (the text in the outputs).
+    What: screw with pitch 1.5 and travel 18 gives 12.0 turns; category-3 standers and screws without pitch get None; a nut
+          assembled after its stander-screw partner rotates itself, before it the screw keeps its own turns; a nut placed
+          before a movable partner moves the rotation to the partner's step with turns_note == "nut" and the nut's label;
+          the text uses 2 decimals in assembly_sequence.txt, 1 in the manual, names the nut when it is the one rotating,
+          and is empty when there are no turns.
+    """
     ids = ["A", "B", "S", "N", "M", "N2", "O", "S2"]
     aog = SimpleNamespace(component_ids=ids, component_labels=list(ids))
     prep = SimpleNamespace(stander_records={
@@ -818,7 +911,7 @@ def main() -> int:
     rec.start("cache")
     after = cache_snapshot()
     for name, digest in cache_before.items():
-        rec.check(after.get(name) == digest, f"tests/industrial_fastner/{name} byte-identical after the run")
+        rec.check(after.get(name) == digest, f"output/industrial_fastner/{name} byte-identical after the run")
     rec.results["cache"]["seconds"] = 0.0
 
     print("\n| Test | Result | Time | Notes |\n|---|---|---|---|")

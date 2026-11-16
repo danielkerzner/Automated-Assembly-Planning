@@ -1,18 +1,31 @@
 """Interference Identification: the pairwise interference matrix.
 
-For every ordered pair of reduced-assembly components
-(i, j) and every candidate direction d_k, decides whether i can translate along d_k all the way
-past j without penetrating it, using the verified collision test in collision.py. The result is
-the boolean tensor free[i, j, k], computed once per assembly (cached on disk) and queried by
-the AoG generator without further geometry calls.
+Collision core: collision.py.
 
-Two properties make the pairwise matrix sufficient and halve its cost:
-  - Composition: i can leave sub-assembly S along d_k iff free[i, j, k] for every j in S.
-  - Antisymmetry: free[j, i, neg[k]] == free[i, j, k], so only the i < j triangle is computed.
+Inputs
+    - A `PreprocessingResult`: the reduced assembly (movable parts only) and the candidate directions.
+    - A `collision.CollisionConfig`, an optional cache directory, and a contact threshold.
+Outputs
+    - An `InterferenceResult` whose main member is the boolean tensor `free[i, j, k]`: True if part i can
+      translate along candidate direction k all the way past part j without penetrating it. It also carries
+      the contact graph (`contact[i, j]`, `gaps[i, j]`) and run statistics.
+    - On disk (under `output/<assembly>/interference/` by default): `interference.npz` and
+      `interference.json` (cache), `interference_table.csv` (readable matrix), and a checkpoint file while a
+      run is in progress.
+    - Consumed by the AoG generator, which queries the tensor without any further geometry calls.
 
-It also records which pairs physically touch (contact[i, j]: static gap <= contact_threshold,
-default 0.1 mm so clearance fits count as contact). The AoG generator uses this contact graph to
-drop sub-assemblies whose parts would float apart.
+What this module does
+    For every pair of reduced-assembly components (i, j) and every candidate direction d_k it runs the
+    verified collision test of collision.py. The result is computed once per assembly and cached on disk.
+    Two properties make the pairwise matrix sufficient and halve its cost:
+      - Composition: i can leave sub-assembly S along d_k iff free[i, j, k] for every j in S.
+      - Antisymmetry: free[j, i, neg[k]] == free[i, j, k], so only the i < j triangle is computed.
+    It also records which pairs physically touch (contact[i, j]: static gap <= contact_threshold, default
+    0.1 mm so clearance fits count as contact); the AoG generator uses this contact graph to drop
+    sub-assemblies whose parts would float apart. A long run is resumable: a checkpoint is written after
+    every pair.
+    Phase 2 (automatic sub-assemblies) adds two numpy-only helpers, `merge_groups` and `sub_interference`,
+    that derive new results from an existing one without calling the collision test again.
 """
 
 from __future__ import annotations
@@ -34,55 +47,65 @@ import numpy as np
 from collision import CollisionConfig, HardOverlapError, Stats, classify_pair, is_free_detail, unit
 from preprocessing import PreprocessingResult, _leaf_components
 
-# Veryfing existing logger 
 log = logging.getLogger("aap.interference")
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-NEG_TOL = 1e-6
+NEG_TOL = 1e-6  # tolerance when matching a direction with its negative in the candidate list
 # Static gap (mm) up to which two movable parts count as touching. Larger than Preprocessing's
 # stander contact_threshold (0.01) so clearance fits count: industrial_fastner's part1 sits in
 # part2/part3 with a 0.075 mm gap.
 CONTACT_THRESHOLD = 0.1
 
-# Called after each pair's checkpoint is written, with the
-# number of pairs completed so far and the pair (i, j). Raising from it simulates an interrupt.
+# [SUPP] Test hook: called after each pair's checkpoint is written, with the number of pairs completed so
+# far and the pair (i, j). Raising from it simulates an interrupted run.
 _after_pair_hook: Callable[[int, tuple[int, int]], None] | None = None
 
-# Dataclass for the outcome of a single collision test between two parts along a direction.
+
 @dataclass
 class InterferenceResult:
-    component_ids: list[str]  # obj.Name, index = matrix row/column
-    component_labels: list[str]  # obj.Label, display only
-    directions: np.ndarray  # (D, 3) float, unit vectors, Preprocessing order
-    neg: np.ndarray  # (D,) int, dirs[neg[k]] == -dirs[k]
-    free: np.ndarray  # (n, n, D) bool, free[i, j, k]: i can leave along dirs[k] past j
-    pair_info: dict[tuple[int, int], dict]  # i < j: {"kind", "V0", "threshold"}
-    exception_cells: list[tuple[int, int, int]]  # common failed twice -> reported blocked
-    caught_exceptions: list[dict]  # every caught backend exception (call, pair, k, t, retry_ok)
-    outcome_detail: dict[tuple[int, int, int], dict]  # i < j only: phase, iterations, t_block, volume
-    config: CollisionConfig
-    stats: dict  # timings, iteration counts, broad-phase share, gap-travel share
-    cache_key: str
-    # (n, n) bool, symmetric, diagonal False: i and j touch (static gap <= contact_threshold).
-    contact: np.ndarray | None = None
-    contact_threshold: float | None = None  # mm
-    gaps: np.ndarray | None = None  # (n, n) float, static distance between i and j, mm
+    """The interference matrix of one assembly level. Output of `identify_interferences`, input of the AoG
+    generator, and also what `merge_groups` / `sub_interference` derive for Phase 2.
 
-    # queries used by the AoG generator !!!!!NO GEOMETRY CALLS!!!!! 
+    Index convention: i, j are positions in `component_ids`; k is a position in `directions`.
+    """
+
+    component_ids: list[str]  # list of obj.Name; the position is the matrix row/column index.
+    component_labels: list[str]  # list of obj.Label; display only (reports, tables).
+    directions: np.ndarray  # (D, 3) float, unit vectors, in Preprocessing's candidate order.
+    neg: np.ndarray  # (D,) int; directions[neg[k]] == -directions[k]. Used for antisymmetry.
+    free: np.ndarray  # (n, n, D) bool; free[i, j, k]: i can leave along directions[k] past j. Diagonal True.
+    pair_info: dict[tuple[int, int], dict]  # for i < j: {"kind": "normal"|"tolerance", "V0", "threshold"} (static overlap pre-check).
+    exception_cells: list[tuple[int, int, int]]  # cells (i, j, k) where the geometry backend failed twice; reported blocked.
+    caught_exceptions: list[dict]  # every caught backend exception: call, pair, k, t, retry_ok (diagnostics).
+    outcome_detail: dict[tuple[int, int, int], dict]  # for i < j: {phase, iterations, t_block, volume} of each test (diagnostics).
+    config: CollisionConfig  # the collision settings used (part of the cache key).
+    stats: dict  # timings, iteration counts, broad-phase share, gap-travel share.
+    cache_key: str  # SHA-256 identifying the inputs; a cached matrix is reused only if it matches.
+    # (n, n) bool, symmetric, diagonal False: i and j touch (static gap <= contact_threshold). Stored because
+    # the AoG uses it to keep sub-assemblies connected.
+    contact: np.ndarray | None = None
+    contact_threshold: float | None = None  # mm; threshold used for `contact`. Recommended: 0.1 (CONTACT_THRESHOLD).
+    gaps: np.ndarray | None = None  # (n, n) float, static distance between i and j, mm.
+
+    # Queries used by the AoG generator. They only read the stored arrays: NO GEOMETRY CALLS.
 
     def index_of(self, component_id: str) -> int:
-        """Index of the component with the given obj.Name in the matrix."""
+        """[AUX] Matrix index of the component with the given obj.Name."""
         return self.component_ids.index(component_id)
 
     def free_directions(self, i: int, subset: Iterable[int]) -> np.ndarray:
-        """Indices k along which i can leave the sub-assembly `subset` (i may be in subset)."""
+        """[AUX] Indices k along which i can leave the sub-assembly `subset` (i may be in it).
+
+        Applies the composition rule: a direction is free only if it is free past every member.
+        An empty subset means no obstacle, so all directions are returned.
+        """
         members = list(subset)
         if not members:
             return np.arange(len(self.directions))
         return np.flatnonzero(np.all(self.free[i, members, :], axis=0))
 
     def removable(self, subset: Iterable[int]) -> dict[int, np.ndarray]:
-        """{i: free direction indices} for every i in subset with at least one free direction."""
+        """[AUX] {i: free direction indices} for every i in subset that has at least one free direction."""
         members = list(subset)
         result = {}
         for i in members:
@@ -92,34 +115,39 @@ class InterferenceResult:
         return result
 
     def blockers(self, i: int, k: int, subset: Iterable[int]) -> list[int]:
-        """Members of subset that block i along dirs[k] (for debugging and the thesis)."""
+        """[AUX] Members of subset that block i along directions[k] (for debugging and the thesis)."""
         return [j for j in subset if j != i and not self.free[i, j, k]]
 
     def contact_neighbors(self, i: int) -> list[int]:
-        """Components that physically touch i."""
+        """[AUX] Indices of the components that physically touch i."""
         return [int(j) for j in np.flatnonzero(self.contact[i])]
 
     def is_connected(self, subset: Iterable[int]) -> bool:
-        """True if the members of `subset` form one group through physical contacts."""
+        """[AUX] True if the members of `subset` form one group through physical contacts."""
         return _connected(self.contact, list(subset))
 
 
 # ---------------------------------------------------------------------------
-# Phase 2 (docs/subassembly-spec.md section 10): derived tensors for an automatic sub-assembly
+# Phase 2: derived tensors for an automatic sub-assembly
 # group. Pure numpy, no geometry calls -- neither constructor re-runs collision.py.
 # ---------------------------------------------------------------------------
 
 
 def merge_groups(interf: InterferenceResult, group_ids: list[str], new_id: str, new_label: str) -> InterferenceResult:
-    """Derived InterferenceResult with `group_ids` replaced by one component `new_id` (the group,
-    treated as one rigid body). `free[new_id, j, k]` = AND over group members of `free[member, j,
-    k]` (the matrix's own documented composition rule); `free[j, new_id, k]` is never computed
-    separately -- it follows from the antisymmetric identity `free[j, i, neg[k]] == free[i, j,
-    k]`. `contact[new_id, j]` = OR over members, `gaps[new_id, j]` = min over members. Diagnostic-
-    only fields (`pair_info`, `exception_cells`, `caught_exceptions`, `outcome_detail`) are not
-    carried over -- they describe individual collision calls, none of which are repeated here, so
-    an empty value is more honest than a stale or synthesized one. Used both to rank Phase 2 merge
-    candidates (on a throwaway copy) and to commit the chosen one."""
+    """[MAIN] Derive an InterferenceResult in which `group_ids` are replaced by one rigid component `new_id`.
+
+    Inputs: the parent result, the ids of the members to merge (at least 2), and the id and label of the
+    new component. Output: a new InterferenceResult with n - len(group) + 1 components; the parent is not
+    modified. Used to rank Phase 2 merge candidates (on a throwaway copy) and to commit the chosen one.
+
+    Rules, all from the matrix's own properties (no geometry calls):
+      - free[new, j, k] = AND over the members of free[member, j, k] (composition rule);
+      - free[j, new, k] is not computed separately, it follows from antisymmetry free[j, i, neg[k]] == free[i, j, k];
+      - contact[new, j] = OR over the members, gaps[new, j] = min over the members.
+    Diagnostic-only fields (pair_info, exception_cells, caught_exceptions, outcome_detail) are not carried
+    over: they describe individual collision calls, none of which are repeated, so an empty value is more
+    honest than a stale or synthesised one.
+    """
     ids = list(interf.component_ids)
     group_idx = sorted(interf.index_of(g) for g in group_ids)
     group_set = set(group_idx)
@@ -128,12 +156,14 @@ def merge_groups(interf: InterferenceResult, group_ids: list[str], new_id: str, 
     if new_id in ids:
         raise ValueError(f"new_id {new_id!r} already exists in this InterferenceResult")
 
+    # Components that stay, and the new id/label lists with the merged component appended last.
     keep = [i for i in range(len(ids)) if i not in group_set]
     new_ids = [ids[i] for i in keep] + [new_id]
     new_labels = [interf.component_labels[i] for i in keep] + [new_label]
     n_new = len(new_ids)
     D = len(interf.directions)
 
+    # Free tensor: copy the untouched block, then fill the merged row (AND) and column (antisymmetry).
     free = np.zeros((n_new, n_new, D), dtype=bool)
     free[np.ix_(range(len(keep)), range(len(keep)), range(D))] = \
         interf.free[np.ix_(keep, keep, range(D))]
@@ -146,6 +176,7 @@ def merge_groups(interf: InterferenceResult, group_ids: list[str], new_id: str, 
     free[-1, -1, :] = True  # self-diagonal, as in the original matrix (free_directions may pass
                               # a subset that includes the component itself)
 
+    # Contact graph: touching if any member touches (OR); gap is the smallest member gap (min).
     contact = gaps = None
     if interf.contact is not None:
         contact = np.zeros((n_new, n_new), dtype=bool)
@@ -164,6 +195,7 @@ def merge_groups(interf: InterferenceResult, group_ids: list[str], new_id: str, 
         gaps[-1, :-1] = merged_gaps
         gaps[:-1, -1] = merged_gaps
 
+    # Derived cache key: a function of the parent key and the merge, so it is unique and reproducible.
     cache_key = hashlib.sha256(
         f"merge:v1;parent:{interf.cache_key};group:{sorted(group_ids)};new_id:{new_id};"
         f"ids:{'|'.join(new_ids)}".encode()
@@ -179,9 +211,11 @@ def merge_groups(interf: InterferenceResult, group_ids: list[str], new_id: str, 
 
 
 def sub_interference(interf: InterferenceResult, group_ids: list[str]) -> InterferenceResult:
-    """Restricted InterferenceResult for one Phase 2 group's own child level: the sub-block
-    `free[A, A, :]` (A = group_ids), same `directions`/`neg` as the parent (not rediscovered -- the
-    tensor stays indexed by the parent level's candidate-direction list, per spec)."""
+    """[AUX] Restrict an InterferenceResult to one Phase 2 group, for that group's own child level.
+
+    It takes the sub-block free[A, A, :] with A = group_ids. `directions` and `neg` are the parent's, not
+    rediscovered: the tensor stays indexed by the parent level's candidate-direction list.
+    """
     idx = sorted(interf.index_of(g) for g in group_ids)
     D = len(interf.directions)
     ids = [interf.component_ids[i] for i in idx]
@@ -201,12 +235,13 @@ def sub_interference(interf: InterferenceResult, group_ids: list[str]) -> Interf
     )
 
 
-# Setup: components, directions, cache key, contacts
+# Setup: components, directions, contacts
 
-# Auxiliary function to get the leaf components of a FreeCAD document.
 def _components(doc: "FreeCAD.Document"):
-    """Return the reduced assembly's leaf components in a reproducible order,
-      with their ids, labels and shapes."""
+    """[AUX] The reduced assembly's leaf components in a reproducible order (sorted by Name).
+
+    Returns (ids, labels, shapes). The order defines the matrix indices, so it must be deterministic.
+    """
     comps = sorted(_leaf_components(doc), key=lambda obj: obj.Name)
     ids = [obj.Name for obj in comps]
     labels = [obj.Label for obj in comps]
@@ -214,10 +249,13 @@ def _components(doc: "FreeCAD.Document"):
     shapes = [obj.Shape.copy() for obj in comps]
     return ids, labels, shapes
 
-# Auxiliary function to extract the candidate directions 
-# and their negation indices for antisymmetry from preprocessing.
+
 def _directions(candidates) -> tuple[list[FreeCAD.Vector], np.ndarray]:
-    """Return the candidate directions and the neg array for antisymmetry."""
+    """[AUX] Normalise the candidate directions and build `neg` (index of each direction's negative).
+
+    `neg` is what makes the antisymmetry shortcut possible. Raises ValueError if a direction has no
+    negative in the list (Preprocessing always emits both signs, so that would be an upstream bug).
+    """
     dirs = [unit(d) for d in candidates]
     neg = []
     for k, d in enumerate(dirs):
@@ -231,12 +269,8 @@ def _directions(candidates) -> tuple[list[FreeCAD.Vector], np.ndarray]:
     return dirs, np.array(neg, dtype=int)
 
 
-# Function to compute a cache key based on the preprocessing result, 
-# component ids, shapes, directions, and collision configuration. 
-# This key is used to determine if a cached interference matrix can be reused 
-# or if it needs to be recomputed.
 def _connected(contact: np.ndarray, members: list[int]) -> bool:
-    """Flood fill over the contact graph restricted to `members`."""
+    """[AUX] True if `members` form one connected group in the contact graph (flood fill restricted to them)."""
     if len(members) <= 1:
         return True
     inside = set(members)
@@ -252,10 +286,10 @@ def _connected(contact: np.ndarray, members: list[int]) -> bool:
 
 
 def compute_contacts(shapes, labels, threshold: float) -> tuple[np.ndarray, np.ndarray]:
-    """Static gap between every pair and the contact matrix (gap <= threshold).
+    """[AUX] Static gap between every pair and the contact matrix (gap <= threshold). Returns (contact, gaps).
 
-    distToShape is 0 for touching or overlapping (tolerance) pairs. If it fails, the pair counts
-    as in contact when the bounding boxes, enlarged by the threshold, intersect (logged).
+    distToShape is 0 for touching or overlapping (tolerance) pairs. If it fails, the pair counts as in
+    contact when the bounding boxes, enlarged by the threshold, intersect (logged).
     """
     n = len(shapes)
     gaps = np.zeros((n, n), dtype=float)
@@ -278,6 +312,10 @@ def compute_contacts(shapes, labels, threshold: float) -> tuple[np.ndarray, np.n
 def compute_cache_key(
     prep: PreprocessingResult, ids: list[str], shapes, dirs, config: CollisionConfig
 ) -> str:
+    """[SUPP] Cache key: SHA-256 of the STEP and BOM bytes (or the shapes), directions, ids and collision config.
+
+    A cached matrix is reused only if this key matches. The contact matrix is deliberately not part of it.
+    """
     h = hashlib.sha256()
     if prep.step_path is not None:
         h.update(b"step:" + Path(prep.step_path).read_bytes())
@@ -296,37 +334,37 @@ def compute_cache_key(
 
 
 def _default_cache_dir(prep: PreprocessingResult) -> Path:
+    """[SUPP] Default cache folder: output/<step file name>/interference under the repo root."""
     stem = Path(prep.step_path).stem if prep.step_path is not None else prep.reduced_assembly.Name
     return REPO_ROOT / "output" / stem / "interference"
 
 
-# Name declarations for the cache files, interference matrix and related data.
-NPZ_NAME = "interference.npz"
-JSON_NAME = "interference.json"
-CHECKPOINT_NAME = "interference.checkpoint.json"
-TABLE_NAME = "interference_table.csv"
+# File names of the cache and report files.
+NPZ_NAME = "interference.npz"  # numpy arrays: free, directions, neg, contact, gaps
+JSON_NAME = "interference.json"  # metadata: cache key, ids, pair info, diagnostics
+CHECKPOINT_NAME = "interference.checkpoint.json"  # partial progress of a run in progress
+TABLE_NAME = "interference_table.csv"  # human-readable matrix
 
 
 def _key_str(*idx: int) -> str:
-    """String key for a pair or triple of indices, used in JSON dicts."""
+    """[SUPP] Index tuple -> string key ("i,j" or "i,j,k"), because JSON object keys must be strings."""
     return ",".join(str(x) for x in idx)
 
 
 def _parse_key(s: str) -> tuple[int, ...]:
-    """Parse a string key back into a tuple of indices."""
+    """[SUPP] Inverse of `_key_str`: string key -> tuple of ints."""
     return tuple(int(x) for x in s.split(","))
 
 
 def _write_json_atomic(path: Path, data: dict) -> None:
-    """Write JSON to a temporary file and then atomically rename it to the target path."""
+    """[SUPP] Write JSON to a temporary file, then rename it over the target (no half-written files)."""
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_text(json.dumps(data, indent=1), encoding="utf-8")
     os.replace(tmp, path)
 
 
-# Main function for loading cached interference matrices, saving new results, and exporting the matrix to a CSV table.
 def _try_load_cache(cache_dir: Path, cache_key: str, config: CollisionConfig) -> InterferenceResult | None:
-    """Return the cached interference matrix if it exists and matches the cache key, else None."""
+    """[SUPP] Load the cached matrix if both files exist and the stored key matches; otherwise None."""
     json_path, npz_path = cache_dir / JSON_NAME, cache_dir / NPZ_NAME
     if not (json_path.exists() and npz_path.exists()):
         return None
@@ -357,10 +395,9 @@ def _try_load_cache(cache_dir: Path, cache_key: str, config: CollisionConfig) ->
         log.warning("Could not load cached interference matrix (%s); recomputing", exc)
         return None
 
-# Function to save cached interference results to disk, 
-# including the boolean tensor of free directions, 
-#  component information, and statistics.
+
 def _save(result: InterferenceResult, cache_dir: Path) -> None:
+    """[SUPP] Cache function: write the arrays (.npz) and the metadata and statistics (.json) to disk."""
     cache_dir.mkdir(parents=True, exist_ok=True)
     np.savez(cache_dir / NPZ_NAME, free=result.free, directions=result.directions, neg=result.neg,
              contact=result.contact, gaps=result.gaps)
@@ -383,14 +420,14 @@ def _save(result: InterferenceResult, cache_dir: Path) -> None:
 
 
 def _fmt_vec(v) -> str:
-    """Format a vector as a string with 6 decimal places, 
-    ensuring that -0.0 is displayed as 0.0."""
+    """[SUPP] Format a vector with 6 decimals for the CSV table, printing -0.0 as 0.0."""
      # +0.0 turns -0.0 into 0.0 so a zero component prints the same in (i, j) and (j, i).
     return "(" + ", ".join(f"{round(float(c), 6) + 0.0:.6f}" for c in v) + ")"
 
-# Formats table and exports to CSV, ensuring that the output is human-readable.
+
 def export_table(result: InterferenceResult, path: Path) -> None:
-    """Matrix in the layout of the thesis figure: cell (i, j) = free directions of i past j.
+    """[SUPP] Export the matrix as a CSV in the layout of the thesis figure: cell (i, j) = free directions of i past j.
+
     Written as utf-8-sig: the BOM makes Excel on Windows read the "—" diagonal correctly.
     """
     n = len(result.component_ids)
@@ -408,8 +445,8 @@ def export_table(result: InterferenceResult, path: Path) -> None:
             writer.writerow(row)
 
 
-# Summarizes statistics for export.
 def _stats_summary(stats: Stats, pair_times: dict[str, float], total_time: float) -> dict:
+    """[SUPP] Condense the collision `Stats` and the timings into the dict stored in `InterferenceResult.stats`."""
     stepped = len(stats.times)
     return {
         "tests": stats.calls, 
@@ -429,12 +466,15 @@ def _stats_summary(stats: Stats, pair_times: dict[str, float], total_time: float
         "total_time_s": total_time,
     }
 
-# Verifies and handles static overlaps for all pairs of components.
-# Static overlaps happen when two components occupy the same space even before 
-# the colision analyses (!Should be avoided!).
-# Raises error if overlaps are too big (< overlap_tol = 1mm^3) 
+
 def _classify_all(ids, labels, shapes, config) -> dict[tuple[int, int], dict]:
-    """Static-overlap pre-check for every i < j. Raises one error listing every hard overlap."""
+    """[AUX] Static-overlap pre-check (collision step 0) for every pair i < j. Returns the `pair_info` dict.
+
+    Static overlap means two parts occupy the same space before any motion; it should not happen. Each
+    pair is classified normal or tolerance (small overlap, e.g. a press fit; logged), with the blocking
+    threshold the sweep will use. If any pair overlaps by more than `overlap_tol` (1 mm^3 by default) one
+    HardOverlapError listing every such pair is raised.
+    """
     n = len(shapes)
     pair_info, hard = {}, []
     for i in range(n):
@@ -456,7 +496,11 @@ def _classify_all(ids, labels, shapes, config) -> dict[tuple[int, int], dict]:
         )
     return pair_info
 
-# Main function to identify interferences between components in a reduced assembly.
+
+# ---------------------------------------------------------------------------------------------------
+# Main function
+# ---------------------------------------------------------------------------------------------------
+
 def identify_interferences(
     prep: PreprocessingResult,
     config: CollisionConfig | None = None,
@@ -464,27 +508,35 @@ def identify_interferences(
     force: bool = False,
     contact_threshold: float | None = None,
 ) -> InterferenceResult:
-    """Build (or load from cache) the interference matrix for Preprocessing's reduced assembly.
+    """[MAIN] Build (or load from cache) the interference matrix for Preprocessing's reduced assembly.
 
-    `force=True` ignores both a finished cache and an in-progress checkpoint.
-    `contact_threshold` (mm) defaults to CONTACT_THRESHOLD; a cached matrix computed with another
-    threshold keeps its `free` tensor and only has its contacts recomputed.
+    Inputs
+        prep: the `PreprocessingResult` (reduced assembly + candidate directions).
+        config: collision settings; `CollisionConfig()` if None.
+        cache_dir: where the cache and the CSV table go; default output/<step name>/interference.
+        force: True ignores both a finished cache and an in-progress checkpoint and recomputes everything.
+        contact_threshold: mm, default CONTACT_THRESHOLD (0.1). A cached matrix computed with another
+            threshold keeps its `free` tensor and only has its contacts recomputed.
+    Output
+        An `InterferenceResult`. The collision test runs only for pairs i < j; the mirror cells come from
+        antisymmetry, and the diagonal is set True (neutral element of AND).
+
+    Raises HardOverlapError if any pair overlaps statically by more than `overlap_tol`.
     """
 
-    # Setup and cache key computation
+    # Setup: configuration, components, directions and the cache key that identifies these inputs.
     config = config or CollisionConfig()
     if contact_threshold is None:
         contact_threshold = CONTACT_THRESHOLD
     t_start = time.perf_counter()
     cache_dir = Path(cache_dir) if cache_dir is not None else _default_cache_dir(prep)
 
-    # Load cached interference matrix if available and valid
     ids, labels, shapes = _components(prep.reduced_assembly)
     dirs, neg = _directions(prep.candidate_directions)
     n, D = len(ids), len(dirs)
     cache_key = compute_cache_key(prep, ids, shapes, dirs, config)
 
-    # If not forcing a recomputation, attempt to load the cached interference matrix.
+    # Fast path: reuse a finished matrix whose cache key still matches.
     if not force:
         cached = _try_load_cache(cache_dir, cache_key, config)
         if cached is not None:
@@ -501,10 +553,10 @@ def identify_interferences(
                 _log_contacts(cached)
             return cached
 
-    
+    # Static-overlap pre-check for all pairs (raises on hard overlaps, fixes each pair's threshold).
     pair_info = _classify_all(ids, labels, shapes, config)
 
-    # Initialize the free matrix, exception cells, outcome details, pair times, and statistics.
+    # Result containers, empty at the start of a fresh run.
     free = np.zeros((n, n, D), dtype=bool)
     exception_cells: list[tuple[int, int, int]] = []
     outcome_detail: dict[tuple[int, int, int], dict] = {}
@@ -513,7 +565,7 @@ def identify_interferences(
     completed: set[tuple[int, int]] = set()
     rows: dict[str, list[bool]] = {}
 
-    # Checkpoint handling: if a checkpoint exists and matches the cache key, resume from it.
+    # Resume: if a checkpoint with the same cache key exists, restore the pairs it already finished.
     checkpoint_path = cache_dir / CHECKPOINT_NAME
     if not force and checkpoint_path.exists():
         try:
@@ -536,32 +588,30 @@ def identify_interferences(
         elif ckpt:
             log.info("Ignoring checkpoint with a different cache key")
 
-    # Main loop over all pairs of components and candidate directions to determine interferences.
+    # Core loop: for every pair i < j and every direction, run the collision test of collision.py.
     pairs = [(i, j) for i in range(n) for j in range(i + 1, n)]
-    # Loop over each pair of components (i, j) to check for interferences along all candidate directions.
     for i, j in pairs:
-        # Verify if the pair has already been completed in the checkpoint; if so, skip it.
         if (i, j) in completed:
             continue
         threshold = pair_info[(i, j)]["threshold"]
         t0 = time.perf_counter()
-        # Loop over all candidate directions for the current pair of components.
         for k, d in enumerate(dirs):
             n_exc = len(stats.exceptions)
             try:
-                # Call the collision test for the current pair of components along the current direction.
+                # Can i translate along d past j? (threshold from the static pre-check, so no repeat boolean)
                 out = is_free_detail(shapes[i], shapes[j], d, config, stats, threshold)
             except Exception as exc:
                 raise RuntimeError(
                     f"Collision test failed for pair {ids[i]} / {ids[j]}, direction {k} {tuple(d)}: {exc}"
                 ) from exc
-            # Obtain results and update the free matrix and exception information accordingly.
+            # Tag any backend exceptions raised during this test with the pair and direction.
             for e in stats.exceptions[n_exc:]:
                 e.update(pair=[ids[i], ids[j]], k=k)
+            # Store the result and its mirror cell (antisymmetry: no second test).
             free[i, j, k] = out.free
-            free[j, i, neg[k]] = out.free  # antisymmetry, no second test
+            free[j, i, neg[k]] = out.free
 
-            # Exception handling: if the collision test failed twice for this cell, mark it as an exception cell.
+            # A cell the backend failed on twice is already reported blocked; remember it for the report.
             if out.exception_cell:
                 exception_cells.append((i, j, k))
                 log.warning("Exception cell %s / %s dir %d %s: common failed twice, reported blocked",
@@ -570,11 +620,10 @@ def identify_interferences(
                 "phase": out.phase, "iterations": out.iterations,
                 "t_block": out.t_block, "volume": out.volume,
             }
-        # Calculate the time taken for the current pair and update the pair_times dictionary.
         pair_time = time.perf_counter() - t0
         pair_times[_key_str(i, j)] = pair_time
 
-        # Set the pair as completed, update the rows dictionary, and write the checkpoint to disk.
+        # Checkpoint after every pair so an interrupted run can resume from here.
         completed.add((i, j))
         rows[_key_str(i, j)] = [bool(x) for x in free[i, j, :]]
         cache_dir.mkdir(parents=True, exist_ok=True)
@@ -586,7 +635,6 @@ def identify_interferences(
             "pair_times": pair_times,
             "stats": asdict(stats),
         })
-        # Add to log for user information about the progress
         log.info("Pair %d/%d %s / %s: %.1f s, %d/%d directions free",
                  len(completed), len(pairs), labels[i], labels[j], pair_time, int(free[i, j].sum()), D)
         if _after_pair_hook is not None:
@@ -596,9 +644,10 @@ def identify_interferences(
     for i in range(n):
         free[i, i, :] = True
 
+    # Contact graph (static gaps), computed once for all pairs.
     contact, gaps = compute_contacts(shapes, labels, contact_threshold)
 
-    # Store results
+    # Assemble, save and report the result; the checkpoint is no longer needed.
     result = InterferenceResult(
         component_ids=ids,
         component_labels=labels,
@@ -622,9 +671,9 @@ def identify_interferences(
     _log_summary(result)
     return result
 
-# Function to log a summary of the interference results, including the number of components, 
-# directions, pairs, and statistics about the tests performed. For user information and debugging.
+
 def _log_summary(result: InterferenceResult) -> None:
+    """[SUPP] Log the run summary (warnings for pairs with no free direction, timings, removable parts, contacts)."""
     n, D = len(result.component_ids), len(result.directions)
     labels = result.component_labels
     for i in range(n):
@@ -647,6 +696,7 @@ def _log_summary(result: InterferenceResult) -> None:
 
 
 def _log_contacts(result: InterferenceResult) -> None:
+    """[SUPP] Log the touching pairs and warn about components that touch no other movable component."""
     labels, n = result.component_labels, len(result.component_ids)
     pairs = [(labels[i], labels[j]) for i, j in zip(*np.nonzero(np.triu(result.contact)))]
     log.info("Contacts (gap <= %.4g mm): %s", result.contact_threshold,

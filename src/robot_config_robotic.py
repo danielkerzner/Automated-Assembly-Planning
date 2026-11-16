@@ -1,7 +1,14 @@
-"""RobotConfig: every robot-mode parameter (docs/robotic-gripper_spec.md section 9).
+"""RobotConfig: every robot-mode parameter.
 
-Values decided by the thesis author on 2026-11-12 are marked "decided"; the rest are the spec's
-defaults or implementation choices, marked "to confirm" where the spec leaves them open.
+Inputs
+    - Nothing is read from disk: a `RobotConfig` is built in code (`main._main_robot` builds one with
+      `check_subassembly_grasp` from the command line, everything else at its default).
+Outputs
+    - One `RobotConfig` object passed to the point-cloud, engine, gripper-analysis, tool-check, loop and
+      output modules. Its `to_json` / `thresholds` are written into plan.json -> robot.
+
+Values decided by the thesis author on 2026-11-12 are marked "decided"; the rest are
+defaults or implementation choices, marked "to confirm" where still open.
 """
 
 from __future__ import annotations
@@ -14,52 +21,62 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 @dataclass
 class RobotConfig:
-    # Loop (spec 6)
-    robot_max_iterations: int = 10
-    grasp_quarter_fraction: float = 0.25  # decided: counted over gripper steps only; prune max(1, floor(N * f))
+    """Settings of robot mode (config input of `run_robot_pipeline`). Defaults are the recommended values."""
 
-    # Feasibility rule (spec 5.2): feasible iff S_rel >= grasp_rel_threshold and S_context >= grasp_abs_floor
-    grasp_rel_threshold: float = 0.5  # decided 2026-11-12: "guess a value" -> the spec's suggested 0.5
-    grasp_abs_floor: float = 0.5  # decided 2026-11-12: "adjustable, give it 50% and let's see"
-    grasp_boundary_inclusive: bool = True  # to confirm (spec 12)
+    # Loop
+    robot_max_iterations: int = 10  # int >= 1. Maximum verify-prune-reoptimize iterations. Recommended: 10.
+    # float in (0, 1]. Share of the worst gripper steps pruned per iteration, prune max(1, floor(N * f)).
+    # Decided: counted over gripper steps only. Recommended: 0.25.
+    grasp_quarter_fraction: float = 0.25
 
-    # Optional sub-assembly check (added 2026-11-13, spec 13.6): an edge is feasible only if, besides the part's
+    # Feasibility rule: feasible iff S_rel >= grasp_rel_threshold and S_context >= grasp_abs_floor
+    # float in [0, 1]. Minimum S_context / S_alone (how much of the free-space grasp quality must survive the
+    # obstacles). Decided 2026-11-12: 0.5.
+    grasp_rel_threshold: float = 0.5
+    # float in [0, 1]. Minimum absolute engine score. Decided 2026-11-12: "adjustable, give it 50% and let's see".
+    grasp_abs_floor: float = 0.5
+    grasp_boundary_inclusive: bool = True  # bool. True: a score exactly on a threshold passes (>=). To confirm.
+
+    # Optional sub-assembly check (added 2026-11-13): an edge is feasible only if, besides the part's
     # own grasp/tool check, both its nodes (the sub-assembly before and after the insertion) are graspable as one
     # object with nothing around. Off by default (one extra engine call per distinct sub-assembly).
-    check_subassembly_grasp: bool = False
-    subassembly_grasp_floor: float | None = None  # node graspable iff score >= this; None = grasp_abs_floor
+    check_subassembly_grasp: bool = False  # bool. Command-line flag --check-subassembly-grasp.
+    subassembly_grasp_floor: float | None = None  # float or None. Node graspable iff score >= this; None = grasp_abs_floor.
 
-    # Rotation of nut partners (spec 5.3)
-    grasp_rotation_step_deg: float = 90.0  # decided 2026-11-12: 0, 90, 180, 270 degrees
-    grasp_match_tol_mm: float = 0.5  # same grasp at two angles: TCP within this distance ...
-    grasp_match_angle_deg: float = 5.0  # ... and each of the three axes within this angle (signed)
+    # Rotation of nut partners
+    # float, deg, must divide 360. Angle step of the rotation check. Decided 2026-11-12: 90 (0, 90, 180, 270).
+    grasp_rotation_step_deg: float = 90.0
+    grasp_match_tol_mm: float = 0.5  # float, mm. Same grasp at two angles: TCP within this distance ...
+    grasp_match_angle_deg: float = 5.0  # float, deg. ... and each of the three axes within this angle (signed).
 
-    # Point clouds (spec 3)
-    pcd_spacing_mm: float = 0.3
-    pcd_max_points: int = 60000
-    pcd_seed: int = 1
+    # Point clouds
+    pcd_spacing_mm: float = 0.3  # float, mm. Sampling spacing of the clouds (points ~ area / spacing^2).
+    pcd_max_points: int = 60000  # int. Upper bound of points per component cloud.
+    pcd_seed: int = 1  # int. Seed of the cloud sampling.
 
-    # Engine (spec 4)
-    engine_python: str | None = None  # None: $AAP_GRIPPER_PYTHON, else the sibling env 'parallelgrippercode'
-    engine_repo: str | None = None  # the engine's JMS folder (read only); None: ../gripperparallel/...
-    gripper_yaml: str | None = None  # None: <engine_repo>/gripper_parameter/Franka.yaml
-    engine_timeout_s: float = 1800.0
-    engine_mode: str = "worker"  # "worker" (function copy, long-lived) or "script" (fallback runner)
-    engine_seed: int = 1  # open3d RANSAC seed, set before every call
+    # Engine
+    engine_python: str | None = None  # str or None. Engine interpreter; None: $AAP_GRIPPER_PYTHON, else the sibling env 'parallelgrippercode'.
+    engine_repo: str | None = None  # str or None. The engine's JMS folder (read only); None: ../gripperparallel/...
+    gripper_yaml: str | None = None  # str or None. Gripper description; None: <engine_repo>/gripper_parameter/Franka.yaml.
+    engine_timeout_s: float = 1800.0  # float, s. Timeout of one engine call (and worker start).
+    engine_mode: str = "worker"  # str. "worker" (function copy, long-lived; recommended) or "script" (slow fallback runner).
+    engine_seed: int = 1  # int. open3d RANSAC seed, set before every call.
 
-    # Tool check (spec 7, interface rule of 2026-11-12 in spec 13.4). Stander category -> tool STEP file in
-    # tool_dir; None = no tool (the step is reported unchecked and treated as feasible, the spec's stub behaviour).
-    tool_dir: str = str(REPO_ROOT / "tools" / "gripper")
+    # Tool check (interface rule of 2026-11-12). Stander category -> tool STEP file in
+    # tool_dir; None = no tool (the step is reported unchecked and treated as feasible, the stub behaviour).
+    tool_dir: str = str(REPO_ROOT / "tools" / "gripper")  # str. Folder of the tool STEP files.
+    # dict category -> file name or None. 1 = screw, 2 = nut, 3 = other (bushing).
     tools: dict = field(default_factory=lambda: {1: "screwing_effector.step", 2: "nut_effector.stp",
                                                  3: "bushing_effector.stp"})
     # Stander category -> fraction of the stander's extent along its removal axis that sits inside the tool,
     # past the tool's interface plane (decided 2026-11-12: screws 0 = touching, nuts and bushings half).
     tool_overlap_fraction: dict = field(default_factory=lambda: {1: 0.0, 2: 0.5, 3: 0.5})
-    tool_contact_volume_tol: float = 1e-3  # mm^3; a common volume above this is a contact (collision)
+    tool_contact_volume_tol: float = 1e-3  # float, mm^3. A common volume above this is a contact (collision).
 
-    disk_cache: bool = True  # engine results cached under <output_dir>/robot/engine_cache/
+    disk_cache: bool = True  # bool. Engine results cached under <output_dir>/robot/engine_cache/.
 
     def __post_init__(self):
+        """[AUX] Validate the settings (ValueError): engine_mode, iterations >= 1, quarter fraction in (0, 1], rotation step dividing 360."""
         if self.engine_mode not in ("worker", "script"):
             raise ValueError(f"engine_mode must be 'worker' or 'script', got {self.engine_mode!r}")
         if self.robot_max_iterations < 1:
@@ -70,9 +87,11 @@ class RobotConfig:
             raise ValueError("grasp_rotation_step_deg must divide 360")
 
     def subassembly_floor(self) -> float:
+        """[AUX] Score floor of the sub-assembly check: `subassembly_grasp_floor`, or `grasp_abs_floor` when None."""
         return self.grasp_abs_floor if self.subassembly_grasp_floor is None else self.subassembly_grasp_floor
 
     def thresholds(self) -> dict:
+        """[SUPP] The decision thresholds as a dict, for plan.json -> robot.thresholds."""
         return {"grasp_rel_threshold": self.grasp_rel_threshold, "grasp_abs_floor": self.grasp_abs_floor,
                 "check_subassembly_grasp": self.check_subassembly_grasp,
                 "subassembly_grasp_floor": self.subassembly_floor() if self.check_subassembly_grasp else None,
@@ -82,6 +101,7 @@ class RobotConfig:
                 "tool_contact_volume_tol_mm3": self.tool_contact_volume_tol}
 
     def to_json(self) -> dict:
+        """[SUPP] The whole config as a JSON-ready dict (category keys of `tools` / `tool_overlap_fraction` as strings), for plan.json -> robot.config."""
         d = asdict(self)
         d["tools"] = {str(k): v for k, v in self.tools.items()}
         d["tool_overlap_fraction"] = {str(k): v for k, v in self.tool_overlap_fraction.items()}

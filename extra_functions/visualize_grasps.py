@@ -1,4 +1,17 @@
-"""Interactive viewer for the robot-mode grasps of the chosen sequence (docs/robotic-gripper_spec.md section 8).
+"""Interactive viewer for the robot-mode grasps of the chosen sequence.
+
+[SUPP] Visualisation script, not part of the planning pipeline.
+
+Inputs
+    - `<output_dir>/plan.json` written by `main.py --mode robot` (needs its `robot` block).
+    - The STEP file the plan was made from (shapes only).
+    - Options: `--step N` (first step shown, default 1), `--deflection` (mm, default 0.5).
+Outputs
+    - An interactive matplotlib window; nothing is written to disk.
+
+How it works
+    For each step of `plan.json -> robot.steps` it draws the present components, the removed part, its
+    removal arrow, and the engine's grasp (TCP, frame, schematic finger pads) from the stored result.
 
 Reads `<output_dir>/plan.json` (written by `main.py --mode robot`) and the STEP file, and shows one step at a
 time in a matplotlib 3D window, in assembly order:
@@ -39,7 +52,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 
 def _finger_size(plan: dict) -> tuple[float, float]:
-    """(pad size along Y, pad size along X) in mm from the gripper YAML in plan.json, else Franka defaults."""
+    """[AUX] (pad size along Y, pad size along X) in mm from the gripper YAML in plan.json, else Franka defaults (25, 18)."""
     try:
         import yaml
         path = plan["robot"]["engine"]["gripper_yaml"]
@@ -51,7 +64,7 @@ def _finger_size(plan: dict) -> tuple[float, float]:
 
 
 def _meshes(step_path: str, ids: set[str], deflection: float) -> dict[str, tuple[np.ndarray, np.ndarray]]:
-    """component id (obj.Name) -> (vertices (n, 3), triangles (m, 3)) at global placement."""
+    """[AUX] component id (obj.Name) -> (vertices (n, 3), triangles (m, 3)) at global placement."""
     from preprocessing import _global_shape, _leaf_components, load_assembly
 
     doc = load_assembly(step_path)
@@ -68,7 +81,12 @@ def _meshes(step_path: str, ids: set[str], deflection: float) -> dict[str, tuple
 
 
 def show_grasps(output_dir: str | Path, step_path: str | Path, start_step: int = 1, deflection: float = 0.5) -> None:
-    """Open the viewer on `<output_dir>/plan.json` (robot mode) with the shapes of `step_path`."""
+    """[MAIN] Open the viewer on `<output_dir>/plan.json` (robot mode) with the shapes of `step_path`.
+
+    Builds the 3D panel (`draw`) and the score panel (`draw_scores`) and binds the keys; the grasp drawn is
+    whatever the engine returned for that step, so a different engine shows up here unchanged as long as
+    plan.json keeps the `tcp`, `axes` and `grasp_width` fields.
+    """
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
@@ -93,7 +111,7 @@ def show_grasps(output_dir: str | Path, step_path: str | Path, start_step: int =
     thr = plan["robot"].get("thresholds", {})
 
     def draw_scores(i):
-        """Per step: S in the assembled state and S_alone, with the feasibility rule; current step highlighted."""
+        """[AUX] Per step: S in the assembled state and S_alone, with the feasibility rule; current step highlighted."""
         axs.clear()
         x = np.arange(len(rsteps))
         w = 0.38
@@ -191,6 +209,7 @@ def show_grasps(output_dir: str | Path, step_path: str | Path, start_step: int =
 
 
 def main() -> int:
+    """[AUX] Command line (arguments in the module docstring)."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("output_dir", help="folder with the robot-mode plan.json")
     ap.add_argument("step_path", help="the STEP file the plan was made from")

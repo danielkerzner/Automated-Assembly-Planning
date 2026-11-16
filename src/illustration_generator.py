@@ -1,18 +1,33 @@
 """Illustration Generator: one action diagram per assembly step plus a PDF manual.
 
-Implements docs/illustration-spec.md. Every component is tessellated once (FreeCAD), rasterized per view
-into a layer (depth + shade, numpy z-buffer, orthographic), and frames are depth-min merges of layers: the
-placed parts (steps 1..t-1), the new part at its final position and its ghost at the start position (the
-same layer shifted on screen, exact under an orthographic projection). The view is one global camera for
-the whole manual, replaced for a step only when that step fails the visibility rule (spec 6).
+Inputs
+    - The assembly sequence (`OptimizationResult.steps`, or a list of step dicts): per step the component,
+      insertion direction, travel, start offset, gravity, stability class and screw turns.
+    - The `PreprocessingResult` (to get each component's global FreeCAD shape and the assembly box).
+    - The BOM CSV (`tool`, `group`, `is_stander` columns, matched on Label).
+    - An `IllustrationConfig` (image size, view search, colours, footnote options).
+Outputs
+    - In the output folder (default `output/<assembly>/illustrations`): one PNG per frame
+      (`step_<n>_<label>.png`, or `step_<a>-<b>_<group>.png` for a group frame), `manual.pdf` (cover page +
+      one page per frame), `illustration_report.json` (views, visibility figures, warnings) and cache
+      folders (`meshes/`, `layers/`, `view_selection.json`).
+    - An `IllustrationResult` describing the frames.
+
+What this module does
+    Every component is tessellated once (FreeCAD), rasterised per view into a layer (depth + shade, numpy
+    z-buffer, orthographic), and frames are depth-min merges of layers: the placed parts (steps 1..t-1),
+    the new part at its final position and its ghost at the start position (the same layer shifted on
+    screen, exact under an orthographic projection). The view is one global camera for the whole manual,
+    replaced for a step only when that step fails the visibility rule; if no view works the part is
+    drawn in x-ray. Consecutive steps of the same BOM group share one frame.
 
 Layout:
-  IllustrationConfig, validate_config      configuration (spec 3)
-  Mesh, mesh_from_arrays                   triangle meshes (spec 5.1)
-  view_basis, ViewContext, rasterize       camera, framing, layers (spec 4, 5.2)
-  evaluate_view, select_views              visibility rule and view cascade (spec 6)
-  compose_frame, footnote_lines            frame content (spec 5.3, 7)
-  render_illustrations                     pure numpy/matplotlib entry, with caching (spec 8)
+  IllustrationConfig, validate_config      configuration
+  Mesh, mesh_from_arrays                   triangle meshes
+  view_basis, ViewContext, rasterize       camera, framing, layers
+  evaluate_view, select_views              visibility rule and view cascade
+  compose_frame, footnote_lines            frame content
+  render_illustrations                     pure numpy/matplotlib entry, with caching
   generate_illustrations                   pipeline entry (FreeCAD shapes -> meshes)
 """
 
@@ -41,11 +56,11 @@ DEPTH_EPS_REL = 1e-4  # depth tolerance (fraction of the scene diagonal) for tou
 EDGE_JUMP_REL = 0.02  # depth jump (fraction of the scene diagonal) drawn as a line inside one part
 BARY_TOL = 1e-7  # barycentric tolerance, closes cracks between neighbouring triangles
 CHUNK = 1_000_000  # candidate pixels per rasterizer batch (memory bound)
-OUTLINE_RGB = np.array([0.12, 0.12, 0.12])
-TRAJECTORY_COLOR = "#1a1a1a"
-MESH_VERSION = "1"
-LAYER_VERSION = "1"
-FRAMES_VERSION = "3"  # 2: group frames (spec 12); 3: no view perturbation, stander fallback (spec 6.2)
+OUTLINE_RGB = np.array([0.12, 0.12, 0.12])  # colour of the silhouette lines
+TRAJECTORY_COLOR = "#1a1a1a"  # colour of the dashed trajectory arrow
+MESH_VERSION = "1"  # bump when the mesh cache contents change
+LAYER_VERSION = "1"  # bump when the layer cache contents change
+FRAMES_VERSION = "3"  # 2: group frames; 3: no view perturbation, stander fallback
 
 REPORT_NAME = "illustration_report.json"
 VIEWS_NAME = "view_selection.json"
@@ -54,6 +69,7 @@ SEARCH_FIELDS = ("search_size", "default_view", "azimuths", "elevations", "vis_m
                  "min_trajectory_px_frac")
 MANUAL_NAME = "manual.pdf"
 
+# Texts of the footnote, cover page and table, per language (only English exists).
 STRINGS = {
     "en": {
         "step": "Step",
@@ -82,34 +98,36 @@ STRINGS = {
 
 @dataclass
 class IllustrationConfig:
-    image_size: tuple[int, int] = (1600, 1200)  # px, final frame (width, height)
-    search_size: tuple[int, int] = (480, 360)  # px, view search
-    dpi: int = 200
-    tess_tolerance_rel: float = 0.002  # tessellation deflection / assembly bbox diagonal
-    default_view: tuple[float, float] = (-35.0, 30.0)  # (azimuth, elevation) deg, start of the search order
-    azimuths: tuple = tuple(range(0, 360, 15))
-    elevations: tuple = (20, 35, 50)
-    vis_min_end: float = 0.35
-    vis_min_start: float = 0.35
-    min_trajectory_px_frac: float = 0.10  # of the shorter image side
-    xray_alpha: float = 0.25
-    placed_color: str = "#bdbdbd"
-    new_color: str = "#f28e2b"
-    stander_color: str = "#3b75af"
-    ghost_alpha: float = 0.35
-    show_gravity: bool = True
-    mark_unstable: bool = True
-    footnote_show_vector: bool = False
-    # Consecutive steps whose BOM `group` matches (non-blank) share one frame; only the first movement of the
-    # block must pass the visibility rule (spec 12).
+    """Settings of the illustration generation (config input of `render_illustrations` / `generate_illustrations`)."""
+
+    image_size: tuple[int, int] = (1600, 1200)  # (width, height) px of the final frame. Recommended: (1600, 1200).
+    search_size: tuple[int, int] = (480, 360)  # (width, height) px used for the view search (lower = faster).
+    dpi: int = 200  # int. Resolution of the saved PNG and PDF page.
+    tess_tolerance_rel: float = 0.002  # float. Tessellation deflection as a fraction of the assembly bbox diagonal.
+    default_view: tuple[float, float] = (-35.0, 30.0)  # (azimuth, elevation) deg, start of the search order.
+    azimuths: tuple = tuple(range(0, 360, 15))  # candidate azimuths (deg) of the view search.
+    elevations: tuple = (20, 35, 50)  # candidate elevations (deg, 0-90) of the view search.
+    vis_min_end: float = 0.35  # float in [0, 1]. Minimum visible fraction of the part at its final position.
+    vis_min_start: float = 0.35  # float in [0, 1]. Minimum visible fraction of the ghost at the start position.
+    min_trajectory_px_frac: float = 0.10  # float. Minimum on-screen length of the trajectory, fraction of the shorter image side.
+    xray_alpha: float = 0.25  # float in [0, 1]. Opacity of the placed parts drawn over the new part in an x-ray frame.
+    placed_color: str = "#bdbdbd"  # matplotlib colour of already placed parts.
+    new_color: str = "#f28e2b"  # colour of the part being placed.
+    stander_color: str = "#3b75af"  # colour of a stander being placed.
+    ghost_alpha: float = 0.35  # float in [0, 1]. Opacity of the ghost (start position).
+    show_gravity: bool = True  # bool. Draw the gravity pictogram (needs the stability data in the steps).
+    mark_unstable: bool = True  # bool. Add "Hold in place" to the footnote of class-1 (unsupported) steps.
+    footnote_show_vector: bool = False  # bool. Add the move vector (direction x travel) to the footnote.
+    # bool. Consecutive steps whose BOM `group` matches (non-blank) share one frame; only the first movement
+    # of the block must pass the visibility rule.
     group_frames: bool = True
-    title: str | None = None  # None = assembly name
-    language: str = "en"
-    force: bool = False
+    title: str | None = None  # str or None. Manual title; None = assembly name.
+    language: str = "en"  # str. Key of STRINGS.
+    force: bool = False  # bool. Ignore cached results and re-render.
 
 
 def validate_config(config: IllustrationConfig) -> None:
-    """Spec 3 validation; raises ValueError."""
+    """[AUX] Validation of an `IllustrationConfig`; raises ValueError."""
     from matplotlib.colors import is_color_like
 
     for name in ("image_size", "search_size"):
@@ -146,16 +164,18 @@ def validate_config(config: IllustrationConfig) -> None:
 
 @dataclass
 class Mesh:
-    vertices: np.ndarray  # (V, 3) mm, global coordinates
-    triangles: np.ndarray  # (T, 3) vertex indices, outward winding when closed
-    normals: np.ndarray  # (T, 3) unit triangle normals
-    centroid: np.ndarray  # (3,) area-weighted
-    closed: bool  # closed and consistently oriented: back faces may be culled
-    key: str = ""  # cache key (geometry hash + tessellation tolerance)
+    """Triangle mesh of one component in global coordinates (input of the rasteriser; built by `mesh_from_arrays`)."""
+
+    vertices: np.ndarray  # (V, 3) float, mm, global coordinates.
+    triangles: np.ndarray  # (T, 3) int, vertex indices, outward winding when closed.
+    normals: np.ndarray  # (T, 3) float, unit triangle normals (used for shading and back-face culling).
+    centroid: np.ndarray  # (3,) float, area-weighted centroid (anchor of the trajectory arrow).
+    closed: bool  # bool. Closed and consistently oriented: back faces may be culled.
+    key: str = ""  # str. Cache key (geometry hash + tessellation tolerance); "" disables caching.
 
 
 def _is_closed(V: np.ndarray, F: np.ndarray) -> bool:
-    """True if every directed edge occurs once and its reverse exists (closed, consistently oriented)."""
+    """[AUX] True if every directed edge occurs once and its reverse exists (closed, consistently oriented)."""
     if not len(F):
         return False
     scale = float(np.ptp(V, axis=0).max()) or 1.0
@@ -170,7 +190,10 @@ def _is_closed(V: np.ndarray, F: np.ndarray) -> bool:
 
 
 def mesh_from_arrays(vertices, triangles, key: str = "") -> Mesh:
-    """Mesh with normals, centroid and closedness; a closed mesh with inward winding is flipped."""
+    """[AUX] Build a `Mesh` with normals, centroid and closedness; degenerate triangles are dropped.
+
+    A closed mesh with inward winding is flipped so that the normals point outward.
+    """
     V = np.asarray(vertices, dtype=float).reshape(-1, 3)
     F = np.asarray(triangles, dtype=np.int64).reshape(-1, 3)
     a, b, c = V[F[:, 0]], V[F[:, 1]], V[F[:, 2]]
@@ -188,6 +211,7 @@ def mesh_from_arrays(vertices, triangles, key: str = "") -> Mesh:
 
 
 def _diagonal(meshes) -> float:
+    """[AUX] Length of the diagonal of the box enclosing all meshes (the scene scale for tolerances)."""
     lo = np.min([m.vertices.min(axis=0) for m in meshes], axis=0)
     hi = np.max([m.vertices.max(axis=0) for m in meshes], axis=0)
     return float(np.linalg.norm(hi - lo)) or 1.0
@@ -199,9 +223,9 @@ def _diagonal(meshes) -> float:
 
 
 def view_basis(az: float, el: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """(r, u, v): screen right, screen up, viewing direction (depth = v . p grows away from the viewer).
+    """[AUX] Camera basis (r, u, v): screen right, screen up, viewing direction (depth = v . p grows away from the viewer).
 
-    Azimuth about +z, elevation above the xy plane, up vector +z (spec 4).
+    Azimuth about +z, elevation above the xy plane, up vector +z.
     """
     a, e = np.radians(az), np.radians(el)
     toward = np.array([np.cos(e) * np.cos(a), np.cos(e) * np.sin(a), np.sin(e)])
@@ -210,33 +234,40 @@ def view_basis(az: float, el: float) -> tuple[np.ndarray, np.ndarray, np.ndarray
 
 
 def view_angle(v1, v2) -> float:
-    """Angle in degrees between the viewing directions of two (azimuth, elevation) views."""
+    """[AUX] Angle in degrees between the viewing directions of two (azimuth, elevation) views."""
     c = float(view_basis(*v1)[2] @ view_basis(*v2)[2])
     return float(np.degrees(np.arccos(np.clip(c, -1.0, 1.0))))
 
 
 @dataclass
 class Layer:
-    """One component rasterized in one view, cropped to its coverage; inf depth = not covered."""
+    """One component rasterised in one view, cropped to its coverage; inf depth = not covered."""
 
-    x0: int
-    y0: int
-    depth: np.ndarray  # (h, w) float32
-    shade: np.ndarray  # (h, w) float32
+    x0: int  # int. Column of the layer's left edge in the image.
+    y0: int  # int. Row of the layer's top edge in the image.
+    depth: np.ndarray  # (h, w) float32. Depth of the nearest surface per pixel (inf = empty).
+    shade: np.ndarray  # (h, w) float32. Lambert shade per pixel.
 
     @property
     def mask(self) -> np.ndarray:
+        """[AUX] Boolean mask of the pixels this layer covers."""
         return np.isfinite(self.depth)
 
 
 def rasterize(xy: np.ndarray, z: np.ndarray, tris: np.ndarray, shade: np.ndarray, W: int, H: int) -> Layer:
-    """Z-buffer of triangles (pixel coordinates xy (V, 2) = (col, row), pixel centres at +0.5).
+    """[MAIN] Z-buffer rasteriser: draw triangles into a depth and shade image of W x H pixels.
 
-    Every triangle covers the pixels of its bounding box whose centre passes the barycentric test; the
-    boxes of many triangles are expanded together (vectorized), and the nearest sample wins per pixel.
+    Inputs: projected vertices xy (V, 2) = (col, row) with pixel centres at +0.5, their depths z (V,), the
+    triangles (T, 3), the flat shade of each triangle (T,) and the image size. Output: a `Layer` cropped to
+    the covered area.
+
+    Every triangle covers the pixels of its bounding box whose centre passes the barycentric test; the boxes
+    of many triangles are expanded together (vectorised, in batches of CHUNK candidate pixels to bound the
+    memory), and the nearest sample wins per pixel.
     """
     depth = np.full(H * W, np.inf, dtype=np.float32)
     shd = np.zeros(H * W, dtype=np.float32)
+    # Per-triangle setup: edge vectors, determinant and the pixel bounding box.
     A, B, C = xy[tris[:, 0]], xy[tris[:, 1]], xy[tris[:, 2]]
     e1, e2 = B - A, C - A
     det = e1[:, 0] * e2[:, 1] - e1[:, 1] * e2[:, 0]
@@ -253,6 +284,7 @@ def rasterize(xy: np.ndarray, z: np.ndarray, tris: np.ndarray, shade: np.ndarray
     za, zb, zc = z[tris[:, 0]], z[tris[:, 1]], z[tris[:, 2]]
     start, done = 0, 0
     while start < len(idx):
+        # One batch of triangles whose bounding boxes hold about CHUNK candidate pixels in total.
         end = max(int(np.searchsorted(csum, done + CHUNK, side="right")), start + 1)
         sel, n = idx[start:end], cnt[start:end]
         rep = np.repeat(np.arange(len(sel)), n)
@@ -260,11 +292,13 @@ def rasterize(xy: np.ndarray, z: np.ndarray, tris: np.ndarray, shade: np.ndarray
         t = sel[rep]
         ww = w[t]
         px, py = x0[t] + local % ww, y0[t] + local // ww
+        # Barycentric coordinates of each candidate pixel centre; keep those inside the triangle.
         dx, dy = px + 0.5 - A[t, 0], py + 0.5 - A[t, 1]
         l1 = (dx * e2[t, 1] - dy * e2[t, 0]) / det[t]
         l2 = (e1[t, 0] * dy - e1[t, 1] * dx) / det[t]
         ok = (l1 >= -BARY_TOL) & (l2 >= -BARY_TOL) & (l1 + l2 <= 1 + BARY_TOL)
         t, l1, l2 = t[ok], l1[ok], l2[ok]
+        # Interpolated depth; per pixel keep the nearest sample, then write it if nearer than the buffer.
         zz = za[t] + l1 * (zb[t] - za[t]) + l2 * (zc[t] - za[t])
         lin = py[ok] * W + px[ok]
         order = np.lexsort((zz, lin))
@@ -275,6 +309,7 @@ def rasterize(xy: np.ndarray, z: np.ndarray, tris: np.ndarray, shade: np.ndarray
         shd[lu[better]] = shade[t[first][better]]
         done = int(csum[end - 1])
         start = end
+    # Crop to the covered rows and columns.
     depth, shd = depth.reshape(H, W), shd.reshape(H, W)
     rows, cols = np.flatnonzero(np.isfinite(depth).any(1)), np.flatnonzero(np.isfinite(depth).any(0))
     if not len(rows):
@@ -284,7 +319,7 @@ def rasterize(xy: np.ndarray, z: np.ndarray, tris: np.ndarray, shade: np.ndarray
 
 
 def _clip(layer: Layer, ix: int, iy: int, W: int, H: int):
-    """Image and layer slices of a layer shifted by (ix, iy) pixels, or None if it is outside the image."""
+    """[AUX] Image and layer slices of a layer shifted by (ix, iy) pixels, or None if it is outside the image."""
     h, w = layer.depth.shape
     gx, gy = layer.x0 + ix, layer.y0 + iy
     cx0, cy0, cx1, cy1 = max(gx, 0), max(gy, 0), min(gx + w, W), min(gy + h, H)
@@ -294,7 +329,12 @@ def _clip(layer: Layer, ix: int, iy: int, W: int, H: int):
 
 
 def zmerge(W: int, H: int, items) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Depth-min merge of layers. items: (layer, ix, iy, dz, id). Returns depth, id (-1 = empty), shade."""
+    """[MAIN] Depth-min merge of layers into one image: the nearest surface wins at every pixel.
+
+    items: iterable of (layer, ix, iy, dz, id), a layer with its screen shift (pixels), depth shift and an
+    id (the component index). Returns (depth, id image with -1 = empty, shade). This is how a frame is
+    composed from placed parts, the new part and its ghost.
+    """
     depth = np.full((H, W), np.inf, dtype=np.float32)
     ids = np.full((H, W), -1, dtype=np.int32)
     shade = np.zeros((H, W), dtype=np.float32)
@@ -315,11 +355,19 @@ class ViewContext:
     """One view at one raster size: basis, constant framing over all steps, and its layers.
 
     The framing box is the union of the projected extents of every step's component at its final and at
-    its start position, plus a margin (spec 5.3), so scale and offset are the same for every frame of the view.
+    its start position, plus a margin, so scale and offset are the same for every frame of the view.
+    Layers are rasterised lazily and cached in memory and (if `layer_dir` is given) on disk.
     """
 
     def __init__(self, view, size, meshes: list[Mesh], offsets: np.ndarray, layer_dir: Path | None = None,
                  stats: dict | None = None):
+        """[MAIN] Set up the camera and framing of one view.
+
+        Inputs: the (azimuth, elevation) view, the raster size (W, H), the meshes of the steps in assembly
+        order, their start offsets (N, 3), an optional folder for the layer cache and a stats dict. The
+        height used for drawing excludes the footnote band. The scale and centre are fixed here so every
+        frame of this view has the same framing.
+        """
         self.view = (float(view[0]), float(view[1]))
         self.r, self.u, self.v = view_basis(*self.view)
         self.W = int(size[0])
@@ -328,6 +376,7 @@ class ViewContext:
         self.layer_dir, self.stats = layer_dir, stats if stats is not None else {}
         self.diag = _diagonal(meshes)
         self.eps = DEPTH_EPS_REL * self.diag
+        # Framing: union of the projected extents of every part at its final and start position.
         R = np.stack([self.r, self.u], axis=1)
         self._extent = []
         lo, hi = np.full(2, np.inf), np.full(2, -np.inf)
@@ -345,18 +394,19 @@ class ViewContext:
         self.layers: dict[int, Layer] = {}
 
     def to_pixel(self, p) -> np.ndarray:
-        """(col, row) of world points p (..., 3)."""
+        """[AUX] (col, row) pixel coordinates of world points p (..., 3)."""
         p = np.asarray(p, dtype=float)
         x = (p @ self.r - self.center[0]) * self.scale + self.W / 2
         y = self.H / 2 - (p @ self.u - self.center[1]) * self.scale
         return np.stack([x, y], axis=-1)
 
     def shift(self, offset) -> tuple[float, float, float]:
-        """Screen shift (pixels) and depth shift of a translation; exact under orthographic projection."""
+        """[AUX] Screen shift (pixels) and depth shift of a translation; exact under orthographic projection."""
         o = np.asarray(offset, dtype=float)
         return float(o @ self.r * self.scale), float(-(o @ self.u) * self.scale), float(o @ self.v)
 
     def in_frame(self, k: int, with_offset: bool) -> bool:
+        """[AUX] True if part k (at its final position, or shifted by its start offset) lies inside the image."""
         a, b = self._extent[k]
         o = self.offsets[k] @ np.stack([self.r, self.u], axis=1) if with_offset else np.zeros(2)
         lo = np.array([(a[0] + o[0] - self.center[0]) * self.scale + self.W / 2,
@@ -366,12 +416,14 @@ class ViewContext:
         return bool(lo.min() >= -0.5 and hi[0] <= self.W + 0.5 and hi[1] <= self.H + 0.5)
 
     def _layer_key(self, k: int) -> str:
+        """[SUPP] Cache key of part k's layer in this view (mesh key, raster size, view and framing)."""
         m = self.meshes[k]
         payload = [LAYER_VERSION, m.key, self.W, self.H, *(round(x, 9) for x in
                    (*self.view, *self.center, self.scale))]
         return hashlib.sha256(json.dumps(payload).encode()).hexdigest()
 
     def layer(self, k: int) -> Layer:
+        """[AUX] Layer of part k in this view: from memory, else from the disk cache, else rasterised (and saved)."""
         if k in self.layers:
             return self.layers[k]
         path = None
@@ -395,6 +447,7 @@ class ViewContext:
         return layer
 
     def rasterize_mesh(self, mesh: Mesh) -> Layer:
+        """[AUX] Rasterise one mesh in this view: back faces culled for closed solids, Lambert shade from the normals."""
         t0 = time.perf_counter()
         nv = mesh.normals @ self.v
         keep = nv < 0 if mesh.closed else np.ones(len(nv), dtype=bool)  # cull back faces of solids only
@@ -407,17 +460,17 @@ class ViewContext:
 
 
 # ---------------------------------------------------------------------------
-# Visibility and view selection (spec 6)
+# Visibility and view selection
 # ---------------------------------------------------------------------------
 
 
 def step_group(step: dict, bom: dict) -> str:
-    """BOM `group` of a step by Label (a `group` key on the step itself wins); blank = no group."""
+    """[AUX] BOM `group` of a step by Label (a `group` key on the step itself wins); blank = no group."""
     return (step.get("group") or bom.get(step["component_label"], {}).get("group") or "").strip()
 
 
 def group_blocks(steps: list[dict], bom: dict, config: IllustrationConfig) -> list[tuple[int, int]]:
-    """(first, last) step indices of each frame: runs of consecutive steps sharing a non-blank group (spec 12)."""
+    """[AUX] (first, last) step indices of each frame: runs of consecutive steps sharing a non-blank group."""
     blocks: list[tuple[int, int]] = []
     for s, st in enumerate(steps):
         g = step_group(st, bom)
@@ -429,13 +482,18 @@ def group_blocks(steps: list[dict], bom: dict, config: IllustrationConfig) -> li
 
 
 def _merge_into(buf: np.ndarray, layer: Layer) -> None:
+    """[AUX] Depth-min merge of a layer into a depth buffer, in place."""
     cl = _clip(layer, 0, 0, buf.shape[1], buf.shape[0])
     if cl is not None:
         np.minimum(buf[cl[0]], layer.depth[cl[1]], out=buf[cl[0]])
 
 
 def _step_visibility(ctx: ViewContext, k: int, placed: np.ndarray) -> dict:
-    """Visible fractions of step k's part (end) and ghost (start) against the placed depth buffer."""
+    """[AUX] Visible fractions of step k's part (end) and ghost (start) against the placed depth buffer.
+
+    Also returns the on-screen trajectory length (fraction of the shorter image side) and whether the part
+    and its ghost lie inside the image. These are the figures the visibility rule judges.
+    """
     layer = ctx.layer(k)
     dx, dy, dz = ctx.shift(ctx.offsets[k])
     out = {"traj": float(np.hypot(dx, dy)) / min(ctx.W, ctx.H),
@@ -456,7 +514,11 @@ def _step_visibility(ctx: ViewContext, k: int, placed: np.ndarray) -> dict:
 
 
 def evaluate_view(ctx: ViewContext, blocks: list[tuple[int, int]] | None = None) -> dict[str, np.ndarray]:
-    """Visibility figures per frame in one view.
+    """[MAIN] Visibility figures of every frame in one view (input of the view selection).
+
+    Output: dict of arrays over the frames: `end` and `start` (visible fraction of the part and of its
+    ghost), `traj` (trajectory length fraction) and `in_frame`. Frames are judged in assembly order against
+    the depth buffer of the parts placed before them.
 
     Without `blocks` every step is its own frame. For a block (a, b) only step a is judged, against the
     placed parts 0..a-1 and the other members a+1..b, which the same frame draws at their final positions.
@@ -481,11 +543,12 @@ def evaluate_view(ctx: ViewContext, blocks: list[tuple[int, int]] | None = None)
 
 
 def _ratio(x, thr):
+    """[AUX] x / thr, or 1 when the threshold is 0 (condition switched off)."""
     return np.ones_like(x) if thr <= 0 else x / thr
 
 
 def visible_mask(ev: dict, config: IllustrationConfig, occlusion: bool = True) -> np.ndarray:
-    """Spec 6.1 rule; with occlusion=False (x-ray) only the trajectory and framing conditions count."""
+    """[AUX] Visibility rule per frame (bool array); with occlusion=False (x-ray) only the trajectory and framing conditions count."""
     ok = (ev["traj"] >= config.min_trajectory_px_frac) & ev["in_frame"]
     if occlusion:
         ok &= (ev["end"] >= config.vis_min_end) & (ev["start"] >= config.vis_min_start)
@@ -493,14 +556,14 @@ def visible_mask(ev: dict, config: IllustrationConfig, occlusion: bool = True) -
 
 
 def step_score(ev: dict, config: IllustrationConfig) -> np.ndarray:
-    """Bottleneck of the visibility conditions (>= 1 means visible), used to pick the best failing view."""
+    """[AUX] Bottleneck of the visibility conditions per frame (>= 1 means visible), used to pick the best failing view."""
     s = np.minimum(np.minimum(_ratio(ev["end"], config.vis_min_end), _ratio(ev["start"], config.vis_min_start)),
                    _ratio(ev["traj"], config.min_trajectory_px_frac))
     return np.where(ev["in_frame"], np.nan_to_num(s, nan=-1.0), -1.0)
 
 
 def candidate_views(config: IllustrationConfig) -> list[tuple[float, float]]:
-    """default_view first, then the (azimuth, elevation) grid; duplicates removed."""
+    """[AUX] Candidate (azimuth, elevation) views: default_view first, then the grid; duplicates removed."""
     out, seen = [], set()
     for az, el in [tuple(config.default_view)] + [(a, e) for e in config.elevations for a in config.azimuths]:
         key = (round(float(az) % 360.0, 6), round(float(el), 6))
@@ -511,6 +574,7 @@ def candidate_views(config: IllustrationConfig) -> list[tuple[float, float]]:
 
 
 def _figures(ev: dict, s: int, occluded: bool = True) -> dict:
+    """[AUX] The visibility figures of frame s as a plain dict for the report (unoccluded values for x-ray)."""
     return {"vis_end": float(ev["end"][s]) if occluded else 1.0,
             "vis_start": float(ev["start"][s]) if occluded else 1.0,
             "vis_end_occluded": float(ev["end"][s]), "vis_start_occluded": float(ev["start"][s]),
@@ -520,11 +584,18 @@ def _figures(ev: dict, s: int, occluded: bool = True) -> dict:
 def select_views(meshes: list[Mesh], offsets: np.ndarray, config: IllustrationConfig,
                  stats: dict | None = None, blocks: list[tuple[int, int]] | None = None,
                  is_stander: list[bool] | None = None) -> tuple[tuple[float, float], list[dict]]:
-    """Spec 6.2 cascade at search resolution. Returns (global view, per-frame choice).
+    """[MAIN] View cascade at search resolution: the global view and the view of every frame.
 
-    blocks: (first, last) step indices per frame (default: one frame per step); only the first movement
-    of a block is judged (spec 12), so that movement's is_stander flag (per step, default False) picks
-    the fallback when no main view passes.
+    Inputs: the meshes and start offsets in assembly order, the config, an optional stats dict, the frame
+    `blocks` ((first, last) step indices per frame, default one frame per step) and the is_stander flag of
+    every step. Output: (global view, list of per-frame choices). Each choice holds the view, its kind
+    ("global", "candidate", "stander", "xray" or "none"), the visibility figures and warnings.
+
+    Cascade: evaluate every candidate view; the global view is the one that makes most frames visible. Per
+    frame: use the global view if it passes the rule; else the nearest candidate view that passes; else, for
+    a stander, draw normally in the best failing view; else the x-ray fallback; else the best-scoring view
+    with a warning. Only the first movement of a block is judged, so that movement's is_stander
+    flag (per step, default False) picks the fallback when no main view passes.
     """
     stats = stats if stats is not None else {}
     blocks = blocks or [(s, s) for s in range(len(meshes))]
@@ -538,6 +609,7 @@ def select_views(meshes: list[Mesh], offsets: np.ndarray, config: IllustrationCo
         evals.append(ev)
     stats["views_evaluated"] = stats.get("views_evaluated", 0) + len(cands)
 
+    # Global view: most visible frames, then largest total visible end fraction, then closest to default_view.
     def global_rank(i):
         ev = evals[i]
         return (-int(ev["visible"].sum()), -round(float(np.nansum(ev["end"])), 9),
@@ -553,10 +625,12 @@ def select_views(meshes: list[Mesh], offsets: np.ndarray, config: IllustrationCo
     for s in range(N):
         first = blocks[s][0]
         base = {"step_index": first, "warnings": []}
+        # 1. The global view works.
         if evals[g]["visible"][s]:
             choices.append({**base, "view": glob, "is_global": True, "kind": "global", "visible": True,
                             "xray": False, **_figures(evals[g], s)})
             continue
+        # 2. The nearest other candidate view that works.
         hit = next((i for i in by_distance if evals[i]["visible"][s]), None)
         if hit is not None:
             choices.append({**base, "view": cands[hit], "is_global": False, "kind": "candidate", "visible": True,
@@ -566,15 +640,16 @@ def select_views(meshes: list[Mesh], offsets: np.ndarray, config: IllustrationCo
         scores = [step_score(evals[i], config)[s] for i in range(len(cands))]
         best = max(range(len(cands)), key=lambda i: (bool(visible_mask(evals[i], config, occlusion=False)[s]),
                                                      round(float(scores[i]), 9), -view_angle(cands[i], glob), -i))
+        # 3. A stander is drawn normally in the best failing view (never x-ray).
         if is_stander is not None and is_stander[first]:
-            # Standers are easy to assemble: drawn normally in the best view, never in x-ray (spec 6.2 step 3).
+            # Standers are easy to assemble: drawn normally in the best view, never in x-ray.
             msg = (f"step {first + 1}: stander not fully visible in any main view; drawn without x-ray at "
                    f"az {cands[best][0]:.1f} el {cands[best][1]:.1f}")
             log.info(msg)
             choices.append({**base, "view": cands[best], "is_global": best == g, "kind": "stander", "visible": False,
                             "xray": False, **_figures(evals[best], s), "warnings": [msg]})
             continue
-        # X-ray fallback (spec 6.2 step 4): visibility judged without occlusion, cascade order again.
+        # 4. X-ray fallback: visibility judged without occlusion, cascade order again.
         order = [(cands[i], evals[i]) for i in [g] + by_distance]
         xr = next(((v, ev) for v, ev in order if visible_mask(ev, config, occlusion=False)[s]), None)
         if xr is not None:
@@ -584,6 +659,7 @@ def select_views(meshes: list[Mesh], offsets: np.ndarray, config: IllustrationCo
             choices.append({**base, "view": xr[0], "is_global": xr[0] == glob, "kind": "xray", "visible": True,
                             "xray": True, **_figures(xr[1], s, occluded=False), "warnings": [msg]})
             continue
+        # 5. Nothing works (degenerate trajectory or out of frame): best-scoring view, with a warning.
         msg = (f"step {first + 1}: not visible in any view (degenerate trajectory or out of frame); using the "
                f"best-scoring view az {cands[best][0]:.1f} el {cands[best][1]:.1f}")
         log.warning(msg)
@@ -594,18 +670,19 @@ def select_views(meshes: list[Mesh], offsets: np.ndarray, config: IllustrationCo
 
 
 # ---------------------------------------------------------------------------
-# Frame composition (spec 5.3) and footnote (spec 7)
+# Frame composition and footnote
 # ---------------------------------------------------------------------------
 
 
 def _rgb(color) -> np.ndarray:
+    """[AUX] Matplotlib colour as a float32 RGB array."""
     from matplotlib.colors import to_rgb
 
     return np.array(to_rgb(color), dtype=np.float32)
 
 
 def _edges(ids: np.ndarray, depth: np.ndarray, jump: float) -> np.ndarray:
-    """Silhouette pixels: the component ID changes, or the depth jumps by more than `jump` inside one part."""
+    """[AUX] Silhouette pixels: the component id changes, or the depth jumps by more than `jump` inside one part."""
     e = np.zeros(ids.shape, dtype=bool)
     for axis in (0, 1):
         a = [slice(None), slice(None)]
@@ -621,13 +698,18 @@ def _edges(ids: np.ndarray, depth: np.ndarray, jump: float) -> np.ndarray:
 
 
 def _paint(ids: np.ndarray, shade: np.ndarray, colors: np.ndarray, rgb: np.ndarray) -> None:
+    """[AUX] Colour the covered pixels of rgb (in place) with the part colour times the shade."""
     m = ids >= 0
     rgb[m] = colors[ids[m]] * shade[m, None]
 
 
 def _ghost_overlay(ctx: ViewContext, s: int, rgb: np.ndarray, scene_depth: np.ndarray, color: np.ndarray,
                    alpha: float) -> None:
-    """Start-position copy: shifted layer, alpha-blended where it is not behind the scene, dashed outline."""
+    """[AUX] Draw the ghost (start-position copy) of part s onto rgb, in place.
+
+    The layer is shifted by the start offset, alpha-blended where it is not behind the scene, with a
+    dashed outline.
+    """
     layer = ctx.layer(s)
     dx, dy, dz = ctx.shift(ctx.offsets[s])
     gd, gid, gsh = zmerge(ctx.W, ctx.H, [(layer, int(round(dx)), int(round(dy)), dz, 0)])
@@ -641,8 +723,16 @@ def _ghost_overlay(ctx: ViewContext, s: int, rgb: np.ndarray, scene_depth: np.nd
 
 def compose_frame(ctx: ViewContext, s: int | None, config: IllustrationConfig, is_stander=False,
                   xray: bool = False, last: int | None = None) -> np.ndarray:
-    """RGB image (H, W, 3) of step index s: placed parts 0..s-1, parts s..last (default last = s) with their
-    ghosts. s=None: all parts placed. is_stander: one flag, or one per part s..last."""
+    """[MAIN] Compose the RGB image (H, W, 3) of one frame.
+
+    Inputs: the view context, the step index s (None = final assembly, all parts placed), the config, the
+    stander flag (one value, or one per part s..last), `xray` and `last` (the last step of a group frame).
+    Output: the image with parts 0..s-1 in the placed colour and parts s..last in the new (or stander)
+    colour, each with its ghost at the start position, plus silhouette lines.
+
+    Normal frame: all layers are depth-merged and painted. X-ray frame: the new parts and ghosts are drawn
+    alone and the placed parts are blended over them at `xray_alpha`, so a hidden part stays visible.
+    """
     W, H = ctx.W, ctx.H
     N = len(ctx.meshes)
     placed_rgb = _rgb(config.placed_color)
@@ -681,17 +771,22 @@ def compose_frame(ctx: ViewContext, s: int | None, config: IllustrationConfig, i
 
 
 def _fmt_vec(v) -> str:
+    """[SUPP] Format a vector with up to 2 decimals for the footnote."""
     return "(" + ", ".join(f"{round(float(c), 2) + 0.0:g}" for c in v) + ")"
 
 
 def tool_text(step: dict, bom: dict, language: str = "en") -> str:
-    """BOM tool by Label; a blank or missing tool prints as 'by hand'."""
+    """[AUX] BOM tool of a step by Label; a blank or missing tool prints as 'by hand'."""
     tool = (bom.get(step["component_label"], {}).get("tool") or "").strip()
     return tool or STRINGS[language]["by_hand"]
 
 
 def footnote_lines(steps: list[dict], s: int, bom: dict, config: IllustrationConfig) -> tuple[list[str], dict]:
-    """Footnote of step index s (spec 7) and its flags {reorient, hold}."""
+    """[AUX] Footnote of step index s: step number, part, tool, turns, re-orient and hold notes.
+
+    Returns (lines, {"reorient", "hold"}): "reorient" is set when the gravity differs from the previous
+    step, "hold" when the part is class 1 (unsupported) and `mark_unstable` is on.
+    """
     T = STRINGS[config.language]
     st = steps[s]
     first = (f"{T['step']} {st['step']} / {len(steps)}   {st['component_label']}   "
@@ -714,7 +809,11 @@ def footnote_lines(steps: list[dict], s: int, bom: dict, config: IllustrationCon
 
 def block_footnote_lines(steps: list[dict], first: int, last: int, bom: dict,
                          config: IllustrationConfig) -> tuple[list[str], dict]:
-    """Footnote of a frame covering steps first..last (spec 12); a single step uses footnote_lines unchanged."""
+    """[AUX] Footnote of a frame covering steps first..last; a single step uses `footnote_lines` unchanged.
+
+    A group frame lists the step range, the group, the parts (with their tool or turns when they differ),
+    and the re-orient and hold notes of the whole block.
+    """
     if first == last:
         return footnote_lines(steps, first, bom, config)
     T = STRINGS[config.language]
@@ -755,7 +854,7 @@ def block_footnote_lines(steps: list[dict], first: int, last: int, bom: dict,
 
 
 def _snap(point: np.ndarray, other: np.ndarray, mask: np.ndarray) -> np.ndarray:
-    """`point` if it lies on the mask, else the nearest mask pixel on the segment point-other (ring parts)."""
+    """[AUX] `point` if it lies on the mask, else the nearest mask pixel on the segment point-other (ring parts)."""
     H, W = mask.shape
     c, r = int(np.floor(point[0])), int(np.floor(point[1]))
     if 0 <= r < H and 0 <= c < W and mask[r, c]:
@@ -769,7 +868,7 @@ def _snap(point: np.ndarray, other: np.ndarray, mask: np.ndarray) -> np.ndarray:
 
 
 def trajectory_points(ctx: ViewContext, s: int) -> tuple[np.ndarray, np.ndarray]:
-    """(start, end) of the arrow in pixel coordinates: ghost centroid -> part centroid, snapped to the silhouettes."""
+    """[AUX] (start, end) of the trajectory arrow in pixel coordinates: ghost centroid -> part centroid, snapped to the silhouettes."""
     end = ctx.to_pixel(ctx.meshes[s].centroid)
     dx, dy, _ = ctx.shift(ctx.offsets[s])
     start = end + np.array([dx, dy])
@@ -780,6 +879,7 @@ def trajectory_points(ctx: ViewContext, s: int) -> tuple[np.ndarray, np.ndarray]
 
 
 def _draw_gravity(ax, ctx: ViewContext, g) -> None:
+    """[AUX] Draw the gravity pictogram (a circle with an arrow, or a dot / cross if g points along the view) in a corner."""
     from matplotlib.patches import Circle
 
     R = 0.055 * min(ctx.W, ctx.H)
@@ -803,6 +903,7 @@ def _draw_gravity(ax, ctx: ViewContext, g) -> None:
 
 
 def _figure(config: IllustrationConfig):
+    """[AUX] Empty matplotlib figure of the configured image size and dpi."""
     from matplotlib.figure import Figure
 
     W, H = config.image_size
@@ -810,6 +911,7 @@ def _figure(config: IllustrationConfig):
 
 
 def _image_axes(fig, ctx: ViewContext, rgb: np.ndarray):
+    """[AUX] Add the image axes (all but the footer band) to the figure and show the frame image in pixel coordinates."""
     ax = fig.add_axes([0, FOOTER_FRAC, 1, 1 - FOOTER_FRAC])
     ax.imshow(rgb, extent=(0, ctx.W, ctx.H, 0), interpolation="none")
     ax.set_xlim(0, ctx.W)
@@ -820,13 +922,19 @@ def _image_axes(fig, ctx: ViewContext, rgb: np.ndarray):
 
 def draw_step(ctx: ViewContext, steps: list[dict], s: int, choice: dict, lines: list[str],
               config: IllustrationConfig, last: int | None = None):
-    """Matplotlib figure of steps s..last (default s): frame, one trajectory arrow per part, gravity
-    pictogram (of the last step), footnote."""
+    """[MAIN] Matplotlib figure of one frame (steps s..last, default s): image, trajectory arrows, gravity, footnote.
+
+    Inputs: the view context of the chosen view, the steps, the first step index s, the view choice (for the
+    x-ray flag), the footnote lines and the config. Output: a figure ready to save as PNG and add to the PDF.
+    It composes the frame, draws one dashed trajectory arrow per part, the gravity pictogram of the last
+    step, an "x-ray" tag when needed, and the footnote lines (shrunk to fit the page width).
+    """
     last = s if last is None else last
     block = range(s, last + 1)
     fig = _figure(config)
     rgb = compose_frame(ctx, s, config, [bool(steps[k]["is_stander"]) for k in block], choice["xray"], last)
     ax = _image_axes(fig, ctx, rgb)
+    # One dashed trajectory (ghost -> part) with an arrowhead per part of the frame.
     for k in block:
         a, b = trajectory_points(ctx, k)
         ax.plot([a[0], b[0]], [a[1], b[1]], linestyle=(0, (5, 4)), color=TRAJECTORY_COLOR, lw=1.5, zorder=4)
@@ -840,6 +948,7 @@ def draw_step(ctx: ViewContext, steps: list[dict], s: int, choice: dict, lines: 
         _draw_gravity(ax, ctx, steps[last]["gravity"])
     if choice["xray"]:
         ax.text(0.01 * ctx.W, 0.02 * ctx.H, "x-ray", fontsize=8, color="#666666", va="top")
+    # Footnote text in the bottom band; warning lines (hold / re-orient) are red.
     T = STRINGS[config.language]
     gap = 0.28 if len(lines) <= 3 else 0.84 / len(lines)  # more lines (group frames) are packed tighter
     small = 9 if len(lines) <= 3 else 7
@@ -854,7 +963,7 @@ def draw_step(ctx: ViewContext, steps: list[dict], s: int, choice: dict, lines: 
 
 
 def draw_cover(ctx: ViewContext, steps: list[dict], bom: dict, title: str, config: IllustrationConfig):
-    """Cover page: title, number of steps, parts list, final assembly in the global view."""
+    """[AUX] Cover page figure: title, number of steps, parts table (part, stander, tool, group, turns) and the final assembly."""
     T = STRINGS[config.language]
     fig = _figure(config)
     fig.text(0.03, 0.95, title, fontsize=16, weight="bold", va="top")
@@ -893,14 +1002,17 @@ def draw_cover(ctx: ViewContext, steps: list[dict], bom: dict, title: str, confi
 
 @dataclass
 class IllustrationResult:
-    frames: list[dict]  # per step (assembly order): png, view, visibility figures, flags, warnings
-    manual_path: str
-    global_view: tuple[float, float]
-    config_hash: str
-    stats: dict = field(default_factory=dict)
+    """What the illustration stage produced (output of `render_illustrations` / `generate_illustrations`)."""
+
+    frames: list[dict]  # list of dicts, one per frame in assembly order: png path, steps, view, visibility figures, flags, footnote, warnings.
+    manual_path: str  # str. Path of manual.pdf.
+    global_view: tuple[float, float]  # (azimuth, elevation) deg of the global camera.
+    config_hash: str  # str. Hash of the sequence, meshes, BOM columns and config; identifies the cached result.
+    stats: dict = field(default_factory=dict)  # timings and counters (view search, raster, render, ...).
 
 
 def _steps_of(sequence) -> list[dict]:
+    """[AUX] The step dicts of a sequence (an OptimizationResult or a list); ValueError if empty or a component repeats."""
     steps = list(getattr(sequence, "steps", sequence))
     ids = [s["component_id"] for s in steps]
     if len(set(ids)) != len(ids):
@@ -911,6 +1023,7 @@ def _steps_of(sequence) -> list[dict]:
 
 
 def compute_config_hash(steps: list[dict], meshes: list[Mesh], bom: dict, config: IllustrationConfig) -> str:
+    """[SUPP] Cache key of the illustrations: hash of the sequence, mesh keys, BOM tool/group/is_stander and config (without `force`)."""
     cfg = asdict(config)
     cfg.pop("force")
     seq = [[s["component_id"], s["component_label"], bool(s["is_stander"]),
@@ -926,16 +1039,19 @@ def compute_config_hash(steps: list[dict], meshes: list[Mesh], bom: dict, config
 
 
 def _safe(label: str) -> str:
+    """[SUPP] File-name safe version of a label."""
     return re.sub(r"[^A-Za-z0-9_.-]+", "_", label).strip("_") or "part"
 
 
 def _write_json_atomic(path: Path, data) -> None:
+    """[SUPP] Write JSON to a temporary file, then rename it over the target."""
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_text(json.dumps(data, indent=2), encoding="utf-8")
     os.replace(tmp, path)
 
 
 def _load_cached(output_dir: Path, key: str) -> IllustrationResult | None:
+    """[SUPP] Cache function: the saved result if its hash matches and all its PNGs and the PDF still exist, else None."""
     path = output_dir / REPORT_NAME
     if not path.exists():
         return None
@@ -954,7 +1070,7 @@ def _load_cached(output_dir: Path, key: str) -> IllustrationResult | None:
 
 def _cached_views(mesh_list, offsets, config, output_dir: Path, force: bool, stats: dict,
                   blocks: list[tuple[int, int]], is_stander: list[bool]):
-    """select_views, cached on disk keyed by meshes, start offsets, frame blocks, stander flags and search fields."""
+    """[SUPP] Cache function: `select_views`, cached on disk keyed by meshes, start offsets, frame blocks, stander flags and search fields."""
     h = hashlib.sha256(f"v{FRAMES_VERSION};".encode())
     h.update(json.dumps({"meshes": [m.key for m in mesh_list], "offsets": np.round(offsets, 9).tolist(),
                          "blocks": [list(b) for b in blocks], "is_stander": is_stander,
@@ -979,11 +1095,17 @@ def _cached_views(mesh_list, offsets, config, output_dir: Path, force: bool, sta
 def render_illustrations(sequence, meshes: dict[str, Mesh], bom: dict, output_dir: str | Path,
                          config: IllustrationConfig | None = None, title: str = "Assembly",
                          force: bool | None = None) -> IllustrationResult:
-    """PNG per frame + manual PDF from meshes keyed by component_id (no FreeCAD). Cached on disk (spec 8).
+    """[MAIN] Render the PNG of every frame and the manual PDF from meshes keyed by component_id (no FreeCAD).
 
-    One frame per step, except that consecutive steps of the same BOM group share one frame (spec 12).
+    Inputs: the sequence (steps), the meshes {component_id: Mesh}, the BOM {Label: row dict} (columns tool,
+    group, is_stander; missing columns read as blank), the output folder, the config and the manual title.
+    Output: an `IllustrationResult`; files are written to `output_dir`. Cached on disk: a matching
+    result is returned without rendering.
 
-    bom: Label -> row dict (columns tool, group, is_stander; missing columns read as blank).
+    One frame per step, except that consecutive steps of the same BOM group share one frame.
+    Order of work: group the steps into frames, choose the views (global view + per-frame cascade),
+    then for every frame compose the image, draw the arrows, gravity and footnote, save the PNG and add the
+    page to the PDF (the cover page first), and finally write the JSON report.
     """
     from matplotlib.backends.backend_pdf import PdfPages
 
@@ -1005,6 +1127,7 @@ def render_illustrations(sequence, meshes: dict[str, Mesh], bom: dict, output_di
             log.info("Loaded cached illustrations from %s", output_dir)
             return cached
 
+    # View selection (cached separately, it is the slow part).
     t0 = time.perf_counter()
     stats: dict = {}
     blocks = group_blocks(steps, bom, config)
@@ -1012,6 +1135,7 @@ def render_illustrations(sequence, meshes: dict[str, Mesh], bom: dict, output_di
                                   [bool(st["is_stander"]) for st in steps])
     stats["view_search_s"] = time.perf_counter() - t0
 
+    # Rendering at the final resolution: one ViewContext per view actually used.
     t1 = time.perf_counter()
     for old in output_dir.glob("step_*.png"):
         old.unlink()
@@ -1069,6 +1193,7 @@ def render_illustrations(sequence, meshes: dict[str, Mesh], bom: dict, output_di
     stats["render_s"] = time.perf_counter() - t1
     stats["total_s"] = time.perf_counter() - t0
 
+    # Save the report and log the summary.
     result = IllustrationResult(frames, str(manual), glob, key, stats)
     _write_json_atomic(output_dir / REPORT_NAME, {**asdict(result), "config": {
         k: v for k, v in asdict(config).items() if k != "force"}})
@@ -1085,7 +1210,7 @@ def render_illustrations(sequence, meshes: dict[str, Mesh], bom: dict, output_di
 
 
 def read_bom(bom_path) -> dict[str, dict]:
-    """Label -> row (stripped strings). Missing columns (for example `tool`) simply read as blank."""
+    """[AUX] Read the BOM as {Label: row dict} (stripped strings). Missing columns (for example `tool`) simply read as blank."""
     rows = {}
     with open(bom_path, newline="", encoding="utf-8-sig") as f:
         for row in csv.DictReader(f):
@@ -1096,7 +1221,7 @@ def read_bom(bom_path) -> dict[str, dict]:
 
 
 def tessellate_shape(shape, tol: float, mesh_dir: Path | None = None, force: bool = False) -> Mesh:
-    """Mesh of a global-placement shape, cached as .npz keyed by geometry hash and tolerance (spec 5.1)."""
+    """[AUX] Triangle mesh of a global-placement shape, cached as .npz keyed by geometry hash and tolerance."""
     key = hashlib.sha256(f"v{MESH_VERSION};{shape_geometry_hash(shape)};{tol:.9g}".encode()).hexdigest()
     path = None if mesh_dir is None else Path(mesh_dir) / f"{key}.npz"
     if path is not None and path.exists() and not force:
@@ -1119,7 +1244,13 @@ def tessellate_shape(shape, tol: float, mesh_dir: Path | None = None, force: boo
 
 def generate_illustrations(sequence, prep, output_dir: str | Path, config: IllustrationConfig | None = None,
                            force: bool | None = None) -> IllustrationResult:
-    """Pipeline entry: shapes from the Preprocessing documents -> meshes -> frames and manual."""
+    """[MAIN] Pipeline entry point: shapes from the Preprocessing documents -> meshes -> frames and manual.
+
+    Inputs: the sequence (an `OptimizationResult` or step list), the `PreprocessingResult` (shapes, assembly
+    box, BOM path, names), the output folder, the config. Output: an `IllustrationResult`. Gets each
+    component's global shape (`shapes.component_shapes`), tessellates it with a tolerance relative to the
+    assembly diagonal, reads the BOM and calls `render_illustrations`.
+    """
     from shapes import component_shapes
 
     config = config or IllustrationConfig()
@@ -1128,6 +1259,7 @@ def generate_illustrations(sequence, prep, output_dir: str | Path, config: Illus
     steps = _steps_of(sequence)
     output_dir = Path(output_dir)
     shapes = component_shapes([s["component_id"] for s in steps], [s["is_stander"] for s in steps], prep)
+    # Tessellation tolerance from the assembly diagonal (the preprocessing box, or the shapes' own box).
     if prep.assembly_bbox is not None:
         lo, hi = prep.assembly_bbox
         diag = float(np.linalg.norm([hi.x - lo.x, hi.y - lo.y, hi.z - lo.z]))

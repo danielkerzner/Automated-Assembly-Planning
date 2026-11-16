@@ -1,6 +1,6 @@
 """GENERATED FILE -- do not edit; regenerate with make_function_copy.py.
 
-Function copy of the JMS parallel-gripper grasp engine (docs/robotic-gripper_spec.md section 4).
+Function copy of the JMS parallel-gripper grasp engine (made by third_party/jms_grasp/make_function_copy.py).
 Source (read only, never edited): C:/Users/danie/Documents/documentosprincipal/Master Thesis/gripperparallel/Adaptive-In-Orbit-Servicing-of-Altered-Satellite-Components/JMS/main_script_parallel_grasp_valid_assembly.py
 Source repository commit: 13f2b68543c72f31ce5e86258af5d04e86eb7619
 Source file SHA-256: 9d29272f7d9cee62687403f9d2e1301f7ef573a2beb4035f224b6fe0afe3dc57

@@ -1,5 +1,20 @@
 """Draw the robot-mode grasp results as a disassembly tree with thumbnails (AND/OR-graph style).
 
+[SUPP] Visualisation script, not part of the planning pipeline.
+
+Inputs
+    - `<output_dir>/plan.json` written by `main.py --mode robot` (needs its `robot` block).
+    - The STEP file the plan was made from (only for the thumbnails).
+    - Options: `--chosen-only`, `--deflection` (mm, default 1.0), `--save <file>`, `--part-size` (default 0.6).
+Outputs
+    - A matplotlib figure (shown, and written to `--save` if given). Nothing else is written.
+
+How it works
+    `collect` gathers the (state, component) edges of every recorded sequence from plan.json, `layout`
+    places them in rows (one row per number of removed components, children under the barycentre of
+    their parents), `_thumbnail` renders each node's components, and `draw_tree` draws boxes, arrows and
+    score labels.
+
 Reads `<output_dir>/plan.json` (written by `main.py --mode robot`) and the STEP file. Shows the part of the AoG that
 the robot loop explored (the union of every recorded sequence; `--chosen-only` for just the chosen one):
 
@@ -46,6 +61,7 @@ LIGHT = LIGHT / np.linalg.norm(LIGHT)
 
 
 def _meshes(step_path: str, ids: set[str], deflection: float) -> dict:
+    """[AUX] Tessellate the listed components of the STEP at global placement: component id -> (vertices, triangles)."""
     from preprocessing import _global_shape, _leaf_components, load_assembly
 
     doc = load_assembly(step_path)
@@ -59,7 +75,7 @@ def _meshes(step_path: str, ids: set[str], deflection: float) -> dict:
 
 def _thumbnail(meshes: dict, ids: list[str], color, px: int = 140, elev: float = 25, azim: float = -60,
                part_size: float = 1.0) -> np.ndarray:
-    """RGBA image of the given components, Lambert-shaded, autoscaled to them. `part_size` scales the drawn
+    """[AUX] RGBA image of the given components, Lambert-shaded, autoscaled to them. `part_size` scales the drawn
     components inside the (unchanged) image: 1.0 = filling it, 0.6 = 60 % of that, with more empty margin."""
     from matplotlib.backends.backend_agg import FigureCanvasAgg
     from matplotlib.colors import to_rgb
@@ -97,12 +113,18 @@ def _thumbnail(meshes: dict, ids: list[str], color, px: int = 140, elev: float =
 
 
 def _score_color(s):
+    """[AUX] Colour of a grasp score 0..1 on a red -> yellow -> green map."""
     import matplotlib
     return matplotlib.colormaps["RdYlGn"](0.1 + 0.85 * float(np.clip(s, 0, 1)))
 
 
 def collect(plan: dict, chosen_only: bool = False):
-    """(bit -> id, id -> label, stander ids, edges {(S, bit): step json}, chosen edge set)."""
+    """[MAIN] Read the explored AoG edges from plan.json.
+
+    Returns (bit -> id, id -> label, stander ids, edges {(S, bit): step json}, chosen edge set). An edge is
+    (AoG state before the removal, component bit); the last part alone is not an edge (it is the one-component
+    state node). With `chosen_only` only the chosen sequence's edges are kept.
+    """
     lsteps = plan["level"]["steps"]
     bit_of = {s["component_id"]: s["component"] for s in lsteps}
     comp_id = {b: c for c, b in bit_of.items()}
@@ -128,7 +150,7 @@ ROW_GAP = 1.45  # vertical distance between rows
 
 
 def layout(edges: dict, n: int):
-    """Rows of items, ("state", S) or ("part", (S, bit)), and their x positions.
+    """[MAIN] Rows of items, ("state", S) or ("part", (S, bit)), and their x positions.
 
     Each row is a sequence of groups: the parts removed into one sub-assembly, then that sub-assembly. Groups are
     ordered by the mean x of their parents (barycentre) and placed so the sub-assembly sits under its parents where
@@ -171,7 +193,12 @@ def layout(edges: dict, n: int):
 
 def draw_tree(output_dir: str | Path, step_path: str | Path, chosen_only: bool = False, deflection: float = 1.0,
               save: str | None = None, show: bool = True, part_size: float = 0.6):
-    """`part_size`: size of the drawn components inside their (fixed-size) boxes, 1.0 = filling the thumbnail."""
+    """[MAIN] Draw the tree for `<output_dir>/plan.json` and return the figure.
+
+    `part_size`: size of the drawn components inside their (fixed-size) boxes, 1.0 = filling the thumbnail.
+    Order: layout, edges (arrows and score labels) first so they lie underneath, then the node boxes with
+    thumbnails and scores, row numbers and the legend title.
+    """
     import matplotlib.pyplot as plt
     from matplotlib.offsetbox import AnnotationBbox, OffsetImage
     from matplotlib.patches import FancyBboxPatch
@@ -294,6 +321,7 @@ def draw_tree(output_dir: str | Path, step_path: str | Path, chosen_only: bool =
 
 
 def main() -> int:
+    """[AUX] Command line (arguments in the module docstring)."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("output_dir", help="folder with the robot-mode plan.json")
     ap.add_argument("step_path", help="the STEP file the plan was made from")

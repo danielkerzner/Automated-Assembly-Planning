@@ -1,21 +1,39 @@
 """AoG generator: the graph of every feasible single-component disassembly sequence.
 
-Implements docs/aog-spec.md, migrated to the three-class stander model of
-docs/stander_processing-spec.md (section 3). Nodes are sub-assembly states (bitmask over all N
-components, standers included), edges are removal moves carrying every free direction as a
-bitset. The graph is generated iteratively, level by level (level L = L components removed),
-vectorised over all states of a level; each state is expanded exactly once. No geometry calls:
-removal freedom comes from InterferenceResult.free via the composition property; a stander may
-have several removal options (direction, blocker set), a screw's holds must stay present while it
-leaves, and a nut's `nut_rule` orders it against its `partner` (stander or movable) -- all encoded
-as blocker masks (section 3.3), no single gate any more. Travel distances are measured to the
-constant whole-assembly box. States whose components do not form one group through physical
-contacts (parts floating apart) are dropped, with the edges leading to them. Members of one BOM
-group are removed consecutively, in one order per group block (docs/aog-spec.md D12, D13). There
-is no node limit; the only size limit is MAX_COMPONENTS (one uint64 bitmask per state).
+Uses the three-class stander model (screw / nut / other). Phase 2 helpers:
+classify_dead_ends, find_candidate_groups.
 
-`generate_aog` is pure numpy on `AoGInputs`, so tests need no FreeCAD. `collect_inputs` and
-`build_aog` connect it to the pipeline objects.
+Inputs
+    - `InterferenceResult` (Interference Identification): the tensor free[i, j, k] over the movable parts,
+      the candidate directions, the contact graph.
+    - `PreprocessingResult`: the stander records (removal options, holds, nut partners, contacts), the
+      whole-assembly bounding box, the reduced assembly (for component bounding boxes) and the BOM path
+      (for the `group` column). `collect_inputs` packs these into an `AoGInputs`.
+    - An `AoGConfig` (margin and the two BOM-group switches).
+Outputs
+    - An `AoG`: nodes are sub-assembly states, edges are single-component removal moves carrying every free
+      direction, plus the travel distance of each component along each direction, the live/dead-end
+      analysis and statistics. Cached on disk (`aog.npz`, `aog.json`), with CSV and DOT exports for small
+      graphs. Consumed by Optimization (ACO) and, through it, by the Illustration Generator.
+    - Phase 2: `classify_dead_ends` and `find_candidate_groups` tell the per-level orchestration
+      (`levels.py`) which dead ends can be repaired by merging parts into an automatic sub-assembly.
+
+What this module does
+    Nodes are states (a bitmask over all N components, standers included); an edge removes one component
+    and stores the set of directions along which it can leave as a bitset. The graph is generated level by
+    level (level L = L components removed), vectorised over all states of a level, and each state is
+    expanded exactly once. There are no geometry calls: removal freedom comes from InterferenceResult.free
+    through the composition property (a part is free along k in a state iff it is free past every part still
+    present). A stander may have several removal options (direction, blocker set); a screw's holds must stay
+    present while it leaves; a nut's `nut_rule` orders it against its `partner` (stander or movable). All of
+    this is encoded as blocker masks, not as a single gate. Travel distances are measured to
+    the constant whole-assembly box. States whose components do not form one group through physical
+    contacts (parts floating apart) are dropped, with the edges leading to them. Members of one BOM group are
+    removed consecutively, in one order per group block (D12, D13). There is no node limit; the only size
+    limit is MAX_COMPONENTS (one uint64 bitmask per state).
+
+`generate_aog` is pure numpy on `AoGInputs`, so tests need no FreeCAD. `collect_inputs` and `build_aog`
+connect it to the pipeline objects.
 """
 
 from __future__ import annotations
@@ -33,113 +51,131 @@ from typing import Iterator
 
 import numpy as np
 
-# Create a logger for this module
 log = logging.getLogger("aap.aog")
 
-# Define hyperparameters for maximum size of the AoG when Exporting
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DIR_TOL = 1e-6  # direction equality (spec "Direction table")
+DIR_TOL = 1e-6  # tolerance for treating two directions as equal
 AXIS_ZERO = 1e-12  # direction component treated as 0 in the travel model
-EXPORT_MAX_NODES = 500 # Maximum number of nodes
-MAX_COMPONENTS = 64 # Maximum number of components
+EXPORT_MAX_NODES = 500  # CSV/DOT export is written only for graphs up to this many nodes
+MAX_COMPONENTS = 64  # one uint64 bitmask per state
 MAX_DIRECTIONS = 64  # one uint64 word per edge (W = 1)
 
 U64 = np.uint64
 
 
-# Dataclass for the AoG configuration
 @dataclass
 class AoGConfig:
-    margin: float = 1.0  # mm, travel-model clearance (same default as CollisionConfig.margin)
-    # D12: members of one BOM group are removed (so also assembled) consecutively: while a group is
-    # partly removed, only its remaining members may move. Blank group = a group of one.
+    """Settings of the AoG generation (config input of `generate_aog` and `build_aog`)."""
+
+    # float, mm. Clearance added to every travel distance. Same default as CollisionConfig.margin.
+    # Recommended: 1.0.
+    margin: float = 1.0
+    # bool. D12: members of one BOM group are removed (so also assembled) consecutively: while a group is
+    # partly removed, only its remaining members may move. A blank group is a group of one.
+    # Recommended: True.
     group_consecutive: bool = True
-    # D13: one order per group block: of the feasible moves removing members of the same group from a
+    # bool. D13: one order per group block: of the feasible moves removing members of the same group from a
     # state, only the lowest-index member is kept (removes the k! orderings). Needs group_consecutive.
+    # Recommended: True.
     group_one_order: bool = True
 
-# Dataclass for the AoG inputs 
+
 @dataclass
 class AoGInputs:
-    component_ids: list[str]  # movable then standers; obj.Label or stander_id
-    component_labels: list[str] # 
-    n_movable: int # number of movable components (the rest are standers)
-    free: np.ndarray  # (n, n, D) bool from InterferenceResult
-    directions: np.ndarray  # (D, 3) candidates + appended stander directions
-    neg: np.ndarray  # (D,) int64, neg[k] = index of -directions[k] in directions
-    # docs/stander_processing-spec.md section 3.1: bit index -> one entry per RemovalOption,
-    # (unit direction, blocker bit indices -- may include stander bits). 1 entry for a screw/nut,
-    # 2 for a category-3 "other" stander.
+    """Everything `generate_aog` needs, as plain arrays (input). Built by `collect_inputs`, or by hand in tests.
+
+    Component order: the n movable components first, then the standers. A component's position is its bit
+    index in the state masks.
+    """
+
+    component_ids: list[str]  # list of obj.Name, movable then standers.
+    component_labels: list[str]  # list of obj.Label (stander label looked up in the original document); display only.
+    n_movable: int  # int. Number of movable components; the remaining N - n are standers.
+    free: np.ndarray  # (n, n, D) bool, from InterferenceResult.free (movable parts only).
+    directions: np.ndarray  # (D, 3) float, the interference candidate directions (stander directions are appended later).
+    neg: np.ndarray  # (D,) int64, neg[k] = index of -directions[k] in directions.
+    # Bit index -> one entry per RemovalOption: (unit direction,
+    # set of blocker bit indices, which may include stander bits). 1 entry for a screw or nut, 2 for a
+    # category-3 "other" stander. The blockers must already be gone before the stander can leave that way.
     stander_options: dict[int, list[tuple[np.ndarray, set[int]]]]
-    stander_holds: dict[int, set[int]]  # bit index -> movable bit indices that must stay present (screws only)
-    # nut bit index -> (partner bit index, "locked" | "free"); partner may be movable or a stander.
+    stander_holds: dict[int, set[int]]  # bit index -> movable bit indices that must stay present (screws only).
+    # Nut bit index -> (partner bit index, "locked" | "free"); the partner may be movable or a stander.
     nut_links: dict[int, tuple[int, str]]
-    bbox_lo: np.ndarray  # (N, 3) global AABBs of every component, mm (travel model)
-    bbox_hi: np.ndarray  # (N, 3)
-    assembly_lo: np.ndarray  # (3,) Preprocessing's whole-assembly box, all components
-    assembly_hi: np.ndarray  # (3,)
-    cache_key: str  # interference cache_key + stander data hash
-    # (N, N) bool, symmetric: components physically touching (movable-movable from the interference
-    # contact matrix, stander-movable from StanderRecord.contact_neighbors). States whose parts do
-    # not form one connected group are dropped. None = no contact data, rule off (synthetic tests).
+    bbox_lo: np.ndarray  # (N, 3) float, mm. Global AABB minimum of every component (travel model).
+    bbox_hi: np.ndarray  # (N, 3) float, mm. Global AABB maximum of every component.
+    assembly_lo: np.ndarray  # (3,) float, mm. Whole-assembly box minimum, all components (from Preprocessing).
+    assembly_hi: np.ndarray  # (3,) float, mm. Whole-assembly box maximum.
+    cache_key: str  # str. Interference cache key + hash of the stander data; identifies these inputs.
+    # (N, N) bool, symmetric: components physically touching (movable-movable from the interference contact
+    # matrix, stander-movable from StanderRecord.contact_neighbors). States whose parts do not form one
+    # connected group are dropped. None = no contact data, rule off (synthetic tests).
     contact: np.ndarray | None = None
-    # (N,) BOM `group` per component (None = blank or no BOM row: a group of one). None = no group data.
+    # (N,) list of the BOM `group` per component (None entry = blank or no BOM row: a group of one).
+    # None = no group data.
     group: list[str | None] | None = None
-    # Stander bit -> one entry per option, parallel to stander_options[s] (docs/preprocessing-spec.md
-    # P5 screw-travel extension, added 2026-11-05): an override cap on that option's reported travel
-    # distance (D10), or None to keep the bbox-only distance. Screws only; empty/absent = no overrides
-    # anywhere (old behaviour, every existing caller that doesn't know about this field).
+    # Stander bit -> one entry per option, parallel to stander_options[s] (P5 screw-travel extension): a cap
+    # on that option's reported travel distance (D10), or None to keep the bbox-only distance. Screws only;
+    # empty = no overrides anywhere.
     stander_max_travel: dict[int, list[float | None]] = field(default_factory=dict)
 
-# Dataclass for the AoG itself
+
 @dataclass
 class AoG:
-    component_ids: list[str] # movable then standers; obj.Label or stander_id
-    component_labels: list[str]
-    is_stander: np.ndarray  # (N,) boolean array, True for standers
-    directions: np.ndarray  # (D', 3) candidates + appended stander directions
-    neg: np.ndarray  # neg[k] = index of -directions[k] in directions
-    node_mask: np.ndarray  # (V,) uint64, sorted within each level; node id = index
-    node_level: np.ndarray  # (V,) int8, components removed so far
-    level_offsets: np.ndarray  # (N+2,) first node id of each level; [N+1] = V
-    edge_src: np.ndarray  # (E,) int32, source node id
-    edge_dst: np.ndarray  # (E,) int32, destination node id
-    edge_comp: np.ndarray  # (E,) int8, the component removed (bit index)
-    edge_dirs: np.ndarray  # (E, W) uint64, bitset over `directions`: all free directions
-    out_ptr: np.ndarray  # (V+1,) CSR offsets (edges sorted by src, then comp)
-    live: np.ndarray  # (V,) bool, node can reach the terminal
-    dead_ends: np.ndarray  # node ids: non-terminal, no out-edge
-    complete: bool  # root is live
-    root: int # number of the root node (all components present)
-    terminal: int | None # number of the terminal node (all components removed), or None if not present
-    travel: np.ndarray  # (N, D') float, mm: travel[c, k], constant per component and direction
-    config: AoGConfig
-    stats: dict
-    cache_key: str # Cache variables
-    component_groups: list[str | None] | None = None  # BOM group per component (as in AoGInputs.group)
-    _in_order: np.ndarray | None = field(default=None, repr=False, compare=False)
-    _in_ptr: np.ndarray | None = field(default=None, repr=False, compare=False)
+    """The generated graph (output of `generate_aog`, input of Optimization and of the Phase 2 helpers).
 
-    # Properties of the AoG
+    Nodes are numbered level by level (level L = L components removed), sorted by mask within a level;
+    the root (all components present) is node 0 and the terminal (nothing left) the last node, if reached.
+    Edges are stored in arrays sorted by source node, then by component (CSR layout via `out_ptr`).
+    """
+
+    component_ids: list[str]  # movable then standers (same order as AoGInputs).
+    component_labels: list[str]  # display labels.
+    is_stander: np.ndarray  # (N,) bool, True for standers.
+    directions: np.ndarray  # (D', 3) float; interference candidates plus appended stander directions.
+    neg: np.ndarray  # (D',) int; neg[k] = index of -directions[k] in directions.
+    node_mask: np.ndarray  # (V,) uint64; bit c set = component c still present. Node id = index.
+    node_level: np.ndarray  # (V,) int8; number of components removed so far.
+    level_offsets: np.ndarray  # (N+2,) int64; first node id of each level, [N+1] = V.
+    edge_src: np.ndarray  # (E,) int32; source node id of each edge.
+    edge_dst: np.ndarray  # (E,) int32; destination node id.
+    edge_comp: np.ndarray  # (E,) int8; the component removed by the edge (bit index).
+    edge_dirs: np.ndarray  # (E, W) uint64; bitset over `directions`: every free direction of the edge.
+    out_ptr: np.ndarray  # (V+1,) int64; CSR offsets, out-edges of v are out_ptr[v]..out_ptr[v+1].
+    live: np.ndarray  # (V,) bool; the node can reach the terminal (a full disassembly exists from it).
+    dead_ends: np.ndarray  # (k,) int64; node ids that are non-terminal and have no out-edge.
+    complete: bool  # bool. The root is live: at least one full sequence exists.
+    root: int  # int. Node id of the root (all components present), always 0.
+    terminal: int | None  # int or None. Node id of the fully disassembled state, None if never reached.
+    travel: np.ndarray  # (N, D') float, mm; travel[c, k] = distance c must move along direction k to clear the assembly.
+    config: AoGConfig  # the settings used.
+    stats: dict  # sizes, timings and rule counters (logged and saved to JSON).
+    cache_key: str  # key identifying the inputs and config, for the cache.
+    component_groups: list[str | None] | None = None  # BOM group per component (as in AoGInputs.group).
+    _in_order: np.ndarray | None = field(default=None, repr=False, compare=False)  # lazy in-edge index (see in_edges)
+    _in_ptr: np.ndarray | None = field(default=None, repr=False, compare=False)  # lazy in-edge offsets
+
     @property
     def n_components(self) -> int:
+        """[AUX] Number of components N (movable plus standers)."""
         return len(self.component_ids)
 
     @property
     def n_nodes(self) -> int:
+        """[AUX] Number of nodes V."""
         return len(self.node_mask)
 
     @property
     def n_edges(self) -> int:
+        """[AUX] Number of edges E."""
         return len(self.edge_src)
 
-    # Queries for the AoG structure
+    # Queries on the graph structure.
     def out_edges(self, v: int) -> range:
-        """Edge ids of all out-edges from node v, in the order of edge_src then edge_comp."""
+        """[AUX] Edge ids of all out-edges from node v, in the order of edge_src then edge_comp."""
         return range(int(self.out_ptr[v]), int(self.out_ptr[v + 1]))
 
     def in_edges(self, v: int) -> np.ndarray:
-        """Edge ids of all in-edges to node v, in the order of edge_dst then edge_comp."""
+        """[AUX] Edge ids of all in-edges to node v. The in-edge index is built on first use and kept."""
         if self._in_order is None:
             self._in_order = np.argsort(self.edge_dst, kind="stable").astype(np.int64)
             counts = np.bincount(self.edge_dst, minlength=self.n_nodes)
@@ -147,25 +183,25 @@ class AoG:
         return self._in_order[self._in_ptr[v]:self._in_ptr[v + 1]]
 
     def edge_direction_indices(self, e: int) -> np.ndarray:
-        """Indices of directions for the given edge."""
+        """[AUX] Indices k into `directions` of every free direction of edge e (decoded from the bitset)."""
         return _bitset_indices(self.edge_dirs[e], len(self.directions))
 
     def state_components(self, v: int) -> list[int]:
-        """Component ids of all components in the state of node v."""
+        """[AUX] Indices of the components still present in the state of node v."""
         mask = int(self.node_mask[v])
         return [c for c in range(self.n_components) if (mask >> c) & 1]
 
     def edge_distances(self, e: int) -> np.ndarray:
-        """Distances along the free directions of edge e, in the same order as edge_direction_indices(e)."""
+        """[AUX] Travel distances along the free directions of edge e, in the order of edge_direction_indices(e)."""
         return self.travel[int(self.edge_comp[e]), self.edge_direction_indices(e)]
 
     def edge_displacements(self, e: int) -> np.ndarray:
-        """Displacements along the free directions of edge e, in the same order as edge_direction_indices(e)."""
+        """[AUX] Displacement vectors (distance x direction) of edge e, in the order of edge_direction_indices(e)."""
         ks = self.edge_direction_indices(e)
         return self.travel[int(self.edge_comp[e]), ks][:, None] * self.directions[ks]
 
     def hyperarcs(self, v: int) -> Iterator[tuple[int, frozenset[int]]]:
-        """AND/OR view: (edge id, {child sub-assembly masks}) for every AND-arc out of v.
+        """[AUX] AND/OR view: (edge id, {child sub-assembly masks}) for every AND-arc out of v.
 
         Each arc splits the sub-assembly node_mask[v] into the remaining state and the trivial
         single-part child (the removed component), both given as component bitmasks.
@@ -174,10 +210,10 @@ class AoG:
             c = int(self.edge_comp[e])
             yield e, frozenset({int(self.node_mask[self.edge_dst[e]]), 1 << c})
 
-    # Queries for disassembly/assembly sequences.
+    # Queries that turn an edge path into disassembly / assembly sequences.
 
     def _check_path(self, edge_path) -> list[int]:
-        """Check that the given edge path is a valid connected path from the root, and return it as a list of ints."""
+        """[AUX] Check that `edge_path` is a connected path starting at the root; return it as a list of ints."""
         path = [int(e) for e in edge_path]
         node = self.root
         for e in path:
@@ -187,7 +223,7 @@ class AoG:
         return path
 
     def _step(self, e: int, c: int, ks: np.ndarray) -> dict:
-        """Return a dict describing the removal of component c along directions[ks] via edge e."""
+        """[AUX] Dict describing the removal of component c along directions[ks] via edge e (ids, directions, distances)."""
         return {
             "edge": e,
             "component": c,
@@ -203,7 +239,7 @@ class AoG:
         }
 
     def sequence(self, edge_path) -> list[dict]:
-        """Removal steps in disassembly order, each with all free directions of its edge."""
+        """[AUX] Removal steps in disassembly order for an edge path, each with all free directions of its edge."""
         steps = []
         for i, e in enumerate(self._check_path(edge_path)):
             step = self._step(e, int(self.edge_comp[e]), self.edge_direction_indices(e))
@@ -212,7 +248,7 @@ class AoG:
         return steps
 
     def assembly_sequence(self, edge_path) -> list[dict]:
-        """The path reversed as assembly steps; insertion directions are neg[removal direction].
+        """[AUX] The path reversed as assembly steps; insertion directions are neg[removal direction].
 
         `start_offsets` = travel * removal direction: the component starts at final position +
         offset (outside the whole-assembly box) and moves along the insertion direction.
@@ -229,8 +265,8 @@ class AoG:
             steps.append(step)
         return steps
 
-    # Conversion to NetworkX for vizualisation (optional dependency).
     def to_networkx(self):
+        """[SUPP] Convert the graph to a networkx DiGraph for visualisation (optional dependency)."""
         import networkx as nx  # optional dependency
 
         g = nx.DiGraph()
@@ -246,11 +282,13 @@ class AoG:
         return g
 
 
-# Auxiliary functions for AoG generation and pipeline integration.
+# ---------------------------------------------------------------------------------------------------
+# Auxiliary functions for AoG generation
+# ---------------------------------------------------------------------------------------------------
 
 
 def _bitset_indices(words: np.ndarray, n_bits: int) -> np.ndarray:
-    """Return the indices of the bits set in a bitset represented as an array of uint64 words."""
+    """[AUX] Indices of the bits set in a bitset stored as uint64 words (bits >= n_bits are ignored)."""
     ks = []
     for w, word in enumerate(np.atleast_1d(words)):
         word = int(word)
@@ -259,7 +297,7 @@ def _bitset_indices(words: np.ndarray, n_bits: int) -> np.ndarray:
 
 
 def _unit(v) -> np.ndarray:
-    """Return a unit vector in the direction of v."""
+    """[AUX] Unit vector in the direction of v (ValueError for a zero vector)."""
     v = np.asarray(v, dtype=float)
     norm = np.linalg.norm(v)
     if norm == 0:
@@ -271,13 +309,12 @@ def extend_directions(
     directions: np.ndarray, neg: np.ndarray,
     stander_options: dict[int, list[tuple[np.ndarray, set[int]]]],
 ) -> tuple[np.ndarray, np.ndarray, dict[int, list[int]]]:
-    """Candidate directions extended with every stander option's direction (spec
-    "Direction table" / docs/stander_processing-spec.md 3.2).
+    """[AUX] Extend the candidate directions with every stander option's direction.
 
-    A direction equal to an existing entry (|d - e| < 1e-6) reuses its index; otherwise d and -d
-    are appended (-d only if absent) and `neg` extended. Returns (dirs', neg', {s: [k_opt0, ...]}),
-    one column index per option, in the same order as `stander_options[s]` (so a category-3
-    stander with two options gets two columns).
+    A direction equal to an existing entry (|d - e| < DIR_TOL) reuses its index; otherwise d and -d are
+    appended (-d only if absent) and `neg` is extended. Returns (dirs', neg', {s: [k_opt0, ...]}): one
+    column index per option, in the order of `stander_options[s]` (a category-3 stander with two options
+    gets two columns). This puts stander moves in the same direction table as the movable parts.
     """
     dirs = [np.asarray(d, dtype=float) for d in directions]
     neg_list = [int(x) for x in neg]
@@ -319,8 +356,13 @@ def compute_travel_table(
     directions: np.ndarray,
     margin: float,
 ) -> np.ndarray:
-    """travel[c, k]: distance c must move along directions[k] for its AABB to leave the fixed
-    whole-assembly box B, plus `margin` (spec "Travel model"). Always >= margin."""
+    """[AUX] travel[c, k]: distance component c must move along directions[k] for its AABB to leave the box.
+
+    The box is the fixed whole-assembly box B; `margin` is added, so every value is
+    >= margin. Vectorised slab method over all components and directions at once: for each axis the
+    interval of travel during which the moving box overlaps B is found, and the exit is the end of the
+    intersection of the three intervals.
+    """
     lo = np.asarray(bbox_lo, dtype=float)[:, None, :]  # (N, 1, 3)
     hi = np.asarray(bbox_hi, dtype=float)[:, None, :]
     b_lo = np.asarray(assembly_lo, dtype=float)[None, None, :]
@@ -341,7 +383,7 @@ def compute_travel_table(
 
 
 def _mask_of(bits) -> int:
-    """Return a bitmask with the given bit indices set."""
+    """[AUX] Python int bitmask with the given bit indices set."""
     m = 0
     for b in bits:
         m |= 1 << int(b)
@@ -349,7 +391,7 @@ def _mask_of(bits) -> int:
 
 
 def connected_states(masks: np.ndarray, adj: np.ndarray) -> np.ndarray:
-    """For each state mask, True if its components form one group through contacts.
+    """[AUX] For each state mask, True if its components form one group through contacts.
 
     Vectorised flood fill: start from the lowest present bit, repeatedly add the present contact
     neighbours of everything reached. `adj[c]` = bitmask of the components touching c. The empty
@@ -369,9 +411,8 @@ def connected_states(masks: np.ndarray, adj: np.ndarray) -> np.ndarray:
 
 
 def compute_cache_key(inputs: AoGInputs, config: AoGConfig) -> str:
-    """Cache key for AoG generation, including the interference cache_key and the stander data
-    (docs/stander_processing-spec.md 3.7: options, holds, nut links -- not the removed
-    stander_dir/stander_gate)."""
+    """[SUPP] Cache key of the AoG: SHA-256 over the inputs (free tensor, directions, stander options, holds,
+    nut links, boxes, contacts, groups) and the config."""
     h = hashlib.sha256()
     h.update(b"inputs:" + inputs.cache_key.encode())
     h.update(("ids:" + "|".join(inputs.component_ids)).encode())
@@ -402,40 +443,55 @@ def compute_cache_key(inputs: AoGInputs, config: AoGConfig) -> str:
     return h.hexdigest()
 
 
-# Main AoG generation function, pure numpy, no geometry calls. Returns an AoG dataclass.
+# ---------------------------------------------------------------------------------------------------
+# Main function: AoG generation
+# ---------------------------------------------------------------------------------------------------
+
 def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
-    """Build the AoG from `inputs` (pure numpy, no geometry calls)."""
+    """[MAIN] Build the AoG from `inputs` (pure numpy, no geometry calls).
+
+    Input: an `AoGInputs` (movable parts first, then standers) and an `AoGConfig`.
+    Output: an `AoG` with all reachable states, the removal edges with their free directions, the travel
+    table, the live nodes (those that can reach the fully disassembled state) and the dead ends.
+
+    Method: a state is a bitmask of the components still present. For a movable part c in state S, the
+    bit k of its direction set is 1 iff no part present in S blocks it along k, i.e. (S & blocker_mask[c, k])
+    == 0; a stander has one blocker mask per removal option. Every move c -> S without c is kept only if the
+    resulting state is valid (screw holds present, parts still connected, BOM group order respected). Each
+    level of the graph is the set of unique resulting states of the previous level. Finally the live nodes
+    are found by propagating reachability of the terminal backwards, and the dead ends are the non-terminal
+    nodes without out-edge.
+    """
     config = config or AoGConfig()
     t0 = time.perf_counter()
 
-    # Check inputs to make sure it does not exceed the maximum number of components 
-    # and that the shapes of the arrays are correct.
+    # Input checks: size limits, array shapes and one options entry per stander.
     N, n = len(inputs.component_ids), inputs.n_movable
-    if N > MAX_COMPONENTS: # Component limit check
+    if N > MAX_COMPONENTS:  # Component limit check
         raise ValueError(f"AoG supports at most {MAX_COMPONENTS} components, got {N}")
-    if N == 0: # No components check
+    if N == 0:  # No components check
         raise ValueError("AoG needs at least one component")
     free = np.asarray(inputs.free, dtype=bool)
     D = len(inputs.directions)
-    if free.shape != (n, n, D): # Check that the free array has the correct shape
+    if free.shape != (n, n, D):  # Check that the free array has the correct shape
         raise ValueError(f"free has shape {free.shape}, expected {(n, n, D)}")
     standers = list(range(n, N))
     if set(inputs.stander_options) != set(standers):  # one options entry per stander bit
         raise ValueError(f"stander_options must have one entry per stander bit {standers}")
 
+    # Direction table: interference directions plus the directions of the stander options.
     dirs, neg, kd = extend_directions(inputs.directions, inputs.neg, inputs.stander_options)
     Dp = len(dirs)
-    if Dp > MAX_DIRECTIONS: # Check that the number of directions does not exceed the maximum allowed
+    if Dp > MAX_DIRECTIONS:  # Check that the number of directions does not exceed the maximum allowed
         raise ValueError(f"D' = {Dp} directions exceeds {MAX_DIRECTIONS} (one uint64 word per edge)")
 
+    # Blocker mask of each movable part and direction: the parts that block it along that direction.
     bm = np.zeros((n, D), dtype=U64)
-    # Build a bitmask for each movable component and direction, indicating which other
-    # components block its movement in that direction.
     for i in range(n):
         for k in range(D):
             bm[i, k] = U64(_mask_of(j for j in range(n) if j != i and not free[i, j, k]))
 
-    # docs/stander_processing-spec.md 3.3: blocker masks replace the old single gate.
+    # Blocker masks replace the old single gate.
     # blockmask[s][o] = components that must be gone before stander s may leave via option o
     # (may include stander bits, category 3/P11). holdmask[s] = movable components that must stay
     # present while s leaves (screws only, P6).
@@ -506,9 +562,9 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
     one_order = use_groups and config.group_one_order
 
     # A state T is valid only if every stander still present in it has all of its holds present
-    # too (docs/stander_processing-spec.md 3.4): a screw's hold cannot have legally left while the
+    # too: a screw's hold cannot have legally left while the
     # screw is still there, on any path, so such a T is unreachable and must be filtered out
-    # regardless of which edge led to it (same role the old gate check played for every stander).
+    # regardless of which edge led to it.
     def valid(T: np.ndarray) -> np.ndarray:
         ok = np.ones(len(T), dtype=bool)
         for s in standers:
@@ -519,7 +575,8 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
             ok &= ~present | ((T & hm) == hm)
         return ok
 
-    # Variables for the iterative generation of the AoG
+    # Iterative generation: `level` holds the unique states of the current level (starting with the root,
+    # all components present); each loop builds the next level.
     full = (1 << N) - 1
     level = np.array([full], dtype=U64)
     node_chunks = [level]
@@ -529,8 +586,7 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
     dropped_per_level = [0]
     order_pruned = 0
 
-    # For each level of the AoG (number of compoents), generate the next level by removing one component 
-    # at a time and checking if the resulting state is valid.
+    # For each level (L components removed), expand every state once by removing one present component.
     for L in range(N):
         S = level
         srcs, comps, dirsets, dsts = [], [], [], []
@@ -541,13 +597,12 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
             for g in gmasks:
                 part = S & g
                 block |= np.where((part != 0) & (part != g), g, U64(0))
-        # For each component, check if it is present in the current state and 
-        # if it can be removed (i.e., if the resulting state is valid). 
-        # If so, add the resulting state to the next level.
+        # Try to remove each component c from every state of the level, vectorised over the states.
         for c in range(N):
             bit = U64(1 << c)
             present = (S & bit) != 0
             if c < n:
+                # Movable part: direction k is free in S iff no blocker of (c, k) is still present.
                 ds = np.zeros(len(S), dtype=U64)
                 for k in range(D):
                     ds |= ((S & bm[c, k]) == 0).astype(U64) << U64(k)  # bm already folds in extra[c]
@@ -572,11 +627,11 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
                 comps.append(np.full(len(idx), c, dtype=np.int8))
                 dirsets.append(ds[idx])
                 dsts.append(T[idx])
-        # If no valid next states were found, break the loop.
+        # No valid move from any state: the graph ends here.
         if not srcs:
             break
 
-        # Concatenate the results from all components and deduplicate the resulting states to form the next level.
+        # Merge the moves of all components and deduplicate the resulting states: they form the next level.
         src_local = np.concatenate(srcs)
         comp = np.concatenate(comps)
         dset = np.concatenate(dirsets)
@@ -615,7 +670,7 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
         if not len(nxt):
             break
 
-        # Compute the offsets for the next level and store the edges and nodes for the current level.
+        # Store this level's edges (with global node ids) and the new level's nodes.
         next_offset = offset + len(S)
         dst = np.searchsorted(nxt, dst_mask).astype(np.int64) + next_offset
         order = np.lexsort((comp, src_local))
@@ -625,15 +680,15 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
         level_sizes.append(len(nxt))
         offset = next_offset
         level = nxt
-    
-    # Concatenate the node chunks to form the final node mask and compute the level offsets and node levels.
+
+    # Assemble the node arrays: masks, level offsets and the level of every node.
     node_mask = np.concatenate(node_chunks).astype(U64)
     V = len(node_mask)
     sizes = level_sizes + [0] * (N + 1 - len(level_sizes))
     level_offsets = np.concatenate(([0], np.cumsum(sizes))).astype(np.int64)  # (N+2,)
     node_level = np.repeat(np.arange(N + 1, dtype=np.int8), sizes)
 
-    # Concatenate the edge chunks to form the final edge arrays, or create empty arrays if there are no edges.
+    # Assemble the edge arrays (empty arrays if no edge exists) and the CSR offsets.
     if edge_chunks:
         edge_src = np.concatenate([ch[0] for ch in edge_chunks])
         edge_dst = np.concatenate([ch[1] for ch in edge_chunks])
@@ -645,11 +700,12 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
         edge_comp = np.zeros(0, dtype=np.int8)
         edge_dirs = np.zeros((0, 1), dtype=U64)
     out_ptr = np.concatenate(([0], np.cumsum(np.bincount(edge_src, minlength=V)))).astype(np.int64)
-    
+
     root = 0
     terminal = V - 1 if int(node_mask[-1]) == 0 else None
 
-    # Compute the live nodes by propagating the reachability from the terminal node backwards through the graph.
+    # Live nodes: propagate "can reach the terminal" backwards, level by level. Dead ends are non-terminal
+    # nodes with no out-edge.
     live = np.zeros(V, dtype=bool)
     if terminal is not None:
         live[terminal] = True
@@ -660,21 +716,20 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
     has_out = out_ptr[1:] > out_ptr[:-1]
     dead_ends = np.flatnonzero((node_mask != 0) & ~has_out).astype(np.int64)
 
-    # Compute the travel table for all components and directions, which gives the distance
-    # each component must move along each direction to leave the assembly bounding box, plus a margin.
+    # Travel table: the distance each component must move along each direction to leave the assembly box,
+    # plus the margin.
     travel = compute_travel_table(inputs.bbox_lo, inputs.bbox_hi, inputs.assembly_lo,
                                   inputs.assembly_hi, dirs, config.margin)
-    # docs/preprocessing-spec.md P5 screw-travel extension (2026-11-05): a stander option with a
-    # max_travel override is reported as whichever is shorter, that cap or the bbox-based distance
-    # above (min(), not a replacement -- the override was computed against Preprocessing's own
-    # bbox-exit formula, which can differ slightly from compute_travel_table's fuller one).
+    # P5 screw-travel extension: a stander option with a max_travel override is reported as whichever
+    # is shorter, that cap or the bbox-based distance above (min(), not a replacement -- the override was
+    # computed against Preprocessing's own bbox-exit formula, which can differ slightly from this one).
     for s, caps in inputs.stander_max_travel.items():
         for o, cap in enumerate(caps):
             if cap is not None:
                 col = kd[s][o]
                 travel[s, col] = min(travel[s, col], cap)
 
-    # Create the AoG dataclass with all the computed information and return it.
+    # Pack everything into the AoG dataclass and record the statistics.
     aog = AoG(
         component_ids=list(inputs.component_ids),
         component_labels=list(inputs.component_labels),
@@ -716,30 +771,30 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
 
 
 # ---------------------------------------------------------------------------
-# Phase 2 (docs/subassembly-spec.md section 10): dead-end classification and candidate groups.
+# Phase 2: dead-end classification and candidate groups.
 # Pure numpy/Python, no geometry calls -- built on InterferenceResult's own query methods
 # (removable, blockers), which already implement exactly "interf.removable(S's movable members)"
-# and "i is blocked by j along k" from the spec's wording.
+# and "i is blocked by j along k" from the usual wording.
 # ---------------------------------------------------------------------------
 
 
 def classify_dead_ends(aog: AoG, interf) -> dict[int, str]:
-    """Classify each node in `aog.dead_ends` as "blocking" or "rule_induced" (spec section 10).
+    """[MAIN] Classify each dead-end node of `aog` as "blocking" or "rule_induced".
 
-    "blocking": `interf.removable(movable members present)` is empty -- no movable, non-stander
-    component present in the state has any free direction at all, judged purely from the raw
-    interference tensor -- no gates, no D11 (no-floating-parts), no D12/D13 (BOM group ordering).
-    Only blocking dead ends are candidates for a Phase 2 merge.
+    Input: the AoG and the `InterferenceResult` it was built from. Output: {node id: "blocking" |
+    "rule_induced"}. Only blocking dead ends can be repaired by a Phase 2 merge, so `levels.py` uses this to
+    decide whether merging is worth trying.
 
-    "rule_induced": otherwise -- some present part had a geometrically available move (a movable
-    component with at least one free direction, or any present stander, whose own direction is
-    always nominally free in this model and only ever fails on its gate) but every resulting state
-    was filtered out by a stander gate, D11, or a D12/D13 group-ordering rule. Standers never make
-    a dead end "blocking" by themselves: they are not in the interference tensor, so their presence
-    (with an unsatisfiable gate) is rule-induced, not blocking, even when every movable part present
-    is also fully blocked -- a merge cannot free a stander stuck only on its gate. A state with no
-    movable members present at all (an all-stander dead end, e.g. a stander-gate cycle) is also
-    "rule_induced": there is no movable group for Phase 2 to merge.
+    "blocking": `interf.removable(movable members present)` is empty, i.e. no movable component present in
+    the state has any free direction, judged purely on the raw interference tensor (no stander blockers,
+    no connectivity rule, no BOM group ordering).
+    "rule_induced": otherwise. Some present part had a geometrically available move (a movable part with a
+    free direction, or any present stander), but every resulting state was filtered out by a stander
+    blocker/hold rule, the connectivity rule or a D12/D13 group-ordering rule. A stander never makes a dead
+    end "blocking" by itself: standers are not in the interference tensor, so a stander stuck on its
+    blockers is rule-induced even if every movable part present is also fully blocked (a merge cannot free
+    it). A state with no movable members at all (an all-stander dead end) is also "rule_induced": there is
+    no movable group for Phase 2 to merge.
     """
     n = len(interf.component_ids)
     kinds: dict[int, str] = {}
@@ -752,13 +807,18 @@ def classify_dead_ends(aog: AoG, interf) -> dict[int, str]:
 
 
 def find_candidate_groups(aog: AoG, interf, node_id: int) -> list[dict]:
-    """Candidate rigid-body groups for one blocking dead end (spec section 10): for direction k,
-    `closure_k(i)` is everything reachable from movable component i through "i is blocked by j"
-    edges (`interf.blockers(i, k, movable_present)`). By construction, nothing outside a closure
-    blocks anything inside it, so every closure with 2 <= |A| < (movable members present) is
-    automatically a valid group that could leave together along k -- no separate check needed.
-    Returns one entry per unique (direction, group), as {"direction": k, "members": [indices]}
-    (indices into `interf.component_ids`, i.e. the same space as `aog.state_components`)."""
+    """[MAIN] Candidate rigid-body groups for one blocking dead end.
+
+    Input: the AoG, the `InterferenceResult` and a dead-end node id. Output: one entry per unique
+    (direction, group), as {"direction": k, "members": [indices]}, with indices into
+    `interf.component_ids` (the same space as `aog.state_components`).
+
+    Method: for direction k, closure_k(i) is everything reachable from movable component i through "i is
+    blocked by j" edges (`interf.blockers(i, k, movable_present)`). By construction nothing outside a
+    closure blocks anything inside it, so every closure with 2 <= |A| < (movable members present) is
+    automatically a valid group that could leave together along k, with no separate check. The caller
+    (`levels.py`) then picks the winner among these candidates.
+    """
     n = len(interf.component_ids)
     D = len(interf.directions)
     S = int(aog.node_mask[node_id])
@@ -768,6 +828,7 @@ def find_candidate_groups(aog: AoG, interf, node_id: int) -> list[dict]:
     out: list[dict] = []
     for k in range(D):
         for c in movable_present:
+            # Grow the closure of c along k: add every part that blocks a member, until nothing new appears.
             A = {c}
             frontier = set(interf.blockers(c, k, movable_present))
             while frontier - A:
@@ -783,20 +844,25 @@ def find_candidate_groups(aog: AoG, interf, node_id: int) -> list[dict]:
 
 
 def _array_bytes(aog: AoG) -> int:
-    """Return the total number of bytes used by the numpy arrays in the AoG dataclass."""
+    """[SUPP] Total bytes of the AoG's numpy arrays (for the statistics)."""
     return int(sum(getattr(aog, name).nbytes for name in _ARRAY_FIELDS))
 
 
-# Functions for adapting to pipeline objects (PreprocessingResult, InterferenceResult) and FreeCAD.
+# ---------------------------------------------------------------------------------------------------
+# Adapters from the pipeline objects (PreprocessingResult, InterferenceResult) and FreeCAD
+# ---------------------------------------------------------------------------------------------------
 
 def _vec3(v) -> list[float]:
-    """Convert a 3D vector to a list of floats, handling FreeCAD.Vector if present."""
+    """[AUX] Convert a 3-vector (sequence or FreeCAD.Vector) to a list of three floats."""
     return [float(v[0]), float(v[1]), float(v[2])] if not hasattr(v, "x") else [v.x, v.y, v.z]
 
 
 def _stander_label(prep, stander_id: str) -> str:
-    """obj.Label of a stander. The original document is not on PreprocessingResult, so look it up
-    by name (run_preprocessing names the reduced doc '<doc>_reduced'); fall back to the ID."""
+    """[AUX] obj.Label of a stander (display only; falls back to the id).
+
+    The original document is not on PreprocessingResult, so it is looked up by name
+    (run_preprocessing names the reduced doc '<doc>_reduced').
+    """
     try:
         import FreeCAD
 
@@ -811,8 +877,11 @@ def _stander_label(prep, stander_id: str) -> str:
 
 
 def read_bom_groups(bom_path, labels: list[str]) -> list[str | None] | None:
-    """BOM `group` per label (rows matched on Label, as in Optimization). Blank or no row -> None
-    (a group of one). Returns None when there is no BOM or it has no `group` column."""
+    """[AUX] BOM `group` value for each label (rows matched on Label, as in Optimization).
+
+    A blank group or a missing row gives None (a group of one). Returns None when there is no BOM file or
+    it has no `group` column.
+    """
     if bom_path is None or not Path(bom_path).exists():
         return None
     with open(bom_path, newline="", encoding="utf-8-sig") as f:
@@ -829,16 +898,21 @@ def read_bom_groups(bom_path, labels: list[str]) -> list[str | None] | None:
 
 
 def collect_inputs(interference_result, prep, config: AoGConfig | None = None) -> AoGInputs:
-    """Build AoGInputs from InterferenceResult + PreprocessingResult (bounding boxes only).
+    """[MAIN] Build an `AoGInputs` from an InterferenceResult and a PreprocessingResult.
 
-    docs/stander_processing-spec.md 3.1: `options`/`blockers` come from `rec.options` (names
-    mapped to indices over movable+stander space -- a blocker may itself be a stander, P5/P11),
-    `holds` from `rec.holds` (movable-only, P6), `nut_links` from `rec.partner`/`rec.nut_rule`.
+    This is where the stander model meets the graph: stander names are
+    mapped to bit indices over movable-then-stander space (a blocker may itself be a stander, P5/P11);
+    `options`/`blockers` come from `rec.options`, `holds` from `rec.holds` (movable only, P6), `nut_links`
+    from `rec.partner`/`rec.nut_rule`; the contact matrix is extended with the stander contacts
+    (`rec.contact_neighbors`, P10); component boxes come from the reduced assembly and the stander
+    records. A hash of all stander data is folded into the cache key. Raises ValueError if the inputs are
+    inconsistent (unknown blockers, missing bbox or contact matrix).
     """
     config = config or AoGConfig()
     if prep.assembly_bbox is None:
         raise ValueError("PreprocessingResult.assembly_bbox is missing; re-run Preprocessing")
 
+    # Component order and labels: movable parts (interference order), then standers (sorted by id).
     movable = list(interference_result.component_ids)
     index = {cid: i for i, cid in enumerate(movable)}
     stander_ids = sorted(prep.stander_records)
@@ -847,6 +921,7 @@ def collect_inputs(interference_result, prep, config: AoGConfig | None = None) -
     index_all = {cid: i for i, cid in enumerate(ids)}
     labels = list(interference_result.component_labels) + [_stander_label(prep, s) for s in stander_ids]
 
+    # Bounding boxes of the movable parts (the reduced document stores global shapes).
     bbox_lo, bbox_hi = [], []
     for cid in movable:
         obj = prep.reduced_assembly.getObject(cid)
@@ -856,6 +931,7 @@ def collect_inputs(interference_result, prep, config: AoGConfig | None = None) -
         bbox_lo.append([bb.XMin, bb.YMin, bb.ZMin])
         bbox_hi.append([bb.XMax, bb.YMax, bb.ZMax])
 
+    # Contact matrix: movable-movable block from the interference result; stander rows are added below.
     if getattr(interference_result, "contact", None) is None:
         raise ValueError("InterferenceResult has no contact matrix; re-run identify_interferences")
     N = len(ids)
@@ -872,6 +948,7 @@ def collect_inputs(interference_result, prep, config: AoGConfig | None = None) -
         if rec.bbox is None:
             raise ValueError(f"StanderRecord {sid} has no bbox; re-run Preprocessing")
 
+        # Removal options: direction and blocker bits (names mapped to indices).
         options = []
         for opt in rec.options:
             unknown = set(opt.blockers) - set(index_all)
@@ -882,12 +959,14 @@ def collect_inputs(interference_result, prep, config: AoGConfig | None = None) -
         stander_options[b] = options
         stander_max_travel[b] = [getattr(opt, "max_travel", None) for opt in rec.options]
 
+        # Holds (movable only).
         unknown_holds = set(rec.holds) - set(index)
         if unknown_holds:
             raise ValueError(f"Holds of stander {sid} name components not in the interference "
                              f"matrix (holds are movable-only, P6): {sorted(unknown_holds)}")
         stander_holds[b] = {index[m] for m in rec.holds}
 
+        # Nut link: the nut orders itself against its partner (needs a partner present in this level).
         if rec.nut_rule is not None:
             if rec.partner is None or rec.partner not in index_all:
                 log.warning("Nut stander %r has nut_rule=%r but no usable partner in this level "
@@ -903,6 +982,7 @@ def collect_inputs(interference_result, prep, config: AoGConfig | None = None) -
             contact[b, index[g]] = contact[index[g], b] = True
         bbox_lo.append(_vec3(rec.bbox[0]))
         bbox_hi.append(_vec3(rec.bbox[1]))
+        # Fold the whole record into the cache key so any change in stander data invalidates the cache.
         h.update(json.dumps({
             "id": sid,
             "category": rec.category,
@@ -943,15 +1023,15 @@ def collect_inputs(interference_result, prep, config: AoGConfig | None = None) -
 
 
 # ---------------------------------------------------------------------------
-# Persistence and exports
+# Persistence and exports (supplementary)
 # ---------------------------------------------------------------------------
 
-NPZ_NAME = "aog.npz"
-JSON_NAME = "aog.json"
+NPZ_NAME = "aog.npz"  # numpy arrays of the AoG
+JSON_NAME = "aog.json"  # metadata, statistics and the cache key
 _ARRAY_FIELDS = ("is_stander", "directions", "neg", "node_mask", "node_level", "level_offsets",
                  "edge_src", "edge_dst", "edge_comp", "edge_dirs", "out_ptr", "live", "dead_ends",
-                 "travel")
-# docs/stander_processing-spec.md 3.7: bump whenever a cached AoG's on-disk meaning could change
+                 "travel")  # AoG fields saved in the .npz
+# Bump whenever a cached AoG's on-disk meaning could change
 # without its cache_key necessarily changing (e.g. a loader/field rename) -- rejects old caches
 # outright rather than risking a silent misread. 2 = the stander_options/holds/nut_links model
 # (was 1, implicitly, under stander_dir/stander_gate).
@@ -959,6 +1039,7 @@ AOG_SCHEMA_VERSION = 2
 
 
 def save_aog(aog: AoG, cache_dir: str | Path) -> None:
+    """[SUPP] Cache function: write the AoG arrays (.npz) and its metadata (.json) to `cache_dir`."""
     cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
     np.savez(cache_dir / NPZ_NAME, **{name: getattr(aog, name) for name in _ARRAY_FIELDS})
@@ -982,8 +1063,11 @@ def save_aog(aog: AoG, cache_dir: str | Path) -> None:
 
 
 def load_aog(cache_dir: str | Path, cache_key: str | None = None) -> AoG | None:
-    """Load a cached AoG; None if absent, unreadable, of an old schema, or (when given) the key
-    does not match."""
+    """[SUPP] Cache function: load a cached AoG.
+
+    Returns None if it is absent, unreadable, of an old schema or (when `cache_key` is given) the key
+    does not match.
+    """
     cache_dir = Path(cache_dir)
     json_path, npz_path = cache_dir / JSON_NAME, cache_dir / NPZ_NAME
     if not (json_path.exists() and npz_path.exists()):
@@ -1017,15 +1101,17 @@ def load_aog(cache_dir: str | Path, cache_key: str | None = None) -> AoG | None:
 
 
 def _fmt_vec(v) -> str:
+    """[SUPP] Format a vector with 6 decimals for the exports (-0.0 prints as 0.0)."""
     return "(" + ", ".join(f"{round(float(c), 6) + 0.0:.6f}" for c in v) + ")"
 
 
 def _state_label(aog: AoG, v: int) -> str:
+    """[SUPP] Readable label of a node: the labels of the components present, joined by ';'."""
     return "; ".join(aog.component_labels[c] for c in aog.state_components(v)) or "(empty)"
 
 
 def export_csv_dot(aog: AoG, out_dir: str | Path) -> None:
-    """aog_nodes.csv, aog_edges.csv and aog.dot for the thesis (small graphs only)."""
+    """[SUPP] Export aog_nodes.csv, aog_edges.csv and aog.dot (Graphviz) for the thesis (small graphs only)."""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     dead = set(int(v) for v in aog.dead_ends)
@@ -1066,6 +1152,7 @@ def export_csv_dot(aog: AoG, out_dir: str | Path) -> None:
 
 
 def _log_summary(aog: AoG) -> None:
+    """[SUPP] Log the AoG size, active rules, dead ends and a warning if the graph is incomplete."""
     s = aog.stats
     log.info("AoG: N=%d (n=%d movable, m=%d standers), D'=%d, V=%d, E=%d, complete=%s, %.2f s, %.1f MB",
              s["N"], s["n_movable"], s["n_standers"], s["D_prime"], s["V"], s["E"], aog.complete,
@@ -1098,6 +1185,7 @@ def _log_summary(aog: AoG) -> None:
 
 
 def _default_cache_dir(prep) -> Path:
+    """[SUPP] Default cache folder: output/<step file name>/aog under the repo root."""
     stem = Path(prep.step_path).stem if prep.step_path is not None else prep.reduced_assembly.Name
     return REPO_ROOT / "output" / stem / "aog"
 
@@ -1109,7 +1197,12 @@ def build_aog(
     cache_dir: str | Path | None = None,
     force: bool = False,
 ) -> AoG:
-    """Return the AoG for the pipeline objects, loading it from cache when the key matches."""
+    """[MAIN] Pipeline entry point: the AoG for an InterferenceResult and PreprocessingResult, cached on disk.
+
+    Packs the pipeline objects with `collect_inputs`, returns the cached AoG if its key matches (unless
+    `force`), otherwise runs `generate_aog`, saves it and, for graphs of at most EXPORT_MAX_NODES nodes,
+    writes the CSV/DOT exports next to the cache. Default cache folder: output/<assembly>/aog.
+    """
     config = config or AoGConfig()
     cache_dir = Path(cache_dir) if cache_dir is not None else _default_cache_dir(prep)
     inputs = collect_inputs(interference_result, prep, config)

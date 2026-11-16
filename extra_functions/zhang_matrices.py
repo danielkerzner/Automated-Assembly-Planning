@@ -39,6 +39,12 @@ Usage (from the repo root):
     python extra_functions/zhang_matrices.py [aog_dir] [out_dir] [--check]
 
 aog_dir defaults to output/industrial_fastner/aog; out_dir to <aog_dir>/../zhang_matrices.
+
+Expected result: the console prints `<T> tasks from <N> components; written to <out_dir>` and the numbered task list
+("<component> (dx,dy,dz)"). out_dir gets P_priority.csv, E_exclusive.csv, C_cooperative.csv,
+C_cooperative_strict.csv, G_correlation.csv, task_index.csv, zhang_tasks.json and zhang_matrices.npz. With --check it
+also prints the number of AoG paths, the number of orders allowed by P alone (equal or larger) and
+`P_matches_all_paths: True`. E and C are symmetric and every task has exactly one 1 in its row of G.
 """
 
 from __future__ import annotations
@@ -85,6 +91,9 @@ def _edge_direction_bits(aog: AoG) -> np.ndarray:
 
 
 def compute_matrices(aog: AoG) -> ZhangMatrices:
+    """[MAIN] AoG -> Zhang matrices. Tasks = (component, direction) pairs free on some live edge. Component-level P:
+    a precedes b if a is never present when b leaves. E: different directions of one component. C: no priority and
+    not exclusive (paper) / a live state where both can leave and both orders exist (strict). G: task -> its part."""
     N, Dp = aog.n_components, len(aog.directions)
     live_edge = aog.live[aog.edge_dst] if aog.n_edges else np.zeros(0, dtype=bool)
     comp = aog.edge_comp.astype(np.int64)
@@ -237,6 +246,7 @@ def save_matrices(m: ZhangMatrices, out_dir: Path) -> None:
 
 
 def main() -> None:
+    """Load the cached AoG, compute the matrices, write the CSV / npz / json files, print the task list (and the check)."""
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("aog_dir", nargs="?", type=Path, default=REPO_ROOT / "output" / "industrial_fastner" / "aog")
     ap.add_argument("out_dir", nargs="?", type=Path, default=None)

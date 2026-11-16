@@ -1,14 +1,22 @@
 """Sub-assembly hierarchy extraction: Containers (App::Part) and the Hierarchy tree.
 
-Implements docs/subassembly-spec.md section 4. `build_hierarchy` walks a FreeCAD document's
-`RootObjects` through `Group`, duck-typed over objects exposing `TypeId`, `Name`, `Label` and
-`Group` (so tests need no FreeCAD). A `Container` is one App::Part; a leaf is whatever `is_leaf`
-accepts (default: the `_leaf_components` filter). Other group types (e.g.
-`App::DocumentObjectGroup`) are transparent, same convention as `generate_bom.collect_rows`.
+Inputs
+    - A FreeCAD document (anything exposing `RootObjects`, and per object `TypeId`, `Name`, `Label`,
+      `Group`; tests use fakes, so no FreeCAD is needed here).
+    - The BOM rows as plain dicts (the caller reads the CSV): columns `label`, `processed`,
+      `subassembly`, `is_stander` are used here.
+Outputs
+    - A `Hierarchy`: the tree of `Container`s (one per App::Part, plus a virtual root when the document
+      has no single top-level part), with the leaves (solid components) of every container and each
+      container's `processed` decision.
+    - `check_level_sizes` raises `LevelSizeError` before any geometry work if a level is too large.
 
-The BOM's `processed`/`subassembly` columns are resolved here against rows passed in as plain
-dicts (caller reads the CSV), and `check_level_sizes` guards against an oversized level before
-any geometry work runs.
+What this module does
+    It walks the document tree once. A leaf is a `Part::Feature` with solids (`_default_is_leaf`); an
+    `App::Part` becomes a `Container`; any other group type (for example `App::DocumentObjectGroup`) is
+    transparent, like in `generate_bom.collect_rows`. Then it resolves the BOM `processed` / `subassembly`
+    columns against the tree (BOM and STEP must agree), applies the "fewer than 2 components" rule, and
+    leaves the per-level work to `levels.solve_level`.
 """
 
 from __future__ import annotations
@@ -20,8 +28,8 @@ from typing import Callable, Iterable
 
 log = logging.getLogger("aap.hierarchy")
 
-_TRUE = {"1", "true", "yes", "y", "t"}
-_FALSE = {"0", "false", "no", "n", "f"}
+_TRUE = {"1", "true", "yes", "y", "t"}  # accepted spellings of a true BOM flag
+_FALSE = {"0", "false", "no", "n", "f"}  # accepted spellings of a false BOM flag
 
 
 class LevelSizeError(RuntimeError):
@@ -30,27 +38,38 @@ class LevelSizeError(RuntimeError):
 
 @dataclass
 class Container:
-    id: str  # obj.Name; "__root__" for a virtual root
-    label: str
-    parent: str | None
-    leaf_ids: list[str]  # direct leaf children (obj.Name), document order
-    child_ids: list[str]  # direct child containers
-    processed: bool
-    all_leaf_ids: list[str] = field(default_factory=list)  # every descendant leaf, for fusing
-    auto: bool = False  # Phase 2: a virtual container (auto_<n>) merged by levels.py, not a real
-                         # STEP/BOM sub-assembly (docs/subassembly-spec.md section 10)
+    """One App::Part of the assembly tree (or the virtual root): a node of the `Hierarchy`.
+
+    A container is one level of the planning: its direct leaves plus its direct child containers are the
+    components that `levels.solve_level` orders. Child containers are fused into rigid solids at the
+    parent level.
+    """
+
+    id: str  # str. obj.Name (unique in the document); "__root__" for the virtual root.
+    label: str  # str. obj.Label, matched against the BOM `label` column; "" for the virtual root.
+    parent: str | None  # str or None. Id of the parent container; None for the root.
+    leaf_ids: list[str]  # list[str]. Direct leaf children (obj.Name) in document order: the parts of this level.
+    child_ids: list[str]  # list[str]. Direct child containers: sub-assemblies, fused as one component at this level.
+    processed: bool  # bool. True = expanded into its own level; False = one rigid component. Set from the BOM.
+    # list[str]. Every descendant leaf (nested too); needed to fuse the container into one solid.
+    all_leaf_ids: list[str] = field(default_factory=list)
+    # bool. Phase 2: a virtual container (auto_<n>) created by levels.py from a closed group of parts,
+    # not a real STEP/BOM sub-assembly.
+    auto: bool = False
 
 
 @dataclass
 class Hierarchy:
-    root: str
-    containers: dict[str, Container]
-    leaf_label: dict[str, str]
-    leaf_parent: dict[str, str]  # leaf id -> immediate parent container id
+    """The assembly tree: output of `build_hierarchy`, input of `check_level_sizes` and `levels.solve_level`."""
+
+    root: str  # str. Id of the root container.
+    containers: dict[str, Container]  # dict id -> Container. Every container of the tree, root included.
+    leaf_label: dict[str, str]  # dict leaf id -> Label (needed to match BOM rows and to name results).
+    leaf_parent: dict[str, str]  # dict leaf id -> id of its immediate parent container.
 
 
 def _default_is_leaf(obj) -> bool:
-    """Same filter as `preprocessing._leaf_components`, applied to one object."""
+    """[AUX] True if obj is a solid component; the same filter as `preprocessing._leaf_components`, for one object."""
     return (
         getattr(obj, "TypeId", None) == "Part::Feature"
         and getattr(obj, "Shape", None) is not None
@@ -60,19 +79,24 @@ def _default_is_leaf(obj) -> bool:
 
 
 def _leaf_component_names(doc, is_leaf: Callable) -> set[str]:
+    """[AUX] Names of every leaf in the document (used to check that the tree walk reached them all)."""
     return {obj.Name for obj in getattr(doc, "Objects", []) if is_leaf(obj)}
 
 
 def _walk(obj, container: Container, containers: dict[str, Container], leaf_label: dict[str, str],
           leaf_parent: dict[str, str], is_leaf: Callable) -> None:
-    """Fill `container`'s leaf_ids/child_ids from obj's direct Group, recursing into nested
-    containers and transparently through other group types."""
+    """[MAIN] Recursive tree walk: fill `container`'s leaf_ids / child_ids from obj's direct `Group`.
+
+    Leaves are recorded in the current container, each App::Part becomes a child `Container` and is
+    walked in turn, other group types are walked as if they were the same container (no depth change),
+    and an App::Link (repeated sub-assembly) is rejected as not supported yet.
+    """
     for child in getattr(obj, "Group", None) or []:
         type_id = getattr(child, "TypeId", None)
         if type_id == "App::Link":
             raise NotImplementedError(
                 f"Repeated sub-assembly (App::Link) {getattr(child, 'Label', child)!r} is not "
-                "supported yet; see docs/subassembly-spec.md open item 4."
+                "supported yet."
             )
         if is_leaf(child):
             container.leaf_ids.append(child.Name)
@@ -91,6 +115,7 @@ def _walk(obj, container: Container, containers: dict[str, Container], leaf_labe
 
 
 def _fill_all_leaf_ids(containers: dict[str, Container], root_id: str) -> None:
+    """[AUX] Set `all_leaf_ids` of every container to its direct leaves plus those of all descendants (memoised recursion)."""
     memo: dict[str, list[str]] = {}
 
     def collect(cid: str) -> list[str]:
@@ -108,6 +133,7 @@ def _fill_all_leaf_ids(containers: dict[str, Container], root_id: str) -> None:
 
 
 def _parse_processed(value: str | None, context: str) -> bool:
+    """[AUX] Parse a BOM `processed` cell: blank = True, else one of _TRUE / _FALSE; ValueError otherwise (context names the row)."""
     v = (value or "").strip().lower()
     if v == "":
         return True
@@ -119,6 +145,7 @@ def _parse_processed(value: str | None, context: str) -> bool:
 
 
 def _index_bom_rows(bom_rows: Iterable[dict] | None) -> dict[str, dict]:
+    """[AUX] BOM rows indexed by their stripped `label` (rows without a label are dropped)."""
     index: dict[str, dict] = {}
     for row in bom_rows or []:
         label = (row.get("label") or "").strip()
@@ -129,10 +156,17 @@ def _index_bom_rows(bom_rows: Iterable[dict] | None) -> dict[str, dict]:
 
 def _resolve_bom(containers: dict[str, Container], leaf_label: dict[str, str], leaf_parent: dict[str, str],
                  bom_rows: Iterable[dict] | None, root_id: str) -> None:
+    """[MAIN] Resolve the BOM columns against the tree: sets `Container.processed` and checks BOM/STEP consistency.
+
+    Why: the BOM is where the user decides which sub-assemblies are expanded (`processed`) or fused
+    (stander), and the BOM must describe the same tree as the STEP, otherwise a decision would be
+    silently lost, so inconsistencies raise ValueError instead of being guessed around.
+    """
     by_label = _index_bom_rows(bom_rows)
     used_labels: set[str] = set()
     mismatches: list[str] = []
 
+    # Containers: processed flag from the BOM row, plus the stander and subassembly consistency checks.
     for cid, c in containers.items():
         row = by_label.get(c.label) if c.label else None
         if row is not None:
@@ -148,13 +182,12 @@ def _resolve_bom(containers: dict[str, Container], leaf_label: dict[str, str], l
                 raise ValueError(
                     f"BOM row for container {c.label!r} [{cid}] sets is_stander=true and "
                     "processed=true; a stander subassembly is fused into one rigid component "
-                    "(docs/preprocessing-spec.md P1/P2, 'other' category) and cannot also be "
+                    "('other' category) and cannot also be "
                     "recursively processed as its own level -- set processed=false or leave it blank"
                 )
             if is_stander:
                 # A stander subassembly is always fused as a single rigid component: unlike a plain
-                # container, blank 'processed' here defaults to false, not true (docs/subassembly-
-                # spec.md section 3).
+                # container, blank 'processed' here defaults to false, not true.
                 if not raw_processed:
                     log.info("Container %r [%s] sets is_stander=true with 'processed' blank; "
                              "defaulting to processed=false", c.label, cid)
@@ -177,6 +210,7 @@ def _resolve_bom(containers: dict[str, Container], leaf_label: dict[str, str], l
             processed = True
         c.processed = processed
 
+    # Leaves: `processed` has no meaning for a part (warn and ignore); `subassembly` must match the tree parent.
     for leaf_id, label in leaf_label.items():
         row = by_label.get(label)
         if row is None:
@@ -200,6 +234,7 @@ def _resolve_bom(containers: dict[str, Container], leaf_label: dict[str, str], l
             + "\n".join(mismatches)
         )
 
+    # BOM labels that match nothing: an error if they carry a `processed` decision, else only a warning.
     unmatched_errors: list[str] = []
     for label in sorted(set(by_label) - used_labels):
         if (by_label[label].get("processed") or "").strip():
@@ -217,6 +252,10 @@ def _resolve_bom(containers: dict[str, Container], leaf_label: dict[str, str], l
 
 
 def _apply_trivial_rule(containers: dict[str, Container], root_id: str) -> None:
+    """[AUX] A processed container with fewer than 2 components has nothing to order: mark it unprocessed (fused).
+
+    The root is the exception: fewer than 2 components there means nothing to plan, so it raises ValueError.
+    """
     root = containers[root_id]
     if len(root.leaf_ids) + len(root.child_ids) < 2:
         raise ValueError("Root container has fewer than 2 components; nothing to plan.")
@@ -230,17 +269,24 @@ def _apply_trivial_rule(containers: dict[str, Container], root_id: str) -> None:
 
 
 def build_hierarchy(doc, bom_rows: Iterable[dict] | None = None, is_leaf: Callable | None = None) -> Hierarchy:
-    """Build the Container tree from `doc.RootObjects`, resolving BOM `processed`/`subassembly`.
+    """[MAIN] Build the Container tree from `doc.RootObjects`, resolving BOM `processed`/`subassembly`.
 
-    `is_leaf(obj) -> bool` is injectable for tests; the default replicates
-    `preprocessing._leaf_components`. Raises `NotImplementedError` on an `App::Link` (open item 4),
-    `ValueError` on a BOM/tree mismatch, an invalid `processed` value, or too few root components.
+    Inputs: the document, the BOM rows (list of dicts, or None) and `is_leaf(obj) -> bool`, injectable
+    for tests (the default replicates `preprocessing._leaf_components`). Output: the `Hierarchy`, which
+    `check_level_sizes` and `levels.solve_level` consume. Raises `NotImplementedError` on an `App::Link`
+    (not supported yet), `ValueError` on a BOM/tree mismatch, an invalid `processed` value or too few root
+    components, and `RuntimeError` if the walk missed a leaf the filter accepts.
+
+    A single top-level App::Part is the root; otherwise a virtual root `__root__` collects all top-level
+    objects. After the walk the leaf set is cross-checked, descendants are collected, the BOM is applied
+    and the "fewer than 2 components" rule is enforced.
     """
     is_leaf = is_leaf or _default_is_leaf
     containers: dict[str, Container] = {}
     leaf_label: dict[str, str] = {}
     leaf_parent: dict[str, str] = {}
 
+    # Root: the single top-level App::Part if there is one, else a virtual root over all top-level objects.
     roots = list(getattr(doc, "RootObjects", []))
     top_parts = [o for o in roots if getattr(o, "TypeId", None) == "App::Part"]
     if len(roots) == 1 and top_parts:
@@ -256,6 +302,7 @@ def build_hierarchy(doc, bom_rows: Iterable[dict] | None = None, is_leaf: Callab
         containers[root_id] = root
         _walk(types.SimpleNamespace(Group=roots), root, containers, leaf_label, leaf_parent, is_leaf)
 
+    # Safety check: the walk must reach exactly the leaves the filter finds in the document.
     reached = set(leaf_label)
     expected = _leaf_component_names(doc, is_leaf)
     if reached != expected:
@@ -272,8 +319,12 @@ def build_hierarchy(doc, bom_rows: Iterable[dict] | None = None, is_leaf: Callab
 
 
 def check_level_sizes(hier: Hierarchy, max_components: int = 20) -> None:
-    """Raise `LevelSizeError` if any processed level (root, or reached through processed containers)
-    has more than `max_components` direct components. Run before any geometry or collision work."""
+    """[AUX] Raise `LevelSizeError` if any processed level has more than `max_components` direct components.
+
+    A level is the root, or a container reached through processed containers; its size is leaves plus
+    child containers. Run before any geometry or collision work, so an oversized level fails fast (the
+    fix is `processed = false` in the BOM). Default 20 is the AoG target size (`--max-level-components`).
+    """
 
     def visit(cid: str) -> None:
         c = hier.containers[cid]

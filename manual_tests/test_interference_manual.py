@@ -1,10 +1,9 @@
 """Manual smoke test for Interference Identification (src/interference_identification.py).
 
-Counterpart of manual_tests/test_preprocessing_manual.py. Not an acceptance suite -- those are the I1-I11
-tests in automatic_tests/test_interference.py. This script runs Preprocessing + Interference
-Identification end to end on one assembly and dumps everything in a form you can inspect by eye:
+Counterpart of manual_tests/test_preprocessing_manual.py. Not an acceptance suite that compares against
+a reference result. This script runs Preprocessing + Interference Identification end to end on one assembly and dumps everything in a form you can inspect by eye:
 
-  tests/industrial_fastner/interference/
+  output/industrial_fastner/interference/
     interference.npz            the matrix itself (free, directions, neg) and the contact matrix
                                 (contact, gaps), written by the module
     interference.json           module metadata (pair classes, exceptions, stats, cache key)
@@ -35,8 +34,14 @@ or point it at a different STEP/BOM pair and output folder:
 
     python manual_tests/test_interference_manual.py path/to.stp path/to/bom.csv tests/out_dir --step 1.0
 
---step (the collision step h, mm) defaults to 2.0, which is only calibrated for
+--step (the collision step h, mm) defaults to 5.0, which is only calibrated for
 industrial_fastner (collision test E6). For another assembly, calibrate h first.
+
+Expected result: no error; the console prints the number of components and directions, how many pairs are free /
+blocked, the removable parts with the whole assembly present, the contact summary and the timing (several minutes
+the first time, instant when cached). The three consistency checks at the end must pass: free is antisymmetric
+(free[i, j, k] == free[j, i, neg[k]]), the diagonal is free, and the contact matrix is symmetric.
+interference_report.json and interference_table.csv are written next to the cache.
 """
 
 from __future__ import annotations
@@ -60,9 +65,9 @@ from interference_identification import identify_interferences  # noqa: E402
 from preprocessing import run_preprocessing  # noqa: E402
 
 DEFAULT_STEP = REPO_ROOT / "data" / "industrial_fastner" / "industrial_fastner.stp"
-DEFAULT_BOM = REPO_ROOT / "data" / "industrial_fastner" / "bom.csv"
-DEFAULT_OUT = REPO_ROOT / "tests" / "industrial_fastner"
-DEFAULT_H = 2.0
+DEFAULT_BOM = REPO_ROOT / "data" / "industrial_fastner" / "generated_bom.csv"
+DEFAULT_OUT = REPO_ROOT / "output" / "industrial_fastner"
+DEFAULT_H = 5.0
 
 
 def _vec(v) -> list[float]:
@@ -255,6 +260,9 @@ def print_summary(result, report: dict, elapsed: float, cache_dir: Path, report_
 
 
 def main(step_path: Path, bom_path: Path, out_dir: Path, h: float, force: bool) -> None:
+    """Pipeline: run_preprocessing -> identify_interferences (for every ordered pair of parts and every candidate
+    direction, a collision sweep with step h decides whether the part can leave past the other: the `free`
+    tensor; plus touching pairs and gaps: `contact`, `gaps`; cached on disk) -> readable report and summary."""
     logging.basicConfig(level=logging.INFO, format="%(name)s %(levelname)s: %(message)s")
     out_dir.mkdir(parents=True, exist_ok=True)
     cache_dir = out_dir / "interference"

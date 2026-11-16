@@ -3,8 +3,8 @@
 Writes `label,is_stander,screw,nut,pitch,tool,group,processed,subassembly` (one row per leaf
 Part::Feature, same filter Preprocessing uses, plus one row per App::Part subassembly).
 `is_stander`, `screw`, `nut`, `pitch` and `tool` are filled by hand (`screw`/`nut` pick a
-stander's category, docs/preprocessing-spec.md P1; `pitch` is mm of axial travel per full turn,
-read only for screw/nut rows, docs/stander_processing-spec.md section 12 -- blank means no turn
+stander's category, rule P1; `pitch` is mm of axial travel per full turn,
+read only for screw/nut rows -- blank means no turn
 count is shown for that stander). See data/industrial_fastner/generated_bom.csv for the columns
 the pipeline actually reads.
 
@@ -16,6 +16,11 @@ row still is, so the decision is visible in the BOM). `subassembly` traces each 
 the Label of its nearest enclosing App::Part (blank at the document root).
 
 Usage: python extra_functions/generate_bom.py <step_path> <output_csv>
+
+Expected result: for every nested subassembly the script asks `list its parts in the BOM? [y/n]`; at the end it prints
+`Wrote N rows to <output_csv>`. The CSV has one row per leaf part and per subassembly with the defaults is_stander /
+screw / nut = False, tool = By_hand, group = the part's own label, and `processed` (true / false) on the subassembly
+rows. Open it and fill in is_stander, screw / nut, pitch, tool and group by hand before using it with the pipeline.
 """
 
 import csv
@@ -99,6 +104,8 @@ def generate_bom_rows(doc) -> list[dict[str, str]]:
 
 
 def main() -> None:
+    """Load the STEP (load_assembly), walk the tree with generate_bom_rows (asking about each nested subassembly)
+    and write the rows to the CSV."""
     if len(sys.argv) != 3:
         print("Usage: python extra_functions/generate_bom.py <step_path> <output_csv>")
         raise SystemExit(1)

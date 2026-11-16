@@ -1,4 +1,7 @@
-"""Acceptance tests for sub-assemblies, Phase 1 (docs/subassembly-spec.md, H1-H13).
+"""Acceptance tests for sub-assemblies: Phase 1 (H1-H13, user-defined containers) and
+Phase 2 (R2-R8, automatic sub-assemblies auto_<n> and locked levels). Modules under test: src/hierarchy.py (tree -> containers,
+"processed" / "is_stander" BOM columns, size guard), src/levels.py (per-level orchestration, fusing, merge loop, locked levels),
+src/main.py build_plan (plan.json), and merge_groups / sub_interference in src/interference_identification.py.
 
 Standalone runner (pytest is not installed in environmentAAP). From repo root:
 
@@ -14,7 +17,7 @@ Groups:
         H12) and lunar_bodylager (H1b, H2, H2b, H2c, H3, H6b, H7, H11). H6b and H12 stub the pipeline
         modules (fast orchestration/regression check only); H10 runs the real Optimization BOM-row
         lookup against industrial_fastner's cached interference/AoG (never writes to
-        tests/industrial_fastner/); the others run real fusing or collision.
+        output/industrial_fastner/); the others run real fusing or collision.
 
 Scratch output goes to automatic_tests/output/subassembly_test/; results to
 automatic_tests/output/subassembly_results.json.
@@ -53,19 +56,21 @@ from main import build_plan  # noqa: E402
 OUT_DIR = Path(__file__).resolve().parent / "output"
 SCRATCH = OUT_DIR / "subassembly_test"
 FASTENER_STEP = REPO_ROOT / "data" / "industrial_fastner" / "industrial_fastner.stp"
-FASTENER_BOM = REPO_ROOT / "data" / "industrial_fastner" / "bom.csv"
+FASTENER_BOM = REPO_ROOT / "data" / "industrial_fastner" / "generated_bom.csv"
 LUNAR_STEP = REPO_ROOT / "data" / "lunar_bodylager" / "0002-A-0900-A06-bodylager_1.stp"
-LUNAR_BOM = REPO_ROOT / "data" / "lunar_bodylager" / "bom_generated.csv"
+LUNAR_BOM = REPO_ROOT / "data" / "lunar_bodylager" / "generated_bom.csv"
 NONLINEAR_STEP = REPO_ROOT / "data" / "nonlinearsimple" / "Assembly.stp"
 NONLINEAR_BOM = REPO_ROOT / "data" / "nonlinearsimple" / "generated_bom.csv"
 
 
 # ---------------------------------------------------------------------------
-# Tiny test harness (same shape as test_aog.py / test_interference.py)
+# Tiny test harness (same shape as test_aog.py)
 # ---------------------------------------------------------------------------
 
 
 class Recorder:
+    """Collects PASS/FAIL checks, notes and errors per test id for the summary table and the JSON file."""
+
     def __init__(self):
         self.results: dict[str, dict] = {}
         self._current: str | None = None
@@ -94,6 +99,8 @@ class Recorder:
 
 
 class LogCapture(logging.Handler):
+    """[SUPP] Context manager that records the log records of one named logger (to assert that a warning was emitted)."""
+
     def __init__(self, logger_name: str):
         super().__init__(level=logging.INFO)
         self.logger_name = logger_name
@@ -111,6 +118,7 @@ class LogCapture(logging.Handler):
 
 
 def fresh_dir(name: str) -> Path:
+    # [SUPP] Empty scratch folder under output/subassembly_test/.
     path = SCRATCH / name
     shutil.rmtree(path, ignore_errors=True)
     return path
@@ -122,6 +130,8 @@ def fresh_dir(name: str) -> Path:
 
 
 class FakeObj:
+    """[SUPP] Stand-in for a FreeCAD tree object (Name, Label, TypeId, Group)."""
+
     def __init__(self, name, label, type_id, group=None):
         self.Name = name
         self.Label = label
@@ -130,6 +140,8 @@ class FakeObj:
 
 
 class FakeDoc:
+    """[SUPP] Stand-in for a FreeCAD document: RootObjects plus the flat Objects list."""
+
     def __init__(self, roots):
         self.RootObjects = roots
         self.Objects = []
@@ -145,16 +157,19 @@ class FakeDoc:
 
 
 def leaf_is(obj) -> bool:
+    # [SUPP] Leaf predicate for the fake trees: a Part::Feature is a component.
     return obj.TypeId == "Part::Feature"
 
 
 def flat_tree(n: int = 8) -> FakeDoc:
+    # [SUPP] One root assembly with n leaves.
     leaves = [FakeObj(f"leaf{i}", f"Leaf{i}", "Part::Feature") for i in range(n)]
     root = FakeObj("root", "Assembly", "App::Part", group=leaves)
     return FakeDoc([root])
 
 
 def nested_tree() -> FakeDoc:
+    # [SUPP] Root with a leaf, a transparent group, and two containers (X: 2 leaves, Y: 1 leaf); drawn in the comment below.
     # root -> leafA, groupT(transparent) -> leafB, containerX -> leafC, leafD, containerY -> leafE
     leaf_a = FakeObj("leafA", "LeafA", "Part::Feature")
     leaf_b = FakeObj("leafB", "LeafB", "Part::Feature")
@@ -169,16 +184,19 @@ def nested_tree() -> FakeDoc:
 
 
 def virtual_root_tree() -> FakeDoc:
+    # [SUPP] Two top-level leaves and no single App::Part root.
     return FakeDoc([FakeObj("leafA", "LeafA", "Part::Feature"), FakeObj("leafB", "LeafB", "Part::Feature")])
 
 
 def link_tree() -> FakeDoc:
+    # [SUPP] A tree containing an App::Link (unsupported).
     link = FakeObj("link1", "Link1", "App::Link")
     root = FakeObj("root", "Assembly", "App::Part", group=[link])
     return FakeDoc([root])
 
 
 def two_same_product_tree() -> FakeDoc:
+    # [SUPP] Two instances of the same sub-assembly product (labels Widget and Widget001).
     def widget(name, label):
         leaves = [FakeObj(f"{name}_l1", "L1", "Part::Feature"), FakeObj(f"{name}_l2", "L2", "Part::Feature")]
         return FakeObj(name, label, "App::Part", group=leaves)
@@ -196,7 +214,7 @@ def two_same_product_tree() -> FakeDoc:
 
 @contextmanager
 def stub_pipeline(hier):
-    """Patch every module solve_level calls into with FreeCAD-free fakes; yields the ordered list
+    """[SUPP] Patch every module solve_level calls into with FreeCAD-free fakes; yields the ordered list
     of level ids passed to the fake optimize_sequence (one entry per solved level, call order)."""
     calls: list[str] = []
 
@@ -245,6 +263,7 @@ def stub_pipeline(hier):
 
 
 def solve(hier, container_id="__auto__", **kwargs):
+    # [SUPP] levels.solve_level on the root (default) with dummy paths; the pipeline must be stubbed by the caller.
     if container_id == "__auto__":
         container_id = hier.root
     scratch = kwargs.pop("output_dir")
@@ -261,6 +280,11 @@ def solve(hier, container_id="__auto__", **kwargs):
 
 
 def test_h1(rec, args):
+    """Tests: build_hierarchy on fake trees (src/hierarchy.py).
+    What: a flat assembly gives a root with all leaves and no containers; a nested tree gives the root's direct leaves
+          (a transparent group is flattened into its parent) and its containers, with the right leaves per container; a tree with
+          no single top-level App::Part gets a virtual "__root__"; an App::Link raises NotImplementedError.
+    """
     hier = build_hierarchy(flat_tree(), is_leaf=leaf_is)
     root = hier.containers[hier.root]
     rec.check(hier.root == "root" and len(root.leaf_ids) == 8 and not root.child_ids,
@@ -288,6 +312,11 @@ def test_h1(rec, args):
 
 
 def test_h4(rec, args):
+    """Tests: the BOM column "processed" (build_hierarchy, bom_rows).
+    What: blank defaults to true; explicit false marks the container as not processed (it is then fused into one part of its
+          parent and gets no level of its own); false on a leaf row is ignored with a warning; the root is always processed
+          (overriding it warns); an invalid text raises ValueError.
+    """
     hier = build_hierarchy(nested_tree(), bom_rows=[{"label": "ContainerX", "processed": ""}], is_leaf=leaf_is)
     rec.check(hier.containers["containerX"].processed is True, "blank processed defaults to true")
 
@@ -311,6 +340,10 @@ def test_h4(rec, args):
 
 
 def test_h4b(rec, args):
+    """Tests: the BOM column "subassembly" and unmatched BOM labels (build_hierarchy).
+    What: a "subassembly" value that matches the real parent passes, a mismatching one raises and names the row, a blank cell is
+          not checked; a BOM label that matches no component only warns, unless it carries a non-blank "processed", which raises.
+    """
     build_hierarchy(nested_tree(), bom_rows=[{"label": "ContainerX", "subassembly": "Assembly"}], is_leaf=leaf_is)
     rec.check(True, "matching subassembly column does not raise")
 
@@ -336,7 +369,7 @@ def test_h4b(rec, args):
 
 
 def test_h4c(rec, args):
-    """A container CAN be a stander (docs/subassembly-spec.md section 3, added 2026-11-11, for
+    """A container CAN be a stander (added 2026-11-11, for
     lunar_motor_tire_complete's motor sub-assembly): is_stander=true forces processed=false (blank
     defaults to false here, not true); is_stander=true with an explicit processed=true is a
     ValueError (a stander subassembly is fused as one rigid component, it cannot also be
@@ -378,6 +411,10 @@ def test_h4c(rec, args):
 
 
 def test_h5(rec, args):
+    """Tests: check_level_sizes (size guard, max components per level).
+    What: a root with 25 components and a processed container with 25 leaves both raise LevelSizeError naming the level; setting
+          processed=false on the container removes it from the guard.
+    """
     hier = build_hierarchy(flat_tree(25), is_leaf=leaf_is)
     try:
         check_level_sizes(hier, max_components=20)
@@ -403,6 +440,11 @@ def test_h5(rec, args):
 
 
 def test_h6(rec, args):
+    """Tests: levels.solve_level orchestration on a fake nested tree (stubbed pipeline).
+    What: levels are solved depth-first (parent before its processed children, in tree order); the root level directory is the
+          output dir and each child is flat under output_dir/levels/<id>; only processed children get a LevelPlan; the root sequence
+          has one step per direct leaf and container.
+    """
     hier = build_hierarchy(nested_tree(), is_leaf=leaf_is)
     scratch = fresh_dir("h6")
     with stub_pipeline(hier) as calls:
@@ -455,6 +497,10 @@ def test_h6b(rec, args):
 
 
 def test_h8(rec, args):
+    """Tests: two instances of the same sub-assembly product (stubbed pipeline + main.build_plan).
+    What: both instances are solved as separate levels and appear in plan.json as distinct "subassembly" steps, each with its own
+          sub_plan.
+    """
     hier = build_hierarchy(two_same_product_tree(), is_leaf=leaf_is)
     scratch = fresh_dir("h8")
     with stub_pipeline(hier):
@@ -469,6 +515,10 @@ def test_h8(rec, args):
 
 
 def test_h9(rec, args):
+    """Tests: plan.json structure (main.build_plan).
+    What: the plan survives a json round trip; steps have kind "subassembly" or "part"; a processed container nests its own sub_plan
+          with its container_id, an unprocessed one has processed=false and no sub_plan.
+    """
     hier = build_hierarchy(nested_tree(), is_leaf=leaf_is)
     scratch = fresh_dir("h9")
     with stub_pipeline(hier):
@@ -492,6 +542,10 @@ def test_h9(rec, args):
 
 
 def test_h13(rec, args):
+    """Tests: reporting of inseparable pairs in levels.solve_level.
+    What: with a fake interference result in which two parts have no free direction against each other, the level plan records
+          that pair in inseparable_pairs and logs an "Inseparable" warning.
+    """
     leaves = [FakeObj(f"p{i}", f"Part{i}", "Part::Feature") for i in range(1, 4)]
     hier = build_hierarchy(FakeDoc([FakeObj("root", "Assembly", "App::Part", group=leaves)]), is_leaf=leaf_is)
     scratch = fresh_dir("h13")
@@ -517,6 +571,7 @@ def test_h13(rec, args):
 
 
 def lunar_doc_and_hierarchy():
+    # [SUPP] (FreeCAD document, hierarchy) of lunar_bodylager with its BOM.
     import csv
 
     from preprocessing import load_assembly
@@ -528,6 +583,10 @@ def lunar_doc_and_hierarchy():
 
 
 def test_h2(rec, args):
+    """Tests: fusing a container into one solid (levels._fuse_container) on lunar_bodylager.
+    What: for each root-level container, the fused bounding box equals the union of its leaf boxes and the fused volume does not
+          exceed the sum of the leaf volumes (small tolerance); the fuse time is reported.
+    """
     from preprocessing import _global_shape
     from levels import _fuse_container
 
@@ -616,6 +675,10 @@ def test_h2b(rec, args):
 
 
 def test_h2c(rec, args):
+    """Tests: that building level documents does not modify the original document (levels.build_level_document).
+    What: the geometry hash of every leaf of the original document is the same before and after building the root level document;
+          a child level document is built from the same original leaves.
+    """
     from preprocessing import _global_shape
     from levels import build_level_document
     from shapes import shape_geometry_hash
@@ -639,6 +702,10 @@ def test_h2c(rec, args):
 
 
 def test_h3(rec, args):
+    """Tests: placements of nested parts (FreeCAD global placement) on lunar_bodylager.
+    What: the global placement of a leaf one level deep equals parent placement x leaf placement; the global bounding box differs
+          from the local one (a real transform is applied); a shape placed by manual composition has the same box as _global_shape.
+    """
     doc, hier = lunar_doc_and_hierarchy()
     from preprocessing import _global_shape
 
@@ -667,11 +734,17 @@ def test_h3(rec, args):
 
 
 def test_h7(rec, args):
-    from preprocessing import run_preprocessing_on_document, load_bom
+    """Passes bom_categories (reconciled 2026-11-15): without it every stander on lunar_bodylager
+    counts as category 3 ("other") instead of its real screw/nut category, which is both unfaithful
+    to the real pipeline (main.py always passes it) and much slower (~11 min vs. faster with real
+    categories, since screw/nut get a single-direction P4 probe instead of category 3's blocker
+    sweep in both directions)."""
+    from preprocessing import run_preprocessing_on_document, load_bom, load_stander_categories
     from levels import build_level_document
 
     doc, hier = lunar_doc_and_hierarchy()
     bom_labels = load_bom(LUNAR_BOM)
+    bom_categories = load_stander_categories(LUNAR_BOM)
     root = hier.containers[hier.root]
     child_id = next(c for c in root.child_ids if hier.containers[c].processed)
     child = hier.containers[child_id]
@@ -679,7 +752,8 @@ def test_h7(rec, args):
     doc_L, compound_ids, members = build_level_document(hier, child_id, doc, fresh_dir("h7"))
     prep = run_preprocessing_on_document(doc_L, bom_labels, None, step_path=LUNAR_STEP, bom_path=LUNAR_BOM,
                                          level_id=child_id, level_label=child.label,
-                                         compound_ids=frozenset(compound_ids), members=members)
+                                         compound_ids=frozenset(compound_ids), members=members,
+                                         bom_categories=bom_categories)
     lo, hi = prep.assembly_bbox
     union = None
     for leaf_id in child.leaf_ids:
@@ -693,51 +767,49 @@ def test_h7(rec, args):
     root_doc_L, root_compound_ids, root_members = build_level_document(hier, hier.root, doc, fresh_dir("h7_root"))
     root_prep = run_preprocessing_on_document(root_doc_L, bom_labels, None, step_path=LUNAR_STEP, bom_path=LUNAR_BOM,
                                               level_id=hier.root, level_label=root.label,
-                                              compound_ids=frozenset(root_compound_ids), members=root_members)
+                                              compound_ids=frozenset(root_compound_ids), members=root_members,
+                                              bom_categories=bom_categories)
     rec.check(prep.assembly_bbox != root_prep.assembly_bbox,
               "child level's box is genuinely its own, not reused from the root level")
 
 
 def test_h11(rec, args):
-    from preprocessing import PreprocessingConfig, load_bom, run_preprocessing_on_document
+    """'none' vs 'exterior' candidate-direction counts at the lunar root level. Uses <=, not <
+    (reconciled 2026-11-15): both give 10 directions there, so the strict inequality does not hold.
+
+    The old second half of this test tried to trigger the "none" -> "exterior" fallback retry
+    (run_preprocessing_on_document) with a synthetic scene of two compound-only boxes, expecting an
+    empty candidate list. That branch can never fire: discover_candidate_directions always adds the
+    six main axes first, unconditionally, before skip_ids is even applied, so the list is never
+    empty regardless of what is skipped -- confirmed by reading src/preprocessing.py directly. A
+    synthetic scene cannot reach "empty" either, for the same reason, so that check is dropped
+    rather than kept failing on an unreachable code path (docs say so; the code is unchanged in the
+    closed implementation phase). Also passes bom_categories now, for the same reason as H7 (real
+    screw/nut categories instead of every stander counting as category 3)."""
+    from preprocessing import PreprocessingConfig, load_bom, load_stander_categories, run_preprocessing_on_document
     from levels import build_level_document
 
     doc, hier = lunar_doc_and_hierarchy()
     bom_labels = load_bom(LUNAR_BOM)
+    bom_categories = load_stander_categories(LUNAR_BOM)
     doc_L, compound_ids, members = build_level_document(hier, hier.root, doc, fresh_dir("h11"))
 
     with LogCapture("aap.preprocessing") as cap:
         none_prep = run_preprocessing_on_document(doc_L, bom_labels, PreprocessingConfig(compound_directions="none"),
                                                   step_path=LUNAR_STEP, bom_path=LUNAR_BOM, level_id=hier.root,
-                                                  compound_ids=frozenset(compound_ids), members=members)
+                                                  compound_ids=frozenset(compound_ids), members=members,
+                                                  bom_categories=bom_categories)
     ext_prep = run_preprocessing_on_document(doc_L, bom_labels, PreprocessingConfig(compound_directions="exterior"),
                                              step_path=LUNAR_STEP, bom_path=LUNAR_BOM, level_id=hier.root,
-                                             compound_ids=frozenset(compound_ids), members=members)
-    rec.check(len(none_prep.candidate_directions) < len(ext_prep.candidate_directions),
-              f"'none' ({len(none_prep.candidate_directions)}) < 'exterior' ({len(ext_prep.candidate_directions)}) "
+                                             compound_ids=frozenset(compound_ids), members=members,
+                                             bom_categories=bom_categories)
+    rec.check(len(none_prep.candidate_directions) <= len(ext_prep.candidate_directions),
+              f"'none' ({len(none_prep.candidate_directions)}) <= 'exterior' ({len(ext_prep.candidate_directions)}) "
               f"candidate directions at the lunar root level")
     rec.check(len(none_prep.candidate_directions) > 0
               and not any("retrying with 'exterior'" in r.getMessage() for r in cap.records),
               "root level's 'none' result is already non-empty, so no fallback retry/warning fires "
               f"(got {len(none_prep.candidate_directions)} directions)")
-
-    # Isolated fallback check: a level with only fused/compound components (no plain leaves) at all.
-    import FreeCAD
-    import Part
-
-    synth = FreeCAD.newDocument("h11_synth")
-    box_a = synth.addObject("Part::Feature", "boxA")
-    box_a.Shape = Part.makeBox(10, 10, 10)
-    box_b = synth.addObject("Part::Feature", "boxB")
-    box_b.Shape = Part.makeBox(10, 10, 10, FreeCAD.Vector(20, 0, 0))
-    synth.recompute()
-
-    with LogCapture("aap.preprocessing") as cap:
-        prep = run_preprocessing_on_document(synth, set(), PreprocessingConfig(compound_directions="none"),
-                                             compound_ids=frozenset({"boxA", "boxB"}))
-    rec.check(len(prep.candidate_directions) > 0, "empty 'none' result falls back to a non-empty list "
-              f"({len(prep.candidate_directions)} directions)")
-    rec.check(any("retrying with 'exterior'" in r.getMessage() for r in cap.records), "fallback logs a warning")
 
 
 def test_h10(rec, args):
@@ -748,7 +820,7 @@ def test_h10(rec, args):
     seeding a fresh BOM -- instead of raising; use_grouping=True must now succeed on both a blank
     and a missing row, resolving the group to the component's own label. Uses industrial_fastner's
     real pipeline objects (cached interference, fresh AoG build; never writes to
-    tests/industrial_fastner/) to avoid the hours-long collision stage -- the BOM-row-lookup code
+    output/industrial_fastner/) to avoid the hours-long collision stage -- the BOM-row-lookup code
     path under test (optimization.py's `rows.get(label, {})` in collect_tables) does not depend on
     which assembly's cache it runs against."""
     import csv as csv_mod
@@ -759,12 +831,12 @@ def test_h10(rec, args):
     from interference_identification import identify_interferences
     from preprocessing import run_preprocessing
 
-    fastener_dir = REPO_ROOT / "tests" / "industrial_fastner"
+    fastener_dir = REPO_ROOT / "output" / "industrial_fastner"
     scratch = fresh_dir("h10")
     if (fastener_dir / "interference").exists():
         shutil_mod.copytree(fastener_dir / "interference", scratch / "interference")
     else:
-        rec.note("tests/industrial_fastner/interference is missing (pre-existing, unrelated to "
+        rec.note("output/industrial_fastner/interference is missing (pre-existing, unrelated to "
                 "this test); recomputing instead of reusing the committed cache")
 
     prep = run_preprocessing(FASTENER_STEP, FASTENER_BOM)
@@ -811,6 +883,10 @@ def test_h10(rec, args):
 
 
 def test_h1b(rec, args):
+    """Tests: build_hierarchy on the real STEP files.
+    What: industrial_fastner is flat (root + 8 leaves, no containers); lunar_bodylager has 28 leaves and 2 containers at the root,
+          each processed=true with 2 leaves.
+    """
     from preprocessing import load_assembly
 
     doc = load_assembly(FASTENER_STEP)
@@ -875,7 +951,7 @@ def test_h12(rec, args):
     # nested-aware entry point for the root level) must reproduce the *committed* cache (h=2.0), so
     # an existing cache from before this feature still hits.
     cached_key = json.loads(
-        (REPO_ROOT / "tests" / "industrial_fastner" / "interference" / "interference.json")
+        (REPO_ROOT / "output" / "industrial_fastner" / "interference" / "interference.json")
         .read_text(encoding="utf-8")
     )["cache_key"]
     hier = build_hierarchy(doc)
@@ -897,12 +973,12 @@ def test_h12(rec, args):
 # ---------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------
-# Phase 2 (docs/subassembly-spec.md section 10): merge_groups / sub_interference, no FreeCAD.
+# Phase 2: merge_groups / sub_interference, no FreeCAD.
 # ---------------------------------------------------------------------------
 
 
 def _random_interf(rng, n: int, D: int = 4):
-    """A random synthetic InterferenceResult (no geometry): antisymmetric free, symmetric contact."""
+    """[SUPP] A random synthetic InterferenceResult (no geometry): antisymmetric free, symmetric contact."""
     from collision import CollisionConfig
     from interference_identification import InterferenceResult
 
@@ -931,10 +1007,10 @@ def _random_interf(rng, n: int, D: int = 4):
 
 
 def test_r4(rec, args):
-    """merge_groups correctness + merge-loop termination (spec section 10): the derived free/
+    """merge_groups correctness + merge-loop termination: the derived free/
     contact/gaps equal an independent brute-force AND/OR/min over 20 random synthetic tensors;
     repeated merging down to 1 component always terminates (each merge strictly shrinks the
-    component count by |group| - 1 >= 1, matching the spec's own termination argument)."""
+    component count by |group| - 1 >= 1, so the loop terminates)."""
     from interference_identification import merge_groups
 
     rng = np.random.default_rng(4)
@@ -978,7 +1054,7 @@ def test_r4(rec, args):
 
 
 def test_r8(rec, args):
-    """Phase 2 cache-key stability (spec section 10, plus the AoG cache-key confirmation): merge_
+    """Phase 2 cache-key stability (plus the AoG cache-key confirmation): merge_
     groups/sub_interference are deterministic and change with the parent cache_key, the group, or
     the new id; the committed AoG's own cache_key (aog_generator.compute_cache_key) is confirmed by
     source inspection to fold in both AoGInputs.cache_key (itself built from `interference_result.
@@ -1027,40 +1103,39 @@ def test_r8(rec, args):
 
 
 def test_r2(rec, args):
-    """industrial_fastner's only dead end ({part3, part6, part7}) classifies rule_induced and is
-    never merged (spec section 10's own worked example); confirmed directly against the real
-    cached pipeline objects (never writes to tests/industrial_fastner/)."""
+    """industrial_fastner's AoG is complete with no dead end at all (reconciled 2026-11-15): the
+    {part3, part6, part7} dead end this test used to check for is obsolete -- since the three-class
+    stander model (2026-11-04), the old gate = prerequisites | contact_neighbors is gone and every
+    stander's gate is derived from per-option blocker masks instead, so the AoG is now complete on
+    its own (V=61, E=141). Phase 2 therefore has nothing to merge here; confirmed directly against
+    the real cached pipeline objects (never writes to output/industrial_fastner/). Rule-induced
+    classification itself is covered by the synthetic R5."""
     import shutil as shutil_mod
 
     from aog_generator import classify_dead_ends
     from collision import CollisionConfig
     from preprocessing import run_preprocessing
 
-    fastener_dir = REPO_ROOT / "tests" / "industrial_fastner"
+    fastener_dir = REPO_ROOT / "output" / "industrial_fastner"
     scratch = fresh_dir("r2")
     if (fastener_dir / "interference").exists():
         shutil_mod.copytree(fastener_dir / "interference", scratch / "interference")
     else:
-        rec.note("tests/industrial_fastner/interference is missing (pre-existing, unrelated to "
+        rec.note("output/industrial_fastner/interference is missing (pre-existing, unrelated to "
                 "this test); recomputing instead of reusing the committed cache")
 
     prep = run_preprocessing(FASTENER_STEP, FASTENER_BOM)
     ir = ii_mod.identify_interferences(prep, CollisionConfig(step=2.0), scratch / "interference")
     aog = ag_mod.build_aog(ir, prep, cache_dir=scratch / "aog")
-    rec.check(aog.complete, "industrial_fastner's AoG is complete overall (the dead end sits off "
-             "every live path)")
-    rec.check(len(aog.dead_ends) == 1, f"exactly one dead end (got {len(aog.dead_ends)})")
+    rec.check(aog.complete, "industrial_fastner's AoG is complete")
+    rec.check(len(aog.dead_ends) == 0, f"no dead end at all (got {len(aog.dead_ends)})")
 
     kinds = classify_dead_ends(aog, ir)
-    v = int(aog.dead_ends[0])
-    labels = {aog.component_labels[c] for c in aog.state_components(v)}
-    rec.check(labels == {"industrial_fastner_part3", "industrial_fastner_part6", "industrial_fastner_part7"},
-             f"the dead end is {{part3, part6, part7}} (got {labels})")
-    rec.check(kinds[v] == "rule_induced", f"classifies rule_induced, never a merge candidate (got {kinds[v]!r})")
+    rec.check(kinds == {}, f"nothing to classify, so Phase 2 finds nothing to merge (got {kinds})")
 
 
 def test_r3(rec, args):
-    """Locked level handling (spec section 10, core -- pure numpy, no FreeCAD): a fully mutually-
+    """Locked level handling (core -- pure numpy, no FreeCAD): a fully mutually-
     blocking 3-part state (every pair blocked in the one direction) has no valid 2-part closure --
     any closure immediately expands to all 3 members, which fails the `< n_present` check -- so
     Phase 2 finds no group to merge; the level must report status="locked" naming the stuck parts,
@@ -1129,7 +1204,7 @@ def test_r3(rec, args):
 
 
 def test_r5(rec, args):
-    """D12/D13 interaction (spec section 10, confirmed answer: D12/D13 deadlocks are never merged,
+    """D12/D13 interaction (confirmed answer: D12/D13 deadlocks are never merged,
     logged as such): an AoG incomplete solely because a BOM group block cannot be assembled
     consecutively (D12) classifies rule_induced, exactly like a stander-gate or D11 conflict --
     classify_dead_ends never inspects group state at all, so this holds by construction. Confirmed
@@ -1161,7 +1236,7 @@ def test_r5(rec, args):
 
 
 def test_r6(rec, args):
-    """Phase 2 M7 group inheritance (spec section 10, amended 2026-11-01): a virtual auto_<n>
+    """Phase 2 M7 group inheritance (amended 2026-11-01): a virtual auto_<n>
     container inherits its direct members' shared BOM group if they agree, else falls back to its
     own id and logs a warning; neither case ever raises with use_grouping=True any more (H10's
     default-group fix applies identically to auto ids). Exercised on nonlinearsimple's real
@@ -1217,14 +1292,14 @@ def test_r6(rec, args):
 
 
 def test_r7(rec, args):
-    """Nested Phase 2 (spec section 10; confirmed: allowed) -- and a real edge case this test run
+    """Nested Phase 2 (confirmed: allowed) -- and a real edge case this test run
     surfaced along the way, worth recording. Two disjoint mutually-blocked pairs {p0,p1}/{p2,p3}:
     find_candidate_groups' closures are a pure function of the static, pairwise interference
     tensor, so a group that is genuinely minimal where it was found is, by the same math, also
     irreducible within its own restricted (sub_interference) view -- there is no smaller sub-group
     to split out further. Concretely here: after {p0,p1} merges into auto_0 and is removed, the
-    remaining state is exactly {p2, p3} -- and the spec's own candidate rule requires `2 <= |A| <
-    |S|` (section 10), a *strict* less-than, so a dead end that is exactly a mutually-blocked pair
+    remaining state is exactly {p2, p3} -- and the candidate rule requires `2 <= |A| <
+    |S|`, a *strict* less-than, so a dead end that is exactly a mutually-blocked pair
     with nothing else present can never be merged (|A| would have to equal |S|). This is not a
     missing feature: merging "everything left" isn't a sub-assembly extraction, so the rule
     correctly excludes it -- the level reports locked. This test confirms _solve_pipeline handles
@@ -1311,7 +1386,7 @@ def test_r7(rec, args):
              f"(got status={plan.status!r})")
     rec.check(set(plan.locked_parts) == {"p2", "p3"},
              f"locked_parts names exactly the still-stuck pair (got {plan.locked_parts})")
-    rec.check(plan.sequence is None, "a locked level has no sequence (spec: 'no sequence for it')")
+    rec.check(plan.sequence is None, "a locked level has no sequence")
     rec.check("auto_0" in hier.containers and "auto_0" in hier.containers["child_level"].child_ids,
              "the first merge still committed for real (auto_0 fused and registered) even though "
              "the overall level ends up locked on what's left")

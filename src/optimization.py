@@ -1,18 +1,35 @@
 """Optimization (ACO): the lowest-cost assembly sequence through the AoG.
 
-Implements docs/optimization-spec.md. Ants walk the AoG from the root (full assembly) to the
-terminal (empty) over `live` nodes only, choosing at each node a live out-edge and one of its free
-directions. The walk is a disassembly path; every cost term is defined in assembly order (the
-edge leaving state S is assembly step t = popcount(S)) and only ever compares consecutive steps,
-so the walking direction does not matter.
+Cost terms M1-M8 and the ACO search; also computes the screw turn counts.
 
-Costs, not desirabilities: lower is better. Each enabled term is scaled to [0, 1] over a complete
-path and multiplied by its weight (pairwise dominance ranking, renormalized over the enabled
-terms). The ACO heuristic is eta = 1 / (eps + immediate cost + optional exact remaining static
-cost); pheromone (MAX-MIN Ant System) is one float32 per move (AoG edge, free direction) and the deposit is 1 / (eps + path cost).
+Inputs
+    - An `AoG` (graph of all feasible disassembly sequences, from aog_generator.py).
+    - The `InterferenceResult` (contacts, cache key) and `PreprocessingResult` (stander records, reduced
+      assembly, BOM path), used on the FreeCAD side to build the per-component data.
+    - The BOM CSV: `tool` (M3), `group` (M7) and `pitch` (screw turns) columns.
+    - An `OptimizationConfig` (which cost terms are on, weights, ACO parameters).
+    - Robot mode only: a set of forbidden (state mask, component) edges (`blocked_edges`).
+Outputs
+    - An `OptimizationResult`: the assembly sequence step by step (component, insertion direction,
+      travel, start offset, gravity, stability class, per-term costs), the total cost, the cost
+      breakdown and the ACO history. Cached as `optimization_result.json` and `assembly_sequence.txt`.
+      Consumed by the Illustration Generator.
+
+What this module does
+    Ants walk the AoG from the root (full assembly) to the terminal (empty) over `live` nodes only,
+    choosing at each node a live out-edge and then one of its free directions. The walk is a
+    disassembly path; every cost term is defined in assembly order (the edge leaving state S is assembly
+    step t = popcount(S)) and only ever compares consecutive steps, so the walking direction does not
+    matter.
+
+    Costs, not desirabilities: lower is better. Each enabled term is scaled to [0, 1] over a complete path
+    and multiplied by its weight (pairwise dominance ranking, renormalised over the enabled terms). The
+    ACO heuristic is eta = 1 / (eps + immediate cost + optional exact remaining static cost); pheromone
+    (MAX-MIN Ant System) is one float32 per move (AoG edge, free direction) and the deposit is
+    1 / (eps + path cost).
 
 Layout:
-  OptimizationConfig, resolve_weights, validate_config   configuration (spec section 3)
+  OptimizationConfig, resolve_weights, validate_config   configuration
   TermTables                                             per-component data + contact patches
   CostModel                                              cost terms, stability, Viterbi, DP (pure numpy)
   run_aco / optimize                                     the ACO itself (pure numpy, no FreeCAD)
@@ -40,6 +57,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 U64 = np.uint64
 
 # Cost terms in the order of the dominance matrix (A..G), with the flag that enables each.
+# travel = M1, direction_change = M2, tool_change = M3, size_contacts = M6, grouping = M7,
+# stability and gravity_change = M8.
 TERMS = ("travel", "direction_change", "tool_change", "size_contacts", "grouping", "stability",
          "gravity_change")
 FLAG_OF = {
@@ -51,7 +70,8 @@ FLAG_OF = {
     "stability": "use_stability",
     "gravity_change": "use_gravity_change",
 }
-# Pairwise dominance ranking (spec 3.2): 0 = row less important, 1 = equal, 2 = more important.
+# Pairwise dominance ranking: 0 = row less important, 1 = equal, 2 = more important.
+# The default weight of a term is its row sum divided by the total (DEFAULT_WEIGHTS below).
 DOMINANCE = np.array([
     [1, 0, 0, 0, 0, 0, 0],
     [2, 1, 0, 0, 0, 0, 1],
@@ -63,6 +83,7 @@ DOMINANCE = np.array([
 ])
 DEFAULT_WEIGHTS = {t: float(DOMINANCE[r].sum()) / DOMINANCE.sum() for r, t in enumerate(TERMS)}
 
+# The six axis directions: the default gravity candidates (the assembly may be built in any orientation).
 AXES6 = ((1.0, 0.0, 0.0), (-1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, -1.0, 0.0), (0.0, 0.0, 1.0),
          (0.0, 0.0, -1.0))
 
@@ -82,47 +103,62 @@ TABLES_VERSION = "2"  # bump when the term-table contents change
 
 @dataclass
 class OptimizationConfig:
-    # Criterion flags (spec 3.1)
-    use_travel: bool = True  # M1
-    use_direction_change: bool = True  # M2
-    use_tool_change: bool = True  # M3, needs the BOM `tool` column
-    use_size_contacts: bool = True  # M6
-    use_grouping: bool = True  # M7
-    use_stability: bool = True  # M8 class-1 penalty
-    use_gravity_change: bool = True  # M8 gravity change, needs use_stability
-    # Weight overrides, term name -> value; merged into DEFAULT_WEIGHTS, then renormalized.
+    """Settings of the optimisation (config input of `optimize` and `optimize_sequence`).
+
+    The cost-term flags select which criteria enter the sequence cost; the ACO fields tune the search.
+    """
+
+    # Criterion flags, all bool. Recommended: all True when the BOM has the needed columns.
+    use_travel: bool = True  # M1: total travel distance.
+    use_direction_change: bool = True  # M2: changes of insertion direction between consecutive steps.
+    use_tool_change: bool = True  # M3: tool changes between consecutive standers. Needs the BOM `tool` column.
+    use_size_contacts: bool = True  # M6: big/highly connected parts should go in early.
+    use_grouping: bool = True  # M7: members of one BOM group should be consecutive. Needs the `group` column.
+    use_stability: bool = True  # M8: class-1 penalty (part not supported when inserted).
+    use_gravity_change: bool = True  # M8: change of the gravity direction between steps. Needs use_stability.
+    # dict {term name: value} or None. Weight overrides, merged into DEFAULT_WEIGHTS then renormalised over
+    # the enabled terms. Recommended: None (dominance-ranking defaults).
     weights: dict[str, float] | None = None
-    # M2: same direction 0, same axis opposite sign = this ratio, other axis 1
+    # float >= 0. M2: same direction costs 0, same axis opposite sign costs this ratio, another axis costs 1.
+    # Recommended: 0.25.
     dir_change_axis_ratio: float = 0.25
-    # M6 mix (sum 1; any may be 0)
+    # floats, M6 mix of volume / area / number of contacts in the size score (sum 1; any may be 0).
+    # Recommended: 1/3 each.
     size_alpha: float = 1 / 3
     size_beta: float = 1 / 3
     size_gamma: float = 1 / 3
-    # M8
+    # M8: tuple of gravity candidates (unit vectors); the best one per step is chosen by Viterbi.
+    # Recommended: the six axes (AXES6).
     gravity_dirs: tuple = AXES6
+    # bool. M8: also count a part as unstable if one of its free insertion directions lets it fall under g.
+    # Recommended: True.
     stability_fall_test: bool = True
-    # "hull" (default, rigid-body assumption): CoG must lie in the convex hull of the projected
-    # load-bearing patches (bridging supports such as a block on two rails are stable).
+    # str, "hull" or "union". "hull" (default, rigid-body assumption): CoG must lie in the convex hull of
+    # the projected load-bearing patches (bridging supports such as a block on two rails are stable).
     # "union" (strict): CoG must lie in one of the patches themselves.
     support_region: str = "hull"
-    # ACO (spec 6.3-6.5); None = derived from N
-    # Optional: add the exact remaining static cost (M1 + M6, by DP) to eta. Off by default: the lookahead
-    # covers only the static terms, so the ants chase the static optimum (spec 6.3). Needed for travel-only.
+    # ACO; None = derived from N (the number of components).
+    # bool. Add the exact remaining static cost (M1 + M6, by DP) to eta. Off by default: the lookahead
+    # covers only the static terms, so the ants chase the static optimum. Needed for travel-only.
     use_cost_to_go: bool = False
-    alpha: float = 1.0
-    beta: float = 3.0
-    rho: float = 0.2
-    n_ants: int | None = None  # max(2N, 10)
-    n_iterations: int = 200
-    tau_min_ratio: float | None = None  # 1 / (2N)
-    stagnation_limit: int = 50
-    global_best_interval: int = 10  # every k-th iteration the global best deposits instead
-    seed: int = 0
-    force: bool = False  # recompute cached term tables and result
+    alpha: float = 1.0  # float. Pheromone exponent in the move probability. Recommended: 1.
+    beta: float = 3.0  # float. Heuristic (1 / cost) exponent. Recommended: 3.
+    rho: float = 0.2  # float in (0, 1). Pheromone evaporation rate. Recommended: 0.2.
+    n_ants: int | None = None  # int or None. Ants per iteration; None = max(2N, 10).
+    n_iterations: int = 200  # int. Maximum number of iterations. Recommended: 200.
+    tau_min_ratio: float | None = None  # float or None. MAX-MIN lower bound as a fraction of tau_max; None = 1 / (2N).
+    stagnation_limit: int = 50  # int. Stop after this many iterations without improvement.
+    global_best_interval: int = 10  # int. Every k-th iteration the global best deposits instead of the iteration best.
+    seed: int = 0  # int. Random seed (results are reproducible for a fixed seed).
+    force: bool = False  # bool. Recompute cached term tables and result.
 
 
 def resolve_weights(config: OptimizationConfig) -> dict[str, float]:
-    """Weights of the enabled terms, renormalized to sum to 1 (ratios kept)."""
+    """[AUX] Weights of the enabled terms, renormalised to sum to 1 (ratios kept).
+
+    Starts from DEFAULT_WEIGHTS, applies the config overrides, keeps only the enabled terms. Raises
+    ValueError for unknown terms, negative weights or a total weight of 0.
+    """
     raw = dict(DEFAULT_WEIGHTS)
     if config.weights:
         unknown = set(config.weights) - set(TERMS)
@@ -140,7 +176,11 @@ def resolve_weights(config: OptimizationConfig) -> dict[str, float]:
 
 
 def validate_config(config: OptimizationConfig, has_tool_column: bool, has_group_column: bool) -> None:
-    """Spec 3.1 validation; raises ValueError, never skips a term silently."""
+    """[AUX] Validation: raises ValueError for inconsistent settings, never skips a term silently.
+
+    Checks, for example, that at least one term is on, that M3/M7 have their BOM columns, and that the
+    ACO and support-region parameters are in range.
+    """
     if not any(getattr(config, FLAG_OF[t]) for t in TERMS):
         raise ValueError("At least one criterion flag must be True")
     if config.use_gravity_change and not config.use_stability:
@@ -169,27 +209,33 @@ def validate_config(config: OptimizationConfig, has_tool_column: bool, has_group
 
 @dataclass
 class TermTables:
-    component_ids: list[str]  # AoG order (bit index)
-    volume: np.ndarray  # (N,) mm^3
-    area: np.ndarray  # (N,) mm^2
-    contact: np.ndarray  # (N, N) bool, symmetric; Nb_i = contact[i].sum()
-    cog: np.ndarray  # (N, 3) centre of gravity, mm
-    tool: list[str | None]  # BOM `tool` (standers; None if blank or absent)
-    group: list[str | None]  # BOM `group` (None if blank or absent)
-    pitch: list[float | None]  # BOM `pitch`, mm/turn (screw/nut rows only; None if blank/non-positive/absent)
-    has_tool_column: bool
-    has_group_column: bool
-    # i < j -> (tri (T, 3, 3), normal (T, 3)); normal = outward normal of j's surface, i.e. pointing
-    # from j into i. None = not computed (stability off).
+    """Per-component data the cost terms need (input of `CostModel`; built by `collect_tables`).
+
+    Everything is indexed in AoG component order (the bit index), so the cost model needs no FreeCAD.
+    """
+
+    component_ids: list[str]  # list of obj.Name in AoG order (bit index); must equal aog.component_ids.
+    volume: np.ndarray  # (N,) float, mm^3. Component volume (M6 size score).
+    area: np.ndarray  # (N,) float, mm^2. Component surface area (M6 size score).
+    contact: np.ndarray  # (N, N) bool, symmetric. Touching pairs; Nb_i = contact[i].sum() (M6).
+    cog: np.ndarray  # (N, 3) float, mm. Centre of gravity (M8 stability).
+    tool: list[str | None]  # BOM `tool` per component (standers; None if blank or absent). M3.
+    group: list[str | None]  # BOM `group` per component. M7. A component with no BOM group gets its own label.
+    pitch: list[float | None]  # BOM `pitch`, mm/turn (screw/nut rows only; None if blank, non-positive or absent). Display of turns.
+    has_tool_column: bool  # bool. The BOM has a `tool` column (validation of use_tool_change).
+    has_group_column: bool  # bool. The BOM has a `group` column (validation of use_grouping).
+    # Dict {(i, j) with i < j: (tri (T, 3, 3), normal (T, 3))}. Contact patches as triangles; normal = outward
+    # normal of j's surface, i.e. pointing from j into i. None = not computed (stability off).
     patches: dict[tuple[int, int], tuple[np.ndarray, np.ndarray]] | None = None
-    cache_key: str = ""
+    cache_key: str = ""  # str. Key of the cached tables (also part of the result's config hash).
 
     @property
     def n_contacts(self) -> np.ndarray:
+        """[AUX] (N,) number of contacts of each component (the Nb of the M6 size score)."""
         return np.asarray(self.contact, dtype=bool).sum(axis=1)
 
     def contact_triangles(self, i: int, j: int) -> tuple[np.ndarray, np.ndarray]:
-        """Contact triangles between i and j with normals pointing from j into i."""
+        """[AUX] Contact triangles between i and j with normals pointing from j into i (empty if none stored)."""
         empty = (np.zeros((0, 3, 3)), np.zeros((0, 3)))
         if not self.patches:
             return empty
@@ -205,11 +251,12 @@ class TermTables:
 
 
 def _bits(mask: int, n: int) -> list[int]:
+    """[AUX] Indices of the set bits of `mask` among the first n bits."""
     return [b for b in range(n) if (mask >> b) & 1]
 
 
 def _plane_basis(g: np.ndarray) -> np.ndarray:
-    """(3, 2) orthonormal basis of the plane perpendicular to g."""
+    """[AUX] (3, 2) orthonormal basis of the plane perpendicular to g (to project patches along gravity)."""
     a = np.array([1.0, 0.0, 0.0]) if abs(g[0]) < 0.9 else np.array([0.0, 1.0, 0.0])
     u = a - a.dot(g) * g
     u /= np.linalg.norm(u)
@@ -217,7 +264,7 @@ def _plane_basis(g: np.ndarray) -> np.ndarray:
 
 
 def _point_in_triangles(P: np.ndarray, p: np.ndarray, tol: float = 1e-9) -> bool:
-    """True if 2D point p lies in any of the triangles P (T, 3, 2)."""
+    """[AUX] True if the 2D point p lies in any of the triangles P (T, 3, 2) (barycentric test)."""
     a = P[:, 0]
     v0, v1, w = P[:, 1] - a, P[:, 2] - a, p - a
     d00, d01, d11 = (v0 * v0).sum(1), (v0 * v1).sum(1), (v1 * v1).sum(1)
@@ -231,7 +278,7 @@ def _point_in_triangles(P: np.ndarray, p: np.ndarray, tol: float = 1e-9) -> bool
 
 
 def _convex_hull(pts: np.ndarray) -> np.ndarray:
-    """2D convex hull (Andrew's monotone chain), counter-clockwise, no repeated end point."""
+    """[AUX] 2D convex hull (Andrew's monotone chain), counter-clockwise, no repeated end point."""
     pts = np.unique(np.round(pts, 9), axis=0)
     if len(pts) <= 2:
         return pts
@@ -252,7 +299,7 @@ def _convex_hull(pts: np.ndarray) -> np.ndarray:
 
 
 def _point_in_hull(pts: np.ndarray, p: np.ndarray, tol: float = HULL_TOL) -> bool:
-    """True if 2D point p lies in the convex hull of pts or within `tol` of it.
+    """[AUX] True if the 2D point p lies in the convex hull of pts or within `tol` of it.
 
     The tolerance makes degenerate hulls usable: a line contact (cylinder on a plane) or a point
     contact supports a CoG that lies on it within `tol`.
@@ -277,12 +324,15 @@ def _point_in_hull(pts: np.ndarray, p: np.ndarray, tol: float = HULL_TOL) -> boo
 
 
 class NoPathError(ValueError):
-    """Robot mode: the blocked edges leave no root-to-terminal path (docs/robotic-gripper_spec.md 6.1)."""
+    """Robot mode: the blocked edges leave no root-to-terminal path."""
 
 
 def blocked_liveness(aog, blocked_edges) -> tuple[np.ndarray, np.ndarray]:
-    """(edge_ok, live) with the (state mask, component) edges in `blocked_edges` removed: edge_ok[e] is
-    False for a blocked edge, live[v] is True iff v reaches the terminal over the remaining edges."""
+    """[AUX] Robot mode: liveness of the AoG with the forbidden edges removed. Returns (edge_ok, live).
+
+    `blocked_edges` are (state mask, component) pairs. edge_ok[e] is False for a blocked edge; live[v] is
+    True iff node v still reaches the terminal over the remaining edges (computed level by level).
+    """
     blocked = {(int(s), int(c)) for s, c in blocked_edges}
     src_mask = aog.node_mask[aog.edge_src]
     edge_ok = np.array([(int(m), int(c)) not in blocked for m, c in zip(src_mask, aog.edge_comp)], dtype=bool)
@@ -298,20 +348,33 @@ def blocked_liveness(aog, blocked_edges) -> tuple[np.ndarray, np.ndarray]:
 
 
 def blocked_key(blocked_edges) -> str:
-    """Canonical text of a blocked-edge set, for cache keys."""
+    """[SUPP] Canonical text of a blocked-edge set, for cache keys."""
     return ";".join(f"{int(s)}:{int(c)}" for s, c in sorted({(int(s), int(c)) for s, c in blocked_edges}))
 
 
 class CostModel:
-    """All cost terms of the spec on one AoG; pure numpy (the geometry is in `tables`).
+    """All cost terms on one AoG; pure numpy (the geometry is in `tables`).
 
     Internal ("ACO") path cost: sum over enabled terms of weight * term, with M1/M6 divided by
-    their DP range but without subtracting the DP minimum (spec section 5). The reported cost
+    their DP range but without subtracting the DP minimum. The reported cost
     subtracts that constant offset, so every reported normalized term lies in [0, 1].
+
+    Used by `run_aco` (immediate move costs `move_costs`, path costs `evaluate`) and by `dp_optimum`
+    (exact optimum of the static terms, a reference).
     """
 
     def __init__(self, aog, tables: TermTables, config: OptimizationConfig,
                  blocked_edges: set[tuple[int, int]] | None = None):
+        """[MAIN] Precompute everything the cost terms need from the AoG, the term tables and the config.
+
+        This is where each term's normalisation is fixed: the min and max of the additive terms (M1 travel,
+        M6 size) over all complete paths come from an exact DP over the live layers, and each term gets a
+        per-unit weight (c_travel, c_size, c_dir, c_tool, c_group, c_stab, c_grav) so that its normalised
+        value lies in [0, 1]. Also builds the live-edge CSR, the move numbering (one pheromone value per
+        edge and free direction), the key ids of the tool/group terms and the gravity tables.
+        Raises ValueError for an incomplete AoG or inconsistent tables, NoPathError in robot mode when
+        the blocked edges disconnect the root from the terminal.
+        """
         validate_config(config, tables.has_tool_column, tables.has_group_column)
         if not aog.complete:
             raise ValueError("The AoG is incomplete (root cannot reach the terminal); nothing to optimize")
@@ -335,7 +398,7 @@ class CostModel:
         self.popcount = (N - aog.node_level.astype(np.int64))  # t of the out-edges of each node
 
         # Live edges in CSR form (edges are sorted by src, so the filtered list stays sorted).
-        # Robot mode (docs/robotic-gripper_spec.md 6.1): forbidden (state, component) edges are dropped
+        # Robot mode: forbidden (state, component) edges are dropped
         # and node liveness recomputed without them; None/empty leaves this exactly as before.
         live, edge_ok = aog.live, None
         if blocked_edges:
@@ -352,6 +415,7 @@ class CostModel:
         self.move_ptr = np.concatenate(([0], np.cumsum(np.bitwise_count(self.edge_dirs)))).astype(np.int64)
         self.n_moves = int(self.move_ptr[-1])
 
+        # Input checks: M3 needs a tool on every stander, M7 a group on every part.
         if self.n_standers and config.use_tool_change:
             missing = [aog.component_labels[c] for c in np.flatnonzero(self.is_stander)
                        if not tables.tool[c]]
@@ -377,6 +441,7 @@ class CostModel:
         edge_size = self.size[self.edge_comp] * self.popcount[aog.edge_src] / N
         self.size_lo, self.size_hi = self._dp_value(edge_size, "min"), self._dp_value(edge_size, "max")
 
+        # Per-unit weight of each term: weight divided by the range its raw value can take.
         def per_unit(term, rng):
             return w[term] / rng if term in w and rng > 0 else 0.0
 
@@ -400,7 +465,7 @@ class CostModel:
         gmask = {g: sum(1 << c for c in range(N) if keys[c] == g) for g in groups}
         self.group_mask = np.array([gmask[g] for g in keys], dtype=U64)
 
-        # Cost-to-go (spec 6.3): exact min remaining static cost (M1 + M6) from each node.
+        # Cost-to-go: exact min remaining static cost (M1 + M6) from each node.
         self.cost_to_go = None
         if config.use_cost_to_go and (self.c_travel or self.c_size):
             self.cost_to_go = self._dp_table(self._static_edge_cost(tmin), "min")
@@ -416,7 +481,7 @@ class CostModel:
     # -- DP helpers --------------------------------------------------------------------------
 
     def _edge_travel_minmax(self):
-        """Per edge: min and max travel over its free directions, and the argmin direction."""
+        """[AUX] Per edge: min and max travel over its free directions, and the argmin direction."""
         E = self.aog.n_edges
         tmin, tmax = np.full(E, np.inf), np.full(E, -np.inf)
         kmin = np.zeros(E, dtype=np.int64)
@@ -430,7 +495,10 @@ class CostModel:
         return tmin, tmax, kmin
 
     def _dp_table(self, cost_e: np.ndarray, mode: str) -> np.ndarray:
-        """best[v]: min (or max) additive cost from node v to the terminal over live edges."""
+        """[AUX] best[v]: min (or max) additive cost from node v to the terminal over live edges.
+
+        Backward dynamic programming, one AoG level at a time, with the per-edge cost `cost_e`.
+        """
         aog = self.aog
         best = np.full(aog.n_nodes, np.inf if mode == "min" else -np.inf)
         best[aog.terminal] = 0.0
@@ -442,18 +510,19 @@ class CostModel:
         return best
 
     def _dp_value(self, cost_e: np.ndarray, mode: str) -> float:
+        """[AUX] DP value at the root: the min (or max) total of `cost_e` over complete paths."""
         return float(self._dp_table(cost_e, mode)[self.aog.root])
 
     def _static_edge_cost(self, tmin: np.ndarray) -> np.ndarray:
-        """Weighted static cost (M1 at the edge's best direction + M6) of every edge."""
+        """[AUX] Weighted static cost (M1 at the edge's best direction + M6) of every edge."""
         return (self.c_travel * tmin
                 + self.c_size * self.size[self.edge_comp] * self.popcount[self.aog.edge_src] / self.N)
 
     def dp_optimum(self) -> tuple[np.ndarray, np.ndarray]:
-        """Exact optimum of the static terms (M1 + M6) by DP: (edge path, removal directions).
+        """[AUX] Exact optimum of the static terms (M1 + M6) by DP: (edge path, removal directions).
 
-        The exact reference of spec section 8 when only use_travel / use_size_contacts are on;
-        with other terms enabled it is only the optimum of the static part.
+        The exact reference when only use_travel / use_size_contacts are on;
+        with other terms enabled it is only the optimum of the static part. Used to check the ACO.
         """
         aog = self.aog
         tmin, _, kmin = self._edge_travel_minmax()
@@ -472,23 +541,30 @@ class CostModel:
     # -- terms -------------------------------------------------------------------------------
 
     def move_ids(self, edges, ks) -> np.ndarray:
-        """Pheromone index of the moves (edge, direction)."""
+        """[AUX] Pheromone index of the moves (edge, direction): the edge's offset plus the rank of k among its free directions."""
         below = self.edge_dirs[edges] & ((U64(1) << np.asarray(ks).astype(U64)) - U64(1))
         return self.move_ptr[edges] + np.bitwise_count(below).astype(np.int64)
 
     def _edge_ks(self, e: int) -> np.ndarray:
+        """[AUX] Indices of the free directions of edge e."""
         word = int(self.edge_dirs[e])
         return np.array([k for k in range(self.Dp) if (word >> k) & 1], dtype=np.int64)
 
     def _dir_levels(self, prev_k: np.ndarray, k: np.ndarray) -> np.ndarray:
-        """M2 level between consecutive directions (removal or insertion, same relations):
-        same 0, same axis opposite sign dir_change_axis_ratio, other axis 1."""
+        """[AUX] M2 level between consecutive directions (removal or insertion, same relations).
+
+        Same direction 0, same axis opposite sign `dir_change_axis_ratio`, other axis 1.
+        prev_k < 0 means "no previous step" and costs 0.
+        """
         prev_safe = np.where(prev_k >= 0, prev_k, 0)
         lvl = np.where(self.neg[prev_safe] == k, self.config.dir_change_axis_ratio, 1.0)
         return np.where((prev_k < 0) | (prev_k == k), 0.0, lvl)
 
     def stability_classes(self, e: int) -> np.ndarray:
-        """class1[g] for inserting edge e's component into the state without it (cached by (S, i))."""
+        """[AUX] class1[g] for inserting edge e's component into the state without it, per gravity candidate.
+
+        Class 1 (True) = not supported or able to fall (M8 penalty). Cached by (state, component).
+        """
         S, i = int(self.aog.node_mask[self.aog.edge_src[e]]), int(self.edge_comp[e])
         key = (S, i)
         cls = self.stability_cache.get(key)
@@ -504,8 +580,11 @@ class CostModel:
         return cls
 
     def _supported(self, i: int, present: int) -> np.ndarray:
-        """supported[g]: CoG of i, projected along g, lies in the support region of the patches
-        between i and the present components whose normal opposes g."""
+        """[AUX] supported[g]: is the CoG of i, projected along g, inside the support region?
+
+        The support region is built from the contact patches between i and the present components whose
+        normal opposes g (the load-bearing ones): their convex hull ("hull") or their union ("union").
+        """
         tris, normals = [], []
         for j in _bits(present, self.N):
             tri, normal = self.tables.contact_triangles(i, j)
@@ -527,23 +606,30 @@ class CostModel:
         return out
 
     def move_costs(self, edges, ks, prev_comp, prev_dir, last_tool) -> np.ndarray:
-        """Weighted immediate cost of moves (edge, direction) given the ant memory (spec 6.3).
+        """[MAIN] Weighted immediate cost of moves (edge, direction) given the ant's memory.
 
-        Walk order is disassembly: the previous move is assembly step t + 1. History terms
+        Inputs: arrays over the candidate moves of all ants: the AoG edge, the removal direction, the
+        previous component and direction of the ant that owns the move, and its last tool. Output: the
+        cost of each move, which feeds the heuristic eta = 1 / (eps + cost) of the ACO.
+
+        Walk order is disassembly: the previous move is assembly step t + 1, so history terms (M2, M3, M7)
         are charged on the pair (t, t + 1); stability uses the min over g (no switching). With
-        use_cost_to_go the exact remaining static cost from the move's destination is added
-        (minus that of its source).
+        use_cost_to_go the exact remaining static cost from the move's destination is added (minus that
+        of its source).
         """
         aog = self.aog
         comp = self.edge_comp[edges]
         src = aog.edge_src[edges]
         c = np.zeros(len(edges))
+        # M1 travel and M6 size: static terms of the move itself.
         if self.c_travel:
             c += self.c_travel * self.travel[comp, ks]
         if self.c_size:
             c += self.c_size * self.size[comp] * self.popcount[src] / self.N
+        # M2: direction change relative to the ant's previous move.
         if self.c_dir:
             c += self.c_dir * self._dir_levels(prev_dir, ks)
+        # M3: tool change between consecutive standers.
         if self.c_tool:
             c += self.c_tool * (self.is_stander[comp] & (last_tool >= 0) & (self.tool_id[comp] != last_tool))
         if self.c_group:
@@ -552,6 +638,7 @@ class CostModel:
             pc = np.where(has, prev_comp, 0)
             unfinished = (self.group_mask[comp] & ~aog.node_mask[src]) != 0
             c += self.c_group * (has & (self.group_id[pc] != self.group_id[comp]) & unfinished)
+        # M8: penalty if the part is class 1 (unsupported / able to fall) for every gravity candidate.
         if self.c_stab:
             uniq, inv = np.unique(edges, return_inverse=True)
             all1 = np.array([self.stability_classes(int(e)).all() for e in uniq])
@@ -564,7 +651,11 @@ class CostModel:
         return c
 
     def _gravity_viterbi(self, cls: np.ndarray) -> tuple[np.ndarray, float]:
-        """Exact best gravity sequence for class1 table cls (N, G) in assembly order."""
+        """[AUX] Exact best gravity sequence for the class-1 table cls (N, G) in assembly order (Viterbi).
+
+        Minimises the sum of the stability penalties plus the cost of switching gravity between steps.
+        Returns (gravity index per step, total cost).
+        """
         unary = self.c_stab * cls.astype(float)
         if not self.c_grav:
             g = np.argmin(unary, axis=1)
@@ -583,6 +674,7 @@ class CostModel:
         return g, float(D.min())
 
     def check_path(self, edges: np.ndarray, ks: np.ndarray) -> None:
+        """[AUX] Validate that (edges, ks) is a complete root-to-terminal path with free directions (ValueError if not)."""
         aog = self.aog
         if len(edges) != self.N or len(ks) != self.N:
             raise ValueError(f"A path needs exactly N = {self.N} edges")
@@ -594,9 +686,13 @@ class CostModel:
             raise ValueError("A direction is not free on its edge")
 
     def evaluate(self, edges, ks) -> dict:
-        """Exact cost of a walk-order path (edges, removal directions), incl. the gravity Viterbi.
+        """[MAIN] Exact cost of a complete path given in walk order (edges, removal directions).
 
-        Returns per-step arrays in assembly order (index s = step t - 1).
+        Inputs: the AoG edge ids and removal-direction indices of a root-to-terminal path (the order an ant
+        walked it). Output: a dict with `internal_cost` (what the ACO compares), `total_cost` (reported,
+        = internal - offset, in [0, 1]), the raw and normalised value of each term, the per-step
+        weighted contributions (`steps`), the gravity chosen at each step by Viterbi and the stability
+        class (1 or 2) of each insertion. Arrays are in assembly order (index s = step t - 1).
         """
         edges, ks = np.asarray(edges, dtype=np.int64), np.asarray(ks, dtype=np.int64)
         self.check_path(edges, ks)
@@ -610,6 +706,7 @@ class CostModel:
         norm: dict[str, float] = {}
         n1 = max(N - 1, 1)
 
+        # Each enabled term: raw value over the path, its normalisation to [0, 1], per-step weighted cost.
         if "travel" in self.weights:
             v = self.travel[comp, k_a]
             raw["travel"] = float(v.sum())
@@ -646,6 +743,7 @@ class CostModel:
             steps["grouping"] = self.c_group * v
         gravity = cls_at = None
         if "stability" in self.weights:
+            # M8: the best gravity sequence by Viterbi, then the class-1 count and the gravity changes along it.
             cls = np.array([self.stability_classes(int(e)) for e in e_a])  # (N, G)
             gravity, _ = self._gravity_viterbi(cls)
             cls_at = cls[np.arange(N), gravity]
@@ -677,9 +775,10 @@ class CostModel:
 
 
 def _sample_segments(logw: np.ndarray, starts: np.ndarray, rng, ends: np.ndarray | None = None) -> np.ndarray:
-    """One index per segment [starts[s], ends[s]) drawn with probability proportional to exp(logw).
+    """[AUX] Roulette-wheel draw, vectorised: one index per segment [starts[s], ends[s]) with probability proportional to exp(logw).
 
-    Without `ends`, the segments are contiguous and cover logw (ends = next start).
+    Without `ends`, the segments are contiguous and cover logw (ends = next start). Used to pick the edge
+    of every ant, and then its direction, in one numpy pass.
     """
     if ends is None:
         ends = np.append(starts[1:], len(logw))
@@ -697,9 +796,15 @@ def _sample_segments(logw: np.ndarray, starts: np.ndarray, rng, ends: np.ndarray
 
 
 def _walk(model: CostModel, n_ants: int, tau=None, rng=None, alpha=1.0, beta=3.0, greedy=False):
-    """All ants walk root -> terminal in lockstep (every path has exactly N edges).
+    """[MAIN] All ants walk root -> terminal in lockstep (every path has exactly N edges).
 
-    Returns (edges (A, N), removal directions (A, N)) in walk (disassembly) order.
+    Inputs: the cost model, the number of ants, the pheromone vector `tau` (one float32 per move), the
+    random generator, the exponents alpha (pheromone) and beta (heuristic), and `greedy` (a single ant that
+    always takes the cheapest move; used to seed the best path). Output: (edges (A, N), removal directions
+    (A, N)) in walk (disassembly) order.
+
+    At each step every ant lists its live out-edges, expands each into its free directions, computes the
+    immediate cost of every move and chooses one with probability proportional to tau^alpha * (1/(eps+cost))^beta.
     """
     aog, N, A = model.aog, model.N, n_ants
     node = np.full(A, aog.root, dtype=np.int64)
@@ -717,7 +822,7 @@ def _walk(model: CostModel, n_ants: int, tau=None, rng=None, alpha=1.0, beta=3.0
         owner_e = np.repeat(ants, cnt)
         within = np.arange(cnt.sum()) - np.repeat(np.cumsum(cnt) - cnt, cnt)
         cand = model.lv_edges[np.repeat(start, cnt) + within]
-        # Expand each edge into its free directions.
+        # Expand each edge into its free directions and cost every resulting move.
         r, k = np.nonzero(((model.edge_dirs[cand][:, None] >> bitk) & U64(1)).astype(bool))
         owner, e = owner_e[r], cand[r]
         c = model.move_costs(e, k, prev_comp[owner], prev_dir[owner], last_tool[owner])
@@ -735,6 +840,7 @@ def _walk(model: CostModel, n_ants: int, tau=None, rng=None, alpha=1.0, beta=3.0
             row = _sample_segments(edge_logw, np.searchsorted(owner_e, ants), rng)
             pick = _sample_segments(logw, move_starts[row], rng,
                                     np.append(move_starts, len(logw))[row + 1])
+        # Advance every ant along its chosen move and update its memory (previous component, direction, tool).
         e_pick, k_pick = e[pick], k[pick]
         comp = model.edge_comp[e_pick]
         path_e[:, step], path_k[:, step] = e_pick, k_pick
@@ -745,7 +851,17 @@ def _walk(model: CostModel, n_ants: int, tau=None, rng=None, alpha=1.0, beta=3.0
 
 
 def run_aco(model: CostModel) -> tuple[np.ndarray, np.ndarray, dict, dict]:
-    """MAX-MIN Ant System over the AoG (spec 6.4). Returns (edges, dirs, evaluation, history)."""
+    """[MAIN] MAX-MIN Ant System over the AoG.
+
+    Input: a `CostModel`. Output: (edges, removal directions, evaluation dict, history dict) of the best
+    path found, in walk order.
+
+    Starts from a greedy path (which also sets tau_max), then each iteration sends `n_ants` ants, evaluates
+    their exact path costs, evaporates the pheromone, lets the iteration best (or, every
+    `global_best_interval` iterations, the global best) deposit 1 / (eps + cost) on its moves, and clips the
+    pheromone to [tau_min, tau_max]. Stops after `n_iterations` or `stagnation_limit` iterations without
+    improvement.
+    """
     cfg, N = model.config, model.N
     t0 = time.perf_counter()
     rng = np.random.default_rng(cfg.seed)
@@ -753,12 +869,14 @@ def run_aco(model: CostModel) -> tuple[np.ndarray, np.ndarray, dict, dict]:
     ratio = cfg.tau_min_ratio if cfg.tau_min_ratio is not None else 1.0 / (2 * N)
     evals: dict[bytes, dict] = {}
 
+    # Memoised path evaluation: the same path is often found many times.
     def evaluate(pe, pk):
         key = pe.tobytes() + pk.tobytes()
         if key not in evals:
             evals[key] = model.evaluate(pe, pk)
         return evals[key]
 
+    # Initial best: the greedy path; its cost defines tau_max and the initial pheromone.
     ge, gk = _walk(model, 1, greedy=True)
     best_e, best_k = ge[0], gk[0]
     best = evaluate(best_e, best_k)
@@ -768,6 +886,7 @@ def run_aco(model: CostModel) -> tuple[np.ndarray, np.ndarray, dict, dict]:
     history_cost, stagnation, stop = [], 0, "iterations"
     it = 0
     for it in range(cfg.n_iterations):
+        # One iteration: all ants walk, then keep the iteration best and update the global best.
         pe, pk = _walk(model, n_ants, tau, rng, cfg.alpha, cfg.beta)
         results = [evaluate(pe[a], pk[a]) for a in range(n_ants)]
         costs = np.array([r["internal_cost"] for r in results])
@@ -778,6 +897,8 @@ def run_aco(model: CostModel) -> tuple[np.ndarray, np.ndarray, dict, dict]:
             stagnation += 1
         history_cost.append(best["total_cost"])
 
+        # Pheromone update: evaporation, one deposit (iteration best, or global best every k-th
+        # iteration), then clipping to the MAX-MIN bounds.
         tau *= (1.0 - cfg.rho)
         if cfg.global_best_interval and (it + 1) % cfg.global_best_interval == 0:
             dep_e, dep_k, dep_c = best_e, best_k, best["internal_cost"]
@@ -814,16 +935,23 @@ def run_aco(model: CostModel) -> tuple[np.ndarray, np.ndarray, dict, dict]:
 
 @dataclass
 class OptimizationResult:
-    steps: list[dict]  # assembly order
-    total_cost: float  # sum of weighted normalized terms, in [0, 1]
-    cost_breakdown: dict[str, dict]  # term -> raw, normalized, weight, weighted
-    history: dict
-    config_hash: str
-    edge_path: list[int] = field(default_factory=list)  # AoG edges, disassembly (walk) order
-    removal_directions: list[int] = field(default_factory=list)  # walk order
+    """The optimised assembly sequence (output of `optimize` / `optimize_sequence`; input of the Illustration Generator)."""
+
+    # list of dicts, assembly order. Per step: component, ids and labels, is_stander, AoG edge, insertion
+    # direction (index and vector), travel (mm), start_offset (final position + offset = start point),
+    # gravity and stability class (None if stability is off), per-term costs, and, added later,
+    # turns/turns_pitch/turns_note/turns_nut_label for screws and nuts.
+    steps: list[dict]
+    total_cost: float  # float in [0, 1]. Sum of the weighted normalised terms.
+    cost_breakdown: dict[str, dict]  # {term: {raw, normalized, weight, weighted}}, for the report.
+    history: dict  # ACO history: best cost per iteration, greedy cost, iterations, stop reason, wall time...
+    config_hash: str  # str. Hash of the AoG, tables, config and blocked edges; identifies the cached result.
+    edge_path: list[int] = field(default_factory=list)  # AoG edge ids, disassembly (walk) order.
+    removal_directions: list[int] = field(default_factory=list)  # removal direction index per edge, walk order.
 
 
 def _build_result(model: CostModel, edges, ks, ev: dict, history: dict, config_hash: str) -> OptimizationResult:
+    """[AUX] Turn the best path and its evaluation into an `OptimizationResult` (assembly order, insertion directions)."""
     aog, N = model.aog, model.N
     e_a, k_a = edges[::-1], ks[::-1]
     steps = []
@@ -865,13 +993,13 @@ def _build_result(model: CostModel, edges, ks, ev: dict, history: dict, config_h
 
 
 def _apply_turns(aog, prep, tables: TermTables, steps: list[dict]) -> None:
-    """Add `turns`/`turns_pitch`/`turns_note`/`turns_nut_label` to each step, in place (display
-    only -- docs/stander_processing-spec.md section 12; the ACO cost and the AoG are unaffected).
+    """[AUX] Add `turns`, `turns_pitch`, `turns_note` and `turns_nut_label` to each step, in place.
 
-    `turns_nut_label` is an extra field beyond the spec's literal 3 (`turns`, `turns_pitch`,
-    `turns_note`): the "partner rotates" case (12.2 row 3) needs the responsible nut's label for
-    the output text (12.4, "thread of nut <label>"), and no listed field carries it, so it is
-    added here rather than re-derived twice downstream.
+    Display only: how many turns a screw, or the nut that
+    drives it, must be rotated (travel / thread pitch). The ACO cost and the AoG are unaffected. Rows of
+    A screw turns on its own step; a nut turns on its own step if its partner left first;
+    otherwise the partner (if not a screw) turns, and `turns_nut_label` names the responsible nut for
+    the output text ("thread of nut <label>").
     """
     index = {cid: i for i, cid in enumerate(aog.component_ids)}
     step_of = {s["component"]: i for i, s in enumerate(steps)}
@@ -927,6 +1055,7 @@ def _apply_turns(aog, prep, tables: TermTables, steps: list[dict]) -> None:
 
 
 def compute_config_hash(aog, tables: TermTables, config: OptimizationConfig, blocked_edges=None) -> str:
+    """[SUPP] Cache key of the result: hash of the AoG key, table key, config (without `force`), weights and blocked edges."""
     cfg = asdict(config)
     cfg.pop("force")
     h = hashlib.sha256()
@@ -940,10 +1069,14 @@ def compute_config_hash(aog, tables: TermTables, config: OptimizationConfig, blo
 
 def optimize(aog, tables: TermTables, config: OptimizationConfig | None = None,
              stability_cache: dict | None = None, blocked_edges=None) -> OptimizationResult:
-    """Run the ACO on an AoG with ready term tables (pure numpy, no FreeCAD, no disk cache).
+    """[MAIN] Run the ACO on an AoG with ready term tables (pure numpy, no FreeCAD, no disk cache).
 
-    `blocked_edges`: optional set of (state mask, component) AoG edges the sequence must not use (robot
-    mode, docs/robotic-gripper_spec.md 6.1); raises NoPathError when they leave no path."""
+    Inputs: the AoG, the `TermTables`, the config, an optional pre-filled stability cache (so repeated runs
+    skip the geometry-free support tests) and `blocked_edges`: optional set of (state mask, component) AoG
+    edges the sequence must not use (robot mode). Output: an
+    `OptimizationResult`; its history carries the stability cache back for the caller to save. Raises
+    NoPathError when the blocked edges leave no path.
+    """
     config = config or OptimizationConfig()
     model = CostModel(aog, tables, config, blocked_edges=blocked_edges)
     if stability_cache:
@@ -957,6 +1090,7 @@ def optimize(aog, tables: TermTables, config: OptimizationConfig | None = None,
 
 
 def _log_summary(result: OptimizationResult) -> None:
+    """[SUPP] Log the cost, the ACO run summary, the breakdown and one line per step."""
     h = result.history
     log.info("Optimization: total cost %.4f (greedy %.4f), %d iterations x %d ants, stopped by %s, "
              "%d distinct paths, %.2f s", result.total_cost, h["greedy_cost"], h["iterations"], h["n_ants"],
@@ -970,13 +1104,16 @@ def _log_summary(result: OptimizationResult) -> None:
 
 
 def _fmt_vec(v) -> str:
+    """[SUPP] Format a vector with up to 3 decimals for logs and the text sequence."""
     return "(" + ", ".join(f"{round(float(c), 3) + 0.0:g}" for c in v) + ")"
 
 
 def _fmt_turns_text(s: dict, decimals: int) -> str:
-    """docs/stander_processing-spec.md 12.4: the turns clause for one step, or "" if `turns` is
-    None. `decimals` controls the turns count only (2 for assembly_sequence.txt, 1 for the
-    manual); the pitch is shown as given, not padded."""
+    """[SUPP] Text of the turns clause of one step, or "" if `turns` is None.
+
+    `decimals` controls the turns count only (2 for assembly_sequence.txt, 1 for the manual); the pitch
+    is shown as given, not padded.
+    """
     turns = s.get("turns")
     if turns is None:
         return ""
@@ -994,6 +1131,7 @@ def _fmt_turns_text(s: dict, decimals: int) -> str:
 
 
 def _read_bom(bom_path) -> tuple[list[str], dict[str, dict], bytes]:
+    """[AUX] Read the BOM: (column names, {label: row dict}, raw bytes for the cache key). Needs `label` and `is_stander` columns."""
     data = Path(bom_path).read_bytes()
     with open(bom_path, newline="", encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
@@ -1009,13 +1147,14 @@ def _read_bom(bom_path) -> tuple[list[str], dict[str, dict], bytes]:
 
 
 def _component_shapes(aog, prep) -> list:
-    """Global shapes in AoG order (shared helper in shapes.py)."""
+    """[AUX] Global shapes in AoG order (shared helper in shapes.py)."""
     from shapes import component_shapes
 
     return component_shapes(aog.component_ids, aog.is_stander, prep)
 
 
 def _center_of_mass(shape) -> list[float]:
+    """[AUX] Volume-weighted centre of mass of a shape (over its solids), as [x, y, z]."""
     solids = shape.Solids
     if not solids:
         raise ValueError("Component shape has no solid; cannot compute its centre of gravity")
@@ -1025,8 +1164,10 @@ def _center_of_mass(shape) -> list[float]:
 
 
 def _contact_matrix(aog, interference_result, prep) -> np.ndarray:
-    """Same contact graph as the AoG connectivity rule: interference contacts between movable
-    parts plus StanderRecord.contact_neighbors."""
+    """[AUX] (N, N) contact matrix in AoG order: the same contact graph as the AoG connectivity rule.
+
+    Interference contacts between movable parts plus `StanderRecord.contact_neighbors`.
+    """
     if getattr(interference_result, "contact", None) is None:
         raise ValueError("InterferenceResult has no contact matrix; re-run identify_interferences")
     N = aog.n_components
@@ -1043,6 +1184,7 @@ def _contact_matrix(aog, interference_result, prep) -> np.ndarray:
 
 
 def _common_faces(fa, fb) -> list:
+    """[AUX] Faces of the boolean common of two faces larger than AREA_EPS ([] if OCC fails)."""
     try:
         return [f for f in fa.common(fb).Faces if f.Area > AREA_EPS]
     except Exception:  # noqa: BLE001  (OCC boolean failure: fall back to tessellation)
@@ -1050,6 +1192,7 @@ def _common_faces(fa, fb) -> list:
 
 
 def _triangles(face, deflection: float) -> np.ndarray:
+    """[AUX] Tessellate a face into triangles, (T, 3, 3) array of vertex coordinates."""
     pts, facets = face.tessellate(deflection)
     if not facets:
         return np.zeros((0, 3, 3))
@@ -1058,7 +1201,7 @@ def _triangles(face, deflection: float) -> np.ndarray:
 
 
 def _region_triangles(fi, fj, threshold: float, deflection: float) -> np.ndarray:
-    """Triangles of the contact region of face fi (component i) against face fj (component j).
+    """[AUX] Triangles of the contact region of face fi (component i) against face fj (component j).
 
     1. Boolean common of the faces (exact for coincident faces).
     2. Parallel planes with a gap <= threshold: fi is moved onto fj's plane, then 1.
@@ -1088,15 +1231,19 @@ def _region_triangles(fi, fj, threshold: float, deflection: float) -> np.ndarray
 
 def extract_contact_patches(shape_i, shape_j, threshold: float,
                             deflection: float = PATCH_DEFLECTION) -> tuple[np.ndarray, np.ndarray]:
-    """Contact patches between two shapes as triangles: (tri (T, 3, 3), normal (T, 3)).
+    """[MAIN] Contact patches between two shapes as triangles: (tri (T, 3, 3), normal (T, 3)).
 
-    normal = outward normal of j's surface at the contact = -(outward normal of i), i.e. it
-    points from j into i. A patch carries i under gravity g when normal . g < 0.
+    Inputs: the two global shapes, the contact `threshold` (mm, same as the interference contact
+    threshold) and the tessellation deflection. Output: the triangles of every region where a face of i
+    lies within `threshold` of a face of j, with normal = outward normal of j's surface at the contact
+    = -(outward normal of i), i.e. it points from j into i. A patch carries i under gravity g when
+    normal . g < 0; these patches are what the M8 stability term projects along g to test support.
     """
     import FreeCAD
 
     tris, normals = [], []
     for fi in shape_i.Faces:
+        # Candidate face pairs: bounding boxes (enlarged by the threshold) intersect and the faces are close.
         box = fi.BoundBox
         box.enlarge(threshold)
         sign = None
@@ -1125,12 +1272,14 @@ def extract_contact_patches(shape_i, shape_j, threshold: float,
 
 
 def _write_json_atomic(path: Path, data) -> None:
+    """[SUPP] Write JSON to a temporary file, then rename it over the target (no half-written cache files)."""
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_text(json.dumps(data), encoding="utf-8")
     os.replace(tmp, path)
 
 
 def _read_json(path: Path, key: str) -> dict | None:
+    """[SUPP] Cache function: read a JSON cache file and return it only if its stored `key` matches."""
     if not path.exists():
         return None
     try:
@@ -1141,14 +1290,16 @@ def _read_json(path: Path, key: str) -> dict | None:
     return data if data.get("key") == key else None
 
 
-TABLES_NAME = "term_tables.json"
-PATCHES_NAME = "contact_patches.json"
-STABILITY_NAME = "stability_classes.json"
-RESULT_NAME = "optimization_result.json"
-SEQUENCE_NAME = "assembly_sequence.txt"
+# File names of the cache and report files.
+TABLES_NAME = "term_tables.json"  # volumes, areas, CoG, contact matrix
+PATCHES_NAME = "contact_patches.json"  # contact triangles per touching pair
+STABILITY_NAME = "stability_classes.json"  # cached stability classes per (state, component)
+RESULT_NAME = "optimization_result.json"  # the result
+SEQUENCE_NAME = "assembly_sequence.txt"  # the result as readable text
 
 
 def _contact_threshold(interference_result) -> float:
+    """[SUPP] Contact threshold (mm) of the interference result, or the module default if it has none."""
     thr = getattr(interference_result, "contact_threshold", None)
     if thr is None:
         from interference_identification import CONTACT_THRESHOLD
@@ -1157,7 +1308,7 @@ def _contact_threshold(interference_result) -> float:
 
 
 def tables_cache_key(aog, interference_result, bom_bytes: bytes, config: OptimizationConfig) -> str:
-    """Key of the weight- and flag-independent term tables (spec 7)."""
+    """[SUPP] Key of the weight- and flag-independent term tables: AoG, interference, BOM, gravity, patch settings."""
     h = hashlib.sha256(f"v{TABLES_VERSION};aog:{aog.cache_key};"
                        f"interference:{interference_result.cache_key};".encode())
     h.update(b"bom:" + hashlib.sha256(bom_bytes).digest())
@@ -1170,7 +1321,17 @@ def tables_cache_key(aog, interference_result, bom_bytes: bytes, config: Optimiz
 
 def collect_tables(aog, interference_result, prep, config: OptimizationConfig, cache_dir: Path,
                    force: bool = False) -> TermTables:
-    """Term tables for the pipeline objects; geometry is cached under cache_dir."""
+    """[MAIN] Build the `TermTables` for the pipeline objects (the FreeCAD side of the optimisation).
+
+    Inputs: the AoG, the InterferenceResult, the PreprocessingResult (stander records, BOM path,
+    `auto_group_override`), the config and the cache folder. Output: a `TermTables` with volume, area,
+    centre of gravity and contacts per component (geometry, cached as JSON), the BOM `tool`, `group` and
+    `pitch` columns, and, when stability is on, the contact patches of every touching pair.
+
+    A component with no BOM group (no row, or a blank cell) is its own group of one; an automatic
+    sub-assembly takes `prep.auto_group_override`. This lets a fused or virtual container with no BOM row
+    reach Optimization.
+    """
     if prep.bom_path is None:
         raise ValueError("PreprocessingResult.bom_path is missing; the BOM is needed for M3/M7")
     columns, rows, bom_bytes = _read_bom(prep.bom_path)
@@ -1178,6 +1339,7 @@ def collect_tables(aog, interference_result, prep, config: OptimizationConfig, c
     cache_dir.mkdir(parents=True, exist_ok=True)
     shapes = None
 
+    # Geometry tables: load from cache, or compute from the shapes and save.
     data = None if force else _read_json(cache_dir / TABLES_NAME, key)
     if data is None:
         shapes = _component_shapes(aog, prep)
@@ -1193,12 +1355,13 @@ def collect_tables(aog, interference_result, prep, config: OptimizationConfig, c
     else:
         log.info("Loaded cached term tables from %s", cache_dir)
 
+    # BOM columns per component (matched on label): tool (M3), pitch (turns), group (M7).
     tool, group, pitch = [], [], []
     auto_group_override = getattr(prep, "auto_group_override", None) or {}
     for cid, label in zip(aog.component_ids, aog.component_labels):
         row = rows.get(label, {})
         tool.append(row.get("tool") or None)
-        # docs/stander_processing-spec.md section 12: pitch is read for screw/nut rows only; blank,
+        # Pitch is read for screw/nut rows only; blank,
         # unparsable or non-positive gives None and (for an actual screw/nut) a warning naming the label.
         rec = prep.stander_records.get(cid)
         p = None
@@ -1219,7 +1382,7 @@ def collect_tables(aog, interference_result, prep, config: OptimizationConfig, c
             # A component with no BOM group (no row, or a blank cell) is its own group of one --
             # same convention extra_functions/generate_bom.py uses when seeding a fresh BOM, and
             # what lets a fused/virtual container with no row ever reach Optimization at all
-            # (docs/subassembly-spec.md section 10; was previously a hard ValueError, H10/R6).
+            # (was previously a hard ValueError, H10/R6).
             group.append(row.get("group") or label)
     tables = TermTables(
         component_ids=list(aog.component_ids),
@@ -1241,19 +1404,16 @@ def collect_tables(aog, interference_result, prep, config: OptimizationConfig, c
 
 
 def _collect_patches(aog, prep, tables, key, cache_dir, force, shapes, threshold):
-    """Contact patches for every touching pair, checkpointed per pair (resumes after a crash).
+    """[AUX] Contact patches for every touching pair, checkpointed per pair (resumes after a crash).
 
-    A pair where *both* components are fused sub-assemblies (`prep.compound_ids`, docs/
-    subassembly-spec.md) is skipped entirely (added 2026-11-11, docs/stander_processing-spec.md
-    section 14): `extract_contact_patches` is O(faces_i * faces_j), and two large fused shapes
-    merely grazing at one near-point (the `_contact_neighbors`/interference contact test is a
-    single whole-shape distance check, not an area check) can cost minutes for zero real contact
-    area, as measured on `lunar_motor_tire_complete` (tire vs. motor: 895.87 s, 0 triangles). A
-    pair with only *one* side a fused sub-assembly (a leaf resting on it) is NOT skipped: that
-    contact can carry real, non-trivial support area the stability/gravity_change cost terms
-    need (same run: 0013-P-0103-A02-AM vs. the tire, 387.0 mm^2 in 79.64 s). A skipped pair simply
-    never gets a `tables.patches` entry; `TermTables.contact_triangles` already returns the empty
-    fallback for any pair it has no patches for, so no caller needs to know about this skip.
+    A pair where *both* components are fused sub-assemblies (`prep.compound_ids`) is skipped entirely:
+    `extract_contact_patches` is O(faces_i * faces_j), and two
+    large fused shapes merely grazing at one near-point (the contact test is a single whole-shape distance
+    check, not an area check) can cost minutes for zero real contact area, as measured on
+    `lunar_motor_tire_complete` (tire vs. motor: 895.87 s, 0 triangles). A pair with only *one* side a
+    fused sub-assembly (a leaf resting on it) is NOT skipped: that contact can carry real support area the
+    stability and gravity_change terms need. A skipped pair never gets a `tables.patches` entry;
+    `TermTables.contact_triangles` already returns the empty fallback for it.
     """
     path = cache_dir / PATCHES_NAME
     data = None if force else _read_json(path, key)
@@ -1263,8 +1423,8 @@ def _collect_patches(aog, prep, tables, key, cache_dir, force, shapes, threshold
     skipped = [(int(i), int(j)) for i, j in pairs
               if aog.component_ids[int(i)] in compound_ids and aog.component_ids[int(j)] in compound_ids]
     if skipped:
-        log.info("Skipping contact-patch extraction for %d sub-assembly/sub-assembly pair(s) "
-                 "(docs/stander_processing-spec.md section 14): %s", len(skipped),
+        log.info("Skipping contact-patch extraction for %d sub-assembly/sub-assembly pair(s): "
+                 "%s", len(skipped),
                  [(aog.component_labels[i], aog.component_labels[j]) for i, j in skipped])
     skip_set = set(skipped)
     todo = [(int(i), int(j)) for i, j in pairs if (int(i), int(j)) not in skip_set and f"{i}|{j}" not in data["pairs"]]
@@ -1287,6 +1447,7 @@ def _collect_patches(aog, prep, tables, key, cache_dir, force, shapes, threshold
 
 
 def _area(tri: np.ndarray) -> float:
+    """[SUPP] Total area (mm^2) of a (T, 3, 3) triangle array (for the log)."""
     if not len(tri):
         return 0.0
     return float(0.5 * np.linalg.norm(np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0]), axis=1).sum())
@@ -1298,6 +1459,7 @@ def _area(tri: np.ndarray) -> float:
 
 
 def save_result(result: OptimizationResult, cache_dir: Path) -> None:
+    """[SUPP] Cache function: write the result as JSON and as the readable text `assembly_sequence.txt`."""
     cache_dir.mkdir(parents=True, exist_ok=True)
     data = asdict(result)
     data["history"] = {k: v for k, v in data["history"].items() if k != "stability_cache"}
@@ -1319,6 +1481,7 @@ def save_result(result: OptimizationResult, cache_dir: Path) -> None:
 
 
 def load_result(cache_dir: Path, config_hash: str) -> OptimizationResult | None:
+    """[SUPP] Cache function: load the saved result if its `config_hash` matches, else None."""
     path = cache_dir / RESULT_NAME
     if not path.exists():
         return None
@@ -1334,6 +1497,7 @@ def load_result(cache_dir: Path, config_hash: str) -> OptimizationResult | None:
 
 
 def _stability_key(tables: TermTables, config: OptimizationConfig) -> str:
+    """[SUPP] Key of the cached stability classes: table key plus the fall-test and support-region settings."""
     return hashlib.sha256(f"{tables.cache_key};fall:{config.stability_fall_test};"
                           f"region:{config.support_region}".encode()).hexdigest()
 
@@ -1344,6 +1508,7 @@ def _stability_key(tables: TermTables, config: OptimizationConfig) -> str:
 
 
 def _default_cache_dir(prep) -> Path:
+    """[SUPP] Default cache folder: output/<step file name>/optimization under the repo root."""
     stem = Path(prep.step_path).stem if prep.step_path is not None else prep.reduced_assembly.Name
     return REPO_ROOT / "output" / stem / "optimization"
 
@@ -1351,12 +1516,18 @@ def _default_cache_dir(prep) -> Path:
 def optimize_sequence(aog, interference_result, prep, config: OptimizationConfig | None = None,
                       cache_dir: str | Path | None = None, force: bool | None = None,
                       blocked_edges=None) -> OptimizationResult:
-    """Optimized assembly sequence for the pipeline objects, with on-disk caching (spec 7).
+    """[MAIN] Pipeline entry point: the optimised assembly sequence for the pipeline objects, with on-disk caching.
 
-    `blocked_edges` (robot mode, docs/robotic-gripper_spec.md 6.1): optional set of (state mask,
-    component) edges to forbid. None/empty is the unchanged manual path. Otherwise the term tables and
-    stability cache are still shared from `cache_dir`, but the result is cached in its own folder
-    `cache_dir/blocked/<hash prefix>/`, so the manual result file is never overwritten."""
+    Inputs: the AoG, InterferenceResult and PreprocessingResult, the config, the cache folder (default
+    output/<assembly>/optimization), `force` (recompute everything) and `blocked_edges` (robot mode): optional set of (state mask, component) edges to forbid. None or
+    empty is the unchanged manual path. Otherwise the term tables and stability cache are still shared from
+    `cache_dir`, but the result is cached in its own folder `cache_dir/blocked/<hash prefix>/`, so the
+    manual result file is never overwritten.
+    Output: an `OptimizationResult` (with the screw/nut turns added to its steps).
+
+    Order of work: validate the config before any geometry, build the tables, return the cached result if
+    its hash matches, otherwise run the ACO (reusing the saved stability classes), save and return.
+    """
     config = config or OptimizationConfig()
     force = config.force if force is None else force
     cache_dir = Path(cache_dir) if cache_dir is not None else _default_cache_dir(prep)
@@ -1372,6 +1543,7 @@ def optimize_sequence(aog, interference_result, prep, config: OptimizationConfig
             log.info("Loaded cached optimization result from %s (total cost %.4f)", result_dir, cached.total_cost)
             return cached
 
+    # Restore the stability classes computed by earlier runs (bits per gravity candidate).
     stab_path, stab_key = cache_dir / STABILITY_NAME, _stability_key(tables, config)
     stability = {}
     stab_data = None if (force or not config.use_stability) else _read_json(stab_path, stab_key)

@@ -18,7 +18,7 @@
       "notes": [
         "random cases: V from 1 to 524, 131 non-trivial"
       ],
-      "seconds": 14.165
+      "seconds": 14.178
     },
     "A2": {
       "passed": true,
@@ -33,7 +33,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.267
+      "seconds": 0.372
     },
     "A2b": {
       "passed": true,
@@ -82,7 +82,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.004
+      "seconds": 0.003
     },
     "A4": {
       "passed": true,
@@ -101,7 +101,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.003
+      "seconds": 0.002
     },
     "A5": {
       "passed": true,
@@ -116,11 +116,11 @@
         }
       ],
       "notes": [
-        "N=12: 0.28 s, arrays 0.5 MB, peak traced 1.2 MB",
-        "N=16: 0.89 s, arrays 10.1 MB, peak traced 23.7 MB",
+        "N=12: 0.27 s, arrays 0.5 MB, peak traced 1.2 MB",
+        "N=16: 0.57 s, arrays 10.1 MB, peak traced 23.7 MB",
         "N = 20 skipped (run with --groups scale)"
       ],
-      "seconds": 1.173
+      "seconds": 0.839
     },
     "A6": {
       "passed": true,
@@ -174,7 +174,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.002
+      "seconds": 0.003
     },
     "A8": {
       "passed": true,
@@ -274,7 +274,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.072
+      "seconds": 0.07
     },
     "A10": {
       "passed": true,
@@ -297,7 +297,7 @@
         }
       ],
       "notes": [],
-      "seconds": 1.078
+      "seconds": 0.671
     },
     "A11": {
       "passed": true,
@@ -312,7 +312,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.058
+      "seconds": 0.045
     },
     "A12": {
       "passed": true,
@@ -363,7 +363,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.412
+      "seconds": 0.208
     },
     "A13": {
       "passed": true,
@@ -418,7 +418,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.304
+      "seconds": 0.141
     }
   }
 }

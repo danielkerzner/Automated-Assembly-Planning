@@ -2,7 +2,7 @@
 
 Counterpart of manual_tests/test_preprocessing_manual.py, manual_tests/test_interference_manual.py,
 manual_tests/test_aog_manual.py and manual_tests/test_optimization_manual.py. Not an acceptance suite --
-those are the L1-L13 tests in automatic_tests/test_illustration.py. This script runs the illustration module end to end
+those are the L1-L14 tests in automatic_tests/test_illustration.py. This script runs the illustration module end to end
 on one assembly and leaves the result where you can look at it:
 
   <out_dir>/illustrations/
@@ -55,6 +55,13 @@ Tune the rendering from the command line, for example:
       python manual_tests/test_illustration_manual.py --force            # re-render, ignore the illustration caches
 
 The exit code is 0 when every check passes, 1 otherwise.
+
+Expected result: checks V1-V7 (and V8 with --check-cache) print PASS and the exit code is 0. In <out_dir>/illustrations
+there is one step_NN_<label>.png per step (one per group block when a BOM group is used), manual.pdf and the report
+files; opening a PNG shows the assembled parts in grey, the new part in colour with its ghost and an arrow along the
+insertion, and the footnote with step counter, part and tool. A frame that could not be shown plainly carries a warning
+or the x-ray flag in the console table instead of failing. The second run with --check-cache returns the cached result
+almost instantly.
 """
 
 from __future__ import annotations
@@ -79,10 +86,10 @@ import numpy as np  # noqa: E402
 
 import illustration_generator as il  # noqa: E402
 from illustration_generator import IllustrationConfig  # noqa: E402
-DEFAULT_STEP = REPO_ROOT / "data" / "lunar_bodylager" / "0002-A-0900-A06-bodylager_1.stp"
-DEFAULT_BOM = REPO_ROOT / "data" / "lunar_bodylager" / "bom_generated.csv"
-DEFAULT_OUT = REPO_ROOT / "output" / "lunar_bodylager"
-DEFAULT_H = 2.0
+DEFAULT_STEP = REPO_ROOT / "data" / "industrial_fastner" / "industrial_fastner.stp"
+DEFAULT_BOM = REPO_ROOT / "data" / "industrial_fastner" / "generated_bom.csv"
+DEFAULT_OUT = REPO_ROOT / "output" / "industrial_fastner"
+DEFAULT_H = 5.0
 
 TOL = 1e-6
 
@@ -466,6 +473,10 @@ def print_summary(mode: str, steps: list[dict], result, config: IllustrationConf
 
 
 def main(args: argparse.Namespace) -> int:
+    """Pipeline: build the optimized sequence (real: preprocessing -> interference -> AoG -> optimization, all
+    cached; synthetic: hand-built assembly drawn as boxes) -> validate the settings -> generate_illustrations
+    (view search, rasterised frames, manual.pdf) -> optional second call to check the cache -> checks V1-V8 ->
+    report and summary."""
     logging.basicConfig(level=logging.INFO, format="%(name)s %(levelname)s: %(message)s")
     if args.quiet:
         logging.getLogger("aap.illustration").setLevel(logging.WARNING)

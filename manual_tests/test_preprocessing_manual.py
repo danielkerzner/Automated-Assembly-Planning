@@ -5,7 +5,7 @@ assembly yet, so this doesn't assert anything. It just runs
 run_preprocessing() end to end and dumps everything it produced somewhere
 you can inspect it:
 
-  tests/industrial_fastner/
+  output/industrial_fastner/   (the default; the folder given as third argument otherwise)
     reduced_assembly.step   the stander-reduced assembly as its own STEP
                              file -- open it in FreeCAD/any STEP viewer and
                              confirm part4 (both instances) and part7 are
@@ -17,13 +17,19 @@ you can inspect it:
                              whole-assembly bbox -- everything else
                              run_preprocessing() returns
 
-Run (from repo root, environmentAPP active):
+Run (from repo root, environmentAAP active):
 
     python manual_tests/test_preprocessing_manual.py
 
 or point it at a different STEP/BOM pair and output folder:
 
     python manual_tests/test_preprocessing_manual.py path/to.stp path/to/bom.csv tests/out_dir
+
+Expected result: no error; the console lists every stander with its category (screw / nut / other), its removal
+option(s) with blockers, holds, number of contact neighbours, partner and nut rule; then the size of the reduced
+assembly, the number of unique candidate directions and the assembly bounding box. reduced_assembly.step contains
+only the movable parts (standers removed) and report.json holds the same numbers as the console. Nothing is
+compared with a reference: you check by eye that the standers found are the ones flagged in the BOM.
 """
 
 from __future__ import annotations
@@ -59,6 +65,8 @@ def _vec(v: FreeCAD.Vector) -> list[float]:
 
 
 def main(step_path: Path, bom_path: Path, out_dir: Path) -> None:
+    """Pipeline: run_preprocessing (STEP + BOM -> standers classified and removed from the assembly, candidate
+    directions, bounding box) -> export the reduced assembly as STEP -> dump report.json -> print a summary."""
     out_dir.mkdir(parents=True, exist_ok=True)
 
     result = run_preprocessing(step_path, bom_path)

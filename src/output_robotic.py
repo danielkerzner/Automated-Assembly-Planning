@@ -1,4 +1,11 @@
-"""Robot-mode output: the usual plan.json plus a `robot` block (docs/robotic-gripper_spec.md section 8).
+"""Robot-mode output: the usual plan.json plus a `robot` block.
+
+Inputs
+    - The hierarchy and `LevelPlan` of the chosen sequence, the `RobotLoopResult` (every sequence tried,
+      blocked edges), the AoG, the `GripperAnalysis` (scores) and the `RobotConfig`.
+Outputs
+    - `<output_dir>/plan.json`: the manual-mode plan plus the `robot` block described below. Pure
+      formatting: no decision is made here.
 
 The plan itself is written by `main.build_plan` exactly as in manual mode (same keys, same step records),
 for the sequence the robot loop chose. The `robot` block is added next to it:
@@ -36,11 +43,17 @@ log = logging.getLogger("aap.robot.output")
 
 
 def _state_labels(aog, state: int) -> list[str]:
+    """[AUX] Labels of the components present in an AoG state bitmask (for readable blocked edges and node scores)."""
     return [aog.component_labels[c] for c in range(aog.n_components) if (state >> c) & 1]
 
 
 def step_json(s, aog) -> dict:
-    """One StepEval as robot-block JSON."""
+    """[MAIN] One `StepEval` as robot-block JSON (the per-step record of plan.json -> robot).
+
+    A gripper step reports the best grasp (TCP, frame, width, contact area), the scores and the rotation
+    check; a tool step reports the tool, the sense used and the contact in every free sense. The optional
+    sub-assembly check adds its two nodes and, if only they fail, their reason.
+    """
     base = {"step": s.step, "component_id": aog.component_ids[s.component], "component_label": s.label,
             "edge": s.edge, "state": s.state, "feasible": bool(s.feasible)}
     if s.kind == "gripper":
@@ -84,6 +97,7 @@ def step_json(s, aog) -> dict:
 
 
 def failing_json(s) -> dict:
+    """[AUX] Short record of an infeasible step (end effector, reason, score or contact) for `robot.failing_steps`."""
     out = {"step": s.step, "label": s.label, "end_effector": "gripper" if s.kind == "gripper" else (s.tool.tool or "tool")}
     if s.kind == "gripper":
         out.update({"reason": s.grasp.reason, "score": s.grasp.score_context,
@@ -101,6 +115,7 @@ def failing_json(s) -> dict:
 
 
 def robot_block(loop, aog, analysis, config) -> dict:
+    """[MAIN] Build the whole `robot` block from the loop result: the chosen sequence's steps and failures, the loop history, scores, thresholds, config and engine info."""
     chosen = loop.records[loop.chosen]
     steps = chosen["steps"]
     alone = analysis.alone_scores()
@@ -139,6 +154,7 @@ def robot_block(loop, aog, analysis, config) -> dict:
 
 
 def write_robot_plan(hier, plan, loop, aog, analysis, config, output_dir: Path, assembly_name: str) -> dict:
+    """[AUX] Write plan.json: the manual-mode plan (`main.build_plan`) of the chosen sequence plus the `robot` block; returns the dict."""
     from main import build_plan
 
     plan_dict = build_plan(hier, plan, assembly_name=assembly_name)

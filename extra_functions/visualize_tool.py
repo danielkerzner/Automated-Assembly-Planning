@@ -1,4 +1,18 @@
-"""Show how a robot tool sits on its stander (docs/robotic-gripper_spec.md section 7 / 13.4).
+"""Show how a robot tool sits on its stander.
+
+[SUPP] Visualisation script, not part of the planning pipeline.
+
+Inputs
+    - `<output_dir>/plan.json` written by `main.py --mode robot`, the STEP file, and the stander's Label.
+    - Options: `--removed LABEL...`, `--all-present`, `--deflection` (mm, default 0.3), `--save <file>`.
+Outputs
+    - An interactive matplotlib figure (and `--save` image if given); the overlap and collision volumes
+      are also printed. Nothing else is written.
+
+How it works
+    Same functions as `src/tool_check.py` (`load_tool`, `engagement`, `place_tool`) place the tool once per
+    free sense; exact common volumes (`collision._common_volume`) give the overlap with the stander and the
+    collisions with the other present components, which are then drawn in 3D and in a section.
 
 Places the tool exactly as `src/tool_check.py` does (same functions: interface plane, overlap rule, placement)
 and draws it in two panels:
@@ -40,6 +54,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 
 def _find_step(plan: dict, label: str) -> dict:
+    """[AUX] The step record of a component Label: the chosen sequence first, then any recorded sequence."""
     for s in plan["robot"]["steps"]:
         if s["component_label"] == label:
             return s
@@ -51,12 +66,13 @@ def _find_step(plan: dict, label: str) -> dict:
 
 
 def _mesh(shape, deflection: float):
+    """[AUX] (vertices (n, 3), triangles (m, 3)) of a FreeCAD shape."""
     V, T = shape.tessellate(deflection)
     return np.array([[v.x, v.y, v.z] for v in V], float).reshape(-1, 3), np.array(T, int).reshape(-1, 3)
 
 
 def _crop(V, T, lo, hi):
-    """Triangles with all three corners in the box [lo, hi] (a centroid test lets long slivers poke out)."""
+    """[AUX] Triangles with all three corners in the box [lo, hi] (a centroid test lets long slivers poke out)."""
     if not len(T):
         return np.zeros((0, 3, 3))
     tri = V[T]
@@ -65,7 +81,7 @@ def _crop(V, T, lo, hi):
 
 
 def _section_lines(shape, plane_face, origin, e_axis, e_perp, samples: int = 60):
-    """Outline of shape cut by plane_face, as 2D polylines (coordinates along e_axis, e_perp)."""
+    """[AUX] Outline of shape cut by plane_face, as 2D polylines (coordinates along e_axis, e_perp)."""
     try:
         sec = shape.section(plane_face)
     except Exception:  # noqa: BLE001
@@ -83,6 +99,12 @@ def _section_lines(shape, plane_face, origin, e_axis, e_perp, samples: int = 60)
 
 def show_tool(output_dir, step_path, stander_label: str, removed: list[str] | None = None, all_present: bool = False,
               deflection: float = 0.3, save: str | None = None, show: bool = True):
+    """[MAIN] Place the stander's tool for every free sense and show the placement, overlaps and collisions.
+
+    Inputs: the plan folder, the STEP, the stander Label, optionally the components to treat as removed
+    (or `all_present`), the tessellation deflection and an image path. The tool, sense and state come from
+    plan.json, so no preprocessing is needed. Output: the matplotlib figure.
+    """
     import FreeCAD  # noqa: F401
     import Part
     from FreeCAD import Vector
@@ -110,7 +132,7 @@ def show_tool(output_dir, step_path, stander_label: str, removed: list[str] | No
     tool = load_tool(Path(cfg.tool_dir) / cfg.tools[cat])
     fraction = float(cfg.tool_overlap_fraction.get(cat, 0.0))
 
-    # components and the state
+    # Components and the state (which parts are present).
     lsteps = plan["level"]["steps"]
     comp_id = {s["component"]: s["component_id"] for s in lsteps}
     label = {s["component_id"]: s["component_label"] for s in lsteps}
@@ -133,7 +155,7 @@ def show_tool(output_dir, step_path, stander_label: str, removed: list[str] | No
     st_shape = shapes[me]
     st_vol = st_shape.Volume
 
-    # place the tool once per sense, measure overlaps
+    # Place the tool once per sense; measure the overlap with the stander and the collisions with the others.
     cases = []
     for sense in senses:
         d = Vector(*sense["direction"])
@@ -249,6 +271,7 @@ def show_tool(output_dir, step_path, stander_label: str, removed: list[str] | No
 
 
 def main() -> int:
+    """[AUX] Command line (arguments in the module docstring)."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("output_dir", help="folder with the robot-mode plan.json")
     ap.add_argument("step_path", help="the STEP file the plan was made from")
