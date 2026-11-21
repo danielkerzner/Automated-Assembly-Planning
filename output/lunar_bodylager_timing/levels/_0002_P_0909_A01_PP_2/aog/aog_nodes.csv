@@ -1,0 +1,5 @@
+﻿node,level,mask,live,dead_end,components
+0,0,3,True,False,1603-0032-0032; 1601-0039-00032
+1,1,1,True,False,1603-0032-0032
+2,1,2,True,False,1601-0039-00032
+3,2,0,True,False,(empty)

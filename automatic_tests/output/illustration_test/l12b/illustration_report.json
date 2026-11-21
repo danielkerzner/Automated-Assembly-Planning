@@ -14,7 +14,7 @@
         "A"
       ],
       "group": null,
-      "is_stander": false,
+      "is_standard": false,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l12b\\step_01_A.png",
       "view": {
         "azimuth": 0.0,
@@ -51,7 +51,7 @@
         "B"
       ],
       "group": null,
-      "is_stander": false,
+      "is_standard": false,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l12b\\step_02_B.png",
       "view": {
         "azimuth": 0.0,
@@ -88,7 +88,7 @@
         "C"
       ],
       "group": null,
-      "is_stander": true,
+      "is_standard": true,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l12b\\step_03_C.png",
       "view": {
         "azimuth": 0.0,
@@ -125,7 +125,7 @@
         "D"
       ],
       "group": null,
-      "is_stander": false,
+      "is_standard": false,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l12b\\step_04_D.png",
       "view": {
         "azimuth": 0.0,
@@ -154,14 +154,14 @@
     0.0,
     35.0
   ],
-  "config_hash": "509d54de0c0eccb56d528eeb0fd27ed24be18a510d813dfca65a603e20dbe7c7",
+  "config_hash": "0d6e7c5f08b2d9f7e4686f69c7a8026525fa77c9935ec3b7352c15b25581cb77",
   "stats": {
     "layers_rasterized": 296,
-    "raster_s": 0.2514794000044276,
+    "raster_s": 0.1602546999056358,
     "views_evaluated": 73,
-    "view_search_s": 0.36105459999998857,
-    "render_s": 0.6438465000001088,
-    "total_s": 1.0049054000000979
+    "view_search_s": 0.23236159999214578,
+    "render_s": 0.4180959000077564,
+    "total_s": 0.650462299992796
   },
   "config": {
     "image_size": [
@@ -215,7 +215,7 @@
     "xray_alpha": 0.25,
     "placed_color": "#bdbdbd",
     "new_color": "#f28e2b",
-    "stander_color": "#3b75af",
+    "standard_color": "#3b75af",
     "ghost_alpha": 0.35,
     "show_gravity": true,
     "mark_unstable": true,

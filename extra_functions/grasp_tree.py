@@ -25,13 +25,13 @@ the robot loop explored (the union of every recorded sequence; `--chosen-only` f
                   score alone (S_alone)
   edge label      on the edge to the removed part: its grasp score in that state (S), coloured red -> yellow ->
                   green; "-" = no grasp (S = 0 or not evaluated because the part fails even alone),
-                  "tool" = a stander removed by a tool (no grasp score): green = the tool check passed,
+                  "tool" = a standard removed by a tool (no grasp score): green = the tool check passed,
                   red = the tool collides in every free sense. A red frame = infeasible step.
   plain edge      parent -> remaining sub-assembly
   sub-assembly    its own grasp score (red frame = not graspable), ONLY if the plan was made with
   score           `main.py --mode robot --check-subassembly-grasp` (robot.subassembly_scores); a plan from a
                   run without that flag has no sub-assembly scores, and those boxes stay blank
-  yellow box      standers
+  yellow box      standards
   bold edges      the chosen sequence
 
 Arrows point upward (assembly direction), as in the original sketch. Only edges a recorded sequence used are
@@ -40,7 +40,7 @@ have no score.
 
 Run in environmentAAP from the repo root:
 
-    python extra_functions/grasp_tree.py output/industrial_fastner_robot data/industrial_fastner/industrial_fastner.stp
+    python extra_functions/grasp_tree.py output/industrial_fastner_robot_nodes data/industrial_fastner/industrial_fastner.stp
     python extra_functions/grasp_tree.py <output_dir> <step> --chosen-only
     python extra_functions/grasp_tree.py <output_dir> <step> --save tree.png      # also write the image
 """
@@ -121,7 +121,7 @@ def _score_color(s):
 def collect(plan: dict, chosen_only: bool = False):
     """[MAIN] Read the explored AoG edges from plan.json.
 
-    Returns (bit -> id, id -> label, stander ids, edges {(S, bit): step json}, chosen edge set). An edge is
+    Returns (bit -> id, id -> label, standard ids, edges {(S, bit): step json}, chosen edge set). An edge is
     (AoG state before the removal, component bit); the last part alone is not an edge (it is the one-component
     state node). With `chosen_only` only the chosen sequence's edges are kept.
     """
@@ -129,7 +129,7 @@ def collect(plan: dict, chosen_only: bool = False):
     bit_of = {s["component_id"]: s["component"] for s in lsteps}
     comp_id = {b: c for c, b in bit_of.items()}
     label = {s["component_id"]: s["component_label"] for s in lsteps}
-    standers = {s["component_id"] for s in lsteps if s["is_stander"]}
+    standards = {s["component_id"] for s in lsteps if s["is_standard"]}
     edges, chosen = {}, set()
     for seq in plan["robot"]["loop"]["sequences"]:
         if chosen_only and not seq["chosen"]:
@@ -141,7 +141,7 @@ def collect(plan: dict, chosen_only: bool = False):
             edges.setdefault(key, st)
             if seq["chosen"]:
                 chosen.add(key)
-    return comp_id, label, standers, edges, chosen
+    return comp_id, label, standards, edges, chosen
 
 
 ITEM_GAP = 1.0  # centre distance of the boxes inside one group (removed parts + the sub-assembly they leave)
@@ -206,7 +206,7 @@ def draw_tree(output_dir: str | Path, step_path: str | Path, chosen_only: bool =
     plan = json.loads((Path(output_dir) / "plan.json").read_text(encoding="utf-8"))
     if "robot" not in plan:
         raise ValueError(f"{output_dir}/plan.json has no 'robot' block; run main.py with --mode robot first")
-    comp_id, label, standers, edges, chosen = collect(plan, chosen_only)
+    comp_id, label, standards, edges, chosen = collect(plan, chosen_only)
     if not edges:
         raise ValueError("No recorded steps to draw")
     n = len(comp_id)
@@ -232,13 +232,13 @@ def draw_tree(output_dir: str | Path, step_path: str | Path, chosen_only: bool =
     def ids_of(state):
         return [comp_id[b] for b in range(n) if (state >> b) & 1]
 
-    def node(item, ids, color, text, stander=False, frame="black", lw=0.8):
+    def node(item, ids, color, text, standard=False, frame="black", lw=0.8):
         key = (tuple(ids), str(color))
         if key not in thumbs:
             thumbs[key] = _thumbnail(meshes, ids, color, part_size=part_size)
         cx, cy = x[item], y(item)
         ax.add_patch(FancyBboxPatch((cx - 0.42, cy - 0.36), 0.84, 0.72, boxstyle="round,pad=0.02",
-                                    facecolor="#fff59d" if stander else "#f4f6fa", edgecolor=frame, linewidth=lw,
+                                    facecolor="#fff59d" if standard else "#f4f6fa", edgecolor=frame, linewidth=lw,
                                     zorder=1))
         ax.add_artist(AnnotationBbox(OffsetImage(thumbs[key], zoom=0.42), (cx, cy), frameon=False, zorder=2))
         if text:
@@ -286,7 +286,7 @@ def draw_tree(output_dir: str | Path, step_path: str | Path, chosen_only: bool =
                 if len(ids) == 1:  # a single part left
                     a = alone.get(label[ids[0]])
                     ok = ns is None or ns["feasible"]
-                    node(item, ids, "#5e8f6b", "" if a is None else f"{a:.2f}", stander=ids[0] in standers,
+                    node(item, ids, "#5e8f6b", "" if a is None else f"{a:.2f}", standard=ids[0] in standards,
                          frame="black" if ok else "#c0392b", lw=0.8 if ok else 1.8)
                 elif ns is not None:
                     node(item, ids, "#9aa3ad", f"{ns['score']:.2f}", frame="black" if ns["feasible"] else "#c0392b",
@@ -299,8 +299,8 @@ def draw_tree(output_dir: str | Path, step_path: str | Path, chosen_only: bool =
                 st = edges[(s, b)]
                 a = alone.get(label[cid])
                 ok = st.get("part_feasible", st["feasible"])  # the part's own check (edge feasibility may add nodes)
-                col = "#c9a227" if cid in standers else (_score_color(st["score"]) if st.get("score") else "#c0392b")
-                node(item, [cid], col, "" if a is None else f"{a:.2f}", stander=cid in standers,
+                col = "#c9a227" if cid in standards else (_score_color(st["score"]) if st.get("score") else "#c0392b")
+                node(item, [cid], col, "" if a is None else f"{a:.2f}", standard=cid in standards,
                      frame="black" if ok else "#c0392b", lw=0.8 if ok else 1.8)
 
     for i in range(len(rows)):
@@ -310,7 +310,7 @@ def draw_tree(output_dir: str | Path, step_path: str | Path, chosen_only: bool =
     sub_txt = ("sub-assembly node = its own grasp score (red frame = not graspable)\n" if sub else "")
     ax.set_title(f"{plan['assembly']}: grasp scores ({what}, chosen in bold)\n"
                  f"part node = score alone; edge label = score in that state\n{sub_txt}"
-                 f"yellow = stander; \"tool\" green = tool removal possible, red = tool collides\n"
+                 f"yellow = standard; \"tool\" green = tool removal possible, red = tool collides\n"
                  f"red frame on a part = infeasible part step", fontsize=9)
     fig.tight_layout()
     if save:

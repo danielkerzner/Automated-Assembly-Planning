@@ -1,45 +1,45 @@
-"""Tool check: does a stander's tool touch the rest of the assembly?
+"""Tool check: does a standard's tool touch the rest of the assembly?
 
 Inputs
-    - The global FreeCAD shapes of every component, their labels, stander flags and stander categories
+    - The global FreeCAD shapes of every component, their labels, standard flags and standard categories
       (1 screw, 2 nut, 3 other), the AoG candidate directions and a `RobotConfig`.
     - Tool STEP files (`RobotConfig.tool_dir`, one per category).
-    - Per question: an AoG state (components present), a stander and the senses (directions) to try.
+    - Per question: an AoG state (components present), a standard and the senses (directions) to try.
 Outputs
-    - A `ToolStep` per (state, stander): which senses are free of contact, which labels were touched, and
+    - A `ToolStep` per (state, standard): which senses are free of contact, which labels were touched, and
       whether at least one sense is free (`feasible`). Used by `robot_loop_robotic.evaluate_sequence`.
 
 What this module does
-    Places the category's tool on the stander, along each free removal direction, and tests with exact
+    Places the category's tool on the standard, along each free removal direction, and tests with exact
     booleans whether it collides with any other component present in that state. Details of the geometry
     below.
 
 Independent module (also meant for human tools in manual mode later). Boolean only, no score.
 
-Model: each tool is a STEP file, attached ("glued") to the stander along its disassembly axis in a single
+Model: each tool is a STEP file, attached ("glued") to the standard along its disassembly axis in a single
 orientation, and checked statically in the assembled state against every other component present in
 that state, with the collision core's boolean (`collision._common_volume`). Contact = a common volume
 above `RobotConfig.tool_contact_volume_tol` (touching faces give ~0 volume and do not count).
 
 Conventions (confirmed with the author 2026-11-12):
   - Tool STEP frame: the tool's working axis is its +Z axis through the origin, pointing from the robot
-    flange towards the working element (bit, socket, pin), which connects to the stander in the max Z
+    flange towards the working element (bit, socket, pin), which connects to the standard in the max Z
     direction. Interface plane = the bbox max Z of the solid that the Z axis line meets highest. The
     robot body and its off-axis motor housing are taller but never on the axis. For a hollow socket the
     axis meets only the cavity floor, so the rim (that solid's bbox max Z) is the plane. Measured:
     screwing_effector 241 mm (bit), nut_effector 239 mm (socket), bushing_effector 235 mm (pin).
-  - Engagement point on the stander: its outermost point along the removal direction d (screw head
+  - Engagement point on the standard: its outermost point along the removal direction d (screw head
     face, nut top), on the line through its centre of mass along d.
-  - Overlap (`RobotConfig.tool_overlap_fraction`, per stander category): the stander sits this fraction
+  - Overlap (`RobotConfig.tool_overlap_fraction`, per standard category): the standard sits this fraction
     of its own extent along d past the tool's interface plane. Screws 0 (the bit just touches the head),
     nuts and bushings 0.5 (a 12 mm nut has 6 mm inside the socket). The extent is measured along d from
-    the stander's tessellation, which equals its bounding-box extent for an axis-aligned d.
+    the standard's tessellation, which equals its bounding-box extent for an axis-aligned d.
   - Placement: tool +Z is turned onto -d (the tool comes from outside, along the removal direction)
     with the shortest rotation, so there is no extra spin about the axis; the interface plane sits at
-    the engagement point moved by the overlap into the stander along -d.
-  - Senses: every free direction of the stander's AoG edge is a sense; the tool is placed on the side
-    the stander leaves towards. The stander itself is ignored in the contact test.
-  - Tool per stander category: `RobotConfig.tools` (1 screw -> screwing_effector.step, 2 nut ->
+    the engagement point moved by the overlap into the standard along -d.
+  - Senses: every free direction of the standard's AoG edge is a sense; the tool is placed on the side
+    the standard leaves towards. The standard itself is ignored in the contact test.
+  - Tool per standard category: `RobotConfig.tools` (1 screw -> screwing_effector.step, 2 nut ->
     nut_effector.stp, 3 other/bushing -> bushing_effector.stp). A category mapped to None is reported
     `checked = False` and counts as feasible (the stub behaviour).
 """
@@ -75,7 +75,7 @@ def load_tool(path: str | Path) -> Tool:
     """[MAIN] Load a tool STEP and find its working element and interface plane (convention in the module docstring).
 
     Input: the STEP path. Output: a `Tool` with its solids in the tool frame and `tip` = the point on the
-    +Z axis where the tool meets the stander. The working element is the solid the +Z axis meets highest;
+    +Z axis where the tool meets the standard. The working element is the solid the +Z axis meets highest;
     the interface plane is that solid's bounding-box max Z, so a hollow socket uses its rim, not its floor.
     """
     import Import
@@ -121,7 +121,7 @@ def load_tool(path: str | Path) -> Tool:
 
 
 def engagement(shape, d: Vector) -> tuple[Vector, float]:
-    """[AUX] (outermost point of the stander along d on the line through its centre of mass, its extent along d)."""
+    """[AUX] (outermost point of the standard along d on the line through its centre of mass, its extent along d)."""
     pts, _ = shape.tessellate(0.1)
     proj = [p.dot(d) for p in pts]
     top, bottom = max(proj), min(proj)
@@ -130,17 +130,17 @@ def engagement(shape, d: Vector) -> tuple[Vector, float]:
 
 
 def engagement_point(shape, d: Vector) -> Vector:
-    """[AUX] Outermost point of the stander along d, on the line through its centre of mass along d."""
+    """[AUX] Outermost point of the standard along d, on the line through its centre of mass along d."""
     return engagement(shape, d)[0]
 
 
 def place_tool(tool: Tool, engage: Vector, d: Vector, depth: float = 0.0) -> list:
-    """[MAIN] Place the tool on a stander: returns the tool's solids in the assembly frame.
+    """[MAIN] Place the tool on a standard: returns the tool's solids in the assembly frame.
 
-    Inputs: the tool, the engagement point on the stander, the removal direction d and the overlap `depth`
-    (how far the stander sits past the interface plane). The tool's +Z is turned onto -d with the shortest
+    Inputs: the tool, the engagement point on the standard, the removal direction d and the overlap `depth`
+    (how far the standard sits past the interface plane). The tool's +Z is turned onto -d with the shortest
     rotation (the tool arrives from outside, along the removal direction), and its interface plane is put
-    at the engagement point moved `depth` into the stander.
+    at the engagement point moved `depth` into the standard.
     """
     d = Vector(d)
     d.normalize()
@@ -158,7 +158,7 @@ def place_tool(tool: Tool, engage: Vector, d: Vector, depth: float = 0.0) -> lis
 
 @dataclass
 class ToolStep:
-    """Tool-check result of one stander step (output of `ToolChecker.step`, held by `robot_loop_robotic.StepEval`)."""
+    """Tool-check result of one standard step (output of `ToolChecker.step`, held by `robot_loop_robotic.StepEval`)."""
 
     state: int
     component: int
@@ -182,16 +182,16 @@ class ToolStep:
 
 
 class ToolChecker:
-    """tool_contact(state, stander, sense) over AoG component indices; pairwise results are cached.
+    """tool_contact(state, standard, sense) over AoG component indices; pairwise results are cached.
 
-    Holds everything needed to answer "does the tool of stander c, approaching along direction k, touch a
+    Holds everything needed to answer "does the tool of standard c, approaching along direction k, touch a
     component present in state S?" and caches tools, placements, pairwise results and step results.
     """
 
-    def __init__(self, shapes: list, labels: list[str], is_stander: list[bool], categories: dict[int, int],
+    def __init__(self, shapes: list, labels: list[str], is_standard: list[bool], categories: dict[int, int],
                  directions, config: RobotConfig):
-        """[AUX] Store the shapes, labels, stander flags, categories (AoG component index -> 1/2/3), the direction table and the config; caches start empty."""
-        self.shapes, self.labels, self.is_stander = shapes, labels, list(is_stander)
+        """[AUX] Store the shapes, labels, standard flags, categories (AoG component index -> 1/2/3), the direction table and the config; caches start empty."""
+        self.shapes, self.labels, self.is_standard = shapes, labels, list(is_standard)
         self.categories, self.directions, self.config = categories, directions, config
         self._tools: dict[int, Tool | None] = {}
         self._placed: dict[tuple[int, int], list] = {}
@@ -200,7 +200,7 @@ class ToolChecker:
         self._steps: dict[tuple[int, int, int | None], ToolStep] = {}
 
     def tool_for(self, c: int) -> Tool | None:
-        """[AUX] The (lazily loaded, cached) `Tool` for component c's stander category, or None if that category has no tool in `RobotConfig.tools`."""
+        """[AUX] The (lazily loaded, cached) `Tool` for component c's standard category, or None if that category has no tool in `RobotConfig.tools`."""
         cat = self.categories.get(c)
         if cat not in self._tools:
             fname = self.config.tools.get(cat) if cat is not None else None
@@ -213,7 +213,7 @@ class ToolChecker:
         return self._tools[cat]
 
     def _tool_solids(self, c: int, k: int) -> list:
-        """[AUX] The tool's solids placed on stander c for direction k (engagement point and overlap depth from the config), cached."""
+        """[AUX] The tool's solids placed on standard c for direction k (engagement point and overlap depth from the config), cached."""
         if (c, k) not in self._placed:
             tool = self.tool_for(c)
             d = Vector(*[float(v) for v in self.directions[k]])
@@ -231,7 +231,7 @@ class ToolChecker:
         return self._bboxes[key]
 
     def _touches(self, c: int, k: int, o: int) -> bool:
-        """[MAIN] Does the tool on stander c (direction k) touch component o? Pairwise, cached.
+        """[MAIN] Does the tool on standard c (direction k) touch component o? Pairwise, cached.
 
         A cheap tight bounding-box test first, then the exact common volume
         (`collision._common_volume`) per tool solid: a volume above `RobotConfig.tool_contact_volume_tol`
@@ -259,7 +259,7 @@ class ToolChecker:
         return self._pair[key]
 
     def tool_contact(self, state: int, c: int, k: int) -> bool:
-        """True = the tool on stander c, approaching along removal direction k, touches a present component."""
+        """True = the tool on standard c, approaching along removal direction k, touches a present component."""
         if self.tool_for(c) is None:
             return False
         return bool(self._contacts(state, c, k))
@@ -270,9 +270,9 @@ class ToolChecker:
                 if o != c and (state >> o) & 1 and self._touches(c, k, o)]
 
     def step(self, state: int, c: int, senses: list[int], preferred: int | None = None) -> ToolStep:
-        """[MAIN] Tool check of removing stander c from `state`: try every free sense and report the contacts.
+        """[MAIN] Tool check of removing standard c from `state`: try every free sense and report the contacts.
 
-        Inputs: the state bitmask, the stander index, the free direction indices of its AoG edge (senses)
+        Inputs: the state bitmask, the standard index, the free direction indices of its AoG edge (senses)
         and the sense chosen by the optimizer (`preferred`). Output: a `ToolStep`, feasible if at least one
         sense has no contact; the reported sense is the preferred one if it is free, else the first free one.
         A category without a tool is reported unchecked and feasible (the stub behaviour). Cached.

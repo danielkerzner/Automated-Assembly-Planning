@@ -14,7 +14,7 @@
     "component": 2,
     "component_id": "c2",
     "component_label": "c2",
-    "is_stander": false,
+    "is_standard": false,
     "edge": 11,
     "removal_direction_index": 1,
     "direction_index": 0,
@@ -43,7 +43,7 @@
     "component": 1,
     "component_id": "c1",
     "component_label": "c1",
-    "is_stander": false,
+    "is_standard": false,
     "edge": 7,
     "removal_direction_index": 1,
     "direction_index": 0,
@@ -72,7 +72,7 @@
     "component": 0,
     "component_id": "c0",
     "component_label": "c0",
-    "is_stander": false,
+    "is_standard": false,
     "edge": 0,
     "removal_direction_index": 1,
     "direction_index": 0,
@@ -718,7 +718,7 @@
      ]
     }
    ],
-   "wall_time_s": 0.05871480000041629
+   "wall_time_s": 0.05557730000873562
   },
   "alone_scores": {
    "c0": 0.9,

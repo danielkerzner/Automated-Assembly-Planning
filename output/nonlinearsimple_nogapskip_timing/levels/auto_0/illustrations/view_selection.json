@@ -1,0 +1,45 @@
+{
+  "key": "4b2ae0f1e08f7bdec40c77df0005480a1788434fbac6bf9a5e81a1d4c1979de0",
+  "global_view": [
+    315.0,
+    20.0
+  ],
+  "choices": [
+    {
+      "step_index": 0,
+      "warnings": [],
+      "view": [
+        315.0,
+        20.0
+      ],
+      "is_global": true,
+      "kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.18834005748407623,
+      "in_frame": true
+    },
+    {
+      "step_index": 1,
+      "warnings": [],
+      "view": [
+        315.0,
+        20.0
+      ],
+      "is_global": true,
+      "kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.7226786544721748,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.7226786544721748,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.27394917452229195,
+      "in_frame": true
+    }
+  ]
+}

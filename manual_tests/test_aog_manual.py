@@ -18,8 +18,8 @@ runs a set of independent consistency checks on it, and writes the graph in form
 Checks (independent of the module's bitmask code where possible):
   S1 structure       layered DAG, dst = src minus one bit, sorted, CSR consistent
   S2 brute force     every state and move recomputed naively from the interference tensor
-  S3 standers        gate rule on every state, stander move present wherever the stander is
-  S4 directions      neg table consistent, stander edges carry exactly their own direction
+  S3 standards        gate rule on every state, standard move present wherever the standard is
+  S4 directions      neg table consistent, standard edges carry exactly their own direction
   S5 travel          travel table recomputed cell by cell, plus two hand-computed cases
   S6 paths           random root-to-terminal walks replayed, assembly order reversed correctly
   S7 live / dead     reachability recomputed, dead ends match
@@ -108,20 +108,20 @@ AXNEG = np.array([1, 0, 3, 2, 5, 4])
 XP, XN, YP, YN, ZP, ZN = range(6)
 
 
-def _make_inputs(labels, n, blocked, standers, boxes, key) -> AoGInputs:
+def _make_inputs(labels, n, blocked, standards, boxes, key) -> AoGInputs:
     """blocked: (i, j, k) triples meaning "i cannot leave past j along axis k" (the antisymmetric
-    twin is added). standers: list of (label, unit direction, holds set of movable indices, box) --
+    twin is added). standards: list of (label, unit direction, holds set of movable indices, box) --
     one RemovalOption each, no blockers of its own (these demos only model holds); holds = movable
-    indices that must stay present while the stander leaves (rule P6)."""
+    indices that must stay present while the standard leaves (rule P6)."""
     free = np.ones((n, n, len(AXES)), dtype=bool)
     for i, j, k in blocked:
         free[i, j, k] = False
         free[j, i, AXNEG[k]] = False
     for i in range(n):
         free[i, i, :] = True
-    all_labels = list(labels) + [s[0] for s in standers]
-    lo = np.array([b[0] for b in boxes] + [s[3][0] for s in standers], dtype=float)
-    hi = np.array([b[1] for b in boxes] + [s[3][1] for s in standers], dtype=float)
+    all_labels = list(labels) + [s[0] for s in standards]
+    lo = np.array([b[0] for b in boxes] + [s[3][0] for s in standards], dtype=float)
+    hi = np.array([b[1] for b in boxes] + [s[3][1] for s in standards], dtype=float)
     return AoGInputs(
         component_ids=[f"Part__{lab}" for lab in all_labels],
         component_labels=all_labels,
@@ -129,8 +129,8 @@ def _make_inputs(labels, n, blocked, standers, boxes, key) -> AoGInputs:
         free=free,
         directions=AXES.copy(),
         neg=AXNEG.copy(),
-        stander_options={n + q: [(np.asarray(s[1], dtype=float), set())] for q, s in enumerate(standers)},
-        stander_holds={n + q: set(s[2]) for q, s in enumerate(standers)},
+        standard_options={n + q: [(np.asarray(s[1], dtype=float), set())] for q, s in enumerate(standards)},
+        standard_holds={n + q: set(s[2]) for q, s in enumerate(standards)},
         nut_links={},
         bbox_lo=lo,
         bbox_hi=hi,
@@ -161,11 +161,11 @@ def synthetic_demo() -> AoGInputs:
         ([20, 20, 30], [80, 80, 40]),   # C
         ([90, 20, 10], [110, 80, 30]),  # S
     ]
-    standers = [
+    standards = [
         ("screw1", [0, 0, 1], {C, B}, ([48, 48, 20], [52, 52, 45])),
         ("screw2", [0, 0, -1], {B, P}, ([48, 48, -5], [52, 52, 20])),
     ]
-    return _make_inputs(["P (plate)", "B (bracket)", "C (cover)", "S (side)"], 4, blocked, standers,
+    return _make_inputs(["P (plate)", "B (bracket)", "C (cover)", "S (side)"], 4, blocked, standards,
                         boxes, "synthetic-demo")
 
 
@@ -176,7 +176,7 @@ def synthetic_lattice(n: int) -> AoGInputs:
 
 
 def synthetic_random(n: int, m: int, seed: int, p_block: float = 0.3) -> AoGInputs:
-    """Random blocking (may create dead ends) and random stander gates."""
+    """Random blocking (may create dead ends) and random standard gates."""
     rng = random.Random(seed)
     blocked = [(i, j, k) for i in range(n) for j in range(i + 1, n) for k in range(6)
                if rng.random() < p_block]
@@ -184,12 +184,12 @@ def synthetic_random(n: int, m: int, seed: int, p_block: float = 0.3) -> AoGInpu
     for _ in range(n):
         lo = [rng.uniform(0, 80) for _ in range(3)]
         boxes.append((lo, [c + rng.uniform(10, 30) for c in lo]))
-    standers = []
+    standards = []
     for q in range(m):
         lo = [rng.uniform(0, 80) for _ in range(3)]
         gate = set(rng.sample(range(n), k=min(n, rng.choice([1, 2]))))
-        standers.append((f"screw{q}", AXES[rng.randrange(6)], gate, (lo, [c + 5 for c in lo])))
-    return _make_inputs([f"p{i}" for i in range(n)], n, blocked, standers, boxes,
+        standards.append((f"screw{q}", AXES[rng.randrange(6)], gate, (lo, [c + 5 for c in lo])))
+    return _make_inputs([f"p{i}" for i in range(n)], n, blocked, standards, boxes,
                         f"synthetic-random-{n}-{m}-{seed}")
 
 
@@ -244,13 +244,13 @@ def check_structure(aog: AoG) -> dict:
     return _result("S1", "structure", p, f"{V} nodes, {E} edges, layered DAG, CSR consistent")
 
 
-def _stander_dir0(inputs: AoGInputs, s: int) -> np.ndarray:
-    """First (and, for every demo this script builds, only) option's direction of stander `s`."""
-    return np.asarray(inputs.stander_options[s][0][0], dtype=float)
+def _standard_dir0(inputs: AoGInputs, s: int) -> np.ndarray:
+    """First (and, for every demo this script builds, only) option's direction of standard `s`."""
+    return np.asarray(inputs.standard_options[s][0][0], dtype=float)
 
 
-def _expected_stander_dir(aog: AoG, inputs: AoGInputs, s: int) -> int:
-    d = _stander_dir0(inputs, s)
+def _expected_standard_dir(aog: AoG, inputs: AoGInputs, s: int) -> int:
+    d = _standard_dir0(inputs, s)
     d = d / np.linalg.norm(d)
     return int(np.flatnonzero(np.linalg.norm(aog.directions - d, axis=1) < 1e-6)[0])
 
@@ -261,8 +261,8 @@ def check_bruteforce(aog: AoG, inputs: AoGInputs, max_n: int) -> dict:
         return {"id": "S2", "name": "brute force", "passed": True, "skipped": True,
                 "detail": f"skipped (N={N} > {max_n})"}
     free, D = inputs.free, inputs.free.shape[2]
-    gates = {s: frozenset(inputs.stander_holds.get(s, ())) for s in range(n, N)}
-    sdir = {s: _expected_stander_dir(aog, inputs, s) for s in range(n, N)}
+    gates = {s: frozenset(inputs.standard_holds.get(s, ())) for s in range(n, N)}
+    sdir = {s: _expected_standard_dir(aog, inputs, s) for s in range(n, N)}
 
     def valid(S):
         return all(gates[s] <= S for s in S if s >= n)
@@ -312,14 +312,14 @@ def check_bruteforce(aog: AoG, inputs: AoGInputs, max_n: int) -> dict:
                    f"{len(ref_nodes)} states and {len(ref_edges)} moves identical to the naive reference")
 
 
-def check_standers(aog: AoG, inputs: AoGInputs) -> dict:
+def check_standards(aog: AoG, inputs: AoGInputs) -> dict:
     N, n, V = aog.n_components, inputs.n_movable, aog.n_nodes
     if N == n:
-        return {"id": "S3", "name": "standers", "passed": True, "skipped": True, "detail": "no standers"}
+        return {"id": "S3", "name": "standards", "passed": True, "skipped": True, "detail": "no standards"}
     mask = aog.node_mask.astype(np.uint64)
     p = []
     for s in range(n, N):
-        gate = np.uint64(sum(1 << g for g in inputs.stander_holds.get(s, ())))
+        gate = np.uint64(sum(1 << g for g in inputs.standard_holds.get(s, ())))
         present = ((mask >> np.uint64(s)) & np.uint64(1)).astype(bool)
         has_move = np.bincount(aog.edge_src[aog.edge_comp == s].astype(np.int64), minlength=V) > 0
         label = aog.component_labels[s]
@@ -329,8 +329,8 @@ def check_standers(aog: AoG, inputs: AoGInputs) -> dict:
             p.append(f"{label}: no removal move in a state where it is present")
         if np.any(~present & has_move):
             p.append(f"{label}: removal move in a state where it is absent")
-    return _result("S3", "standers", p, f"{N - n} standers: gate holds in all {V} states, "
-                   "each stander removable wherever present")
+    return _result("S3", "standards", p, f"{N - n} standards: gate holds in all {V} states, "
+                   "each standard removable wherever present")
 
 
 def check_directions(aog: AoG, inputs: AoGInputs) -> dict:
@@ -352,11 +352,11 @@ def check_directions(aog: AoG, inputs: AoGInputs) -> dict:
     if np.any(movable & ((words & ~candidate_bits) != 0)):
         p.append("a movable part's edge carries a non-candidate direction")
     for s in range(n, aog.n_components):
-        want = np.uint64(1) << np.uint64(_expected_stander_dir(aog, inputs, s))
+        want = np.uint64(1) << np.uint64(_expected_standard_dir(aog, inputs, s))
         if np.any((comp == s) & (words != want)):
-            p.append(f"stander {aog.component_labels[s]}: an edge does not carry exactly its own direction")
-    return _result("S4", "directions", p, f"{len(d)} directions ({len(d) - D} appended for standers), "
-                   "neg table consistent, stander edges carry their own direction")
+            p.append(f"standard {aog.component_labels[s]}: an edge does not carry exactly its own direction")
+    return _result("S4", "directions", p, f"{len(d)} directions ({len(d) - D} appended for standards), "
+                   "neg table consistent, standard edges carry their own direction")
 
 
 def _travel_ref(lo, hi, blo, bhi, d, margin) -> float:
@@ -400,7 +400,7 @@ def check_paths(aog: AoG, inputs: AoGInputs, samples: int, seed: int = 0) -> dic
                 "detail": "skipped (AoG is incomplete)"}
     N, n = aog.n_components, inputs.n_movable
     rng = random.Random(seed)
-    gates = {s: set(inputs.stander_holds.get(s, ())) for s in range(n, N)}
+    gates = {s: set(inputs.standard_holds.get(s, ())) for s in range(n, N)}
     p, walked = [], 0
     for _ in range(samples):
         v, path = aog.root, []
@@ -427,10 +427,10 @@ def check_paths(aog: AoG, inputs: AoGInputs, samples: int, seed: int = 0) -> dic
                             p.append(f"path step remove {aog.component_labels[c]} along {k} is blocked")
                 else:
                     if not gates[c] <= state:
-                        p.append(f"stander {aog.component_labels[c]} removed without its gate")
+                        p.append(f"standard {aog.component_labels[c]} removed without its gate")
                 state = rest
                 if any(not gates[s] <= state for s in state if s >= n):
-                    p.append("a stander is left without its gate")
+                    p.append("a standard is left without its gate")
             asm = aog.assembly_sequence(path)
             order = [st["component"] for st in asm]
             if sorted(order) != list(range(N)):
@@ -438,7 +438,7 @@ def check_paths(aog: AoG, inputs: AoGInputs, samples: int, seed: int = 0) -> dic
             pos = {c: i for i, c in enumerate(order)}
             for s, g in gates.items():
                 if any(pos[j] > pos[s] for j in g):
-                    p.append(f"assembly order places stander {aog.component_labels[s]} before its gate")
+                    p.append(f"assembly order places standard {aog.component_labels[s]} before its gate")
             for st, e in zip(asm, reversed(path)):
                 ks = aog.edge_direction_indices(e)
                 if not np.allclose(np.array(st["directions"]), -aog.directions[ks]):
@@ -447,7 +447,7 @@ def check_paths(aog: AoG, inputs: AoGInputs, samples: int, seed: int = 0) -> dic
         if len(p) > 8:
             break
     return _result("S6", "paths", p, f"{walked} random root-to-terminal walks replayed independently; "
-                   "assembly order valid, standers after their gates")
+                   "assembly order valid, standards after their gates")
 
 
 def check_live(aog: AoG) -> dict:
@@ -517,26 +517,26 @@ def check_cache_key(aog: AoG, inputs: AoGInputs) -> dict:
         p.append("changing the margin did not change the key")
     if N > n:
         s = n
-        gate = set(inputs.stander_holds.get(s, ()))
+        gate = set(inputs.standard_holds.get(s, ()))
         other = set(range(n)) - gate
         new_gate = (gate | {next(iter(other))}) if other else (gate - {next(iter(gate))} if gate else gate)
         if new_gate != gate:
-            changed = replace(inputs, stander_holds={**inputs.stander_holds, s: new_gate})
+            changed = replace(inputs, standard_holds={**inputs.standard_holds, s: new_gate})
             if compute_cache_key(changed, aog.config) == key:
                 p.append("changing a holds set did not change the key")
-        d0, blockers0 = inputs.stander_options[s][0]
-        moved_options = {**inputs.stander_options, s: [(-np.asarray(d0, dtype=float), blockers0)]}
-        moved = replace(inputs, stander_options=moved_options)
+        d0, blockers0 = inputs.standard_options[s][0]
+        moved_options = {**inputs.standard_options, s: [(-np.asarray(d0, dtype=float), blockers0)]}
+        moved = replace(inputs, standard_options=moved_options)
         if compute_cache_key(moved, aog.config) == key:
-            p.append("changing a stander direction did not change the key")
-    return _result("S10", "cache key", p, "key changes with the config, holds sets and stander directions")
+            p.append("changing a standard direction did not change the key")
+    return _result("S10", "cache key", p, "key changes with the config, holds sets and standard directions")
 
 
 def run_checks(aog: AoG, inputs: AoGInputs, samples: int, brute_max_n: int) -> list[dict]:
     return [
         check_structure(aog),
         check_bruteforce(aog, inputs, brute_max_n),
-        check_standers(aog, inputs),
+        check_standards(aog, inputs),
         check_directions(aog, inputs),
         check_travel(aog, inputs),
         check_paths(aog, inputs, samples),
@@ -654,19 +654,19 @@ def build_report(aog: AoG, inputs: AoGInputs, checks: list[dict], path: list[int
         ks = aog.edge_direction_indices(e)
         root_moves.append({
             "component": aog.component_labels[c],
-            "is_stander": bool(aog.is_stander[c]),
+            "is_standard": bool(aog.is_standard[c]),
             "directions": [_vec(aog.directions[k]) for k in ks],
             "travel_mm": [round(float(aog.travel[c, k]), 3) for k in ks],
         })
     seq = aog.sequence(path) if path else []
     return {
         "components": [{"bit": c, "label": aog.component_labels[c], "id": aog.component_ids[c],
-                        "kind": "stander" if aog.is_stander[c] else "movable"} for c in range(N)],
+                        "kind": "standard" if aog.is_standard[c] else "movable"} for c in range(N)],
         "directions": [{"index": k, "vector": _vec(aog.directions[k]),
-                        "neg": int(aog.neg[k]), "appended_for_standers": k >= inputs.free.shape[2]}
+                        "neg": int(aog.neg[k]), "appended_for_standards": k >= inputs.free.shape[2]}
                        for k in range(len(aog.directions))],
-        "stander_holds": {aog.component_labels[s]: sorted(aog.component_labels[g]
-                                                          for g in inputs.stander_holds.get(s, ()))
+        "standard_holds": {aog.component_labels[s]: sorted(aog.component_labels[g]
+                                                          for g in inputs.standard_holds.get(s, ()))
                           for s in range(n, N)},
         "nodes": aog.n_nodes,
         "edges": aog.n_edges,
@@ -702,7 +702,7 @@ def build_payload(aog: AoG, rank: np.ndarray, path: list[int]) -> dict:
         edges.append([int(aog.edge_src[e]), int(aog.edge_dst[e]), c, [int(k) for k in ks],
                       [round(float(aog.travel[c, k]), 2) for k in ks]])
     return {
-        "comps": [{"label": aog.component_labels[c], "stander": bool(aog.is_stander[c])} for c in range(N)],
+        "comps": [{"label": aog.component_labels[c], "standard": bool(aog.is_standard[c])} for c in range(N)],
         "dirs": [_vec(d) for d in aog.directions],
         "levelSizes": sizes,
         "nodes": nodes,
@@ -844,7 +844,7 @@ HTML_TEMPLATE = r"""<!doctype html>
   });
 
   const edgeEls = D.edges.map((e, i) => {
-    const a = pos[e[0]], b = pos[e[1]], st = D.comps[e[2]].stander;
+    const a = pos[e[0]], b = pos[e[1]], st = D.comps[e[2]].standard;
     const ln = el('line', {x1: a.x, y1: a.y, x2: b.x, y2: b.y, class: 'edge', stroke: color(e[2]),
       'stroke-width': 1.3, opacity: 0.32, 'stroke-dasharray': st ? '5 3' : ''}, gE);
     ln.addEventListener('mousemove', ev => showEdgeTip(ev, i));
@@ -891,7 +891,7 @@ HTML_TEMPLATE = r"""<!doctype html>
   }
   function showEdgeTip(ev, i) {
     const e = D.edges[i], c = D.comps[e[2]];
-    placeTip(ev, `<b>Remove ${esc(c.label)}</b>${c.stander ? ' (stander)' : ''}<br>${e[3].length} free direction${e[3].length > 1 ? 's' : ''}: ${edgeInfo(i)}`);
+    placeTip(ev, `<b>Remove ${esc(c.label)}</b>${c.standard ? ' (standard)' : ''}<br>${e[3].length} free direction${e[3].length > 1 ? 's' : ''}: ${edgeInfo(i)}`);
   }
   function stateSummary(v) {
     const p = present(v), n = D.nodes[v];
@@ -941,7 +941,7 @@ HTML_TEMPLATE = r"""<!doctype html>
     const d = document.getElementById('detail');
     if (selected === null) { d.innerHTML = '<span class="hint">Nothing selected.</span>'; refresh(); return; }
     const moves = out[v].map(i => { const e = D.edges[i], c = D.comps[e[2]];
-      return `<li>${esc(c.label)}${c.stander ? ' (stander)' : ''}: ${edgeInfo(i)}</li>`; }).join('');
+      return `<li>${esc(c.label)}${c.standard ? ' (standard)' : ''}: ${edgeInfo(i)}</li>`; }).join('');
     d.innerHTML = stateSummary(v) + `<br><span class="k">Moves out (${out[v].length}):</span><ul>${moves || '<li>none</li>'}</ul>`;
     refresh();
   }
@@ -955,8 +955,8 @@ HTML_TEMPLATE = r"""<!doctype html>
     const lg = document.getElementById('legend'); lg.innerHTML = '';
     D.comps.forEach((c, i) => {
       const row = document.createElement('div'); row.className = 'chip' + (hidden.has(i) ? ' off' : '');
-      row.innerHTML = `<span class="sw${c.stander ? ' st' : ''}" style="border-color:${color(i)}"></span>` +
-        `<span>${esc(c.label)}${c.stander ? ' <span class="k">(stander)</span>' : ''}</span><span class="n">${edgeCount[i]}</span>`;
+      row.innerHTML = `<span class="sw${c.standard ? ' st' : ''}" style="border-color:${color(i)}"></span>` +
+        `<span>${esc(c.label)}${c.standard ? ' <span class="k">(standard)</span>' : ''}</span><span class="n">${edgeCount[i]}</span>`;
       row.onclick = () => { hidden.has(i) ? hidden.delete(i) : hidden.add(i); buildLegend(); refresh(); };
       lg.appendChild(row);
     });
@@ -1030,18 +1030,18 @@ def print_summary(aog: AoG, inputs: AoGInputs, report: dict, checks: list[dict],
                   elapsed: float, files: dict[str, Path | None]) -> None:
     N, n = aog.n_components, inputs.n_movable
     print()
-    print(f"AoG: {N} components ({n} movable, {N - n} standers), {len(aog.directions)} directions, "
+    print(f"AoG: {N} components ({n} movable, {N - n} standards), {len(aog.directions)} directions, "
           f"{aog.n_nodes} states, {aog.n_edges} moves, complete={aog.complete}, "
           f"{len(aog.dead_ends)} dead ends")
     print("States per level:  " + "  ".join(f"L{L}:{s}" for L, s in enumerate(report["states_per_level"])))
-    if report["stander_holds"]:
-        print("Stander holds (must all still be present when the stander is removed):")
-        for s, g in report["stander_holds"].items():
+    if report["standard_holds"]:
+        print("Standard holds (must all still be present when the standard is removed):")
+        for s, g in report["standard_holds"].items():
             print(f"  {s}: {', '.join(g) if g else '(none)'}")
     print("Moves with everything assembled:")
     for m in report["moves_with_everything_assembled"]:
         dirs = ", ".join(f"{tuple(d)} {t} mm" for d, t in zip(m["directions"], m["travel_mm"]))
-        print(f"  {m['component']}{' (stander)' if m['is_stander'] else ''}: {dirs}")
+        print(f"  {m['component']}{' (standard)' if m['is_standard'] else ''}: {dirs}")
     if len(aog.dead_ends):
         print(f"Dead ends ({len(aog.dead_ends)}, first 5):")
         for v in aog.dead_ends[:5]:
@@ -1143,7 +1143,7 @@ if __name__ == "__main__":
     parser.add_argument("--synthetic", choices=["stack", "demo", "lattice", "random"],
                         help="use a hand-built assembly instead of the STEP pipeline (no FreeCAD needed)")
     parser.add_argument("--n", type=int, default=5, help="movable parts for lattice/random (default 5)")
-    parser.add_argument("--m", type=int, default=2, help="standers for random (default 2)")
+    parser.add_argument("--m", type=int, default=2, help="standards for random (default 2)")
     parser.add_argument("--seed", type=int, default=1, help="seed for random (default 1)")
     parser.add_argument("--out", type=Path, help="output folder for synthetic runs (default tests/synthetic/<name>)")
     parser.add_argument("--step", type=float, default=DEFAULT_H,

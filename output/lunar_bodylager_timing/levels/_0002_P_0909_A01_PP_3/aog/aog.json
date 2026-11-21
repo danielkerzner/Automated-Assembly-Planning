@@ -1,0 +1,51 @@
+{
+ "schema_version": 2,
+ "cache_key": "313395eeba49a2c8975f76e146a3340e34d66a3b6157cd8cb3463b9ca7529bec",
+ "component_ids": [
+  "Part__Feature022",
+  "Part__Feature023"
+ ],
+ "component_labels": [
+  "1603-0032-0033",
+  "1601-0039-00033"
+ ],
+ "config": {
+  "margin": 1.0,
+  "group_consecutive": true,
+  "group_one_order": true
+ },
+ "stats": {
+  "group_rule": false,
+  "group_one_order": false,
+  "groups": {},
+  "group_order_pruned_edges": 0,
+  "N": 2,
+  "n_movable": 2,
+  "n_standers": 0,
+  "D": 6,
+  "D_prime": 6,
+  "V": 4,
+  "E": 4,
+  "nodes_per_level": [
+   1,
+   2,
+   1
+  ],
+  "connectivity_rule": true,
+  "disconnected_dropped": 0,
+  "dead_ends": 0,
+  "live_nodes": 4,
+  "complete": true,
+  "time_s": 0.002763299969956279,
+  "array_bytes": 470
+ },
+ "complete": true,
+ "root": 0,
+ "terminal": 3,
+ "dead_ends": [],
+ "component_groups": [
+  "1603-0032-0033",
+  "1601-0039-00033"
+ ],
+ "date": "2026-11-18T18:54:26"
+}

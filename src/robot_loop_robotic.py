@@ -21,7 +21,7 @@ What this module does
         choice = choose(records)
 
     A step is checked with the gripper (grasp engine, `gripper_analysis_robotic`) for normal parts, or with
-    the tool check (`tool_check`) for standers.
+    the tool check (`tool_check`) for standards.
 
 Implementation decisions:
   - Intrinsically infeasible gripper components (fail even alone, see gripper_analysis_robotic) are
@@ -59,21 +59,21 @@ log = logging.getLogger("aap.robot")
 # ---------------------------------------------------------------------------
 
 
-def rotation_for(state: int, c: int, aog, stander_records: dict) -> Rotation | None:
+def rotation_for(state: int, c: int, aog, standard_records: dict) -> Rotation | None:
     """[MAIN] The nut axis component c turns about when removed from `state`, or None.
 
-    Input: the AoG state bitmask, the component index, the AoG and the stander records. Output: a
+    Input: the AoG state bitmask, the component index, the AoG and the standard records. Output: a
     `Rotation` if c is the partner of a nut that is still present (so c turns while it is removed, and the
     grasp must survive that rotation), else None. A screw never rotates here (its own thread makes it a
     tool step anyway). With several present nuts the first one's axis is used, with a warning.
     """
     cid = aog.component_ids[c]
-    own = stander_records.get(cid)
+    own = standard_records.get(cid)
     if own is not None and own.category == 1:
         return None  # a screw turns on its own thread; it is a tool step anyway
     found = []
     for n, nid in enumerate(aog.component_ids):
-        rec = stander_records.get(nid)
+        rec = standard_records.get(nid)
         if rec is None or rec.category != 2 or rec.partner != cid or not (state >> n) & 1:
             continue
         d = rec.options[0].direction
@@ -103,7 +103,7 @@ class StepEval:
     state: int  # int bitmask. Components present before removal.
     component: int  # int. AoG component index of the removed part.
     label: str  # str. BOM label of the part.
-    kind: str  # str. "gripper" (normal part) or "tool" (stander).
+    kind: str  # str. "gripper" (normal part) or "tool" (standard).
     feasible: bool  # bool. The edge: part check and (when enabled) both sub-assembly nodes.
     grasp: object | None = None  # StepGrasp for a gripper step, else None.
     tool: object | None = None  # ToolStep for a tool step, else None.
@@ -141,11 +141,11 @@ class StepEval:
         return bool(self.grasp is not None and self.grasp.intrinsic)
 
 
-def evaluate_sequence(seq, aog, stander_records: dict, analysis: GripperAnalysis, tool_checker) -> list[StepEval]:
+def evaluate_sequence(seq, aog, standard_records: dict, analysis: GripperAnalysis, tool_checker) -> list[StepEval]:
     """[MAIN] Evaluate every step of an OptimizationResult (assembly order), never stopping at a failure.
 
-    Inputs: the sequence, the AoG, the stander records, the gripper analysis (grasp engine) and the tool
-    checker. Output: one `StepEval` per step. Standers are checked with the tool (any free sense without
+    Inputs: the sequence, the AoG, the standard records, the gripper analysis (grasp engine) and the tool
+    checker. Output: one `StepEval` per step. Standards are checked with the tool (any free sense without
     contact is enough, the planned sense preferred); other parts with the grasp analysis, including the
     nut-partner rotation. With `check_subassembly_grasp` on, each edge also needs both of its nodes (the
     sub-assembly before and after the insertion) to be graspable; node results are cached per state in the
@@ -157,13 +157,13 @@ def evaluate_sequence(seq, aog, stander_records: dict, analysis: GripperAnalysis
     for s in seq.steps:
         e, c = int(s["edge"]), int(s["component"])
         state = int(aog.node_mask[aog.edge_src[e]])
-        if bool(aog.is_stander[c]):
+        if bool(aog.is_standard[c]):
             senses = [int(k) for k in aog.edge_direction_indices(e)]
             ts = tool_checker.step(state, c, senses, preferred=int(s["removal_direction_index"]))
             ev = StepEval(step=int(s["step"]), edge=e, state=state, component=c, label=aog.component_labels[c],
                           kind="tool", feasible=ts.feasible, tool=ts, root_state=root_state)
         else:
-            g = analysis.step(state, c, rotation_for(state, c, aog, stander_records))
+            g = analysis.step(state, c, rotation_for(state, c, aog, standard_records))
             ev = StepEval(step=int(s["step"]), edge=e, state=state, component=c, label=aog.component_labels[c],
                           kind="gripper", feasible=g.feasible, grasp=g, root_state=root_state)
         if check_nodes:
@@ -293,7 +293,7 @@ def run_robot_loop(aog, interference_result, prep, analysis: GripperAnalysis, to
             steps = records[seen[key]]["steps"]  # a sequence already tried is not re-evaluated
             log.info("Robot loop: iteration %d repeats the sequence of iteration %d", it, records[seen[key]]["iteration"])
         else:
-            steps = evaluate_sequence(seq, aog, prep.stander_records, analysis, tool_checker)
+            steps = evaluate_sequence(seq, aog, prep.standard_records, analysis, tool_checker)
             seen[key] = len(records)
         # 3. Record it and block the edges to prune.
         metrics = sequence_metrics(steps)
@@ -370,7 +370,7 @@ def run_robot_pipeline(step_path, bom_path, output_dir, robot_config: RobotConfi
 
     It builds the root level exactly like `levels.solve_level` (same caches), then the point clouds, the
     tool checker and the grasp engine (as a context manager, so the worker is always closed), computes
-    S_alone for every non-stander, runs the loop and writes the plan for the chosen sequence.
+    S_alone for every non-standard, runs the loop and writes the plan for the chosen sequence.
     """
     from aog_generator import AoGConfig, build_aog
     from gripper_engine_robotic import GraspEngine
@@ -379,7 +379,7 @@ def run_robot_pipeline(step_path, bom_path, output_dir, robot_config: RobotConfi
     from levels import LevelPlan, build_level_document
     from output_robotic import write_robot_plan
     from pointclouds_robotic import component_clouds
-    from preprocessing import load_assembly, load_bom, load_stander_categories, run_preprocessing_on_document
+    from preprocessing import load_assembly, load_bom, load_standard_categories, run_preprocessing_on_document
     from shapes import component_shapes
     from tool_check import ToolChecker
     import csv
@@ -393,7 +393,7 @@ def run_robot_pipeline(step_path, bom_path, output_dir, robot_config: RobotConfi
     # Load the inputs and refuse nested sub-assemblies.
     doc = load_assembly(step_path)
     bom_labels = load_bom(bom_path)
-    bom_categories = load_stander_categories(bom_path)
+    bom_categories = load_standard_categories(bom_path)
     with open(bom_path, newline="", encoding="utf-8-sig") as f:
         bom_rows = list(csv.DictReader(f))
     hier = build_hierarchy(doc, bom_rows=bom_rows)
@@ -415,13 +415,13 @@ def run_robot_pipeline(step_path, bom_path, output_dir, robot_config: RobotConfi
     if not aog.complete:
         raise ValueError("The AoG cannot reach the fully disassembled state; robot mode needs a complete AoG")
 
-    # Point clouds for the grasp engine and the tool checker (needs the shapes and stander categories).
-    shapes = component_shapes(aog.component_ids, aog.is_stander, prep)
+    # Point clouds for the grasp engine and the tool checker (needs the shapes and standard categories).
+    shapes = component_shapes(aog.component_ids, aog.is_standard, prep)
     clouds, keys = component_clouds(list(aog.component_ids), shapes, config.pcd_spacing_mm, config.pcd_max_points,
                                     config.pcd_seed, cache_dir=robot_dir / "clouds", labels=list(aog.component_labels))
-    categories = {c: prep.stander_records[cid].category for c, cid in enumerate(aog.component_ids)
-                  if cid in prep.stander_records}
-    tool_checker = ToolChecker(shapes, list(aog.component_labels), list(aog.is_stander), categories,
+    categories = {c: prep.standard_records[cid].category for c, cid in enumerate(aog.component_ids)
+                  if cid in prep.standard_records}
+    tool_checker = ToolChecker(shapes, list(aog.component_labels), list(aog.is_standard), categories,
                                np.asarray(aog.directions), config)
 
     # Grasp engine (worker subprocess lives inside this block), gripper analysis and the loop.
@@ -431,9 +431,9 @@ def run_robot_pipeline(step_path, bom_path, output_dir, robot_config: RobotConfi
         analysis = GripperAnalysis(engine, clouds, keys, list(aog.component_labels), config,
                                    cache_dir=(robot_dir / "engine_cache") if config.disk_cache else None,
                                    engine_tag=engine_tag(config, engine.gripper_yaml))
-        # Alone scores for every non-stander component up front (reported in the output).
+        # Alone scores for every non-standard component up front (reported in the output).
         for c in range(aog.n_components):
-            if not aog.is_stander[c]:
+            if not aog.is_standard[c]:
                 analysis.alone(c)
         loop = run_robot_loop(aog, interf, prep, analysis, tool_checker, config, optimization_config,
                               optimization_cache_dir=output_dir / "optimization")

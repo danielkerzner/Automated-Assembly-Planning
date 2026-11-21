@@ -1,5 +1,5 @@
 {
-  "key": "2e30ac890380480272eafd3aba18c9d113cf268b733b8fbc113f168b350c8398",
+  "key": "b495f303cbd04c269f52a02217366d2668831883c8fec488109513b43da595f2",
   "global_view": [
     -35.0,
     30.0
@@ -26,14 +26,14 @@
     {
       "step_index": 1,
       "warnings": [
-        "step 2: stander not fully visible in any main view; drawn without x-ray at az -35.0 el 30.0"
+        "step 2: standard not fully visible in any main view; drawn without x-ray at az -35.0 el 30.0"
       ],
       "view": [
         -35.0,
         30.0
       ],
       "is_global": true,
-      "kind": "stander",
+      "kind": "standard",
       "visible": false,
       "xray": false,
       "vis_end": 0.0,

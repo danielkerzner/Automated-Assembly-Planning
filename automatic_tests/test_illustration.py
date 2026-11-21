@@ -193,11 +193,11 @@ def enclosure(lo, hi, t, key="enclosure") -> ig.Mesh:
     return merged(walls, key)
 
 
-def step(t, cid, offset, stander=False, gravity=None, cls=None, label=None) -> dict:
+def step(t, cid, offset, standard=False, gravity=None, cls=None, label=None) -> dict:
     # [SUPP] Step dict as the optimizer writes it; `offset` is start_offset, the direction is derived from it.
     o = np.asarray(offset, float)
     travel = float(np.linalg.norm(o))
-    return {"step": t, "component_id": cid, "component_label": label or cid, "is_stander": stander,
+    return {"step": t, "component_id": cid, "component_label": label or cid, "is_standard": standard,
             "direction": (-o / travel).tolist(), "travel": travel, "start_offset": o.tolist(),
             "gravity": gravity, "stability_class": cls}
 
@@ -216,7 +216,7 @@ def row_scene():
     return scene([
         ("A", box([0, 0, 0], [20, 20, 10]), [0, 0, -40]),
         ("B", box([0, 0, 10], [10, 10, 20]), [0, 0, 40]),
-        ("C", box([10, 0, 10], [20, 10, 20]), [40, 0, 0], {"stander": True}),
+        ("C", box([10, 0, 10], [20, 10, 20]), [40, 0, 0], {"standard": True}),
         ("D", box([0, 10, 10], [20, 20, 16]), [0, 40, 0]),
     ])
 
@@ -236,7 +236,7 @@ def test_l1(rec, args):
     """Tests: validate_config, the BOM reader / tool text, and the input checks of render_illustrations.
     What: each invalid config value (image size, empty azimuth / elevation lists, negative elevation, visibility fraction,
           colour name, language, dpi, tessellation tolerance) must raise a ValueError naming the field. The tool text of a
-          step is the BOM tool for standers and "by hand" otherwise (no tool column, blank tool, non-stander, label absent
+          step is the BOM tool for standards and "by hand" otherwise (no tool column, blank tool, non-standard, label absent
           from the BOM). A step without mesh, or a component listed twice, raises.
     """
     C = IllustrationConfig
@@ -254,18 +254,18 @@ def test_l1(rec, args):
     out = fresh_dir("l1")
     out.mkdir(parents=True)
     no_tool = out / "bom_no_tool.csv"
-    no_tool.write_text("label,is_stander\nP1,false\nS1,true\n", encoding="utf-8")
+    no_tool.write_text("label,is_standard\nP1,false\nS1,true\n", encoding="utf-8")
     with_tool = out / "bom.csv"
-    with_tool.write_text("label,is_stander,tool,group\nP1,false,,g1\nS1,true,wrench_10,g2\nS2,true,,g2\n",
+    with_tool.write_text("label,is_standard,tool,group\nP1,false,,g1\nS1,true,wrench_10,g2\nS2,true,,g2\n",
                          encoding="utf-8")
     bom0, bom1 = ig.read_bom(no_tool), ig.read_bom(with_tool)
     s_p = step(1, "p1", [0, 0, 10], label="P1")
-    s_s1 = step(2, "s1", [0, 0, 10], stander=True, label="S1")
-    s_s2 = step(3, "s2", [0, 0, 10], stander=True, label="S2")
-    rec.check(ig.tool_text(s_s1, bom0) == "by hand", "BOM without a tool column: stander prints 'by hand'")
-    rec.check(ig.tool_text(s_s1, bom1) == "wrench_10", "stander tool read from the BOM by Label")
+    s_s1 = step(2, "s1", [0, 0, 10], standard=True, label="S1")
+    s_s2 = step(3, "s2", [0, 0, 10], standard=True, label="S2")
+    rec.check(ig.tool_text(s_s1, bom0) == "by hand", "BOM without a tool column: standard prints 'by hand'")
+    rec.check(ig.tool_text(s_s1, bom1) == "wrench_10", "standard tool read from the BOM by Label")
     rec.check(ig.tool_text(s_s2, bom1) == "by hand", "blank tool prints 'by hand'")
-    rec.check(ig.tool_text(s_p, bom1) == "by hand", "non-stander prints 'by hand'")
+    rec.check(ig.tool_text(s_p, bom1) == "by hand", "non-standard prints 'by hand'")
     rec.check(ig.tool_text(step(1, "x", [0, 0, 1], label="unknown"), bom1) == "by hand", "label missing from BOM")
     steps, meshes, _, _ = row_scene()
     rec.check(raises(lambda: ig.render_illustrations(steps, {"A": meshes["A"]}, {}, out / "r", IllustrationConfig(**SMALL)),
@@ -445,10 +445,10 @@ def test_l6(rec, args):
 def test_l7(rec, args):
     """Tests: per-step view fallbacks (select_views) and their report.
     What: (1) a step hidden in the global view gets another candidate view; (2) a movable part enclosed in a box gets the x-ray
-          fallback with a warning, and only the main views are searched; (3) an enclosed stander is drawn without x-ray and
-          reported as not visible; (4) the stander's best view prefers a clear trajectory; (5) a step whose only view looks along
+          fallback with a warning, and only the main views are searched; (3) an enclosed standard is drawn without x-ray and
+          reported as not visible; (4) the standard's best view prefers a clear trajectory; (5) a step whose only view looks along
           its insertion direction is reported "none" with a warning and never aborts; (6) a group frame follows the fallback of
-          its first movement; (7) end to end, render_illustrations writes the frame without x-ray and the pixels at the stander
+          its first movement; (7) end to end, render_illustrations writes the frame without x-ray and the pixels at the standard
           stay behind the enclosure, while the x-ray version would show them.
     """
     wall = box([-1, -30, -5], [1, 30, 40])
@@ -460,31 +460,31 @@ def test_l7(rec, args):
     rec.check(ch[2]["kind"] == "candidate" and ch[2]["view"] == (180.0, 20.0) and ch[2]["visible"],
               f"step 3 hidden behind the wall gets the other candidate ({ch[2]['kind']} {ch[2]['view']})")
 
-    # Hidden from every main view: movable part -> x-ray with a warning, stander -> drawn normally.
+    # Hidden from every main view: movable part -> x-ray with a warning, standard -> drawn normally.
     _, _, mesh_list, offsets = scene([("box", enclosure([-10, -10, -10], [10, 10, 10], 2), [0, 0, 60]),
                                       ("inner", box([-4, -4, -4], [4, 4, 4]), [0, 0, 40])])
     cfg = IllustrationConfig(search_size=(160, 120))
     stats = {}
-    glob, ch = ig.select_views(mesh_list, offsets, cfg, stats, is_stander=[False, False])
+    glob, ch = ig.select_views(mesh_list, offsets, cfg, stats, is_standard=[False, False])
     rec.check(ch[1]["kind"] == "xray" and ch[1]["xray"] and ch[1]["warnings"] and ch[1]["visible"],
               f"enclosed movable part gets the x-ray fallback with a warning ({ch[1]['kind']}, {ch[1]['warnings']})")
     rec.check(ch[1]["vis_end_occluded"] == 0.0, "its occluded end fraction is 0 in the chosen view")
     cands = ig.candidate_views(cfg)
     rec.check(stats["views_evaluated"] == len(cands) and all(c["view"] in cands for c in ch),
               f"only the main views are searched, no perturbation ({stats['views_evaluated']} views)")
-    _, ch = ig.select_views(mesh_list, offsets, cfg, is_stander=[False, True])
-    rec.check(ch[1]["kind"] == "stander" and not ch[1]["xray"] and not ch[1]["visible"] and ch[1]["warnings"]
+    _, ch = ig.select_views(mesh_list, offsets, cfg, is_standard=[False, True])
+    rec.check(ch[1]["kind"] == "standard" and not ch[1]["xray"] and not ch[1]["visible"] and ch[1]["warnings"]
               and ch[1]["view"] in cands,
-              f"enclosed stander is drawn without x-ray and reported as not visible ({ch[1]['kind']})")
+              f"enclosed standard is drawn without x-ray and reported as not visible ({ch[1]['kind']})")
 
     # Its best view prefers a clear trajectory over the view that looks along the insertion direction.
     toward = np.array([np.cos(np.radians(20)), 0, np.sin(np.radians(20))])
     _, _, mesh_list, offsets = scene([("box", enclosure([-10, -10, -10], [10, 10, 10], 2), [0, 0, 60]),
                                       ("inner", box([-4, -4, -4], [4, 4, 4]), (60 * toward).tolist())])
     cfg = IllustrationConfig(azimuths=(0, 90), elevations=(20,), default_view=(0, 20), search_size=(240, 180))
-    glob, ch = ig.select_views(mesh_list, offsets, cfg, is_stander=[False, True])
-    rec.check(glob == (0.0, 20.0) and ch[1]["kind"] == "stander" and ch[1]["view"] == (90.0, 20.0),
-              f"stander best view has a clear trajectory ({ch[1]['view']}, global {glob})")
+    glob, ch = ig.select_views(mesh_list, offsets, cfg, is_standard=[False, True])
+    rec.check(glob == (0.0, 20.0) and ch[1]["kind"] == "standard" and ch[1]["view"] == (90.0, 20.0),
+              f"standard best view has a clear trajectory ({ch[1]['view']}, global {glob})")
 
     # Degenerate in the only main view: nothing to fall back on, reported as not visible, never aborts.
     _, _, mesh_list, offsets = scene([("a", box([0, 0, 0], [10, 10, 10]), [0, 0, 40]),
@@ -500,26 +500,26 @@ def test_l7(rec, args):
                                       ("m", box([1, -4, -4], [4, 4, 4]), [0, 0, 40])])
     cfg = IllustrationConfig(azimuths=(0, 90), elevations=(20,), default_view=(0, 20), search_size=(240, 180))
     blocks = [(0, 0), (1, 2)]
-    _, ch = ig.select_views(mesh_list, offsets, cfg, blocks=blocks, is_stander=[False, True, False])
-    rec.check(ch[1]["kind"] == "stander", f"block led by a stander: no x-ray ({ch[1]['kind']})")
-    _, ch = ig.select_views(mesh_list, offsets, cfg, blocks=blocks, is_stander=[False, False, True])
+    _, ch = ig.select_views(mesh_list, offsets, cfg, blocks=blocks, is_standard=[False, True, False])
+    rec.check(ch[1]["kind"] == "standard", f"block led by a standard: no x-ray ({ch[1]['kind']})")
+    _, ch = ig.select_views(mesh_list, offsets, cfg, blocks=blocks, is_standard=[False, False, True])
     rec.check(ch[1]["kind"] == "xray", f"block led by a movable part: x-ray ({ch[1]['kind']})")
 
     # End to end: the report and the rendered frame follow the same decision.
     parts = [("box", enclosure([-10, -10, -10], [10, 10, 10], 2), [0, 0, 60]),
-             ("inner", box([-4, -4, -4], [4, 4, 4]), [0, 0, 40], {"stander": True})]
+             ("inner", box([-4, -4, -4], [4, 4, 4]), [0, 0, 40], {"standard": True})]
     steps, meshes, mesh_list, offsets = scene(parts)
     res = ig.render_illustrations(steps, meshes, {}, fresh_dir("l7"), IllustrationConfig(**SMALL), title="enclosed")
     f = res.frames[1]
-    rec.check(f["view_kind"] == "stander" and not f["xray"] and f["warnings"] and Path(f["png"]).exists(),
-              "render: stander frame written without x-ray, the report carries the note")
+    rec.check(f["view_kind"] == "standard" and not f["xray"] and f["warnings"] and Path(f["png"]).exists(),
+              "render: standard frame written without x-ray, the report carries the note")
     v = (f["view"]["azimuth"], f["view"]["elevation"])
     ctx = ViewContext(v, SMALL["image_size"], mesh_list, offsets)
     cfg = IllustrationConfig(**SMALL)
     plain, xray = ig.compose_frame(ctx, 1, cfg, True, False), ig.compose_frame(ctx, 1, cfg, True, True)
     r, c = at_pixel(ctx, mesh_list[1].centroid)
     rec.check(np.ptp(plain[r, c]) < 0.02 and np.ptp(xray[r, c]) > 0.05,
-              f"the enclosed stander stays behind the grey enclosure, x-ray would show it ({plain[r, c]}, {xray[r, c]})")
+              f"the enclosed standard stays behind the grey enclosure, x-ray would show it ({plain[r, c]}, {xray[r, c]})")
 
 
 def test_l8(rec, args):
@@ -544,7 +544,7 @@ def test_l8(rec, args):
         ghost = ig.zmerge(ctx.W, ctx.H, [(ctx.layer(s), int(round(dx)), int(round(dy)), 0.0, 0)])[1] >= 0
         shown = np.any(cov[: s + 1], axis=0) | ghost
         future = np.any(cov[s + 1:], axis=0) if s + 1 < N else np.zeros_like(ghost)
-        rgb = ig.compose_frame(ctx, s, cfg, steps[s]["is_stander"])
+        rgb = ig.compose_frame(ctx, s, cfg, steps[s]["is_standard"])
         white = (rgb > 0.999).all(axis=2)
         near = shown | np.roll(shown, 1, 0) | np.roll(shown, -1, 0) | np.roll(shown, 1, 1) | np.roll(shown, -1, 1)
         ok_future &= bool(white[future & ~near].all())  # outlines may spill one pixel past a shown part
@@ -581,7 +581,7 @@ def test_l9(rec, args):
             dx, dy, _ = ctx.shift(offsets[t])
             ghost = ig.zmerge(ctx.W, ctx.H, [(ctx.layer(t), int(round(dx)), int(round(dy)), 0.0, 0)])[1] >= 0
             ids = ig.zmerge(ctx.W, ctx.H, items)[1]
-            frames.append((ig.compose_frame(ctx, t, cfg, steps[t]["is_stander"]), ids, ghost))
+            frames.append((ig.compose_frame(ctx, t, cfg, steps[t]["is_standard"]), ids, ghost))
         (r1, i1, g1), (r2, i2, g2) = frames
         region = (i1 == 0) & (i2 == 0) & ~g1 & ~g2
         # Interior pixels only: outlines next to a newly added part may change.
@@ -592,15 +592,15 @@ def test_l9(rec, args):
 
 def test_l10(rec, args):
     """Tests: the footnote lines of a step (footnote_lines) and that the frames report the same.
-    What: step line with label and tool ("by hand" or the BOM tool); a stander with stability class 1 gets "Hold in place";
+    What: step line with label and tool ("by hand" or the BOM tool); a standard with stability class 1 gets "Hold in place";
           a gravity change gets the "Re-orient assembly" line with the new direction; mark_unstable=False removes the hold mark;
           footnote_show_vector appends the displacement; without gravity data there are no marks; the frame records carry the
           same footnote and flags.
     """
-    bom = {"S": {"label": "S", "is_stander": "true", "tool": "wrench_10", "group": "g2"},
-           "P": {"label": "P", "is_stander": "false", "tool": "", "group": "g1"}}  # distinct: one frame per step
+    bom = {"S": {"label": "S", "is_standard": "true", "tool": "wrench_10", "group": "g2"},
+           "P": {"label": "P", "is_standard": "false", "tool": "", "group": "g1"}}  # distinct: one frame per step
     steps = [step(1, "p", [0, 0, -20], gravity=[1, 0, 0], cls=2, label="P"),
-             step(2, "s", [0, 0, 30], stander=True, gravity=[1, 0, 0], cls=1, label="S"),
+             step(2, "s", [0, 0, 30], standard=True, gravity=[1, 0, 0], cls=1, label="S"),
              step(3, "q", [10, 0, 0], gravity=[0, 1, 0], cls=2, label="Q")]
     cfg = IllustrationConfig()
     l0, f0 = ig.footnote_lines(steps, 0, bom, cfg)
@@ -609,7 +609,7 @@ def test_l10(rec, args):
     rec.check(l0 == ["Step 1 / 3   P   Tool: by hand"] and not f0["reorient"] and not f0["hold"],
               f"step 1: label and 'by hand' ({l0})")
     rec.check(l1[0] == "Step 2 / 3   S   Tool: wrench_10" and f1["hold"] and l1[-1] == "Hold in place"
-              and not f1["reorient"], f"stander: BOM tool, class 1 gets 'Hold in place' ({l1})")
+              and not f1["reorient"], f"standard: BOM tool, class 1 gets 'Hold in place' ({l1})")
     rec.check(f2["reorient"] and any(x.startswith("Re-orient assembly") and "(0, 1, 0)" in x for x in l2)
               and not f2["hold"], f"gravity change gets the re-orient line ({l2})")
     l1b, f1b = ig.footnote_lines(steps, 1, bom, replace(cfg, mark_unstable=False))
@@ -679,7 +679,7 @@ def _scale_case(rec, N, budget_s, image_cfg):
         cx, cy = (i % cols) * 30.0, (i // cols) * 30.0
         offset = (np.array(axes[i % len(axes)]) * rng.uniform(30, 60)).tolist()
         mesh = sphere([cx, cy, 0], 10, n_lat=60, n_lon=120, key=f"scale-sphere-{i}")
-        parts.append((f"c{i}", mesh, offset, {"stander": i % 4 == 3, "gravity": [0, 0, -1], "cls": 2}))
+        parts.append((f"c{i}", mesh, offset, {"standard": i % 4 == 3, "gravity": [0, 0, -1], "cls": 2}))
     steps, meshes, _, _ = scene(parts)
     rec.note(f"N = {N}: {sum(len(m.triangles) for m in meshes.values())} triangles")
     tracemalloc.start()
@@ -775,7 +775,7 @@ def test_l14(rec, args):
     steps, meshes, mesh_list, offsets = scene([
         ("A", box([0, 0, 0], [40, 20, 6]), [0, 0, -40]),
         ("B", box([4, 6, 6], [10, 14, 20]), [0, 0, 40]),
-        ("C", box([28, 6, 6], [34, 14, 20]), [0, 0, 40], {"stander": True}),
+        ("C", box([28, 6, 6], [34, 14, 20]), [0, 0, 40], {"standard": True}),
         ("D", box([14, 4, 6], [24, 16, 10]), [0, 30, 0]),
     ])
     bom = {"A": {"group": "base"}, "B": {"group": "pins"}, "C": {"group": "pins", "tool": "wrench_10"},
@@ -803,10 +803,10 @@ def test_l14(rec, args):
         v = rgb[r - 2:r + 3, c - 2:c + 3].reshape(-1, 3).mean(0)
         return bool(v.min() < 0.95 and np.sign(v[0] - v[2]) == np.sign(color[0] - color[2]))
 
-    new, stander = ig._rgb(cfg.new_color), ig._rgb(cfg.stander_color)
-    rec.check(hue_at(mesh_list[1].centroid, new) and hue_at(mesh_list[2].centroid, stander),
+    new, standard = ig._rgb(cfg.new_color), ig._rgb(cfg.standard_color)
+    rec.check(hue_at(mesh_list[1].centroid, new) and hue_at(mesh_list[2].centroid, standard),
               "both members drawn at their final positions in their own colours")
-    rec.check(tint_at(mesh_list[1].centroid + offsets[1], new) and tint_at(mesh_list[2].centroid + offsets[2], stander),
+    rec.check(tint_at(mesh_list[1].centroid + offsets[1], new) and tint_at(mesh_list[2].centroid + offsets[2], standard),
               "both members get a ghost at final + start_offset")
     rec.check(not hue_at(mesh_list[3].centroid, new), "the later step D is not drawn in the group frame")
     arrows = [ig.trajectory_points(ctx, k) for k in (1, 2)]
@@ -832,8 +832,8 @@ def test_l14(rec, args):
 
     # Footnote of a block: shared tool, move vectors, re-orient inside the block, hold list.
     st = [step(1, "a", [0, 0, -5], gravity=[1, 0, 0], label="A"),
-          step(2, "s1", [0, 10, 0], stander=True, gravity=[1, 0, 0], cls=1, label="S1"),
-          step(3, "s2", [0, 10, 0], stander=True, gravity=[0, 1, 0], cls=1, label="S2")]
+          step(2, "s1", [0, 10, 0], standard=True, gravity=[1, 0, 0], cls=1, label="S1"),
+          step(3, "s2", [0, 10, 0], standard=True, gravity=[0, 1, 0], cls=1, label="S2")]
     b2 = {"S1": {"tool": "wrench_10", "group": "f"}, "S2": {"tool": "wrench_10", "group": "f"}}
     lines, flags = ig.block_footnote_lines(st, 1, 2, b2, replace(cfg, footnote_show_vector=True))
     rec.check(lines == ["Steps 2-3 / 3   f   Tool: wrench_10", "Parts: S1, S2",

@@ -85,7 +85,7 @@ def _gap(g: float) -> float | None:
 
 
 def build_contacts(result) -> dict:
-    """Contact matrix section of the report (movable parts only; standers come from their records)."""
+    """Contact matrix section of the report (movable parts only; standards come from their records)."""
     if result.contact is None:
         return {"available": False}
     n = len(result.component_ids)
@@ -240,7 +240,7 @@ def print_summary(result, report: dict, elapsed: float, cache_dir: Path, report_
             gap = "inf" if p["gap_mm"] is None else f"{p['gap_mm']:.4f} mm"
             print(f"  {p['pair']}: {gap}")
         if contacts["touching_nothing"]:
-            print(f"Touching no other movable part (held only by standers?): {', '.join(contacts['touching_nothing'])}")
+            print(f"Touching no other movable part (held only by standards?): {', '.join(contacts['touching_nothing'])}")
         print(f"Movable parts form one connected group: {contacts['movable_parts_connected']}")
     else:
         print("Contact matrix: not available (cached result without contacts)")

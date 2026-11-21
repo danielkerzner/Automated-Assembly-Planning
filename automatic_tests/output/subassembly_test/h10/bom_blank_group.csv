@@ -1,4 +1,4 @@
-label,is_stander,screw,nut,pitch, tool,group,processed,subassembly
+label,is_standard,screw,nut,pitch, tool,group,processed,subassembly
 industrial_fastner,False,False,False,,,industrial_fastner,true,
 industrial_fastner_part3,False,False,False,,,,,industrial_fastner
 industrial_fastner_part2,False,False,False,,,industrial_fastner_part2,,industrial_fastner

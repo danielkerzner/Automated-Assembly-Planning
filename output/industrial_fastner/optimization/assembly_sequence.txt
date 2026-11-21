@@ -4,10 +4,10 @@ Assembly sequence (total cost 0.2671)
   2. industrial_fastner_part1: insert along (0, 0, 1), travel 46.50 mm, start offset (0, 0, -46.5), gravity (1, 0, 0), class 2
   3. industrial_fastner_part2: insert along (0, 0, -1), travel 37.80 mm, start offset (0, 0, 37.8), gravity (1, 0, 0), class 1
   4. industrial_fastner_part5: insert along (0, 0, -1), travel 37.85 mm, start offset (0, 0, 37.847), gravity (1, 0, 0), class 2
-  5. industrial_fastner_part7 [stander]: insert along (-1, 0, 0), travel 34.24 mm, start offset (34.244, 0, 0), gravity (-1, 0, 0), class 2
+  5. industrial_fastner_part7 [standard]: insert along (-1, 0, 0), travel 34.24 mm, start offset (34.244, 0, 0), gravity (-1, 0, 0), class 2
   6. industrial_fastner_part6: insert along (-1, 0, 0), travel 71.24 mm, start offset (71.244, 0, 0), rotate 40.71 turns clockwise (thread of nut industrial_fastner_part7, pitch 1.75 mm), gravity (-1, 0, 0), class 2
-  7. industrial_fastner_part001 [stander]: insert along (0, -1, 0), travel 24.90 mm, start offset (0, 24.905, 0), gravity (-1, 0, 0), class 1
-  8. industrial_fastner_part4 [stander]: insert along (0, -1, 0), travel 24.90 mm, start offset (0, 24.905, 0), gravity (-1, 0, 0), class 1
+  7. industrial_fastner_part001 [standard]: insert along (0, -1, 0), travel 24.90 mm, start offset (0, 24.905, 0), gravity (-1, 0, 0), class 1
+  8. industrial_fastner_part4 [standard]: insert along (0, -1, 0), travel 24.90 mm, start offset (0, 24.905, 0), gravity (-1, 0, 0), class 1
 
 Cost breakdown (normalized x weight):
   travel: raw 322.1460, normalized 0.1583, weight 0.0204, weighted 0.0032

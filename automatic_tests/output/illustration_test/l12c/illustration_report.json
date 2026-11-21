@@ -14,7 +14,7 @@
         "A"
       ],
       "group": null,
-      "is_stander": false,
+      "is_standard": false,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l12c\\step_01_A.png",
       "view": {
         "azimuth": 0.0,
@@ -51,7 +51,7 @@
         "C"
       ],
       "group": null,
-      "is_stander": true,
+      "is_standard": true,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l12c\\step_02_C.png",
       "view": {
         "azimuth": 0.0,
@@ -88,7 +88,7 @@
         "B"
       ],
       "group": null,
-      "is_stander": false,
+      "is_standard": false,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l12c\\step_03_B.png",
       "view": {
         "azimuth": 0.0,
@@ -125,7 +125,7 @@
         "D"
       ],
       "group": null,
-      "is_stander": false,
+      "is_standard": false,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l12c\\step_04_D.png",
       "view": {
         "azimuth": 0.0,
@@ -154,15 +154,15 @@
     0.0,
     35.0
   ],
-  "config_hash": "9229031864d317038641f613570cb3dbb7daa82e3350ec94ce7cfb06bfa16750",
+  "config_hash": "57ba5f9db144bae28c321605ad61e09941b45a8d6df6008ab5060161eca1a769",
   "stats": {
     "layers_rasterized": 4,
-    "raster_s": 0.0024900000007619383,
+    "raster_s": 0.0018192000134149566,
     "views_evaluated": 1,
-    "view_search_s": 0.008027199999560253,
+    "view_search_s": 0.01338920000125654,
     "layers_loaded": 4,
-    "render_s": 0.6805956999996852,
-    "total_s": 0.688629100000071
+    "render_s": 0.3784559000050649,
+    "total_s": 0.39185090000682976
   },
   "config": {
     "image_size": [
@@ -191,7 +191,7 @@
     "xray_alpha": 0.25,
     "placed_color": "#bdbdbd",
     "new_color": "#f28e2b",
-    "stander_color": "#3b75af",
+    "standard_color": "#3b75af",
     "ghost_alpha": 0.35,
     "show_gravity": true,
     "mark_unstable": true,

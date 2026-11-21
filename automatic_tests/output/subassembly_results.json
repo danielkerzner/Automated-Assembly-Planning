@@ -4,6 +4,352 @@
     "real"
   ],
   "results": {
+    "H1": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "flat: root + 8 leaves (got 8 leaves, 0 containers)",
+          "passed": true
+        },
+        {
+          "label": "nested: root direct leaves ['leafA', 'leafB'] (transparent group flattened), containers ['containerX', 'containerY']",
+          "passed": true
+        },
+        {
+          "label": "nested: container children correct",
+          "passed": true
+        },
+        {
+          "label": "transparent group type does not change the parent id",
+          "passed": true
+        },
+        {
+          "label": "no single top-level App::Part: virtual __root__ holds the top-level objects",
+          "passed": true
+        },
+        {
+          "label": "App::Link raises NotImplementedError",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.0
+    },
+    "H4": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "blank processed defaults to true",
+          "passed": true
+        },
+        {
+          "label": "explicit false (2 leaves) -> not processed, no child level",
+          "passed": true
+        },
+        {
+          "label": "false on a leaf row is ignored with a warning",
+          "passed": true
+        },
+        {
+          "label": "root is processed whatever its BOM value",
+          "passed": true
+        },
+        {
+          "label": "overriding root processed warns",
+          "passed": true
+        },
+        {
+          "label": "invalid processed text raises",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.001
+    },
+    "H4b": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "matching subassembly column does not raise",
+          "passed": true
+        },
+        {
+          "label": "mismatching subassembly column raises and names the row (BOM 'subassembly' column does not match the STEP tree (BOM and STEP are out of sync):\ncontainer 'ContainerX' [containerX]: BOM subassembly='WrongParent', tree parent='Assembly')",
+          "passed": true
+        },
+        {
+          "label": "blank subassembly cell is not checked",
+          "passed": true
+        },
+        {
+          "label": "unmatched BOM label warns",
+          "passed": true
+        },
+        {
+          "label": "unmatched BOM label with a non-blank 'processed' raises and names the label (BOM has unmatched labels with a 'processed' value (BOM and STEP are out of sync):\nBOM label 'NoSuchLabel' sets 'processed' but matches no component in the assembly tree (stale or misspelled label; a processed/not-processed decision on it would be silently lost))",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.001
+    },
+    "H4c": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "is_standard=true with 'processed' blank defaults processed to false",
+          "passed": true
+        },
+        {
+          "label": "is_standard=true with an explicit processed=false does not raise",
+          "passed": true
+        },
+        {
+          "label": "is_standard=true + processed=true raises and names the row (BOM row for container 'ContainerX' [containerX] sets is_standard=true and processed=true; a standard subassembly is fused into one rigid component ('other' category) and cannot also be recursively processed as its own level -- set processed=false or leave it blank)",
+          "passed": true
+        },
+        {
+          "label": "is_standard=true on the root raises and names it (BOM row for the root container 'Assembly' [root] sets is_standard=true, but the root cannot be a standard)",
+          "passed": true
+        },
+        {
+          "label": "is_standard=false on a container row does not raise",
+          "passed": true
+        },
+        {
+          "label": "blank is_standard on a container row does not raise",
+          "passed": true
+        },
+        {
+          "label": "is_standard=true on a leaf row is unaffected (unchanged leaf-standard path)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.001
+    },
+    "H5": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "oversized root raises and names it (Container 'Assembly' [root] has 25 components at its level, over the limit 20; set 'processed = false' in the BOM for it (or an ancestor).)",
+          "passed": true
+        },
+        {
+          "label": "oversized container named (Container 'Big' [big] has 25 components at its level, over the limit 20; set 'processed = false' in the BOM for it (or an ancestor).)",
+          "passed": true
+        },
+        {
+          "label": "processed=false removes the oversized container from the guard",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.0
+    },
+    "H6": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "depth-first solve order: ['root', 'containerX'] == ['root', 'containerX']",
+          "passed": true
+        },
+        {
+          "label": "root level_dir == output_dir (C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\subassembly_test\\h6)",
+          "passed": true
+        },
+        {
+          "label": "only processed children get a LevelPlan (['containerX'])",
+          "passed": true
+        },
+        {
+          "label": "child containerX level_dir flat under output_dir/levels/containerX (C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\subassembly_test\\h6\\levels\\containerX)",
+          "passed": true
+        },
+        {
+          "label": "root step count == direct leaves + containers",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.007
+    },
+    "H6b": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "both root-level containers are processed=true (got [('_0002_P_0909_A01_PP_2', True), ('_0002_P_0909_A01_PP_3', True)])",
+          "passed": true
+        },
+        {
+          "label": "root level resolves to 30 components (got 30)",
+          "passed": true
+        },
+        {
+          "label": "both processed containers recurse into their own level (got ['_0002_P_0909_A01_PP_2', '_0002_P_0909_A01_PP_3'])",
+          "passed": true
+        },
+        {
+          "label": "both containers solved as their own level (calls: ['_0002_A_0900_A06_bodylager_1', '_0002_P_0909_A01_PP_2', '_0002_P_0909_A01_PP_3'])",
+          "passed": true
+        },
+        {
+          "label": "container _0002_P_0909_A01_PP_2 got a level directory (C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\subassembly_test\\h6b\\levels\\_0002_P_0909_A01_PP_2)",
+          "passed": true
+        },
+        {
+          "label": "container _0002_P_0909_A01_PP_3 got a level directory (C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\subassembly_test\\h6b\\levels\\_0002_P_0909_A01_PP_3)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 2.062
+    },
+    "H8": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "both instances solved: ['widgetA', 'widgetB']",
+          "passed": true
+        },
+        {
+          "label": "plan.json: both instances appear as distinct subassembly steps",
+          "passed": true
+        },
+        {
+          "label": "both instances carry a sub_plan",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.006
+    },
+    "H9": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "plan.json round-trips through json.dumps/loads",
+          "passed": true
+        },
+        {
+          "label": "kind values: containerX=subassembly, leafA=part (got {'leafA': 'part', 'leafB': 'part', 'containerX': 'subassembly', 'containerY': 'subassembly'})",
+          "passed": true
+        },
+        {
+          "label": "processed subassembly (containerX, 2 leaves) nests its own sub_plan",
+          "passed": true
+        },
+        {
+          "label": "unprocessed subassembly (containerY, 1 leaf, trivial rule) has no sub_plan",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.006
+    },
+    "H13": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "inseparable pair recorded: [('Part1', 'Part2')]",
+          "passed": true
+        },
+        {
+          "label": "inseparable pair logs a warning",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.002
+    },
+    "H2": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "'0002-P-0909-A01-PP_2': fused bbox == union of 2 leaf bboxes (tol 0.0653 mm)",
+          "passed": true
+        },
+        {
+          "label": "'0002-P-0909-A01-PP_2': fused volume 4504.8 <= leaf sum 4504.8 mm^3 (ratio 1.00000)",
+          "passed": true
+        },
+        {
+          "label": "'0002-P-0909-A01-PP_3': fused bbox == union of 2 leaf bboxes (tol 0.0653 mm)",
+          "passed": true
+        },
+        {
+          "label": "'0002-P-0909-A01-PP_3': fused volume 4504.8 <= leaf sum 4504.8 mm^3 (ratio 1.00000)",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "'0002-P-0909-A01-PP_2': fused 2 leaves in 0.78 s",
+        "'0002-P-0909-A01-PP_3': fused 2 leaves in 0.63 s"
+      ],
+      "seconds": 2.417
+    },
+    "H2b": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "fused result matches the leaf-by-leaf ground truth on all 6 axes (mismatches: [])",
+          "passed": true
+        },
+        {
+          "label": "no exception cells on either side (common()/distToShape() never failed twice): none",
+          "passed": true
+        },
+        {
+          "label": "covers both a known-free axis ['+y', '-y'] and a known-blocked axis ['+x', '-x', '+z', '-z']",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "fused '0002-P-0909-A01-PP_2' (2 leaves) in 0.75 s, volume 4504.8 mm^3 vs leaf sum 4504.8 mm^3",
+        "+x: leaf-by-leaf (2 leaves) free=False, fused free=False",
+        "-x: leaf-by-leaf (2 leaves) free=False, fused free=False",
+        "+y: leaf-by-leaf (2 leaves) free=True, fused free=True",
+        "-y: leaf-by-leaf (2 leaves) free=True, fused free=True",
+        "+z: leaf-by-leaf (2 leaves) free=False, fused free=False",
+        "-z: leaf-by-leaf (2 leaves) free=False, fused free=False",
+        "neighbour = '0002-P-0901-A01-PP'; 18 collision tests in 427.4 s"
+      ],
+      "seconds": 429.013
+    },
+    "H2c": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "32 leaf shapes in the original document unchanged after build_level_document (geometry hash identical)",
+          "passed": true
+        },
+        {
+          "label": "child level document builds from the same (unchanged) original leaves (['Part__Feature012', 'Part__Feature013'])",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 2.763
+    },
+    "H3": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "getGlobalPlacement() of a leaf nested one level deep == parent.Placement * leaf.Placement",
+          "passed": true
+        },
+        {
+          "label": "global bbox differs from the leaf's own local-placement bbox (a real transform is applied)",
+          "passed": true
+        },
+        {
+          "label": "shape placed by manual composition has the same bbox as _global_shape's result (lunar part positions independently confirmed)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.64
+    },
     "H7": {
       "passed": true,
       "checks": [
@@ -17,7 +363,7 @@
         }
       ],
       "notes": [],
-      "seconds": 295.051
+      "seconds": 501.703
     },
     "H10": {
       "passed": true,
@@ -40,7 +386,7 @@
         }
       ],
       "notes": [],
-      "seconds": 146.387
+      "seconds": 215.485
     },
     "H11": {
       "passed": true,
@@ -55,10 +401,35 @@
         }
       ],
       "notes": [],
-      "seconds": 742.837
+      "seconds": 981.998
+    },
+    "H1b": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "industrial_fastner: flat, root + 8 leaves (expected 8, no containers)",
+          "passed": true
+        },
+        {
+          "label": "lunar_bodylager root: 28 leaves + 2 containers (got 28 leaves, 2 containers)",
+          "passed": true
+        },
+        {
+          "label": "container '0002-P-0909-A01-PP_2': processed=true, 2 leaves (got processed=True, 2 leaves)",
+          "passed": true
+        },
+        {
+          "label": "container '0002-P-0909-A01-PP_3': processed=true, 2 leaves (got processed=True, 2 leaves)",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "lunar root: 28 leaves, 2 containers ['0002-P-0909-A01-PP_2', '0002-P-0909-A01-PP_3']"
+      ],
+      "seconds": 1.332
     },
     "H12": {
-      "passed": false,
+      "passed": true,
       "checks": [
         {
           "label": "same component ids/labels (5 components)",
@@ -77,16 +448,16 @@
           "passed": true
         },
         {
-          "label": "same stander ids",
+          "label": "same standard ids",
           "passed": true
         },
         {
-          "label": "build_level_document on the root level reproduces the committed cache_key (False)",
-          "passed": false
+          "label": "build_level_document on the root level reproduces the committed cache_key (True)",
+          "passed": true
         }
       ],
       "notes": [],
-      "seconds": 110.931
+      "seconds": 133.198
     },
     "R2": {
       "passed": true,
@@ -105,7 +476,149 @@
         }
       ],
       "notes": [],
-      "seconds": 164.354
+      "seconds": 220.039
+    },
+    "R3": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "setup: the fully-entangled 3-part state is genuinely incomplete (V=1, E=0)",
+          "passed": true
+        },
+        {
+          "label": "locked level reports status='locked' (got 'locked')",
+          "passed": true
+        },
+        {
+          "label": "locked_parts names the stuck parts (got ['p0', 'p1', 'p2'])",
+          "passed": true
+        },
+        {
+          "label": "locked level has no sequence",
+          "passed": true
+        },
+        {
+          "label": "optimize_sequence/generate_illustrations are never called for a locked level (got {'optimize': 0, 'illustrate': 0})",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.004
+    },
+    "R4": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "merge_groups' free/contact/gaps match an independent brute-force AND/OR/min over 20 random trials (mismatches: none)",
+          "passed": true
+        },
+        {
+          "label": "repeated merging terminates (down to 1 component in 9 merges)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.089
+    },
+    "R5": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "setup: the group-consecutive conflict is genuinely incomplete (matches A13)",
+          "passed": true
+        },
+        {
+          "label": "every dead end in the D12-conflict AoG classifies rule_induced, never blocking (got {1: 'rule_induced'}) -- Phase 2 would never attempt to merge this",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.019
+    },
+    "R6": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "no shared group: auto_0 falls back to its own id (got 'auto_0')",
+          "passed": true
+        },
+        {
+          "label": "no shared group: logs a warning",
+          "passed": true
+        },
+        {
+          "label": "shared group 'Shared': auto_1 inherits it (got 'Shared')",
+          "passed": true
+        },
+        {
+          "label": "shared group: no warning logged",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 2.262
+    },
+    "R7": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "the second dead end ({p2, p3} alone, nothing else present) has no valid candidate -- 2 <= |A| < |S| is strict, so the whole remaining state can never be the group -- and the level correctly reports locked rather than silently 'complete' or crashing (got status='locked')",
+          "passed": true
+        },
+        {
+          "label": "locked_parts names exactly the still-stuck pair (got ['p2', 'p3'])",
+          "passed": true
+        },
+        {
+          "label": "a locked level has no sequence",
+          "passed": true
+        },
+        {
+          "label": "the first merge still committed for real (auto_0 fused and registered) even though the overall level ends up locked on what's left",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.059
+    },
+    "R8": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "merge_groups is deterministic: same inputs -> same cache_key",
+          "passed": true
+        },
+        {
+          "label": "a different group -> a different cache_key",
+          "passed": true
+        },
+        {
+          "label": "a different new_id -> a different cache_key",
+          "passed": true
+        },
+        {
+          "label": "a different parent cache_key -> a different merged cache_key",
+          "passed": true
+        },
+        {
+          "label": "sub_interference: a different member set -> a different cache_key",
+          "passed": true
+        },
+        {
+          "label": "aog_generator.compute_cache_key folds in AoGInputs.cache_key (confirmed by source inspection, src/aog_generator.py)",
+          "passed": true
+        },
+        {
+          "label": "aog_generator.compute_cache_key also folds in inputs.component_ids directly (confirmed by source inspection) -- so a merge's distinct component_ids alone already changes the committed AoG's cache_key, independent of the interference key",
+          "passed": true
+        },
+        {
+          "label": "aog_generator.collect_inputs derives AoGInputs.cache_key from interference_result.cache_key (confirmed by source inspection)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.015
     }
   }
 }

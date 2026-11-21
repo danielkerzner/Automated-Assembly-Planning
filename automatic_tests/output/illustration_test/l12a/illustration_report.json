@@ -14,7 +14,7 @@
         "A"
       ],
       "group": null,
-      "is_stander": false,
+      "is_standard": false,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l12a\\step_01_A.png",
       "view": {
         "azimuth": 0.0,
@@ -51,7 +51,7 @@
         "B"
       ],
       "group": null,
-      "is_stander": false,
+      "is_standard": false,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l12a\\step_02_B.png",
       "view": {
         "azimuth": 0.0,
@@ -88,7 +88,7 @@
         "C"
       ],
       "group": null,
-      "is_stander": true,
+      "is_standard": true,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l12a\\step_03_C.png",
       "view": {
         "azimuth": 0.0,
@@ -125,7 +125,7 @@
         "D"
       ],
       "group": null,
-      "is_stander": false,
+      "is_standard": false,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l12a\\step_04_D.png",
       "view": {
         "azimuth": 0.0,
@@ -154,13 +154,13 @@
     0.0,
     35.0
   ],
-  "config_hash": "4b00e20a1b2f5a5af9fa8950affb147db53a079d70c4aaec04a7b09f53c3cda3",
+  "config_hash": "95cd398031d30a65de9790744b3c60ceac0b79c5636ff5017555d0bf75d9fe2a",
   "stats": {
     "views_cached": true,
-    "view_search_s": 0.012920299999677809,
+    "view_search_s": 0.00988080000388436,
     "layers_loaded": 4,
-    "render_s": 0.6237512999996397,
-    "total_s": 0.63667710000027
+    "render_s": 0.4294558999972651,
+    "total_s": 0.4393394999933662
   },
   "config": {
     "image_size": [
@@ -214,7 +214,7 @@
     "xray_alpha": 0.25,
     "placed_color": "#bdbdbd",
     "new_color": "#00aa00",
-    "stander_color": "#3b75af",
+    "standard_color": "#3b75af",
     "ghost_alpha": 0.35,
     "show_gravity": true,
     "mark_unstable": true,

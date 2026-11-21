@@ -1,0 +1,63 @@
+{
+ "schema_version": 2,
+ "cache_key": "6f83c3c71a7a9c96e29169a1ab668508b49f761f5ec79be6ccedf62dc634a4af",
+ "component_ids": [
+  "Part__Feature",
+  "Part__Feature001",
+  "Part__Feature002",
+  "_0013_A_0300_A01_3",
+  "v30013_P_0101_A01_PP_motor_complete"
+ ],
+ "component_labels": [
+  "0013-P-0102-A02-PP",
+  "0013-P-0103-A02-AM",
+  "0013-P-0105-A01-PP",
+  "0013-A-0300-A01_3",
+  "v30013-P-0101-A01-PP-motor-complete038"
+ ],
+ "config": {
+  "margin": 1.0,
+  "group_consecutive": true,
+  "group_one_order": true
+ },
+ "stats": {
+  "group_rule": false,
+  "group_one_order": false,
+  "groups": {},
+  "group_order_pruned_edges": 0,
+  "N": 5,
+  "n_movable": 4,
+  "n_standers": 1,
+  "D": 12,
+  "D_prime": 12,
+  "V": 21,
+  "E": 40,
+  "nodes_per_level": [
+   1,
+   3,
+   5,
+   6,
+   5,
+   1
+  ],
+  "connectivity_rule": true,
+  "disconnected_dropped": 5,
+  "dead_ends": 0,
+  "live_nodes": 21,
+  "complete": true,
+  "time_s": 0.055080800026189536,
+  "array_bytes": 1991
+ },
+ "complete": true,
+ "root": 0,
+ "terminal": 20,
+ "dead_ends": [],
+ "component_groups": [
+  "0013-P-0102-A02-PP",
+  "0013-P-0103-A02-AM",
+  "0013-P-0105-A01-PP",
+  "0013-A-0300-A01_3",
+  "v30013-P-0101-A01-PP-motor-complete038"
+ ],
+ "date": "2026-11-19T14:17:33"
+}

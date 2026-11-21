@@ -30,7 +30,7 @@ Variants of C
     that would need a swept-volume check.
 
 Limits
-  * The matrices are a projection of the AoG: OR-priorities, state-dependent rules (stander gates,
+  * The matrices are a projection of the AoG: OR-priorities, state-dependent rules (standard gates,
     contacts, BOM groups) are not representable pairwise, so the orders allowed by P alone are a
     superset of the AoG paths (reported by --check).
   * Full disassembly only; selective disassembly (target parts) is not implemented.

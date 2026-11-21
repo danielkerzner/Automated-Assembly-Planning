@@ -1,4 +1,4 @@
-label,is_stander,screw,nut,pitch,tool,group,processed,subassembly
+label,is_standard,screw,nut,pitch,tool,group,processed,subassembly
 0002-A-0900-A06-bodylager_1,False,False,False,,By_hand,0002-A-0900-A06-bodylager_1,true,
 0002-P-0901-A01-PP,False,False,False,,By_hand,0002-P-0901-A01-PP,,0002-A-0900-A06-bodylager_1
 0002-P-0903-A01-AM,False,False,False,,By_hand,0002-P-0903-A01-AM,,0002-A-0900-A06-bodylager_1

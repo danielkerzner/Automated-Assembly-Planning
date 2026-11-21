@@ -4,11 +4,43 @@
   ],
   "results": {
     "O1": {
-      "passed": false,
-      "checks": [],
+      "passed": true,
+      "checks": [
+        {
+          "label": "no flag True raises",
+          "passed": true
+        },
+        {
+          "label": "gravity change without stability raises",
+          "passed": true
+        },
+        {
+          "label": "tool change without a 'tool' column raises, naming the column",
+          "passed": true
+        },
+        {
+          "label": "grouping without a 'group' column raises, naming the column",
+          "passed": true
+        },
+        {
+          "label": "standard with empty tool raises, naming the part (industrial_fastner_part7)",
+          "passed": true
+        },
+        {
+          "label": "part with empty group raises, naming the part (industrial_fastner_part3)",
+          "passed": true
+        },
+        {
+          "label": "the same tables are accepted when the flag is off",
+          "passed": true
+        },
+        {
+          "label": "industrial_fastner bom.csv has tool and group columns: ['label', 'is_standard', 'screw', 'nut', 'pitch', 'tool', 'group', 'processed', 'subassembly']",
+          "passed": true
+        }
+      ],
       "notes": [],
-      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
-      "seconds": 0.002
+      "seconds": 0.06
     },
     "O2": {
       "passed": true,
@@ -39,21 +71,80 @@
         }
       ],
       "notes": [],
-      "seconds": 0.001
+      "seconds": 0.0
     },
     "O3": {
-      "passed": false,
-      "checks": [],
+      "passed": true,
+      "checks": [
+        {
+          "label": "industrial_fastner: ACO 0.018669 = DP 0.018669 (greedy 0.018669)",
+          "passed": true
+        },
+        {
+          "label": "synthetic N=9: ACO 0.000000 = DP 0.000000 (greedy 0.000000)",
+          "passed": true
+        },
+        {
+          "label": "synthetic N=8: ACO 0.074061 = DP 0.074061 (greedy 0.084000)",
+          "passed": true
+        },
+        {
+          "label": "synthetic N=9: ACO 0.013849 = DP 0.013849 (greedy 0.013849)",
+          "passed": true
+        },
+        {
+          "label": "synthetic N=9: ACO 0.014750 = DP 0.014750 (greedy 0.049502)",
+          "passed": true
+        }
+      ],
       "notes": [],
-      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
-      "seconds": 0.001
+      "seconds": 0.889
     },
     "O4": {
-      "passed": false,
-      "checks": [],
-      "notes": [],
-      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
-      "seconds": 0.001
+      "passed": true,
+      "checks": [
+        {
+          "label": "direction_change: ACO = brute force 0.285714 on seeds [0, 1, 2] (832 edge paths; got 0.285714, 0.285714, 0.285714)",
+          "passed": true
+        },
+        {
+          "label": "tool_change: ACO = brute force 0.500000 on seeds [0, 1, 2] (832 edge paths; got 0.500000, 0.500000, 0.500000)",
+          "passed": true
+        },
+        {
+          "label": "size_contacts: ACO = brute force 0.000000 on seeds [0, 1, 2] (832 edge paths; got 0.000000, 0.000000, 0.000000)",
+          "passed": true
+        },
+        {
+          "label": "grouping: ACO = brute force 0.000000 on seeds [0, 1, 2] (832 edge paths; got 0.000000, 0.000000, 0.000000)",
+          "passed": true
+        },
+        {
+          "label": "stability: ACO = brute force 0.428571 on seeds [0, 1, 2] (832 edge paths; got 0.428571, 0.428571, 0.428571)",
+          "passed": true
+        },
+        {
+          "label": "default (all flags, tool change on): ACO within 10% of brute force 0.314143 on seeds [0, 1, 2] (832 edge paths; got 0.320698, 0.338405, 0.333414)",
+          "passed": true
+        },
+        {
+          "label": "default without tool change: ACO within 10% of brute force 0.245944 on seeds [0, 1, 2] (832 edge paths; got 0.267006, 0.245944, 0.245944)",
+          "passed": true
+        },
+        {
+          "label": "stability + gravity_change: ACO = brute force 0.270677 on seeds [0, 1, 2] (832 edge paths; got 0.270677, 0.270677, 0.270677)",
+          "passed": true
+        },
+        {
+          "label": "travel + size_contacts: ACO = brute force 0.018669 on seeds [0, 1, 2] (832 edge paths; got 0.018669, 0.018669, 0.018669)",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "travel only (not asserted), use_cost_to_go=False: optimum 0.000000 found on 10/10 seeds",
+        "travel only (not asserted), use_cost_to_go=True: optimum 0.000000 found on 10/10 seeds"
+      ],
+      "seconds": 21.543
     },
     "O5": {
       "passed": true,
@@ -100,7 +191,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.047
+      "seconds": 0.009
     },
     "O6": {
       "passed": true,
@@ -123,7 +214,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.006
+      "seconds": 0.007
     },
     "O7": {
       "passed": true,
@@ -146,7 +237,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.007
+      "seconds": 0.012
     },
     "O8": {
       "passed": true,
@@ -169,7 +260,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.149
+      "seconds": 0.206
     },
     "O9": {
       "passed": true,
@@ -282,49 +373,119 @@
       "notes": [
         "FreeCAD geometry variant skipped (run with --groups real)"
       ],
-      "seconds": 0.063
+      "seconds": 0.145
     },
     "O10": {
-      "passed": false,
-      "checks": [],
+      "passed": true,
+      "checks": [
+        {
+          "label": "Viterbi = enumeration over 6^n assignments, 30 random tables, n <= 6 (max diff 0.0e+00)",
+          "passed": true
+        }
+      ],
       "notes": [],
-      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
-      "seconds": 0.002
+      "seconds": 5.543
     },
     "O11": {
-      "passed": false,
-      "checks": [],
+      "passed": true,
+      "checks": [
+        {
+          "label": "industrial_fastner's AoG is complete, no dead ends (got 0 dead end(s), complete=True)",
+          "passed": true
+        },
+        {
+          "label": "seed 0: best path visits only live nodes",
+          "passed": true
+        },
+        {
+          "label": "seed 1: best path visits only live nodes",
+          "passed": true
+        },
+        {
+          "label": "seed 2: best path visits only live nodes",
+          "passed": true
+        },
+        {
+          "label": "seed 3: best path visits only live nodes",
+          "passed": true
+        },
+        {
+          "label": "seed 4: best path visits only live nodes",
+          "passed": true
+        }
+      ],
       "notes": [],
-      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
-      "seconds": 0.001
+      "seconds": 6.424
     },
     "O12": {
-      "passed": false,
-      "checks": [],
+      "passed": true,
+      "checks": [
+        {
+          "label": "steps = AoG path reversed",
+          "passed": true
+        },
+        {
+          "label": "insertion direction = neg[removal direction]",
+          "passed": true
+        },
+        {
+          "label": "insertion vector = -removal vector",
+          "passed": true
+        },
+        {
+          "label": "t = popcount(S): [1, 2, 3, 4, 5, 6, 7, 8]",
+          "passed": true
+        },
+        {
+          "label": "start offset = travel x removal direction",
+          "passed": true
+        },
+        {
+          "label": "every part exactly once",
+          "passed": true
+        }
+      ],
       "notes": [],
-      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
-      "seconds": 0.001
+      "seconds": 1.199
     },
     "O13": {
-      "passed": false,
-      "checks": [],
-      "notes": [],
-      "error": "RuntimeError: tests/industrial_fastner/aog has no cached AoG; run manual_tests/test_aog_manual.py first",
-      "seconds": 0.001
+      "passed": true,
+      "checks": [
+        {
+          "label": "same config and seed: identical results",
+          "passed": true
+        },
+        {
+          "label": "changing a weight changes the result key",
+          "passed": true
+        },
+        {
+          "label": "changing weights or flags keeps the term-table key",
+          "passed": true
+        },
+        {
+          "label": "changing the gravity directions changes the term-table key",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "pipeline caching variant skipped (run with --groups real)"
+      ],
+      "seconds": 3.164
     },
     "O14": {
       "passed": true,
       "checks": [
         {
-          "label": "N=12: 9.5 s < 60 s and 6.5 MB < 32.2 MB",
+          "label": "N=12: 13.8 s < 60 s and 6.5 MB < 32.2 MB",
           "passed": true
         }
       ],
       "notes": [
-        "N=12: V=587, E=1540, moves=6610, 91 iterations, 9.5 s, peak traced 6.5 MB (estimate 32.2 MB), cost 0.3297 (greedy 0.3367)",
+        "N=12: V=587, E=1540, moves=6610, 91 iterations, 13.8 s, peak traced 6.5 MB (estimate 32.2 MB), cost 0.3297 (greedy 0.3367)",
         "N = 20 skipped (run with --groups scale)"
       ],
-      "seconds": 9.51
+      "seconds": 13.827
     },
     "O15": {
       "passed": true,
@@ -334,11 +495,11 @@
           "passed": true
         },
         {
-          "label": "nut N after its stander-screw partner: rotates itself (got 5.0)",
+          "label": "nut N after its standard-screw partner: rotates itself (got 5.0)",
           "passed": true
         },
         {
-          "label": "category-3 stander O never gets turns",
+          "label": "category-3 standard O never gets turns",
           "passed": true
         },
         {
@@ -397,19 +558,19 @@
       "passed": true,
       "checks": [
         {
-          "label": "tests/industrial_fastner/interference/interference.json byte-identical after the run",
+          "label": "output/industrial_fastner/interference/interference.json byte-identical after the run",
           "passed": true
         },
         {
-          "label": "tests/industrial_fastner/interference/interference.npz byte-identical after the run",
+          "label": "output/industrial_fastner/interference/interference.npz byte-identical after the run",
           "passed": true
         },
         {
-          "label": "tests/industrial_fastner/aog/aog.json byte-identical after the run",
+          "label": "output/industrial_fastner/aog/aog.json byte-identical after the run",
           "passed": true
         },
         {
-          "label": "tests/industrial_fastner/aog/aog.npz byte-identical after the run",
+          "label": "output/industrial_fastner/aog/aog.npz byte-identical after the run",
           "passed": true
         }
       ],

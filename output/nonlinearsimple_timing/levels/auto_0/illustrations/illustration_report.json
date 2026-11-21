@@ -1,0 +1,153 @@
+{
+  "frames": [
+    {
+      "step": 1,
+      "steps": [
+        1
+      ],
+      "component_id": "Part__Feature",
+      "component_label": "component",
+      "component_ids": [
+        "Part__Feature"
+      ],
+      "component_labels": [
+        "component"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\nonlinearsimple_timing\\levels\\auto_0\\illustrations\\step_01_component.png",
+      "view": {
+        "azimuth": 315.0,
+        "elevation": 20.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.18834005748407623,
+      "in_frame": true,
+      "footnote": [
+        "Step 1 / 2   component   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 2,
+      "steps": [
+        2
+      ],
+      "component_id": "Part__Feature001",
+      "component_label": "component001",
+      "component_ids": [
+        "Part__Feature001"
+      ],
+      "component_labels": [
+        "component001"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\nonlinearsimple_timing\\levels\\auto_0\\illustrations\\step_02_component001.png",
+      "view": {
+        "azimuth": 315.0,
+        "elevation": 20.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.7226786544721748,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.7226786544721748,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.27394917452229195,
+      "in_frame": true,
+      "footnote": [
+        "Step 2 / 2   component001   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    }
+  ],
+  "manual_path": "output\\nonlinearsimple_timing\\levels\\auto_0\\illustrations\\manual.pdf",
+  "global_view": [
+    315.0,
+    20.0
+  ],
+  "config_hash": "fc4955af626f1e73da0bf50c6e3faee4c026ac68747d608759e04ac2aed203c5",
+  "stats": {
+    "layers_rasterized": 148,
+    "raster_s": 3.1086528005544096,
+    "views_evaluated": 73,
+    "view_search_s": 3.107903999974951,
+    "render_s": 2.5667631999822333,
+    "total_s": 5.674672799999826
+  },
+  "config": {
+    "image_size": [
+      1600,
+      1200
+    ],
+    "search_size": [
+      480,
+      360
+    ],
+    "dpi": 200,
+    "tess_tolerance_rel": 0.002,
+    "default_view": [
+      -35.0,
+      30.0
+    ],
+    "azimuths": [
+      0,
+      15,
+      30,
+      45,
+      60,
+      75,
+      90,
+      105,
+      120,
+      135,
+      150,
+      165,
+      180,
+      195,
+      210,
+      225,
+      240,
+      255,
+      270,
+      285,
+      300,
+      315,
+      330,
+      345
+    ],
+    "elevations": [
+      20,
+      35,
+      50
+    ],
+    "vis_min_end": 0.35,
+    "vis_min_start": 0.35,
+    "min_trajectory_px_frac": 0.1,
+    "xray_alpha": 0.25,
+    "placed_color": "#bdbdbd",
+    "new_color": "#f28e2b",
+    "stander_color": "#3b75af",
+    "ghost_alpha": 0.35,
+    "show_gravity": true,
+    "mark_unstable": true,
+    "footnote_show_vector": false,
+    "group_frames": true,
+    "title": "auto_0 (component + component001)",
+    "language": "en"
+  }
+}

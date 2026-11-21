@@ -14,10 +14,10 @@
         "industrial_fastner_part3"
       ],
       "group": null,
-      "is_stander": false,
+      "is_standard": false,
       "png": "output\\industrial_fastner\\illustrations\\step_01_industrial_fastner_part3.png",
       "view": {
-        "azimuth": 270.0,
+        "azimuth": 285.0,
         "elevation": 20.0,
         "is_global": true
       },
@@ -28,7 +28,7 @@
       "vis_start": 1.0,
       "vis_end_occluded": 1.0,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.271937774149184,
+      "trajectory_px_frac": 0.26838124672199204,
       "in_frame": true,
       "footnote": [
         "Step 1 / 8   industrial_fastner_part3   Tool: by hand"
@@ -51,21 +51,21 @@
         "industrial_fastner_part1"
       ],
       "group": null,
-      "is_stander": false,
+      "is_standard": false,
       "png": "output\\industrial_fastner\\illustrations\\step_02_industrial_fastner_part1.png",
       "view": {
-        "azimuth": 270.0,
+        "azimuth": 285.0,
         "elevation": 20.0,
         "is_global": true
       },
       "view_kind": "global",
       "visible": true,
       "xray": false,
-      "vis_end": 0.5882708585247884,
-      "vis_start": 1.0,
-      "vis_end_occluded": 0.5882708585247884,
-      "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.2828882885444531,
+      "vis_end": 0.4370820668693009,
+      "vis_start": 0.6559270516717325,
+      "vis_end_occluded": 0.4370820668693009,
+      "vis_start_occluded": 0.6559270516717325,
+      "trajectory_px_frac": 0.27918854524770975,
       "in_frame": true,
       "footnote": [
         "Step 2 / 8   industrial_fastner_part1   Tool: by hand"
@@ -88,21 +88,21 @@
         "industrial_fastner_part2"
       ],
       "group": null,
-      "is_stander": false,
+      "is_standard": false,
       "png": "output\\industrial_fastner\\illustrations\\step_03_industrial_fastner_part2.png",
       "view": {
-        "azimuth": 270.0,
+        "azimuth": 285.0,
         "elevation": 20.0,
         "is_global": true
       },
       "view_kind": "global",
       "visible": true,
       "xray": false,
-      "vis_end": 0.9738219895287958,
+      "vis_end": 0.7263246425567704,
       "vis_start": 1.0,
-      "vis_end_occluded": 0.9738219895287958,
+      "vis_end_occluded": 0.7263246425567704,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.22996080230065216,
+      "trajectory_px_frac": 0.22695326904007374,
       "in_frame": true,
       "footnote": [
         "Step 3 / 8   industrial_fastner_part2   Tool: by hand",
@@ -126,21 +126,21 @@
         "industrial_fastner_part5"
       ],
       "group": null,
-      "is_stander": false,
+      "is_standard": false,
       "png": "output\\industrial_fastner\\illustrations\\step_04_industrial_fastner_part5.png",
       "view": {
-        "azimuth": 270.0,
+        "azimuth": 285.0,
         "elevation": 20.0,
         "is_global": true
       },
       "view_kind": "global",
       "visible": true,
       "xray": false,
-      "vis_end": 1.0,
+      "vis_end": 0.9122328331059573,
       "vis_start": 1.0,
-      "vis_end_occluded": 1.0,
+      "vis_end_occluded": 0.9122328331059573,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.2302489693000234,
+      "trajectory_px_frac": 0.22723766725873737,
       "in_frame": true,
       "footnote": [
         "Step 4 / 8   industrial_fastner_part5   Tool: by hand"
@@ -163,21 +163,21 @@
         "industrial_fastner_part7"
       ],
       "group": null,
-      "is_stander": true,
+      "is_standard": true,
       "png": "output\\industrial_fastner\\illustrations\\step_05_industrial_fastner_part7.png",
       "view": {
-        "azimuth": 300.0,
+        "azimuth": 285.0,
         "elevation": 20.0,
-        "is_global": false
+        "is_global": true
       },
-      "view_kind": "candidate",
+      "view_kind": "global",
       "visible": true,
       "xray": false,
-      "vis_end": 0.5170212765957447,
+      "vis_end": 0.3718674211802749,
       "vis_start": 1.0,
-      "vis_end_occluded": 0.5170212765957447,
+      "vis_end_occluded": 0.3718674211802749,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.19350117130020153,
+      "trajectory_px_frac": 0.21223045305835908,
       "in_frame": true,
       "footnote": [
         "Step 5 / 8   industrial_fastner_part7   Tool: by_hand",
@@ -201,30 +201,28 @@
         "industrial_fastner_part6"
       ],
       "group": null,
-      "is_stander": false,
+      "is_standard": false,
       "png": "output\\industrial_fastner\\illustrations\\step_06_industrial_fastner_part6.png",
       "view": {
-        "azimuth": 270.0,
+        "azimuth": 0.0,
         "elevation": 20.0,
-        "is_global": true
+        "is_global": false
       },
-      "view_kind": "xray",
+      "view_kind": "candidate",
       "visible": true,
-      "xray": true,
-      "vis_end": 1.0,
+      "xray": false,
+      "vis_end": 0.39315525876460766,
       "vis_start": 1.0,
-      "vis_end_occluded": 0.010806317539484621,
+      "vis_end_occluded": 0.39315525876460766,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.4612396638303548,
+      "trajectory_px_frac": 0.15820209037918143,
       "in_frame": true,
       "footnote": [
         "Step 6 / 8   industrial_fastner_part6   Tool: by hand   Turns: 40.7 (clockwise)"
       ],
       "reorient": false,
       "hold": false,
-      "warnings": [
-        "step 6: no view shows the part unoccluded; x-ray fallback at az 270.0 el 20.0"
-      ]
+      "warnings": []
     },
     {
       "step": 7,
@@ -240,21 +238,21 @@
         "industrial_fastner_part001"
       ],
       "group": null,
-      "is_stander": true,
+      "is_standard": true,
       "png": "output\\industrial_fastner\\illustrations\\step_07_industrial_fastner_part001.png",
       "view": {
-        "azimuth": 255.0,
-        "elevation": 50.0,
+        "azimuth": 120.0,
+        "elevation": 35.0,
         "is_global": false
       },
-      "view_kind": "xray",
-      "visible": true,
-      "xray": true,
-      "vis_end": 1.0,
+      "view_kind": "standard",
+      "visible": false,
+      "xray": false,
+      "vis_end": 0.15625,
       "vis_start": 1.0,
-      "vis_end_occluded": 0.02631578947368421,
+      "vis_end_occluded": 0.15625,
       "vis_start_occluded": 1.0,
-      "trajectory_px_frac": 0.124825061880303,
+      "trajectory_px_frac": 0.1034631481466333,
       "in_frame": true,
       "footnote": [
         "Step 7 / 8   industrial_fastner_part001   Tool: wrenchA",
@@ -263,7 +261,7 @@
       "reorient": false,
       "hold": true,
       "warnings": [
-        "step 7: no view shows the part unoccluded; x-ray fallback at az 255.0 el 50.0"
+        "step 7: standard not fully visible in any main view; drawn without x-ray at az 120.0 el 35.0"
       ]
     },
     {
@@ -280,21 +278,21 @@
         "industrial_fastner_part4"
       ],
       "group": null,
-      "is_stander": true,
+      "is_standard": true,
       "png": "output\\industrial_fastner\\illustrations\\step_08_industrial_fastner_part4.png",
       "view": {
-        "azimuth": 255.0,
-        "elevation": 50.0,
+        "azimuth": 120.0,
+        "elevation": 35.0,
         "is_global": false
       },
-      "view_kind": "xray",
-      "visible": true,
-      "xray": true,
-      "vis_end": 1.0,
+      "view_kind": "standard",
+      "visible": false,
+      "xray": false,
+      "vis_end": 0.14465408805031446,
       "vis_start": 1.0,
-      "vis_end_occluded": 0.0,
-      "vis_start_occluded": 0.047493403693931395,
-      "trajectory_px_frac": 0.124825061880303,
+      "vis_end_occluded": 0.14465408805031446,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.1034631481466333,
       "in_frame": true,
       "footnote": [
         "Step 8 / 8   industrial_fastner_part4   Tool: wrenchA",
@@ -303,22 +301,23 @@
       "reorient": false,
       "hold": true,
       "warnings": [
-        "step 8: no view shows the part unoccluded; x-ray fallback at az 255.0 el 50.0"
+        "step 8: standard not fully visible in any main view; drawn without x-ray at az 120.0 el 35.0"
       ]
     }
   ],
   "manual_path": "output\\industrial_fastner\\illustrations\\manual.pdf",
   "global_view": [
-    270.0,
+    285.0,
     20.0
   ],
-  "config_hash": "14221fbff8c72fc56cc329945ab835557830335bcca63ef4d44700f5e28d9b09",
+  "config_hash": "b73dec417e5d1db4942a30e0ab4d52de0789e02657a1d9adea8c573d544642f8",
   "stats": {
-    "views_cached": true,
-    "view_search_s": 0.00041870000040944433,
-    "layers_loaded": 21,
-    "render_s": 5.328357400000641,
-    "total_s": 5.328779299999951
+    "layers_rasterized": 606,
+    "raster_s": 14.732924199575791,
+    "views_evaluated": 73,
+    "view_search_s": 13.733298499995726,
+    "render_s": 8.469622399992659,
+    "total_s": 22.202926099998876
   },
   "config": {
     "image_size": [
@@ -366,15 +365,13 @@
       35,
       50
     ],
-    "vis_min_end": 0.5,
-    "vis_min_start": 0.5,
-    "min_trajectory_px_frac": 0.12,
-    "perturb_step_deg": 5.0,
-    "perturb_max_deg": 30.0,
+    "vis_min_end": 0.35,
+    "vis_min_start": 0.35,
+    "min_trajectory_px_frac": 0.1,
     "xray_alpha": 0.25,
     "placed_color": "#bdbdbd",
     "new_color": "#f28e2b",
-    "stander_color": "#3b75af",
+    "standard_color": "#3b75af",
     "ghost_alpha": 0.35,
     "show_gravity": true,
     "mark_unstable": true,

@@ -1,6 +1,6 @@
 """Single-pair collision test: can part i translate along direction d all the way past part j?
 
-Used by: Preprocessing (stander/assembly-box checks) and Interference Identification (the pairwise
+Used by: Preprocessing (standard/assembly-box checks) and Interference Identification (the pairwise
 blocking matrix).
 
 Inputs
@@ -55,7 +55,7 @@ class CollisionConfig:
     # Inherited from PreprocessingConfig so both stages use the same noise floor. Recommended: keep it (1e-6).
     volume_epsilon: float = PreprocessingConfig().volume_epsilon
     # float, mm^3. Static overlap above this is a hard error (HardOverlapError): fix the model or mark the
-    # part as stander. Recommended: 1.0.
+    # part as standard. Recommended: 1.0.
     overlap_tol: float = 1.0
 
     # float, mm. Extra distance added to the sweep length so i ends clearly past j. Recommended: 1.0.
@@ -103,7 +103,7 @@ class Outcome:
 
 
 class HardOverlapError(Exception):
-    """Static overlap above overlap_tol: the model must be fixed or the part marked as stander."""
+    """Static overlap above overlap_tol: the model must be fixed or the part marked as standard."""
 
 
 # ---------------------------------------------------------------------------------------------------

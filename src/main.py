@@ -4,13 +4,13 @@ Spec: CLAUDE.md (pipeline).
 
 Inputs
     - STEP file of the assembly (may contain nested sub-assemblies, i.e. App::Part inside App::Part).
-    - BOM CSV, one row per part or sub-assembly, matched on `label` (columns used: `is_stander`, category,
+    - BOM CSV, one row per part or sub-assembly, matched on `label` (columns used: `is_standard`, category,
       `tool`, `group`, `processed`, `subassembly`).
     - An output directory.
 Outputs
     - `<output_dir>/plan.json`: the combined plan: per level the
       status ("complete" or "locked"), the ordered steps with their direction, travel, cost and kind
-      ("part", "stander", "subassembly"), and the nested plan of every expanded sub-assembly.
+      ("part", "standard", "subassembly"), and the nested plan of every expanded sub-assembly.
     - Per-level folders with the stage outputs: interference matrix, AoG, optimization result and, in
       manual mode, the illustrations and PDF manual (and in robot mode the gripper report under
       plan.json -> "robot").
@@ -37,6 +37,8 @@ How to run
         --step H                 Collision step size h in mm. Default: `CollisionConfig.step` (5.0,
                                  intentional). Calibrate per assembly with collision test E6.
         --force-interference     Recompute the interference matrix even if a matching cache exists.
+        --gapskipping            Enable the interference sweep's distance-jump shortcut (gap_skip).
+                                 Default: off (fixed-step common()-only sweep).
         --max-level-components N Size guard: abort before any geometry work if a processed level has more
                                  than N components. Default 20 (the AoG target size). Fix: set
                                  `processed = false` in the BOM for that sub-assembly.
@@ -70,7 +72,7 @@ from hierarchy import Hierarchy, build_hierarchy, check_level_sizes
 from illustration_generator import IllustrationConfig
 from levels import LevelPlan, solve_level
 from optimization import OptimizationConfig
-from preprocessing import PreprocessingConfig, load_assembly, load_bom, load_stander_categories
+from preprocessing import PreprocessingConfig, load_assembly, load_bom, load_standard_categories
 
 log = logging.getLogger("aap.main")
 DEFAULT_MAX_LEVEL_COMPONENTS = 20  # default of --max-level-components (AoG target size)
@@ -82,18 +84,18 @@ def _read_bom_rows(bom_path: Path) -> list[dict]:
 
 
 def _step_kind(hier: Hierarchy, container_id: str, step: dict) -> str:
-    """[AUX] Kind of a step for plan.json: "stander", "subassembly" or "part".
+    """[AUX] Kind of a step for plan.json: "standard", "subassembly" or "part".
 
-    Why this order: a stander-flagged sub-assembly is structurally a container but is fused into one
-    rigid component and treated like any other stander downstream, so it is never reported as
+    Why this order: a standard-flagged sub-assembly is structurally a container but is fused into one
+    rigid component and treated like any other standard downstream, so it is never reported as
     "subassembly".
     """
-    # is_stander wins over "is a child container": a stander-flagged sub-assembly is fused into one
-    # rigid component and treated exactly like any other stander downstream -- it is never recursed
+    # is_standard wins over "is a child container": a standard-flagged sub-assembly is fused into one
+    # rigid component and treated exactly like any other standard downstream -- it is never recursed
     # into, so it should not be reported as
     # "subassembly" even though it is structurally a container.
-    if step["is_stander"]:
-        return "stander"
+    if step["is_standard"]:
+        return "standard"
     if step["component_id"] in hier.containers[container_id].child_ids:
         return "subassembly"
     return "part"
@@ -105,7 +107,7 @@ def _level_to_json(hier: Hierarchy, plan: LevelPlan) -> dict:
     Input: the hierarchy (for labels and members) and the level's plan. Output: a dict with the level's
     status, locked parts, total cost, inseparable pairs and steps. Each step carries its kind and, for a
     sub-assembly step, its members and its own nested plan under "sub_plan" (None for parts, and for
-    fused standers and unprocessed containers).
+    fused standards and unprocessed containers).
     """
     if plan.status == "locked":
         # Phase 2: no closed group could be found for every
@@ -127,8 +129,8 @@ def _level_to_json(hier: Hierarchy, plan: LevelPlan) -> dict:
         kind = _step_kind(hier, plan.container_id, step)
         entry = dict(step)
         entry["kind"] = kind
-        # A stander-flagged sub-assembly is still a real container: report its members/processed/auto
-        # like "subassembly" would, just under kind "stander" and with no sub_plan (it is fused, never
+        # A standard-flagged sub-assembly is still a real container: report its members/processed/auto
+        # like "subassembly" would, just under kind "standard" and with no sub_plan (it is fused, never
         # recursed into).
         if cid in hier.containers[plan.container_id].child_ids:
             child = hier.containers[cid]
@@ -187,10 +189,10 @@ def run_pipeline(
     step_path, bom_path, output_dir = Path(step_path), Path(bom_path), Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Load the inputs: FreeCAD document, BOM labels, stander categories (screw / nut / other) and raw BOM rows.
+    # Load the inputs: FreeCAD document, BOM labels, standard categories (screw / nut / other) and raw BOM rows.
     doc = load_assembly(step_path)
     bom_labels = load_bom(bom_path)
-    bom_categories = load_stander_categories(bom_path)
+    bom_categories = load_standard_categories(bom_path)
     bom_rows = _read_bom_rows(bom_path)
 
     # Sub-assembly tree from the STEP, decided by the BOM `processed` column; fail early on oversized levels.
@@ -226,7 +228,7 @@ def _parse_args() -> argparse.Namespace:
         description="Run the AAP assembly sequence planning pipeline on a STEP assembly."
     )
     parser.add_argument("step_path", type=Path, help="STEP file for the assembly.")
-    parser.add_argument("bom_path", type=Path, help="BOM CSV flagging stander components.")
+    parser.add_argument("bom_path", type=Path, help="BOM CSV flagging standard components.")
     parser.add_argument(
         "output_dir", type=Path, help="Directory to write the plan and per-level output into.")
     parser.add_argument(
@@ -239,6 +241,12 @@ def _parse_args() -> argparse.Namespace:
         "--force-interference",
         action="store_true",
         help="Recompute the interference matrix even if a cached one matches.",
+    )
+    parser.add_argument(
+        "--gapskipping",
+        action="store_true",
+        help="Enable the interference sweep's distance-jump shortcut (CollisionConfig.gap_skip). "
+             "Default: off -- a fixed-step common()-only sweep measured faster overall (see CLAUDE.md).",
     )
     parser.add_argument(
         "--max-level-components",
@@ -299,7 +307,7 @@ def _main_robot(args) -> int:
     plan_dict = run_robot_pipeline(
         args.step_path, args.bom_path, args.output_dir,
         robot_config=RobotConfig(check_subassembly_grasp=args.check_subassembly_grasp),
-        collision_config=CollisionConfig(step=args.step),
+        collision_config=CollisionConfig(step=args.step, gap_skip=args.gapskipping),
         force_interference=args.force_interference,
         max_level_components=args.max_level_components,
     )
@@ -323,7 +331,7 @@ def main() -> int:
         args.step_path,
         args.bom_path,
         args.output_dir,
-        collision_config=CollisionConfig(step=args.step),
+        collision_config=CollisionConfig(step=args.step, gap_skip=args.gapskipping),
         force_interference=args.force_interference,
         max_level_components=args.max_level_components,
     )

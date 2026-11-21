@@ -12,7 +12,7 @@ Outputs
 
 What this module does
     For a step "remove component i from state S" (S = bitmask of present components): target = cloud of i
-    in place, obstacles = merged clouds of every other component present in S (standers included: they are
+    in place, obstacles = merged clouds of every other component present in S (standards included: they are
     physical obstacles for the gripper). The check is static (grasp with i still inserted). One score per
     (state, component), shared by every free direction of the edge.
 

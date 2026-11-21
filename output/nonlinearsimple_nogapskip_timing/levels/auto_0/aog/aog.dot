@@ -1,0 +1,15 @@
+digraph AoG {
+  rankdir=TB;
+  node [shape=box, fontsize=9];
+  { rank=same; n0; }
+  n0 [label="0\ncomponent\ncomponent001"];
+  { rank=same; n1; n2; }
+  n1 [label="1\ncomponent"];
+  n2 [label="2\ncomponent001"];
+  { rank=same; n3; }
+  n3 [label="3\n(empty)"];
+  n0 -> n2 [label="component\n[4]", fontsize=8];
+  n0 -> n1 [label="component001\n[5]", fontsize=8];
+  n1 -> n3 [label="component\n[0 1 2 3 4 5]", fontsize=8];
+  n2 -> n3 [label="component001\n[0 1 2 3 4 5]", fontsize=8];
+}

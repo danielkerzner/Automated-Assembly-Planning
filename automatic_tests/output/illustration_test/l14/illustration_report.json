@@ -14,7 +14,7 @@
         "A"
       ],
       "group": null,
-      "is_stander": false,
+      "is_standard": false,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l14\\step_01_A.png",
       "view": {
         "azimuth": 285.0,
@@ -54,7 +54,7 @@
         "C"
       ],
       "group": "pins",
-      "is_stander": false,
+      "is_standard": false,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l14\\step_02-03_pins.png",
       "view": {
         "azimuth": 285.0,
@@ -92,7 +92,7 @@
         "D"
       ],
       "group": null,
-      "is_stander": false,
+      "is_standard": false,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l14\\step_04_D.png",
       "view": {
         "azimuth": 285.0,
@@ -121,14 +121,14 @@
     285.0,
     35.0
   ],
-  "config_hash": "0dbf3dc866f6e4188e3ed1c48d8d34d17668b76e31b18f5bab073f5d72092143",
+  "config_hash": "cafd758230260af48d95aac18cf66d1116afc11f2e9a6a8e0e7f5d637d691379",
   "stats": {
     "layers_rasterized": 296,
-    "raster_s": 0.2859069000041927,
+    "raster_s": 0.16920020003453828,
     "views_evaluated": 73,
-    "view_search_s": 0.4025013000000399,
-    "render_s": 0.6038777999992817,
-    "total_s": 1.0063835000000836
+    "view_search_s": 0.2340706999966642,
+    "render_s": 0.3753582000063034,
+    "total_s": 0.6094321999989916
   },
   "config": {
     "image_size": [
@@ -182,7 +182,7 @@
     "xray_alpha": 0.25,
     "placed_color": "#bdbdbd",
     "new_color": "#f28e2b",
-    "stander_color": "#3b75af",
+    "standard_color": "#3b75af",
     "ghost_alpha": 0.35,
     "show_gravity": true,
     "mark_unstable": true,

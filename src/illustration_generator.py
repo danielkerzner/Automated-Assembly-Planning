@@ -4,7 +4,7 @@ Inputs
     - The assembly sequence (`OptimizationResult.steps`, or a list of step dicts): per step the component,
       insertion direction, travel, start offset, gravity, stability class and screw turns.
     - The `PreprocessingResult` (to get each component's global FreeCAD shape and the assembly box).
-    - The BOM CSV (`tool`, `group`, `is_stander` columns, matched on Label).
+    - The BOM CSV (`tool`, `group`, `is_standard` columns, matched on Label).
     - An `IllustrationConfig` (image size, view search, colours, footnote options).
 Outputs
     - In the output folder (default `output/<assembly>/illustrations`): one PNG per frame
@@ -60,7 +60,7 @@ OUTLINE_RGB = np.array([0.12, 0.12, 0.12])  # colour of the silhouette lines
 TRAJECTORY_COLOR = "#1a1a1a"  # colour of the dashed trajectory arrow
 MESH_VERSION = "1"  # bump when the mesh cache contents change
 LAYER_VERSION = "1"  # bump when the layer cache contents change
-FRAMES_VERSION = "3"  # 2: group frames; 3: no view perturbation, stander fallback
+FRAMES_VERSION = "3"  # 2: group frames; 3: no view perturbation, standard fallback
 
 REPORT_NAME = "illustration_report.json"
 VIEWS_NAME = "view_selection.json"
@@ -82,7 +82,7 @@ STRINGS = {
         "hold": "Hold in place",
         "steps": "{n} steps",
         "final": "Final assembly",
-        "columns": ("Part", "Stander", "Tool", "Group", "Turns"),
+        "columns": ("Part", "Standard", "Tool", "Group", "Turns"),
         "yes": "yes",
         "no": "no",
         "turns": "Turns",
@@ -113,7 +113,7 @@ class IllustrationConfig:
     xray_alpha: float = 0.25  # float in [0, 1]. Opacity of the placed parts drawn over the new part in an x-ray frame.
     placed_color: str = "#bdbdbd"  # matplotlib colour of already placed parts.
     new_color: str = "#f28e2b"  # colour of the part being placed.
-    stander_color: str = "#3b75af"  # colour of a stander being placed.
+    standard_color: str = "#3b75af"  # colour of a standard being placed.
     ghost_alpha: float = 0.35  # float in [0, 1]. Opacity of the ghost (start position).
     show_gravity: bool = True  # bool. Draw the gravity pictogram (needs the stability data in the steps).
     mark_unstable: bool = True  # bool. Add "Hold in place" to the footnote of class-1 (unsupported) steps.
@@ -150,7 +150,7 @@ def validate_config(config: IllustrationConfig) -> None:
             raise ValueError(f"{name} must lie in [0, 1]")
     if config.min_trajectory_px_frac < 0:
         raise ValueError("min_trajectory_px_frac must be >= 0")
-    for name in ("placed_color", "new_color", "stander_color"):
+    for name in ("placed_color", "new_color", "standard_color"):
         if not is_color_like(getattr(config, name)):
             raise ValueError(f"{name} is not a colour: {getattr(config, name)!r}")
     if config.language not in STRINGS:
@@ -583,18 +583,18 @@ def _figures(ev: dict, s: int, occluded: bool = True) -> dict:
 
 def select_views(meshes: list[Mesh], offsets: np.ndarray, config: IllustrationConfig,
                  stats: dict | None = None, blocks: list[tuple[int, int]] | None = None,
-                 is_stander: list[bool] | None = None) -> tuple[tuple[float, float], list[dict]]:
+                 is_standard: list[bool] | None = None) -> tuple[tuple[float, float], list[dict]]:
     """[MAIN] View cascade at search resolution: the global view and the view of every frame.
 
     Inputs: the meshes and start offsets in assembly order, the config, an optional stats dict, the frame
-    `blocks` ((first, last) step indices per frame, default one frame per step) and the is_stander flag of
+    `blocks` ((first, last) step indices per frame, default one frame per step) and the is_standard flag of
     every step. Output: (global view, list of per-frame choices). Each choice holds the view, its kind
-    ("global", "candidate", "stander", "xray" or "none"), the visibility figures and warnings.
+    ("global", "candidate", "standard", "xray" or "none"), the visibility figures and warnings.
 
     Cascade: evaluate every candidate view; the global view is the one that makes most frames visible. Per
     frame: use the global view if it passes the rule; else the nearest candidate view that passes; else, for
-    a stander, draw normally in the best failing view; else the x-ray fallback; else the best-scoring view
-    with a warning. Only the first movement of a block is judged, so that movement's is_stander
+    a standard, draw normally in the best failing view; else the x-ray fallback; else the best-scoring view
+    with a warning. Only the first movement of a block is judged, so that movement's is_standard
     flag (per step, default False) picks the fallback when no main view passes.
     """
     stats = stats if stats is not None else {}
@@ -640,13 +640,13 @@ def select_views(meshes: list[Mesh], offsets: np.ndarray, config: IllustrationCo
         scores = [step_score(evals[i], config)[s] for i in range(len(cands))]
         best = max(range(len(cands)), key=lambda i: (bool(visible_mask(evals[i], config, occlusion=False)[s]),
                                                      round(float(scores[i]), 9), -view_angle(cands[i], glob), -i))
-        # 3. A stander is drawn normally in the best failing view (never x-ray).
-        if is_stander is not None and is_stander[first]:
-            # Standers are easy to assemble: drawn normally in the best view, never in x-ray.
-            msg = (f"step {first + 1}: stander not fully visible in any main view; drawn without x-ray at "
+        # 3. A standard is drawn normally in the best failing view (never x-ray).
+        if is_standard is not None and is_standard[first]:
+            # Standards are easy to assemble: drawn normally in the best view, never in x-ray.
+            msg = (f"step {first + 1}: standard not fully visible in any main view; drawn without x-ray at "
                    f"az {cands[best][0]:.1f} el {cands[best][1]:.1f}")
             log.info(msg)
-            choices.append({**base, "view": cands[best], "is_global": best == g, "kind": "stander", "visible": False,
+            choices.append({**base, "view": cands[best], "is_global": best == g, "kind": "standard", "visible": False,
                             "xray": False, **_figures(evals[best], s), "warnings": [msg]})
             continue
         # 4. X-ray fallback: visibility judged without occlusion, cascade order again.
@@ -721,13 +721,13 @@ def _ghost_overlay(ctx: ViewContext, s: int, rgb: np.ndarray, scene_depth: np.nd
     rgb[line] = 0.55 * color
 
 
-def compose_frame(ctx: ViewContext, s: int | None, config: IllustrationConfig, is_stander=False,
+def compose_frame(ctx: ViewContext, s: int | None, config: IllustrationConfig, is_standard=False,
                   xray: bool = False, last: int | None = None) -> np.ndarray:
     """[MAIN] Compose the RGB image (H, W, 3) of one frame.
 
     Inputs: the view context, the step index s (None = final assembly, all parts placed), the config, the
-    stander flag (one value, or one per part s..last), `xray` and `last` (the last step of a group frame).
-    Output: the image with parts 0..s-1 in the placed colour and parts s..last in the new (or stander)
+    standard flag (one value, or one per part s..last), `xray` and `last` (the last step of a group frame).
+    Output: the image with parts 0..s-1 in the placed colour and parts s..last in the new (or standard)
     colour, each with its ghost at the start position, plus silhouette lines.
 
     Normal frame: all layers are depth-merged and painted. X-ray frame: the new parts and ghosts are drawn
@@ -740,8 +740,8 @@ def compose_frame(ctx: ViewContext, s: int | None, config: IllustrationConfig, i
     n_placed = N if s is None else s
     last = n_placed - 1 if s is None else (s if last is None else last)
     members = list(range(n_placed, last + 1))
-    flags = list(is_stander) if isinstance(is_stander, (list, tuple)) else [bool(is_stander)] * len(members)
-    member_rgb = {k: _rgb(config.stander_color if f else config.new_color) for k, f in zip(members, flags)}
+    flags = list(is_standard) if isinstance(is_standard, (list, tuple)) else [bool(is_standard)] * len(members)
+    member_rgb = {k: _rgb(config.standard_color if f else config.new_color) for k, f in zip(members, flags)}
     colors = np.array([placed_rgb] * n_placed + [member_rgb.get(k, placed_rgb) for k in range(n_placed, N)])
     placed_items = [(ctx.layer(k), 0, 0, 0.0, k) for k in range(n_placed)]
     new_items = [(ctx.layer(k), 0, 0, 0.0, k) for k in members]
@@ -932,7 +932,7 @@ def draw_step(ctx: ViewContext, steps: list[dict], s: int, choice: dict, lines: 
     last = s if last is None else last
     block = range(s, last + 1)
     fig = _figure(config)
-    rgb = compose_frame(ctx, s, config, [bool(steps[k]["is_stander"]) for k in block], choice["xray"], last)
+    rgb = compose_frame(ctx, s, config, [bool(steps[k]["is_standard"]) for k in block], choice["xray"], last)
     ax = _image_axes(fig, ctx, rgb)
     # One dashed trajectory (ghost -> part) with an arrowhead per part of the frame.
     for k in block:
@@ -963,7 +963,7 @@ def draw_step(ctx: ViewContext, steps: list[dict], s: int, choice: dict, lines: 
 
 
 def draw_cover(ctx: ViewContext, steps: list[dict], bom: dict, title: str, config: IllustrationConfig):
-    """[AUX] Cover page figure: title, number of steps, parts table (part, stander, tool, group, turns) and the final assembly."""
+    """[AUX] Cover page figure: title, number of steps, parts table (part, standard, tool, group, turns) and the final assembly."""
     T = STRINGS[config.language]
     fig = _figure(config)
     fig.text(0.03, 0.95, title, fontsize=16, weight="bold", va="top")
@@ -972,8 +972,8 @@ def draw_cover(ctx: ViewContext, steps: list[dict], bom: dict, title: str, confi
     for st in steps:
         row = bom.get(st["component_label"], {})
         turns = st.get("turns")
-        rows.append([st["component_label"], T["yes"] if st["is_stander"] else T["no"],
-                     tool_text(st, bom, config.language) if st["is_stander"] or row.get("tool") else "",
+        rows.append([st["component_label"], T["yes"] if st["is_standard"] else T["no"],
+                     tool_text(st, bom, config.language) if st["is_standard"] or row.get("tool") else "",
                      row.get("group") or "", f"{turns:.1f}" if turns is not None else ""])
     tax = fig.add_axes([0.02, 0.06, 0.46, 0.78])
     tax.axis("off")
@@ -1023,15 +1023,15 @@ def _steps_of(sequence) -> list[dict]:
 
 
 def compute_config_hash(steps: list[dict], meshes: list[Mesh], bom: dict, config: IllustrationConfig) -> str:
-    """[SUPP] Cache key of the illustrations: hash of the sequence, mesh keys, BOM tool/group/is_stander and config (without `force`)."""
+    """[SUPP] Cache key of the illustrations: hash of the sequence, mesh keys, BOM tool/group/is_standard and config (without `force`)."""
     cfg = asdict(config)
     cfg.pop("force")
-    seq = [[s["component_id"], s["component_label"], bool(s["is_stander"]),
+    seq = [[s["component_id"], s["component_label"], bool(s["is_standard"]),
             [round(float(x), 9) for x in s["direction"]], round(float(s["travel"]), 9),
             [round(float(x), 9) for x in s["start_offset"]],
             None if s.get("gravity") is None else [round(float(x), 9) for x in s["gravity"]],
             s.get("stability_class")] for s in steps]
-    parts = [[bom.get(s["component_label"], {}).get(c, "") for c in ("tool", "group", "is_stander")] for s in steps]
+    parts = [[bom.get(s["component_label"], {}).get(c, "") for c in ("tool", "group", "is_standard")] for s in steps]
     h = hashlib.sha256(f"v{FRAMES_VERSION};".encode())
     h.update(json.dumps({"sequence": seq, "meshes": [m.key for m in meshes], "bom": parts, "config": cfg},
                         sort_keys=True, default=list).encode())
@@ -1069,11 +1069,11 @@ def _load_cached(output_dir: Path, key: str) -> IllustrationResult | None:
 
 
 def _cached_views(mesh_list, offsets, config, output_dir: Path, force: bool, stats: dict,
-                  blocks: list[tuple[int, int]], is_stander: list[bool]):
-    """[SUPP] Cache function: `select_views`, cached on disk keyed by meshes, start offsets, frame blocks, stander flags and search fields."""
+                  blocks: list[tuple[int, int]], is_standard: list[bool]):
+    """[SUPP] Cache function: `select_views`, cached on disk keyed by meshes, start offsets, frame blocks, standard flags and search fields."""
     h = hashlib.sha256(f"v{FRAMES_VERSION};".encode())
     h.update(json.dumps({"meshes": [m.key for m in mesh_list], "offsets": np.round(offsets, 9).tolist(),
-                         "blocks": [list(b) for b in blocks], "is_stander": is_stander,
+                         "blocks": [list(b) for b in blocks], "is_standard": is_standard,
                          "search": {f: getattr(config, f) for f in SEARCH_FIELDS}}, default=list).encode())
     key = h.hexdigest()
     path = output_dir / VIEWS_NAME
@@ -1087,7 +1087,7 @@ def _cached_views(mesh_list, offsets, config, output_dir: Path, force: bool, sta
                 return tuple(data["global_view"]), data["choices"]
         except Exception as exc:  # noqa: BLE001
             log.warning("Could not read %s (%s); searching views again", path, exc)
-    glob, choices = select_views(mesh_list, offsets, config, stats, blocks, is_stander)
+    glob, choices = select_views(mesh_list, offsets, config, stats, blocks, is_standard)
     _write_json_atomic(path, {"key": key, "global_view": glob, "choices": choices})
     return glob, choices
 
@@ -1098,7 +1098,7 @@ def render_illustrations(sequence, meshes: dict[str, Mesh], bom: dict, output_di
     """[MAIN] Render the PNG of every frame and the manual PDF from meshes keyed by component_id (no FreeCAD).
 
     Inputs: the sequence (steps), the meshes {component_id: Mesh}, the BOM {Label: row dict} (columns tool,
-    group, is_stander; missing columns read as blank), the output folder, the config and the manual title.
+    group, is_standard; missing columns read as blank), the output folder, the config and the manual title.
     Output: an `IllustrationResult`; files are written to `output_dir`. Cached on disk: a matching
     result is returned without rendering.
 
@@ -1132,7 +1132,7 @@ def render_illustrations(sequence, meshes: dict[str, Mesh], bom: dict, output_di
     stats: dict = {}
     blocks = group_blocks(steps, bom, config)
     glob, choices = _cached_views(mesh_list, offsets, config, output_dir, force, stats, blocks,
-                                  [bool(st["is_stander"]) for st in steps])
+                                  [bool(st["is_standard"]) for st in steps])
     stats["view_search_s"] = time.perf_counter() - t0
 
     # Rendering at the final resolution: one ViewContext per view actually used.
@@ -1173,7 +1173,7 @@ def render_illustrations(sequence, meshes: dict[str, Mesh], bom: dict, output_di
                 "component_ids": [b["component_id"] for b in block],
                 "component_labels": [b["component_label"] for b in block],
                 "group": step_group(st, bom) if last > s else None,
-                "is_stander": bool(st["is_stander"]),
+                "is_standard": bool(st["is_standard"]),
                 "png": str(png),
                 "view": {"azimuth": choice["view"][0], "elevation": choice["view"][1],
                          "is_global": choice["is_global"]},
@@ -1258,7 +1258,7 @@ def generate_illustrations(sequence, prep, output_dir: str | Path, config: Illus
     validate_config(config)
     steps = _steps_of(sequence)
     output_dir = Path(output_dir)
-    shapes = component_shapes([s["component_id"] for s in steps], [s["is_stander"] for s in steps], prep)
+    shapes = component_shapes([s["component_id"] for s in steps], [s["is_standard"] for s in steps], prep)
     # Tessellation tolerance from the assembly diagonal (the preprocessing box, or the shapes' own box).
     if prep.assembly_bbox is not None:
         lo, hi = prep.assembly_bbox

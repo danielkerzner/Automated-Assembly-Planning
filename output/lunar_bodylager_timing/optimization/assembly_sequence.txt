@@ -1,0 +1,41 @@
+Assembly sequence (total cost 0.0520)
+
+  1. 0002-P-0908-A01-PP: insert along (0, -1, 0), travel 19.00 mm, start offset (0, 19, 0), gravity (0, 1, 0), class 2
+  2. 0002-P-0901-A01-PP: insert along (0, 1, 0), travel 78.30 mm, start offset (0, -78.3, 0), gravity (0, 1, 0), class 2
+  3. 0002-P-0909-A01-PP_2: insert along (0, 1, 0), travel 78.30 mm, start offset (0, -78.3, 0), gravity (0, 1, 0), class 2
+  4. 0002-P-0909-A01-PP_3: insert along (0, 1, 0), travel 28.80 mm, start offset (0, -28.8, 0), gravity (0, 1, 0), class 1
+  5. 0002-P-0906-A02-AM: insert along (0, 1, 0), travel 22.80 mm, start offset (0, -22.8, 0), gravity (0, 1, 0), class 2
+  6. 0002-P-0903-A01-AM: insert along (0, 1, 0), travel 78.30 mm, start offset (0, -78.3, 0), gravity (0, 1, 0), class 2
+  7. 0002-P-0902-A01-SP-M8x90 [stander]: insert along (0, 1, 0), travel 96.30 mm, start offset (0, -96.3, 0), rotate 77.04 turns clockwise (pitch 1.25 mm), gravity (0, 1, 0), class 2
+  8. 0002-P-0910-A01-SP-M4x003 [stander]: insert along (0, 1, 0), travel 28.30 mm, start offset (0, -28.3, 0), rotate 40.43 turns clockwise (pitch 0.7 mm), gravity (1, 0, 0), class 2
+  9. 0002-P-0910-A01-SP-M4x002 [stander]: insert along (0, 1, 0), travel 28.30 mm, start offset (0, -28.3, 0), rotate 40.43 turns clockwise (pitch 0.7 mm), gravity (1, 0, 0), class 2
+ 10. 0002-P-0910-A01-SP-M4x001 [stander]: insert along (0, 1, 0), travel 28.30 mm, start offset (0, -28.3, 0), rotate 40.43 turns clockwise (pitch 0.7 mm), gravity (1, 0, 0), class 2
+ 11. 0002-P-0910-A01-SP-M4x16 [stander]: insert along (0, 1, 0), travel 28.30 mm, start offset (0, -28.3, 0), rotate 40.43 turns clockwise (pitch 0.7 mm), gravity (1, 0, 0), class 2
+ 12. 0002-P-0911-A01-SP-M4x003 [stander]: insert along (0, -1, 0), travel 19.30 mm, start offset (0, 19.3, 0), rotate 27.57 turns clockwise (pitch 0.7 mm), gravity (1, 0, 0), class 2
+ 13. 0002-P-0911-A01-SP-M4x002 [stander]: insert along (0, -1, 0), travel 19.30 mm, start offset (0, 19.3, 0), rotate 27.57 turns clockwise (pitch 0.7 mm), gravity (1, 0, 0), class 2
+ 14. 0002-P-0911-A01-SP-M4x001 [stander]: insert along (0, -1, 0), travel 19.30 mm, start offset (0, 19.3, 0), rotate 27.57 turns clockwise (pitch 0.7 mm), gravity (1, 0, 0), class 2
+ 15. 0002-P-0911-A01-SP-M4x10 [stander]: insert along (0, -1, 0), travel 19.30 mm, start offset (0, 19.3, 0), rotate 27.57 turns clockwise (pitch 0.7 mm), gravity (1, 0, 0), class 2
+ 16. 0002-P-0402-A01-M4nut007 [stander]: insert along (0, 1, 0), travel 22.80 mm, start offset (0, -22.8, 0), rotate 32.57 turns clockwise (pitch 0.7 mm), gravity (0, 1, 0), class 2
+ 17. 0002-P-0402-A01-M4nut006 [stander]: insert along (0, 1, 0), travel 22.80 mm, start offset (0, -22.8, 0), rotate 32.57 turns clockwise (pitch 0.7 mm), gravity (0, 1, 0), class 2
+ 18. 0002-P-0402-A01-M4nut005 [stander]: insert along (0, 1, 0), travel 22.80 mm, start offset (0, -22.8, 0), rotate 32.57 turns clockwise (pitch 0.7 mm), gravity (0, 1, 0), class 2
+ 19. 0002-P-0402-A01-M4nut004 [stander]: insert along (0, 1, 0), travel 22.80 mm, start offset (0, -22.8, 0), rotate 32.57 turns clockwise (pitch 0.7 mm), gravity (0, 1, 0), class 2
+ 20. 0002-P-0402-A01-M4nut003 [stander]: insert along (0, -1, 0), travel 16.50 mm, start offset (0, 16.5, 0), rotate 23.57 turns clockwise (pitch 0.7 mm), gravity (0, -1, 0), class 2
+ 21. 0002-P-0402-A01-M4nut002 [stander]: insert along (0, -1, 0), travel 16.50 mm, start offset (0, 16.5, 0), rotate 23.57 turns clockwise (pitch 0.7 mm), gravity (0, -1, 0), class 2
+ 22. 0002-P-0402-A01-M4nut001 [stander]: insert along (0, -1, 0), travel 16.50 mm, start offset (0, 16.5, 0), rotate 23.57 turns clockwise (pitch 0.7 mm), gravity (0, -1, 0), class 2
+ 23. 0002-P-0402-A01-M4nut [stander]: insert along (0, -1, 0), travel 16.50 mm, start offset (0, 16.5, 0), rotate 23.57 turns clockwise (pitch 0.7 mm), gravity (0, -1, 0), class 2
+ 24. 0002-P-0905-A01-SP-al40x60x13 [stander]: insert along (0, 1, 0), travel 19.30 mm, start offset (0, -19.3, 0), gravity (0, 1, 0), class 2
+ 25. 0002-P-0904-A01-SP-M4x003 [stander]: insert along (0, 1, 0), travel 18.30 mm, start offset (0, -18.3, 0), rotate 26.14 turns clockwise (pitch 0.7 mm), gravity (1, 0, 0), class 2
+ 26. 0002-P-0904-A01-SP-M4x002 [stander]: insert along (0, 1, 0), travel 18.30 mm, start offset (0, -18.3, 0), rotate 26.14 turns clockwise (pitch 0.7 mm), gravity (1, 0, 0), class 2
+ 27. 0002-P-0904-A01-SP-M4x001 [stander]: insert along (0, 1, 0), travel 18.30 mm, start offset (0, -18.3, 0), rotate 26.14 turns clockwise (pitch 0.7 mm), gravity (1, 0, 0), class 2
+ 28. 0002-P-0904-A01-SP-M4x12 [stander]: insert along (0, 1, 0), travel 18.30 mm, start offset (0, -18.3, 0), rotate 26.14 turns clockwise (pitch 0.7 mm), gravity (1, 0, 0), class 2
+ 29. 0002-P-0907-A01-SP-al8x14x4 [stander]: insert along (0, -1, 0), travel 16.50 mm, start offset (0, 16.5, 0), gravity (0, -1, 0), class 2
+ 30. 0002-P-0206-A03-SP-M8locknut [stander]: insert along (0, -1, 0), travel 12.50 mm, start offset (0, 12.5, 0), rotate 10.00 turns clockwise (pitch 1.25 mm), gravity (0, -1, 0), class 1
+
+Cost breakdown (normalized x weight):
+  travel: raw 870.9000, normalized 0.2334, weight 0.0204, weighted 0.0048
+  direction_change: raw 1.5000, normalized 0.0517, weight 0.0816, weighted 0.0042
+  tool_change: raw 0.0000, normalized 0.0000, weight 0.2245, weighted 0.0000
+  size_contacts: raw 8.1293, normalized 0.0396, weight 0.1633, weighted 0.0065
+  grouping: raw 0.0000, normalized 0.0000, weight 0.1224, weighted 0.0000
+  stability: raw 2.0000, normalized 0.0690, weight 0.2449, weighted 0.0169
+  gravity_change: raw 4.0000, normalized 0.1379, weight 0.1429, weighted 0.0197

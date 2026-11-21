@@ -4,7 +4,7 @@ Covers levels, fusing and Phase 2 (automatic sub-assemblies).
 
 Inputs
     - The `Hierarchy` (hierarchy.py) and the original FreeCAD document of the STEP.
-    - STEP path, BOM path, the BOM labels and stander categories, an output directory.
+    - STEP path, BOM path, the BOM labels and standard categories, an output directory.
     - Optional stage configs (Preprocessing, Collision, Optimization, Illustration).
 Outputs
     - A `LevelPlan` tree: for each level its preprocessing result, interference tensor, AoG, optimised
@@ -59,7 +59,7 @@ class LevelPlan:
     container_id: str  # str. Id of the container this level belongs to (hier.root for the root level).
     label: str  # str. Container label, used in plan.json and to title the illustrations.
     level_dir: Path  # Path. Folder holding this level's stage outputs.
-    prep: "object"  # PreprocessingResult. The level's flat document and standers (after Phase 2 merges).
+    prep: "object"  # PreprocessingResult. The level's flat document and standards (after Phase 2 merges).
     interference: "object"  # InterferenceResult. The level's interference tensor (after Phase 2 merges).
     aog: "object"  # AoG. The level's assembly graph (complete, or the last incomplete one when locked).
     sequence: "object"  # OptimizationResult | None. The ordered steps; None when status == "locked".
@@ -365,7 +365,7 @@ def _commit_merge(doc_L, prep_L, interf, group_ids: list[str], new_id: str, new_
 
     Steps: fuse the members (`_fuse_container` with a synthetic `Container`; `doc_L`'s members are already
     globally placed, so it plays the `original_doc` role unchanged); build a new flat document with the
-    group replaced by that one feature; merge the tensor (`merge_groups`); remap the stander gates;
+    group replaced by that one feature; merge the tensor (`merge_groups`); remap the standard gates;
     update `compound_ids` / `members`; and give the new component its M7 group.
     """
     import FreeCAD
@@ -396,14 +396,14 @@ def _commit_merge(doc_L, prep_L, interf, group_ids: list[str], new_id: str, new_
     # Interference tensor with the group collapsed into new_id.
     new_interf = merge_groups(interf, group_ids, new_id, new_label)
 
-    # Stander gates: every reference to a member now points to the new component.
-    new_stander_records = {}
-    for sid, rec in prep_L.stander_records.items():
+    # Standard gates: every reference to a member now points to the new component.
+    new_standard_records = {}
+    for sid, rec in prep_L.standard_records.items():
         new_options = [
             replace(opt, blockers={new_id if m in group_set else m for m in opt.blockers})
             for opt in rec.options
         ]
-        new_stander_records[sid] = replace(
+        new_standard_records[sid] = replace(
             rec,
             options=new_options,
             holds={new_id if m in group_set else m for m in rec.holds},
@@ -435,7 +435,7 @@ def _commit_merge(doc_L, prep_L, interf, group_ids: list[str], new_id: str, new_
                    "use its own id as its M7 group", new_id, resolved_groups, new_id)
     new_auto_group_override = {**prep_L.auto_group_override, new_id: auto_group_value}
 
-    new_prep = replace(prep_L, reduced_assembly=new_doc, stander_records=new_stander_records,
+    new_prep = replace(prep_L, reduced_assembly=new_doc, standard_records=new_standard_records,
                        compound_ids=frozenset(new_compound_ids), members=new_members,
                        auto_group_override=new_auto_group_override)
 
@@ -448,7 +448,7 @@ def _group_child_prep(prep_L, group_ids: list[str], group_shapes: dict, new_id: 
 
     The document is built from the captured member shapes (same global placement as every other level,
     not re-derived). The parent's candidate-direction list is reused (not rediscovered) and
-    `assembly_bbox` is the union of the members' boxes. Only the stander records whose whole gate lies
+    `assembly_bbox` is the union of the members' boxes. Only the standard records whose whole gate lies
     inside the group are kept; cross-group gates are dropped, the same rule as a real container's
     cross-container gates (not supported yet).
     """
@@ -462,17 +462,17 @@ def _group_child_prep(prep_L, group_ids: list[str], group_shapes: dict, new_id: 
         feature.Label = gid
     doc_child.recompute()
 
-    child_stander_records = {}
-    for sid, rec in prep_L.stander_records.items():
+    child_standard_records = {}
+    for sid, rec in prep_L.standard_records.items():
         refs = set(rec.contact_neighbors) | set(rec.holds)
         if rec.partner:
             refs.add(rec.partner)
         for opt in rec.options:
             refs |= opt.blockers
         if sid in group_set and refs <= group_set:
-            child_stander_records[sid] = rec
+            child_standard_records[sid] = rec
         elif sid in group_set:
-            log.warning("Stander %r's gate reaches outside its Phase 2 group %s (%s); dropped at "
+            log.warning("Standard %r's gate reaches outside its Phase 2 group %s (%s); dropped at "
                        "the group's own level", sid, new_id, sorted(refs - group_set))
 
     bbox = None
@@ -485,7 +485,7 @@ def _group_child_prep(prep_L, group_ids: list[str], group_shapes: dict, new_id: 
     child_members = {k: v for k, v in prep_L.members.items() if k in group_set}
 
     return replace(
-        prep_L, reduced_assembly=doc_child, stander_records=child_stander_records,
+        prep_L, reduced_assembly=doc_child, standard_records=child_standard_records,
         assembly_bbox=assembly_bbox, level_id=new_id, level_label=new_label,
         compound_ids=frozenset(prep_L.compound_ids & group_set), members=child_members,
     )
@@ -533,7 +533,7 @@ def _solve_pipeline(hier: Hierarchy, container_id: str, label: str, prep_L, inte
             status = "locked"
             locked_parts = sorted({aog.component_labels[c] for v in kinds for c in aog.state_components(v)})
             log.warning("Level %r [%s] is locked: every remaining dead end is rule-induced (a "
-                       "stander gate, D11, or D12/D13 conflict, not an interference block) -- "
+                       "standard gate, D11, or D12/D13 conflict, not an interference block) -- "
                        "Phase 2 cannot help. Stuck parts: %s", label, container_id, locked_parts)
             break
         candidates = _collect_candidates(aog, interf, blocking)
@@ -635,7 +635,7 @@ def solve_level(
     """[MAIN] Plan one level and, depth-first, every child container marked `processed`.
 
     Inputs: the hierarchy, the container to plan, the original document, STEP and BOM paths, the BOM
-    labels and stander categories, the root output folder, optional stage configs and
+    labels and standard categories, the root output folder, optional stage configs and
     `force_interference`. Output: the level's `LevelPlan`, with child plans in `children`.
 
     Steps: build the level's flat document, run Preprocessing and Interference Identification on it, then

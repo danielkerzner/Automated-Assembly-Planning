@@ -1,0 +1,153 @@
+{
+  "frames": [
+    {
+      "step": 1,
+      "steps": [
+        1
+      ],
+      "component_id": "Part__Feature012",
+      "component_label": "1603-0032-0032",
+      "component_ids": [
+        "Part__Feature012"
+      ],
+      "component_labels": [
+        "1603-0032-0032"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\lunar_bodylager_nogapskip_timing\\levels\\_0002_P_0909_A01_PP_2\\illustrations\\step_01_1603-0032-0032.png",
+      "view": {
+        "azimuth": 270.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.11914940623239455,
+      "in_frame": true,
+      "footnote": [
+        "Step 1 / 2   1603-0032-0032   Tool: By_hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 2,
+      "steps": [
+        2
+      ],
+      "component_id": "Part__Feature013",
+      "component_label": "1601-0039-00032",
+      "component_ids": [
+        "Part__Feature013"
+      ],
+      "component_labels": [
+        "1601-0039-00032"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\lunar_bodylager_nogapskip_timing\\levels\\_0002_P_0909_A01_PP_2\\illustrations\\step_02_1601-0039-00032.png",
+      "view": {
+        "azimuth": 270.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.7979390057095113,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.7979390057095113,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.10212806248752693,
+      "in_frame": true,
+      "footnote": [
+        "Step 2 / 2   1601-0039-00032   Tool: By_hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    }
+  ],
+  "manual_path": "output\\lunar_bodylager_nogapskip_timing\\levels\\_0002_P_0909_A01_PP_2\\illustrations\\manual.pdf",
+  "global_view": [
+    270.0,
+    50.0
+  ],
+  "config_hash": "2d954a51935f72507a3f5a596e7fe4cb1063572217b68a2d0bbb1abe6b3d671c",
+  "stats": {
+    "layers_rasterized": 148,
+    "raster_s": 6.480291199404746,
+    "views_evaluated": 73,
+    "view_search_s": 5.972356500045862,
+    "render_s": 3.217096800042782,
+    "total_s": 9.18945750000421
+  },
+  "config": {
+    "image_size": [
+      1600,
+      1200
+    ],
+    "search_size": [
+      480,
+      360
+    ],
+    "dpi": 200,
+    "tess_tolerance_rel": 0.002,
+    "default_view": [
+      -35.0,
+      30.0
+    ],
+    "azimuths": [
+      0,
+      15,
+      30,
+      45,
+      60,
+      75,
+      90,
+      105,
+      120,
+      135,
+      150,
+      165,
+      180,
+      195,
+      210,
+      225,
+      240,
+      255,
+      270,
+      285,
+      300,
+      315,
+      330,
+      345
+    ],
+    "elevations": [
+      20,
+      35,
+      50
+    ],
+    "vis_min_end": 0.35,
+    "vis_min_start": 0.35,
+    "min_trajectory_px_frac": 0.1,
+    "xray_alpha": 0.25,
+    "placed_color": "#bdbdbd",
+    "new_color": "#f28e2b",
+    "stander_color": "#3b75af",
+    "ghost_alpha": 0.35,
+    "show_gravity": true,
+    "mark_unstable": true,
+    "footnote_show_vector": false,
+    "group_frames": true,
+    "title": "0002-P-0909-A01-PP_2",
+    "language": "en"
+  }
+}

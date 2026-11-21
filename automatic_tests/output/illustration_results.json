@@ -59,11 +59,11 @@
           "passed": true
         },
         {
-          "label": "BOM without a tool column: stander prints 'by hand'",
+          "label": "BOM without a tool column: standard prints 'by hand'",
           "passed": true
         },
         {
-          "label": "stander tool read from the BOM by Label",
+          "label": "standard tool read from the BOM by Label",
           "passed": true
         },
         {
@@ -71,7 +71,7 @@
           "passed": true
         },
         {
-          "label": "non-stander prints 'by hand'",
+          "label": "non-standard prints 'by hand'",
           "passed": true
         },
         {
@@ -88,7 +88,7 @@
         }
       ],
       "notes": [],
-      "seconds": 2.136
+      "seconds": 0.88
     },
     "L2": {
       "passed": true,
@@ -127,7 +127,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.137
+      "seconds": 0.035
     },
     "L3": {
       "passed": true,
@@ -178,7 +178,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.15
+      "seconds": 0.063
     },
     "L4": {
       "passed": true,
@@ -193,7 +193,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.587
+      "seconds": 0.324
     },
     "L5": {
       "passed": true,
@@ -216,7 +216,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.037
+      "seconds": 0.025
     },
     "L6": {
       "passed": true,
@@ -241,7 +241,7 @@
       "notes": [
         "visible counts: [3, 4], 4 view(s) tied on count"
       ],
-      "seconds": 0.161
+      "seconds": 0.132
     },
     "L7": {
       "passed": true,
@@ -267,11 +267,11 @@
           "passed": true
         },
         {
-          "label": "enclosed stander is drawn without x-ray and reported as not visible (stander)",
+          "label": "enclosed standard is drawn without x-ray and reported as not visible (standard)",
           "passed": true
         },
         {
-          "label": "stander best view has a clear trajectory ((90.0, 20.0), global (0.0, 20.0))",
+          "label": "standard best view has a clear trajectory ((90.0, 20.0), global (0.0, 20.0))",
           "passed": true
         },
         {
@@ -279,7 +279,7 @@
           "passed": true
         },
         {
-          "label": "block led by a stander: no x-ray (stander)",
+          "label": "block led by a standard: no x-ray (standard)",
           "passed": true
         },
         {
@@ -287,16 +287,16 @@
           "passed": true
         },
         {
-          "label": "render: stander frame written without x-ray, the report carries the note",
+          "label": "render: standard frame written without x-ray, the report carries the note",
           "passed": true
         },
         {
-          "label": "the enclosed stander stays behind the grey enclosure, x-ray would show it ([0.60117877 0.60117877 0.60117877], [0.29104686 0.4294134  0.5677799 ])",
+          "label": "the enclosed standard stays behind the grey enclosure, x-ray would show it ([0.60117877 0.60117877 0.60117877], [0.29104686 0.4294134  0.5677799 ])",
           "passed": true
         }
       ],
       "notes": [],
-      "seconds": 2.29
+      "seconds": 1.647
     },
     "L8": {
       "passed": true,
@@ -323,7 +323,7 @@
         }
       ],
       "notes": [],
-      "seconds": 1.581
+      "seconds": 1.041
     },
     "L9": {
       "passed": true,
@@ -342,7 +342,7 @@
         }
       ],
       "notes": [],
-      "seconds": 1.805
+      "seconds": 0.89
     },
     "L10": {
       "passed": true,
@@ -352,7 +352,7 @@
           "passed": true
         },
         {
-          "label": "stander: BOM tool, class 1 gets 'Hold in place' (['Step 2 / 3   S   Tool: wrench_10', 'Hold in place'])",
+          "label": "standard: BOM tool, class 1 gets 'Hold in place' (['Step 2 / 3   S   Tool: wrench_10', 'Hold in place'])",
           "passed": true
         },
         {
@@ -377,7 +377,7 @@
         }
       ],
       "notes": [],
-      "seconds": 1.333
+      "seconds": 0.605
     },
     "L11": {
       "passed": true,
@@ -424,7 +424,7 @@
         }
       ],
       "notes": [],
-      "seconds": 4.033
+      "seconds": 2.777
     },
     "L13": {
       "passed": true,
@@ -434,7 +434,7 @@
           "passed": true
         },
         {
-          "label": "N = 8 within 60 s (17.8 s: search 8.5 s, render 9.3 s)",
+          "label": "N = 8 within 60 s (12.3 s: search 6.1 s, render 6.2 s)",
           "passed": true
         },
         {
@@ -447,7 +447,7 @@
         "views evaluated 73, layers rasterized 592, kinds ['global', 'global', 'global', 'global', 'global', 'global', 'global', 'global']",
         "N = 20 skipped (run with --groups scale)"
       ],
-      "seconds": 18.519
+      "seconds": 12.735
     },
     "L14": {
       "passed": true,
@@ -510,13 +510,13 @@
         }
       ],
       "notes": [],
-      "seconds": 1.131
+      "seconds": 0.7
     },
     "cache": {
       "passed": true,
       "checks": [
         {
-          "label": "tests/industrial_fastner/optimization/optimization_result.json byte-identical after the run",
+          "label": "output/industrial_fastner/optimization/optimization_result.json byte-identical after the run",
           "passed": true
         }
       ],

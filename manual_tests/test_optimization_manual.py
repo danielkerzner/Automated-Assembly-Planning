@@ -20,7 +20,7 @@ What it prints and writes:
     stability class, and the BOM tool / group where those criteria are on
   - the cost breakdown per criterion: raw value, normalized value in [0, 1], weight, weighted value
   - sequence statistics: direction changes, gravity changes, class-1 insertions, group switches,
-    tool changes between standers (information only, not scored here)
+    tool changes between standards (information only, not scored here)
   - run statistics: greedy path cost vs the ACO result, iterations, stop reason, distinct paths
   - consistency checks that do not use the optimizer's own cost code:
       K1 weights        enabled criteria only, sum to 1, default ratios kept (unless overridden)
@@ -44,8 +44,8 @@ Two kinds of run:
 
   Synthetic assembly (no FreeCAD, no STEP file, nothing cached): a hand-built assembly from
   test_aog_manual.py, with geometry derived from its bounding boxes (touching faces become contact
-  patches; interpenetrating parts such as screws rest on the overlap), made-up tools (standers alternate
-  tool1/tool2) and groups (movable parts alone, all standers together).
+  patches; interpenetrating parts such as screws rest on the overlap), made-up tools (standards alternate
+  tool1/tool2) and groups (movable parts alone, all standards together).
 
       python manual_tests/test_optimization_manual.py --synthetic demo
       python manual_tests/test_optimization_manual.py --synthetic lattice --n 6
@@ -186,13 +186,13 @@ def synthetic_tables(aog, inputs) -> TermTables:
             patch = _box_patch(lo, hi, cog, i, j, SYNTHETIC_CONTACT_TOL)
             if patch is not None:
                 patches[(i, j)] = patch
-    stander_idx = [c for c in range(n) if aog.is_stander[c]]
+    standard_idx = [c for c in range(n) if aog.is_standard[c]]
     tool = [None] * n
-    for q, c in enumerate(stander_idx):
+    for q, c in enumerate(standard_idx):
         tool[c] = "tool1" if q % 2 == 0 else "tool2"
     group = [f"{aog.component_labels[c]}" for c in range(n)]
-    if len(stander_idx) > 1:
-        for c in stander_idx:
+    if len(standard_idx) > 1:
+        for c in standard_idx:
             group[c] = "fasteners"
     return TermTables(
         component_ids=list(aog.component_ids),
@@ -394,7 +394,7 @@ def sequence_stats(aog, config: OptimizationConfig, result, tool: list, group: l
     other_axis = sum(1 for a, b in zip(idx[:-1], idx[1:]) if b != a and b != int(aog.neg[a]))
     gravity = [s["gravity_index"] for s in steps if s["gravity_index"] is not None]
     comps = [s["component"] for s in steps]
-    stander_tools = [tool[c] for c in comps if aog.is_stander[c]]
+    standard_tools = [tool[c] for c in comps if aog.is_standard[c]]
     # group switches: consecutive steps in different groups (a lower bound is the number of groups - 1)
     groups = [group[c] for c in comps]
     return {
@@ -404,7 +404,7 @@ def sequence_stats(aog, config: OptimizationConfig, result, tool: list, group: l
         "class1_insertions": sum(1 for s in steps if s["stability_class"] == 1) if gravity else None,
         "group_switches": sum(1 for a, b in zip(groups[:-1], groups[1:]) if a != b),
         "number_of_groups": len(set(groups)),
-        "tool_changes_between_standers": sum(1 for a, b in zip(stander_tools[:-1], stander_tools[1:]) if a != b),
+        "tool_changes_between_standards": sum(1 for a, b in zip(standard_tools[:-1], standard_tools[1:]) if a != b),
         "total_travel_mm": round(sum(s["travel"] for s in steps), 3),
     }
 
@@ -469,7 +469,7 @@ def print_summary(aog, config: OptimizationConfig, result, report: dict, checks:
             line += f"  {(row['tool'] or '-'):<10}"
         if show_group:
             line += f"  {(row['group'] or '-'):<14}"
-        print(line + ("   [stander]" if s["is_stander"] else ""))
+        print(line + ("   [standard]" if s["is_standard"] else ""))
 
     print()
     print("Cost breakdown (normalized in [0, 1], times weight):")
@@ -487,7 +487,7 @@ def print_summary(aog, config: OptimizationConfig, result, report: dict, checks:
         print(f"  gravity changes: {st['gravity_changes']}   class-1 insertions: {st['class1_insertions']}")
     print(f"  groups: {st['number_of_groups']}, group switches {st['group_switches']} "
           f"(at least {st['number_of_groups'] - 1} are unavoidable)   "
-          f"tool changes between standers: {st['tool_changes_between_standers']}")
+          f"tool changes between standards: {st['tool_changes_between_standards']}")
 
     h = result.history
     print()
@@ -639,7 +639,7 @@ if __name__ == "__main__":
     parser.add_argument("--synthetic", choices=["stack", "demo", "lattice", "random"],
                         help="use a hand-built assembly instead of the STEP pipeline (no FreeCAD needed)")
     parser.add_argument("--n", type=int, default=5, help="movable parts for lattice/random (default 5)")
-    parser.add_argument("--m", type=int, default=2, help="standers for random (default 2)")
+    parser.add_argument("--m", type=int, default=2, help="standards for random (default 2)")
     parser.add_argument("--asm-seed", type=int, default=1, help="seed of the random synthetic assembly (default 1)")
     parser.add_argument("--out", type=Path, help="output folder for synthetic runs (default tests/synthetic/<name>)")
     parser.add_argument("--step", type=float, default=DEFAULT_H,

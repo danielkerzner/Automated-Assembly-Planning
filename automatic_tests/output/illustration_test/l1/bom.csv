@@ -1,4 +1,4 @@
-label,is_stander,tool,group
+label,is_standard,tool,group
 P1,false,,g1
 S1,true,wrench_10,g2
 S2,true,,g2

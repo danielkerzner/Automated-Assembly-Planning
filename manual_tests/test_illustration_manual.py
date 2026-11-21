@@ -375,8 +375,8 @@ def run_synthetic(args: argparse.Namespace, config: IllustrationConfig):
     tables = synthetic_tables(aog, inputs)
     sequence = op.optimize(aog, tables, op.OptimizationConfig())
     meshes = {cid: box_mesh(lo, hi, cid) for cid, lo, hi in zip(inputs.component_ids, inputs.bbox_lo, inputs.bbox_hi)}
-    bom = {label: {"label": label, "is_stander": str(bool(st)).lower(), "tool": tool or "", "group": group or ""}
-           for label, st, tool, group in zip(aog.component_labels, aog.is_stander, tables.tool, tables.group)}
+    bom = {label: {"label": label, "is_standard": str(bool(st)).lower(), "tool": tool or "", "group": group or ""}
+           for label, st, tool, group in zip(aog.component_labels, aog.is_standard, tables.tool, tables.group)}
     illus_dir = (args.out or REPO_ROOT / "tests" / "synthetic" / args.synthetic) / "illustrations"
 
     def render(cfg):
@@ -414,7 +414,7 @@ def build_report(mode: str, steps: list[dict], result, config: IllustrationConfi
         "manual": result.manual_path,
         "stats": result.stats,
         "steps": [{
-            "step": f["step"], "component": f["component_label"], "is_stander": f["is_stander"],
+            "step": f["step"], "component": f["component_label"], "is_standard": f["is_standard"],
             "png": f["png"], "view": f["view"], "view_kind": f["view_kind"], "visible": f["visible"],
             "xray": f["xray"], "vis_end": f["vis_end"], "vis_start": f["vis_start"],
             "trajectory_px_frac": f["trajectory_px_frac"], "footnote": f["footnote"],
@@ -450,8 +450,8 @@ def print_summary(mode: str, steps: list[dict], result, config: IllustrationConf
             flags.append("re-orient")
         if f.get("hold"):
             flags.append("hold")
-        if f["is_stander"]:
-            flags.append("stander")
+        if f["is_standard"]:
+            flags.append("standard")
         print(f"  {f['step']:>4}  {short[f['component_label']]:<24} {tool:<10} {view:>11} "
               f"{f['view_kind']:<9} {f['vis_end']:>5.2f} {f['vis_start']:>5.2f} {f['trajectory_px_frac']:>5.2f}  "
               f"{', '.join(flags)}")
@@ -517,7 +517,7 @@ if __name__ == "__main__":
     parser.add_argument("--synthetic", choices=["stack", "demo", "lattice", "random"],
                         help="use a hand-built assembly drawn as boxes instead of the STEP pipeline (no FreeCAD needed)")
     parser.add_argument("--n", type=int, default=5, help="movable parts for lattice/random (default 5)")
-    parser.add_argument("--m", type=int, default=2, help="standers for random (default 2)")
+    parser.add_argument("--m", type=int, default=2, help="standards for random (default 2)")
     parser.add_argument("--asm-seed", type=int, default=1, help="seed of the random synthetic assembly (default 1)")
     parser.add_argument("--out", type=Path, help="output folder for synthetic runs (default tests/synthetic/<name>)")
     parser.add_argument("--step", type=float, default=DEFAULT_H,

@@ -7,9 +7,9 @@ the sequence read-out).
 How the tests are built
     Most tests feed `generate_aog` synthetic `AoGInputs` (tiny hand-made interference tensors, built with
     `make_inputs`) so that the expected graph is known by construction. The two main reference sources are
-    (1) `brute_force`, an independent naive enumeration of all 2^N states written from the stander rules, and
+    (1) `brute_force`, an independent naive enumeration of all 2^N states written from the standard rules, and
     (2) the cached `industrial_fastner` matrix and `report.json` committed in `output/industrial_fastner/`
-    (read-only). `random_inputs` generates random tensors with random stander gates, nut links, contacts and
+    (read-only). `random_inputs` generates random tensors with random standard gates, nut links, contacts and
     BOM groups, so the brute-force comparison covers combinations nobody wrote by hand.
 
 Standalone runner (pytest is not installed in environmentAAP). From repo root:
@@ -56,8 +56,8 @@ SCRATCH = OUT_DIR / "aog_test"
 FASTENER_DIR = REPO_ROOT / "output" / "industrial_fastner"
 FASTENER_STEP = REPO_ROOT / "data" / "industrial_fastner" / "industrial_fastner.stp"
 FASTENER_BOM = REPO_ROOT / "data" / "industrial_fastner" / "generated_bom.csv"
-# Stander IDs -> Labels of industrial_fastner (report.json stores IDs only; resolved by the real run).
-FASTENER_STANDER_LABELS = {"Part__Feature003": "industrial_fastner_part7",
+# Standard IDs -> Labels of industrial_fastner (report.json stores IDs only; resolved by the real run).
+FASTENER_STANDARD_LABELS = {"Part__Feature003": "industrial_fastner_part7",
                            "Part__Feature004": "industrial_fastner_part4",
                            "Part__Feature005": "industrial_fastner_part001"}
 
@@ -126,17 +126,17 @@ def fresh_dir(name: str) -> Path:
 # ---------------------------------------------------------------------------
 
 
-def make_inputs(free, directions=AXES, neg=AXES_NEG, stander_options=None, stander_holds=None,
+def make_inputs(free, directions=AXES, neg=AXES_NEG, standard_options=None, standard_holds=None,
                 nut_links=None, bbox_lo=None, bbox_hi=None, box=((0, 0, 0), (100, 100, 100)), ids=None,
                 key="synthetic", contact=None, group=None):
-    """Build AoGInputs for a synthetic case. `stander_options`: {bit: [(direction, blockers), ...]}
-    (one entry = one RemovalOption; most tests only need a single-option stander, so a bare
+    """Build AoGInputs for a synthetic case. `standard_options`: {bit: [(direction, blockers), ...]}
+    (one entry = one RemovalOption; most tests only need a single-option standard, so a bare
     `{bit: direction}` shorthand is also accepted and expanded to one option with no blockers)."""
     free = np.asarray(free, dtype=bool)
     n = free.shape[0]
-    stander_options = stander_options or {}
+    standard_options = standard_options or {}
     norm_options = {}
-    for s, opts in stander_options.items():
+    for s, opts in standard_options.items():
         if isinstance(opts, tuple) and len(opts) == 2 and not isinstance(opts[0], (tuple, list)):
             opts = [opts]
         elif not isinstance(opts, list):
@@ -147,8 +147,8 @@ def make_inputs(free, directions=AXES, neg=AXES_NEG, stander_options=None, stand
     return AoGInputs(
         component_ids=list(ids), component_labels=list(ids), n_movable=n, free=free,
         directions=np.asarray(directions, dtype=float), neg=np.asarray(neg),
-        stander_options=norm_options,
-        stander_holds={s: set(h) for s, h in (stander_holds or {}).items()},
+        standard_options=norm_options,
+        standard_holds={s: set(h) for s, h in (standard_holds or {}).items()},
         nut_links={s: (int(p), r) for s, (p, r) in (nut_links or {}).items()},
         bbox_lo=np.zeros((N, 3)) if bbox_lo is None else np.asarray(bbox_lo, dtype=float),
         bbox_hi=np.ones((N, 3)) if bbox_hi is None else np.asarray(bbox_hi, dtype=float),
@@ -177,7 +177,7 @@ def random_inputs(rng: np.random.Generator, N: int) -> AoGInputs:
             row = rng.random(D) < p
             free[i, j] = row
             free[j, i, AXES_NEG] = row  # antisymmetry, as the real matrix
-    stander_options, stander_holds, nut_links = {}, {}, {}
+    standard_options, standard_holds, nut_links = {}, {}, {}
     for s in range(n, N):
         n_opts = 2 if rng.random() < 0.3 else 1
         opts = []
@@ -185,9 +185,9 @@ def random_inputs(rng: np.random.Generator, N: int) -> AoGInputs:
             d = AXES[rng.integers(D)] if rng.random() < 0.5 else rng.normal(size=3)
             blockers = {int(j) for j in range(N) if j != s and rng.random() < 0.25}
             opts.append((d, blockers))
-        stander_options[s] = opts
+        standard_options[s] = opts
         if rng.random() < 0.3:
-            stander_holds[s] = {int(j) for j in range(n) if rng.random() < 0.3}
+            standard_holds[s] = {int(j) for j in range(n) if rng.random() < 0.3}
         if n_opts == 1 and rng.random() < 0.4:
             candidates = [c for c in range(N) if c != s]
             if candidates:
@@ -196,16 +196,16 @@ def random_inputs(rng: np.random.Generator, N: int) -> AoGInputs:
     if rng.random() < 0.75:
         q = rng.uniform(0.15, 0.7)
         contact = np.triu(rng.random((N, N)) < q, 1)
-        contact[n:, n:] = False  # no stander-stander contacts, as in Preprocessing
+        contact[n:, n:] = False  # no standard-standard contacts, as in Preprocessing
         contact |= contact.T
     group = None
-    if rng.random() < 0.6:  # a few random groups of 2-3 parts (movable and standers mixed)
+    if rng.random() < 0.6:  # a few random groups of 2-3 parts (movable and standards mixed)
         names = [None] * N
         for g in range(int(rng.integers(1, 3))):
             for c in rng.choice(N, size=min(N, int(rng.integers(2, 4))), replace=False):
                 names[int(c)] = f"g{g}"
         group = names
-    return make_inputs(free, stander_options=stander_options, stander_holds=stander_holds,
+    return make_inputs(free, standard_options=standard_options, standard_holds=standard_holds,
                       nut_links=nut_links, contact=contact, group=group)
 
 
@@ -230,25 +230,25 @@ def fastener_inputs_from_cache() -> AoGInputs:
     ids = meta["component_ids"]
     n = len(ids)
     index = {c: i for i, c in enumerate(ids)}
-    stander_ids = sorted(report["stander_records"])
-    index_all = {c: i for i, c in enumerate(ids + stander_ids)}
-    stander_options, stander_holds, nut_links = {}, {}, {}
+    standard_ids = sorted(report["standard_records"])
+    index_all = {c: i for i, c in enumerate(ids + standard_ids)}
+    standard_options, standard_holds, nut_links = {}, {}, {}
     lo, hi = [[0, 0, 0]] * n, [[0, 0, 0]] * n
-    N = n + len(stander_ids)
+    N = n + len(standard_ids)
     contact = np.zeros((N, N), dtype=bool)
     contact[:n, :n] = movable_contact
-    for b, sid in enumerate(stander_ids, start=n):
-        rec = report["stander_records"][sid]
-        stander_options[b] = [(opt["direction"], {index_all[m] for m in opt["blockers"]}) for opt in rec["options"]]
-        stander_holds[b] = {index[m] for m in rec["holds"]}
+    for b, sid in enumerate(standard_ids, start=n):
+        rec = report["standard_records"][sid]
+        standard_options[b] = [(opt["direction"], {index_all[m] for m in opt["blockers"]}) for opt in rec["options"]]
+        standard_holds[b] = {index[m] for m in rec["holds"]}
         if rec["nut_rule"] is not None and rec["partner"] is not None and rec["partner"] in index_all:
             nut_links[b] = (index_all[rec["partner"]], rec["nut_rule"])
         lo, hi = lo + [rec["bbox"][0]], hi + [rec["bbox"][1]]
         for g in rec["contact_neighbors"]:
             contact[b, index[g]] = contact[index[g], b] = True
-    labels = meta["component_labels"] + [FASTENER_STANDER_LABELS.get(s, s) for s in stander_ids]
-    inputs = make_inputs(free, dirs, neg, stander_options, stander_holds, nut_links, lo, hi,
-                         box=report["assembly_bbox"], ids=ids + stander_ids, key=meta["cache_key"],
+    labels = meta["component_labels"] + [FASTENER_STANDARD_LABELS.get(s, s) for s in standard_ids]
+    inputs = make_inputs(free, dirs, neg, standard_options, standard_holds, nut_links, lo, hi,
+                         box=report["assembly_bbox"], ids=ids + standard_ids, key=meta["cache_key"],
                          contact=contact, group=ag.read_bom_groups(FASTENER_BOM, labels))
     inputs.component_labels = labels
     return inputs
@@ -277,12 +277,12 @@ def _free_directions(free, directions, i, subset):
 def brute_force(inputs: AoGInputs):
     """(node set, edge set) with edges as (src_mask, comp, dst_mask, frozenset(direction indices)).
 
-    Independent reference for the stander model: blocker masks per
-    stander option (plus nut_links folded into them / into movable `extra`), holds checked on
+    Independent reference for the standard model: blocker masks per
+    standard option (plus nut_links folded into them / into movable `extra`), holds checked on
     the resulting state T, not derived from `generate_aog`'s own mask code.
     """
     N, n = len(inputs.component_ids), inputs.n_movable
-    dirs, _, kd = ag.extend_directions(inputs.directions, inputs.neg, inputs.stander_options)
+    dirs, _, kd = ag.extend_directions(inputs.directions, inputs.neg, inputs.standard_options)
 
     def members(mask):
         return [c for c in range(N) if (mask >> c) & 1]
@@ -302,10 +302,10 @@ def brute_force(inputs: AoGInputs):
                     stack.append(b)
         return len(seen) == len(comps)
 
-    # Fold nut_links into blocker sets / movable extra, exactly as the stander model defines them
+    # Fold nut_links into blocker sets / movable extra, exactly as the standard model defines them
     # (independently of generate_aog's own numpy mask code).
-    blockers = {s: [set(b) for _d, b in inputs.stander_options[s]] for s in range(n, N)}
-    holds = {s: set(inputs.stander_holds.get(s, ())) for s in range(n, N)}
+    blockers = {s: [set(b) for _d, b in inputs.standard_options[s]] for s in range(n, N)}
+    holds = {s: set(inputs.standard_holds.get(s, ())) for s in range(n, N)}
     extra = {i: set() for i in range(n)}
     for nut, (partner, rule) in inputs.nut_links.items():
         if rule == "locked":
@@ -453,7 +453,7 @@ def test_a1(rec, args):
     Tests: `generate_aog` (states, edges and the free direction set of every edge).
     What: compares nodes and edges with `brute_force`, an independent naive implementation of the same
     rules, on the real industrial_fastner inputs and on 200 random synthetic cases (N up to 12, random
-    stander gates, holds, nut links, contacts and groups).
+    standard gates, holds, nut links, contacts and groups).
     """
     inputs, aog = fastener_cached()
     nodes, edges = brute_force(inputs)
@@ -561,7 +561,7 @@ def test_a2b(rec, args):
 
 
 def _a3_run():
-    # p (0), q (1) movable, free everywhere, touching each other; stander s (2) is a screw with
+    # p (0), q (1) movable, free everywhere, touching each other; standard s (2) is a screw with
     # hold {p} (must stay present while s leaves) and touches both p and q (contact_neighbors,
     # connectivity only, P10 -- not a gate any more: q must NOT be required present, unlike the
     # old "prerequisites+contacts" gate mode). s also touching q (not just p) keeps {p, s}
@@ -575,7 +575,7 @@ def _a3_run():
     opt = SimpleNamespace(direction=(0, 0, 1), exit_point=(0, 0, 1), blockers=set())
     rec_s = SimpleNamespace(category=1, options=[opt], holds={"p"}, contact_neighbors={"p", "q"},
                             bbox=((0, 0, 0), (1, 1, 1)), partner=None, nut_rule=None)
-    prep = SimpleNamespace(reduced_assembly=reduced, stander_records={"s": rec_s},
+    prep = SimpleNamespace(reduced_assembly=reduced, standard_records={"s": rec_s},
                            assembly_bbox=((0, 0, 0), (1, 1, 1)), step_path=None)
     config = AoGConfig()
     inputs = ag.collect_inputs(ir, prep, config)
@@ -583,14 +583,14 @@ def _a3_run():
 
 
 def test_a3(rec, args):
-    """A3 - Stander holds are gates, contact neighbours are not (rule P10).
+    """A3 - Standard holds are gates, contact neighbours are not (rule P10).
 
-    Tests: `collect_inputs` (turning a stander record into holds) and the hold rule in `generate_aog`.
+    Tests: `collect_inputs` (turning a standard record into holds) and the hold rule in `generate_aog`.
     What: a screw s holds p and also touches p and q. Only p must appear in s's holds; p cannot leave while s
     is present, q can; no state contains s without p.
     """
     inputs, aog = _a3_run()
-    rec.check(inputs.stander_holds == {2: {0}}, f"holds of s = {inputs.stander_holds[2]} (only p, not q)")
+    rec.check(inputs.standard_holds == {2: {0}}, f"holds of s = {inputs.standard_holds[2]} (only p, not q)")
     root_comps = {int(aog.edge_comp[e]) for e in aog.out_edges(aog.root)}
     rec.check(2 in root_comps, "s removable at the root")
     rec.check(0 not in root_comps, "p (a hold) not removable while s present")
@@ -688,31 +688,31 @@ def test_a6(rec, args):
 
 
 def test_a7(rec, args):
-    """A7 - Stander directions extend the direction table consistently.
+    """A7 - Standard directions extend the direction table consistently.
 
-    Tests: `extend_directions` (the AoG direction table with the stander removal directions added).
-    What: a stander direction equal to a candidate reuses its index; a new one appends d and -d (and -d is then
+    Tests: `extend_directions` (the AoG direction table with the standard removal directions added).
+    What: a standard direction equal to a candidate reuses its index; a new one appends d and -d (and -d is then
     reused); `dirs[neg[k]] == -dirs[k]` always; on industrial_fastner no direction is added; movable parts
     never use the appended directions.
     """
     diag = np.array([1, 1, 0]) / np.sqrt(2)
-    stander_opts = {6: [(AXES[4] + 1e-9, set())], 7: [(diag, set())], 8: [(-diag, set())]}
-    dirs, neg, kd = ag.extend_directions(AXES, AXES_NEG, stander_opts)
-    rec.check(kd[6] == [4], f"stander direction equal to a candidate reuses its index (got {kd[6]})")
+    standard_opts = {6: [(AXES[4] + 1e-9, set())], 7: [(diag, set())], 8: [(-diag, set())]}
+    dirs, neg, kd = ag.extend_directions(AXES, AXES_NEG, standard_opts)
+    rec.check(kd[6] == [4], f"standard direction equal to a candidate reuses its index (got {kd[6]})")
     rec.check(len(dirs) == 8 and kd[7] == [6] and kd[8] == [7],
               f"new direction appends d and -d, and -d is then reused (D'={len(dirs)}, kd={kd})")
     rec.check(np.allclose(dirs[neg], -dirs), "dirs[neg[k]] == -dirs[k] for all k")
     _, aog = fastener_cached()
     rec.check(len(aog.directions) == len(fastener_cached()[0].directions) and np.allclose(aog.directions[aog.neg], -aog.directions),
-              f"industrial_fastner: stander directions all reuse candidates (D'={len(aog.directions)})")
-    # A stander with a direction that is not a candidate: movable parts never use the new index.
+              f"industrial_fastner: standard directions all reuse candidates (D'={len(aog.directions)})")
+    # A standard with a direction that is not a candidate: movable parts never use the new index.
     free = np.ones((2, 2, 6), dtype=bool)
-    aog = ag.generate_aog(make_inputs(free, stander_options={2: diag}))
+    aog = ag.generate_aog(make_inputs(free, standard_options={2: diag}))
     new_bits = np.uint64((1 << 6) | (1 << 7))
     movable_edges = aog.edge_comp < 2
     rec.check(not np.any(aog.edge_dirs[movable_edges, 0] & new_bits)
               and np.all(aog.edge_dirs[~movable_edges, 0] == np.uint64(1 << 6)),
-              "appended directions used only by the stander")
+              "appended directions used only by the standard")
 
 
 def test_a8(rec, args):
@@ -770,7 +770,7 @@ def test_a9(rec, args):
 
     Tests: `save_aog`, `load_aog`, `export_csv_dot` and `compute_cache_key`.
     What: save then load gives identical arrays and metadata, a different key returns None, the CSV/DOT
-    exports exist; changing any input that affects the graph (stander option blockers or direction, holds,
+    exports exist; changing any input that affects the graph (standard option blockers or direction, holds,
     nut rule, margin, BOM groups, group_one_order) changes the key, identical inputs keep it.
     """
     inputs, aog = fastener_cached()
@@ -788,16 +788,16 @@ def test_a9(rec, args):
     s0 = inputs.n_movable  # the nut (Part__Feature003): has a non-trivial nut_links entry to mutate
     variants = {}
     v = fastener_inputs_from_cache()
-    d0, blockers0 = v.stander_options[s0][0]
-    v.stander_options[s0][0] = (d0, blockers0 | {0})
-    variants["stander option blockers"] = ag.compute_cache_key(v, AoGConfig())
+    d0, blockers0 = v.standard_options[s0][0]
+    v.standard_options[s0][0] = (d0, blockers0 | {0})
+    variants["standard option blockers"] = ag.compute_cache_key(v, AoGConfig())
     v = fastener_inputs_from_cache()
-    d0, blockers0 = v.stander_options[s0][0]
-    v.stander_options[s0][0] = (-np.asarray(d0, dtype=float), blockers0)
-    variants["stander option direction"] = ag.compute_cache_key(v, AoGConfig())
+    d0, blockers0 = v.standard_options[s0][0]
+    v.standard_options[s0][0] = (-np.asarray(d0, dtype=float), blockers0)
+    variants["standard option direction"] = ag.compute_cache_key(v, AoGConfig())
     v = fastener_inputs_from_cache()
-    v.stander_holds[s0] = v.stander_holds[s0] | {0}
-    variants["stander holds"] = ag.compute_cache_key(v, AoGConfig())
+    v.standard_holds[s0] = v.standard_holds[s0] | {0}
+    variants["standard holds"] = ag.compute_cache_key(v, AoGConfig())
     v = fastener_inputs_from_cache()
     partner, rule = v.nut_links[s0]
     v.nut_links[s0] = (partner, "free" if rule == "locked" else "locked")
@@ -832,15 +832,15 @@ def test_a10(rec, args):
     What: 100 random root-to-terminal paths on industrial_fastner and on random graphs are replayed
     step by step against the original rules (component present, directions equal the free set, holds kept,
     free nuts leave before their partner); the assembly sequence must use `neg` of the removal directions
-    and place standers after their holds.
+    and place standards after their holds.
     """
     rng = np.random.default_rng(99)
     cases = [("industrial_fastner", *fastener_cached())]
     while len(cases) < 4:
         inputs = random_inputs(rng, 9)
         aog = ag.generate_aog(inputs)
-        if aog.complete and inputs.stander_options:
-            cases.append((f"random N=9 ({len(inputs.stander_options)} standers)", inputs, aog))
+        if aog.complete and inputs.standard_options:
+            cases.append((f"random N=9 ({len(inputs.standard_options)} standards)", inputs, aog))
     for name, inputs, aog in cases:
         if not aog.complete:
             rec.check(False, f"{name}: graph incomplete, no root->terminal path")
@@ -863,7 +863,7 @@ def test_a10(rec, args):
                     ok &= not (free_blockers_of[c] & present)
                 present.discard(c)
                 ok &= all(
-                    s not in present or not inputs.stander_holds.get(s) or inputs.stander_holds[s] <= present
+                    s not in present or not inputs.standard_holds.get(s) or inputs.standard_holds[s] <= present
                     for s in range(n, N))
                 bad_replay += not ok
             bad_replay += bool(present)
@@ -874,13 +874,13 @@ def test_a10(rec, args):
                 ok = step["direction_indices"] == [int(aog.neg[k]) for k in rem]
                 ok &= np.allclose(step["directions"], -np.asarray(step["removal_directions"]))
                 if c >= n:
-                    ok &= inputs.stander_holds.get(c, set()) <= placed
+                    ok &= inputs.standard_holds.get(c, set()) <= placed
                 placed.add(c)
                 bad_assembly += not ok
         rec.check(bad_replay == 0 and bad_assembly == 0,
                   f"{name}: 100 sampled paths replay as valid removal orders ({bad_replay} bad steps, holds "
                   f"and free-nut/movable-partner order checked); assembly sequence uses neg and places "
-                  f"standers after their holds ({bad_assembly} bad steps)")
+                  f"standards after their holds ({bad_assembly} bad steps)")
 
 
 def test_a11(rec, args):
@@ -943,16 +943,16 @@ def test_a12(rec, args):
     P, X, Y = 0, 1, 2
     aog = ag.generate_aog(make_inputs(free, ids=["P", "X", "Y"], contact=contact_from_pairs(3, [(P, X), (P, Y)])))
     rec.check(0b110 not in {int(m) for m in aog.node_mask}, "plate P with X, Y: state {X, Y} dropped")
-    # Two parts touching only through a stander s (bolt), s holding both A and B present: removing
+    # Two parts touching only through a standard s (bolt), s holding both A and B present: removing
     # A or B first breaks s's holds (invalid T); removing s first leaves {A, B} disconnected (D11,
     # since they only ever touched through s) -- every first move is blocked, root is a dead end.
     free2 = np.ones((2, 2, 6), dtype=bool)
     bridge = contact_from_pairs(3, [(0, 2), (1, 2)])
     with LogCapture() as cap:
-        aog = ag.generate_aog(make_inputs(free2, stander_options={2: AXES[4]}, stander_holds={2: {0, 1}},
+        aog = ag.generate_aog(make_inputs(free2, standard_options={2: AXES[4]}, standard_holds={2: {0, 1}},
                                           contact=bridge, ids=["A", "B", "s"]))
     rec.check(aog.n_nodes == 1 and list(aog.dead_ends) == [0] and not aog.complete,
-              f"A, B held only by stander s (holds {{A, B}}): root is a dead end (V={aog.n_nodes})")
+              f"A, B held only by standard s (holds {{A, B}}): root is a dead end (V={aog.n_nodes})")
     rec.check(any("dead-end" in r.getMessage() for r in cap.records), "dead end reported, not resolved")
     # Full assembly not connected: warning, no mixed state reachable.
     with LogCapture() as cap:

@@ -62,13 +62,13 @@ class RobotConfig:
     engine_mode: str = "worker"  # str. "worker" (function copy, long-lived; recommended) or "script" (slow fallback runner).
     engine_seed: int = 1  # int. open3d RANSAC seed, set before every call.
 
-    # Tool check (interface rule of 2026-11-12). Stander category -> tool STEP file in
+    # Tool check (interface rule of 2026-11-12). Standard category -> tool STEP file in
     # tool_dir; None = no tool (the step is reported unchecked and treated as feasible, the stub behaviour).
     tool_dir: str = str(REPO_ROOT / "tools" / "gripper")  # str. Folder of the tool STEP files.
     # dict category -> file name or None. 1 = screw, 2 = nut, 3 = other (bushing).
     tools: dict = field(default_factory=lambda: {1: "screwing_effector.step", 2: "nut_effector.stp",
                                                  3: "bushing_effector.stp"})
-    # Stander category -> fraction of the stander's extent along its removal axis that sits inside the tool,
+    # Standard category -> fraction of the standard's extent along its removal axis that sits inside the tool,
     # past the tool's interface plane (decided 2026-11-12: screws 0 = touching, nuts and bushings half).
     tool_overlap_fraction: dict = field(default_factory=lambda: {1: 0.0, 2: 0.5, 3: 0.5})
     tool_contact_volume_tol: float = 1e-3  # float, mm^3. A common volume above this is a contact (collision).

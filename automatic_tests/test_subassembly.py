@@ -1,6 +1,6 @@
 """Acceptance tests for sub-assemblies: Phase 1 (H1-H13, user-defined containers) and
 Phase 2 (R2-R8, automatic sub-assemblies auto_<n> and locked levels). Modules under test: src/hierarchy.py (tree -> containers,
-"processed" / "is_stander" BOM columns, size guard), src/levels.py (per-level orchestration, fusing, merge loop, locked levels),
+"processed" / "is_standard" BOM columns, size guard), src/levels.py (per-level orchestration, fusing, merge loop, locked levels),
 src/main.py build_plan (plan.json), and merge_groups / sub_interference in src/interference_identification.py.
 
 Standalone runner (pytest is not installed in environmentAAP). From repo root:
@@ -238,7 +238,7 @@ def stub_pipeline(hier):
 
     def fake_optimize_sequence(aog, interf, prep, config=None, cache_dir=None):
         calls.append(prep.level_id)
-        steps = [{"component_id": c, "is_stander": False} for c in prep.leaf_ids + prep.child_ids]
+        steps = [{"component_id": c, "is_standard": False} for c in prep.leaf_ids + prep.child_ids]
         return SimpleNamespace(steps=steps, total_cost=1.0)
 
     def fake_generate_illustrations(*a, **k):
@@ -369,45 +369,45 @@ def test_h4b(rec, args):
 
 
 def test_h4c(rec, args):
-    """A container CAN be a stander (added 2026-11-11, for
-    lunar_motor_tire_complete's motor sub-assembly): is_stander=true forces processed=false (blank
-    defaults to false here, not true); is_stander=true with an explicit processed=true is a
-    ValueError (a stander subassembly is fused as one rigid component, it cannot also be
-    recursively processed as its own level); is_stander=true on the root is also a ValueError."""
-    hier = build_hierarchy(nested_tree(), bom_rows=[{"label": "ContainerX", "is_stander": "true"}], is_leaf=leaf_is)
+    """A container CAN be a standard (added 2026-11-11, for
+    lunar_motor_tire_complete's motor sub-assembly): is_standard=true forces processed=false (blank
+    defaults to false here, not true); is_standard=true with an explicit processed=true is a
+    ValueError (a standard subassembly is fused as one rigid component, it cannot also be
+    recursively processed as its own level); is_standard=true on the root is also a ValueError."""
+    hier = build_hierarchy(nested_tree(), bom_rows=[{"label": "ContainerX", "is_standard": "true"}], is_leaf=leaf_is)
     rec.check(hier.containers["containerX"].processed is False,
-              "is_stander=true with 'processed' blank defaults processed to false")
+              "is_standard=true with 'processed' blank defaults processed to false")
 
     hier = build_hierarchy(nested_tree(),
-                           bom_rows=[{"label": "ContainerX", "is_stander": "true", "processed": "false"}],
+                           bom_rows=[{"label": "ContainerX", "is_standard": "true", "processed": "false"}],
                            is_leaf=leaf_is)
     rec.check(hier.containers["containerX"].processed is False,
-              "is_stander=true with an explicit processed=false does not raise")
+              "is_standard=true with an explicit processed=false does not raise")
 
     try:
         build_hierarchy(nested_tree(),
-                        bom_rows=[{"label": "ContainerX", "is_stander": "true", "processed": "true"}],
+                        bom_rows=[{"label": "ContainerX", "is_standard": "true", "processed": "true"}],
                         is_leaf=leaf_is)
-        rec.check(False, "is_stander=true with an explicit processed=true raises")
+        rec.check(False, "is_standard=true with an explicit processed=true raises")
     except ValueError as exc:
-        rec.check("ContainerX" in str(exc) and "is_stander" in str(exc) and "processed" in str(exc),
-                  f"is_stander=true + processed=true raises and names the row ({exc})")
+        rec.check("ContainerX" in str(exc) and "is_standard" in str(exc) and "processed" in str(exc),
+                  f"is_standard=true + processed=true raises and names the row ({exc})")
 
     try:
-        build_hierarchy(nested_tree(), bom_rows=[{"label": "Assembly", "is_stander": "true"}], is_leaf=leaf_is)
-        rec.check(False, "is_stander=true on the root raises")
+        build_hierarchy(nested_tree(), bom_rows=[{"label": "Assembly", "is_standard": "true"}], is_leaf=leaf_is)
+        rec.check(False, "is_standard=true on the root raises")
     except ValueError as exc:
-        rec.check("Assembly" in str(exc) and "is_stander" in str(exc),
-                  f"is_stander=true on the root raises and names it ({exc})")
+        rec.check("Assembly" in str(exc) and "is_standard" in str(exc),
+                  f"is_standard=true on the root raises and names it ({exc})")
 
-    build_hierarchy(nested_tree(), bom_rows=[{"label": "ContainerX", "is_stander": "false"}], is_leaf=leaf_is)
-    rec.check(True, "is_stander=false on a container row does not raise")
+    build_hierarchy(nested_tree(), bom_rows=[{"label": "ContainerX", "is_standard": "false"}], is_leaf=leaf_is)
+    rec.check(True, "is_standard=false on a container row does not raise")
 
-    build_hierarchy(nested_tree(), bom_rows=[{"label": "ContainerX", "is_stander": ""}], is_leaf=leaf_is)
-    rec.check(True, "blank is_stander on a container row does not raise")
+    build_hierarchy(nested_tree(), bom_rows=[{"label": "ContainerX", "is_standard": ""}], is_leaf=leaf_is)
+    rec.check(True, "blank is_standard on a container row does not raise")
 
-    build_hierarchy(nested_tree(), bom_rows=[{"label": "LeafA", "is_stander": "true"}], is_leaf=leaf_is)
-    rec.check(True, "is_stander=true on a leaf row is unaffected (unchanged leaf-stander path)")
+    build_hierarchy(nested_tree(), bom_rows=[{"label": "LeafA", "is_standard": "true"}], is_leaf=leaf_is)
+    rec.check(True, "is_standard=true on a leaf row is unaffected (unchanged leaf-standard path)")
 
 
 def test_h5(rec, args):
@@ -734,17 +734,17 @@ def test_h3(rec, args):
 
 
 def test_h7(rec, args):
-    """Passes bom_categories (reconciled 2026-11-15): without it every stander on lunar_bodylager
+    """Passes bom_categories (reconciled 2026-11-15): without it every standard on lunar_bodylager
     counts as category 3 ("other") instead of its real screw/nut category, which is both unfaithful
     to the real pipeline (main.py always passes it) and much slower (~11 min vs. faster with real
     categories, since screw/nut get a single-direction P4 probe instead of category 3's blocker
     sweep in both directions)."""
-    from preprocessing import run_preprocessing_on_document, load_bom, load_stander_categories
+    from preprocessing import run_preprocessing_on_document, load_bom, load_standard_categories
     from levels import build_level_document
 
     doc, hier = lunar_doc_and_hierarchy()
     bom_labels = load_bom(LUNAR_BOM)
-    bom_categories = load_stander_categories(LUNAR_BOM)
+    bom_categories = load_standard_categories(LUNAR_BOM)
     root = hier.containers[hier.root]
     child_id = next(c for c in root.child_ids if hier.containers[c].processed)
     child = hier.containers[child_id]
@@ -785,13 +785,13 @@ def test_h11(rec, args):
     synthetic scene cannot reach "empty" either, for the same reason, so that check is dropped
     rather than kept failing on an unreachable code path (docs say so; the code is unchanged in the
     closed implementation phase). Also passes bom_categories now, for the same reason as H7 (real
-    screw/nut categories instead of every stander counting as category 3)."""
-    from preprocessing import PreprocessingConfig, load_bom, load_stander_categories, run_preprocessing_on_document
+    screw/nut categories instead of every standard counting as category 3)."""
+    from preprocessing import PreprocessingConfig, load_bom, load_standard_categories, run_preprocessing_on_document
     from levels import build_level_document
 
     doc, hier = lunar_doc_and_hierarchy()
     bom_labels = load_bom(LUNAR_BOM)
-    bom_categories = load_stander_categories(LUNAR_BOM)
+    bom_categories = load_standard_categories(LUNAR_BOM)
     doc_L, compound_ids, members = build_level_document(hier, hier.root, doc, fresh_dir("h11"))
 
     with LogCapture("aap.preprocessing") as cap:
@@ -843,8 +843,8 @@ def test_h10(rec, args):
     ir = identify_interferences(prep, CollisionConfig(step=2.0), scratch / "interference")
     aog = ag_mod.build_aog(ir, prep, cache_dir=scratch / "aog")
 
-    non_standers = [c for c in range(aog.n_components) if not aog.is_stander[c]]
-    target = aog.component_labels[non_standers[0]]
+    non_standards = [c for c in range(aog.n_components) if not aog.is_standard[c]]
+    target = aog.component_labels[non_standards[0]]
 
     with open(FASTENER_BOM, newline="", encoding="utf-8-sig") as f:
         reader = csv_mod.DictReader(f)
@@ -872,9 +872,9 @@ def test_h10(rec, args):
     for name, bom_path in [("blank group field", blank_bom), ("missing row", missing_bom)]:
         prep2 = replace(prep, bom_path=bom_path)
         tables = op_mod.collect_tables(aog, ir, prep2, on, scratch / f"opt_{bom_path.stem}")
-        rec.check(tables.group[non_standers[0]] == target,
+        rec.check(tables.group[non_standards[0]] == target,
                   f"{name}: collect_tables defaults {target!r}'s group to its own label "
-                  f"(got {tables.group[non_standers[0]]!r})")
+                  f"(got {tables.group[non_standards[0]]!r})")
         try:
             op_mod.CostModel(aog, tables, on)
             rec.check(True, f"{name}: use_grouping=True now succeeds (no raise) with the defaulted group")
@@ -945,11 +945,13 @@ def test_h12(rec, args):
     key_old = compute_cache_key(old, old_ids, old_shapes, old_dirs, CollisionConfig())
     key_new = compute_cache_key(new, new_ids, new_shapes, new_dirs, CollisionConfig())
     rec.check(key_old == key_new, f"same interference cache_key ({key_old == key_new})")
-    rec.check(old.stander_records.keys() == new.stander_records.keys(), "same stander ids")
+    rec.check(old.standard_records.keys() == new.standard_records.keys(), "same standard ids")
 
     # The actual regression risk: going through build_hierarchy + build_level_document (the real
-    # nested-aware entry point for the root level) must reproduce the *committed* cache (h=2.0), so
-    # an existing cache from before this feature still hits.
+    # nested-aware entry point for the root level) must reproduce the *committed* cache (generated
+    # by `main.py ... --step 5`, i.e. CollisionConfig(step=5.0, gap_skip=False) -- compute_cache_key
+    # hashes via json.dumps, so the float from argparse's `type=float` is not interchangeable with a
+    # plain int 5 here), so an existing cache from before this feature still hits.
     cached_key = json.loads(
         (REPO_ROOT / "output" / "industrial_fastner" / "interference" / "interference.json")
         .read_text(encoding="utf-8")
@@ -962,7 +964,8 @@ def test_h12(rec, args):
     )
     ld_ids, ld_labels, ld_shapes = _components(via_level_doc.reduced_assembly)
     ld_dirs, ld_neg = _directions(via_level_doc.candidate_directions)
-    key_via_level_doc = compute_cache_key(via_level_doc, ld_ids, ld_shapes, ld_dirs, CollisionConfig(step=2.0))
+    key_via_level_doc = compute_cache_key(via_level_doc, ld_ids, ld_shapes, ld_dirs,
+                                          CollisionConfig(step=5.0, gap_skip=False))
     rec.check(key_via_level_doc == cached_key,
               f"build_level_document on the root level reproduces the committed cache_key "
               f"({key_via_level_doc == cached_key})")
@@ -1105,8 +1108,8 @@ def test_r8(rec, args):
 def test_r2(rec, args):
     """industrial_fastner's AoG is complete with no dead end at all (reconciled 2026-11-15): the
     {part3, part6, part7} dead end this test used to check for is obsolete -- since the three-class
-    stander model (2026-11-04), the old gate = prerequisites | contact_neighbors is gone and every
-    stander's gate is derived from per-option blocker masks instead, so the AoG is now complete on
+    standard model (2026-11-04), the old gate = prerequisites | contact_neighbors is gone and every
+    standard's gate is derived from per-option blocker masks instead, so the AoG is now complete on
     its own (V=61, E=141). Phase 2 therefore has nothing to merge here; confirmed directly against
     the real cached pipeline objects (never writes to output/industrial_fastner/). Rule-induced
     classification itself is covered by the synthetic R5."""
@@ -1162,14 +1165,14 @@ def test_r3(rec, args):
     )
     inputs = AoGInputs(
         component_ids=ids, component_labels=ids, n_movable=3, free=free, directions=np.zeros((D, 3)),
-        neg=neg, stander_options={}, stander_holds={}, nut_links={}, bbox_lo=np.zeros((3, 3)), bbox_hi=np.ones((3, 3)),
+        neg=neg, standard_options={}, standard_holds={}, nut_links={}, bbox_lo=np.zeros((3, 3)), bbox_hi=np.ones((3, 3)),
         assembly_lo=np.zeros(3), assembly_hi=np.ones(3), cache_key="r3-inputs", contact=contact, group=None,
     )
     aog = generate_aog(inputs, AoGConfig())
     rec.check(not aog.complete, f"setup: the fully-entangled 3-part state is genuinely incomplete "
              f"(V={aog.n_nodes}, E={aog.n_edges})")
 
-    prep = PreprocessingResult(reduced_assembly=None, stander_records={}, candidate_directions=[],
+    prep = PreprocessingResult(reduced_assembly=None, standard_records={}, candidate_directions=[],
                                level_id="root", level_label="Assembly")
 
     calls = {"optimize": 0, "illustrate": 0}
@@ -1206,7 +1209,7 @@ def test_r3(rec, args):
 def test_r5(rec, args):
     """D12/D13 interaction (confirmed answer: D12/D13 deadlocks are never merged,
     logged as such): an AoG incomplete solely because a BOM group block cannot be assembled
-    consecutively (D12) classifies rule_induced, exactly like a stander-gate or D11 conflict --
+    consecutively (D12) classifies rule_induced, exactly like a standard-gate or D11 conflict --
     classify_dead_ends never inspects group state at all, so this holds by construction. Confirmed
     on the same "group {A, C} but B must leave between them" case as test_aog.py's A13."""
     from aog_generator import classify_dead_ends, generate_aog
@@ -1338,7 +1341,7 @@ def test_r7(rec, args):
         config=CollisionConfig(), stats={}, cache_key="r7",
         contact=contact, contact_threshold=0.1, gaps=np.zeros((4, 4)),
     )
-    prep = PreprocessingResult(reduced_assembly=doc, stander_records={}, candidate_directions=[],
+    prep = PreprocessingResult(reduced_assembly=doc, standard_records={}, candidate_directions=[],
                                assembly_bbox=(FreeCAD.Vector(0, 0, 0), FreeCAD.Vector(60, 10, 10)),
                                step_path=None, bom_path=None, level_id="child_level", level_label="Child")
 
@@ -1352,7 +1355,7 @@ def test_r7(rec, args):
             component_ids=list(interference_result.component_ids),
             component_labels=list(interference_result.component_labels),
             n_movable=n, free=interference_result.free, directions=interference_result.directions,
-            neg=interference_result.neg, stander_options={}, stander_holds={}, nut_links={},
+            neg=interference_result.neg, standard_options={}, standard_holds={}, nut_links={},
             bbox_lo=np.zeros((n, 3)), bbox_hi=np.ones((n, 3)) * 10,
             assembly_lo=np.zeros(3), assembly_hi=np.array([60.0, 10.0, 10.0]),
             cache_key=interference_result.cache_key, contact=interference_result.contact, group=None,

@@ -6,11 +6,11 @@ run_preprocessing() end to end and dumps everything it produced somewhere
 you can inspect it:
 
   output/industrial_fastner/   (the default; the folder given as third argument otherwise)
-    reduced_assembly.step   the stander-reduced assembly as its own STEP
+    reduced_assembly.step   the standard-reduced assembly as its own STEP
                              file -- open it in FreeCAD/any STEP viewer and
                              confirm part4 (both instances) and part7 are
                              actually gone, nothing else is
-    report.json              per-stander record (category, options[] each with
+    report.json              per-standard record (category, options[] each with
                              direction/exit_point/blockers, holds,
                              contact_neighbors, bbox, partner, nut_rule) plus
                              the full candidate direction list and the
@@ -25,11 +25,11 @@ or point it at a different STEP/BOM pair and output folder:
 
     python manual_tests/test_preprocessing_manual.py path/to.stp path/to/bom.csv tests/out_dir
 
-Expected result: no error; the console lists every stander with its category (screw / nut / other), its removal
+Expected result: no error; the console lists every standard with its category (screw / nut / other), its removal
 option(s) with blockers, holds, number of contact neighbours, partner and nut rule; then the size of the reduced
 assembly, the number of unique candidate directions and the assembly bounding box. reduced_assembly.step contains
-only the movable parts (standers removed) and report.json holds the same numbers as the console. Nothing is
-compared with a reference: you check by eye that the standers found are the ones flagged in the BOM.
+only the movable parts (standards removed) and report.json holds the same numbers as the console. Nothing is
+compared with a reference: you check by eye that the standards found are the ones flagged in the BOM.
 """
 
 from __future__ import annotations
@@ -65,7 +65,7 @@ def _vec(v: FreeCAD.Vector) -> list[float]:
 
 
 def main(step_path: Path, bom_path: Path, out_dir: Path) -> None:
-    """Pipeline: run_preprocessing (STEP + BOM -> standers classified and removed from the assembly, candidate
+    """Pipeline: run_preprocessing (STEP + BOM -> standards classified and removed from the assembly, candidate
     directions, bounding box) -> export the reduced assembly as STEP -> dump report.json -> print a summary."""
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -80,8 +80,8 @@ def main(step_path: Path, bom_path: Path, out_dir: Path) -> None:
     report = {
         "reduced_assembly_component_count": len(reduced_objs),
         "reduced_assembly_components": [obj.Label for obj in reduced_objs],
-        "stander_count": len(result.stander_records),
-        "stander_records": {
+        "standard_count": len(result.standard_records),
+        "standard_records": {
             name: {
                 "category": rec.category,
                 "options": [
@@ -95,7 +95,7 @@ def main(step_path: Path, bom_path: Path, out_dir: Path) -> None:
                 "partner": rec.partner,
                 "nut_rule": rec.nut_rule,
             }
-            for name, rec in result.stander_records.items()
+            for name, rec in result.standard_records.items()
         },
         "candidate_direction_count": len(result.candidate_directions),
         "candidate_directions": [_vec(d) for d in result.candidate_directions],
@@ -107,9 +107,9 @@ def main(step_path: Path, bom_path: Path, out_dir: Path) -> None:
     report_path.write_text(json.dumps(report, indent=2))
 
     # 3. Short console summary.
-    print(f"Standers processed: {len(result.stander_records)}")
+    print(f"Standards processed: {len(result.standard_records)}")
     cat_name = {1: "screw", 2: "nut", 3: "other"}
-    for name, rec in result.stander_records.items():
+    for name, rec in result.standard_records.items():
         bbox_str = f"{_vec(rec.bbox[0])} -> {_vec(rec.bbox[1])}" if rec.bbox else None
         opts_str = "; ".join(f"dir={_vec(opt.direction)} blockers={sorted(opt.blockers)}" for opt in rec.options)
         print(

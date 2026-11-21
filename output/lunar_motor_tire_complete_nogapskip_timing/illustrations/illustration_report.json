@@ -1,0 +1,265 @@
+{
+  "frames": [
+    {
+      "step": 1,
+      "steps": [
+        1
+      ],
+      "component_id": "_0013_A_0300_A01_3",
+      "component_label": "0013-A-0300-A01_3",
+      "component_ids": [
+        "_0013_A_0300_A01_3"
+      ],
+      "component_labels": [
+        "0013-A-0300-A01_3"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\lunar_motor_tire_complete_nogapskip_timing\\illustrations\\step_01_0013-A-0300-A01_3.png",
+      "view": {
+        "azimuth": 75.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.1527761197118063,
+      "in_frame": true,
+      "footnote": [
+        "Step 1 / 5   0013-A-0300-A01_3   Tool: By_hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 2,
+      "steps": [
+        2
+      ],
+      "component_id": "v30013_P_0101_A01_PP_motor_complete",
+      "component_label": "v30013-P-0101-A01-PP-motor-complete038",
+      "component_ids": [
+        "v30013_P_0101_A01_PP_motor_complete"
+      ],
+      "component_labels": [
+        "v30013-P-0101-A01-PP-motor-complete038"
+      ],
+      "group": null,
+      "is_stander": true,
+      "png": "output\\lunar_motor_tire_complete_nogapskip_timing\\illustrations\\step_02_v30013-P-0101-A01-PP-motor-complete038.png",
+      "view": {
+        "azimuth": 75.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.2747598797089503,
+      "in_frame": true,
+      "footnote": [
+        "Step 2 / 5   v30013-P-0101-A01-PP-motor-complete038   Tool: By_hand",
+        "Hold in place"
+      ],
+      "reorient": false,
+      "hold": true,
+      "warnings": []
+    },
+    {
+      "step": 3,
+      "steps": [
+        3
+      ],
+      "component_id": "Part__Feature001",
+      "component_label": "0013-P-0103-A02-AM",
+      "component_ids": [
+        "Part__Feature001"
+      ],
+      "component_labels": [
+        "0013-P-0103-A02-AM"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\lunar_motor_tire_complete_nogapskip_timing\\illustrations\\step_03_0013-P-0103-A02-AM.png",
+      "view": {
+        "azimuth": 75.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.7174603174603175,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.7174603174603175,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.2747598797089221,
+      "in_frame": true,
+      "footnote": [
+        "Step 3 / 5   0013-P-0103-A02-AM   Tool: By_hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 4,
+      "steps": [
+        4
+      ],
+      "component_id": "Part__Feature002",
+      "component_label": "0013-P-0105-A01-PP",
+      "component_ids": [
+        "Part__Feature002"
+      ],
+      "component_labels": [
+        "0013-P-0105-A01-PP"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\lunar_motor_tire_complete_nogapskip_timing\\illustrations\\step_04_0013-P-0105-A01-PP.png",
+      "view": {
+        "azimuth": 75.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.4423076923076923,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.4423076923076923,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.2507391773809882,
+      "in_frame": true,
+      "footnote": [
+        "Step 4 / 5   0013-P-0105-A01-PP   Tool: By_hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 5,
+      "steps": [
+        5
+      ],
+      "component_id": "Part__Feature",
+      "component_label": "0013-P-0102-A02-PP",
+      "component_ids": [
+        "Part__Feature"
+      ],
+      "component_labels": [
+        "0013-P-0102-A02-PP"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\lunar_motor_tire_complete_nogapskip_timing\\illustrations\\step_05_0013-P-0102-A02-PP.png",
+      "view": {
+        "azimuth": 75.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.5801418439716312,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.5801418439716312,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.2581301627126602,
+      "in_frame": true,
+      "footnote": [
+        "Step 5 / 5   0013-P-0102-A02-PP   Tool: By_hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    }
+  ],
+  "manual_path": "output\\lunar_motor_tire_complete_nogapskip_timing\\illustrations\\manual.pdf",
+  "global_view": [
+    75.0,
+    50.0
+  ],
+  "config_hash": "c7966dc6e8512f2876f7ec4757c3809388b2e15ddf54f0def021bd77fbd2ca81",
+  "stats": {
+    "layers_rasterized": 370,
+    "raster_s": 16.853677100501955,
+    "views_evaluated": 73,
+    "view_search_s": 17.550452600000426,
+    "render_s": 8.288027499977034,
+    "total_s": 25.838486200023908
+  },
+  "config": {
+    "image_size": [
+      1600,
+      1200
+    ],
+    "search_size": [
+      480,
+      360
+    ],
+    "dpi": 200,
+    "tess_tolerance_rel": 0.002,
+    "default_view": [
+      -35.0,
+      30.0
+    ],
+    "azimuths": [
+      0,
+      15,
+      30,
+      45,
+      60,
+      75,
+      90,
+      105,
+      120,
+      135,
+      150,
+      165,
+      180,
+      195,
+      210,
+      225,
+      240,
+      255,
+      270,
+      285,
+      300,
+      315,
+      330,
+      345
+    ],
+    "elevations": [
+      20,
+      35,
+      50
+    ],
+    "vis_min_end": 0.35,
+    "vis_min_start": 0.35,
+    "min_trajectory_px_frac": 0.1,
+    "xray_alpha": 0.25,
+    "placed_color": "#bdbdbd",
+    "new_color": "#f28e2b",
+    "stander_color": "#3b75af",
+    "ghost_alpha": 0.35,
+    "show_gravity": true,
+    "mark_unstable": true,
+    "footnote_show_vector": false,
+    "group_frames": true,
+    "title": "0013-A-0100-A01_3_complete",
+    "language": "en"
+  }
+}

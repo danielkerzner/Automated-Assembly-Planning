@@ -1,11 +1,11 @@
 """Generate a starter bom.csv listing every leaf component's Label, plus every subassembly.
 
-Writes `label,is_stander,screw,nut,pitch,tool,group,processed,subassembly` (one row per leaf
+Writes `label,is_standard,screw,nut,pitch,tool,group,processed,subassembly` (one row per leaf
 Part::Feature, same filter Preprocessing uses, plus one row per App::Part subassembly).
-`is_stander`, `screw`, `nut`, `pitch` and `tool` are filled by hand (`screw`/`nut` pick a
-stander's category, rule P1; `pitch` is mm of axial travel per full turn,
+`is_standard`, `screw`, `nut`, `pitch` and `tool` are filled by hand (`screw`/`nut` pick a
+standard's category, rule P1; `pitch` is mm of axial travel per full turn,
 read only for screw/nut rows -- blank means no turn
-count is shown for that stander). See data/industrial_fastner/generated_bom.csv for the columns
+count is shown for that standard). See data/industrial_fastner/generated_bom.csv for the columns
 the pipeline actually reads.
 
 The assembly tree may contain nested subassemblies (App::Part). The very first one (the root
@@ -18,9 +18,9 @@ the Label of its nearest enclosing App::Part (blank at the document root).
 Usage: python extra_functions/generate_bom.py <step_path> <output_csv>
 
 Expected result: for every nested subassembly the script asks `list its parts in the BOM? [y/n]`; at the end it prints
-`Wrote N rows to <output_csv>`. The CSV has one row per leaf part and per subassembly with the defaults is_stander /
+`Wrote N rows to <output_csv>`. The CSV has one row per leaf part and per subassembly with the defaults is_standard /
 screw / nut = False, tool = By_hand, group = the part's own label, and `processed` (true / false) on the subassembly
-rows. Open it and fill in is_stander, screw / nut, pitch, tool and group by hand before using it with the pipeline.
+rows. Open it and fill in is_standard, screw / nut, pitch, tool and group by hand before using it with the pipeline.
 """
 
 import csv
@@ -30,7 +30,7 @@ sys.path.insert(0, "src")
 import freecad  # bootstrap for the conda build
 from preprocessing import load_assembly
 
-FIELDNAMES = ["label", "is_stander", "screw", "nut", "pitch", "tool", "group", "processed", "subassembly"]
+FIELDNAMES = ["label", "is_standard", "screw", "nut", "pitch", "tool", "group", "processed", "subassembly"]
 
 
 def is_leaf_component(obj) -> bool:
@@ -59,7 +59,7 @@ def ask_include_subassembly(obj) -> bool:
 def _row(label: str, subassembly: str, processed: str = "") -> dict[str, str]:
     return {
         "label": label,
-        "is_stander": False,
+        "is_standard": False,
         "screw": False,
         "nut": False,
         "pitch": "",

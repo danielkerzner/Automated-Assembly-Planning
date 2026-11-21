@@ -14,7 +14,7 @@
         "box"
       ],
       "group": null,
-      "is_stander": false,
+      "is_standard": false,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l7\\step_01_box.png",
       "view": {
         "azimuth": -35.0,
@@ -51,14 +51,14 @@
         "inner"
       ],
       "group": null,
-      "is_stander": true,
+      "is_standard": true,
       "png": "C:\\Users\\danie\\Documents\\documentosprincipal\\Master Thesis\\AAP\\automatic_tests\\output\\illustration_test\\l7\\step_02_inner.png",
       "view": {
         "azimuth": -35.0,
         "elevation": 30.0,
         "is_global": true
       },
-      "view_kind": "stander",
+      "view_kind": "standard",
       "visible": false,
       "xray": false,
       "vis_end": 0.0,
@@ -73,7 +73,7 @@
       "reorient": false,
       "hold": false,
       "warnings": [
-        "step 2: stander not fully visible in any main view; drawn without x-ray at az -35.0 el 30.0"
+        "step 2: standard not fully visible in any main view; drawn without x-ray at az -35.0 el 30.0"
       ]
     }
   ],
@@ -82,14 +82,14 @@
     -35.0,
     30.0
   ],
-  "config_hash": "1dbe0b36b4520df495c31b813b83fbc89acd63f4345a2a236efaaa2e990eebee",
+  "config_hash": "3ede08878d8f2a76f5399b8074ea64f7c081983cdb0ebffc198b50554d83dbad",
   "stats": {
     "layers_rasterized": 148,
-    "raster_s": 0.6787708000010753,
+    "raster_s": 0.4130353999644285,
     "views_evaluated": 73,
-    "view_search_s": 0.7680043000000296,
-    "render_s": 0.5610624999999345,
-    "total_s": 1.329073800000515
+    "view_search_s": 0.4579650999949081,
+    "render_s": 0.36351149999245536,
+    "total_s": 0.821482899991679
   },
   "config": {
     "image_size": [
@@ -143,7 +143,7 @@
     "xray_alpha": 0.25,
     "placed_color": "#bdbdbd",
     "new_color": "#f28e2b",
-    "stander_color": "#3b75af",
+    "standard_color": "#3b75af",
     "ghost_alpha": 0.35,
     "show_gravity": true,
     "mark_unstable": true,

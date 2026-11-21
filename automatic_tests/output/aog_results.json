@@ -18,7 +18,7 @@
       "notes": [
         "random cases: V from 1 to 524, 131 non-trivial"
       ],
-      "seconds": 14.178
+      "seconds": 7.455
     },
     "A2": {
       "passed": true,
@@ -33,7 +33,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.372
+      "seconds": 0.157
     },
     "A2b": {
       "passed": true,
@@ -82,7 +82,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.003
+      "seconds": 0.002
     },
     "A4": {
       "passed": true,
@@ -101,7 +101,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.002
+      "seconds": 0.001
     },
     "A5": {
       "passed": true,
@@ -116,11 +116,11 @@
         }
       ],
       "notes": [
-        "N=12: 0.27 s, arrays 0.5 MB, peak traced 1.2 MB",
-        "N=16: 0.57 s, arrays 10.1 MB, peak traced 23.7 MB",
+        "N=12: 0.22 s, arrays 0.5 MB, peak traced 1.2 MB",
+        "N=16: 0.50 s, arrays 10.1 MB, peak traced 23.7 MB",
         "N = 20 skipped (run with --groups scale)"
       ],
-      "seconds": 0.839
+      "seconds": 0.722
     },
     "A6": {
       "passed": true,
@@ -147,13 +147,13 @@
         }
       ],
       "notes": [],
-      "seconds": 0.003
+      "seconds": 0.002
     },
     "A7": {
       "passed": true,
       "checks": [
         {
-          "label": "stander direction equal to a candidate reuses its index (got [4])",
+          "label": "standard direction equal to a candidate reuses its index (got [4])",
           "passed": true
         },
         {
@@ -165,16 +165,16 @@
           "passed": true
         },
         {
-          "label": "industrial_fastner: stander directions all reuse candidates (D'=6)",
+          "label": "industrial_fastner: standard directions all reuse candidates (D'=6)",
           "passed": true
         },
         {
-          "label": "appended directions used only by the stander",
+          "label": "appended directions used only by the standard",
           "passed": true
         }
       ],
       "notes": [],
-      "seconds": 0.003
+      "seconds": 0.002
     },
     "A8": {
       "passed": true,
@@ -241,15 +241,15 @@
           "passed": true
         },
         {
-          "label": "changing the stander option blockers changes cache_key",
+          "label": "changing the standard option blockers changes cache_key",
           "passed": true
         },
         {
-          "label": "changing the stander option direction changes cache_key",
+          "label": "changing the standard option direction changes cache_key",
           "passed": true
         },
         {
-          "label": "changing the stander holds changes cache_key",
+          "label": "changing the standard holds changes cache_key",
           "passed": true
         },
         {
@@ -274,30 +274,30 @@
         }
       ],
       "notes": [],
-      "seconds": 0.07
+      "seconds": 0.054
     },
     "A10": {
       "passed": true,
       "checks": [
         {
-          "label": "industrial_fastner: 100 sampled paths replay as valid removal orders (0 bad steps, holds and free-nut/movable-partner order checked); assembly sequence uses neg and places standers after their holds (0 bad steps)",
+          "label": "industrial_fastner: 100 sampled paths replay as valid removal orders (0 bad steps, holds and free-nut/movable-partner order checked); assembly sequence uses neg and places standards after their holds (0 bad steps)",
           "passed": true
         },
         {
-          "label": "random N=9 (3 standers): 100 sampled paths replay as valid removal orders (0 bad steps, holds and free-nut/movable-partner order checked); assembly sequence uses neg and places standers after their holds (0 bad steps)",
+          "label": "random N=9 (3 standards): 100 sampled paths replay as valid removal orders (0 bad steps, holds and free-nut/movable-partner order checked); assembly sequence uses neg and places standards after their holds (0 bad steps)",
           "passed": true
         },
         {
-          "label": "random N=9 (2 standers): 100 sampled paths replay as valid removal orders (0 bad steps, holds and free-nut/movable-partner order checked); assembly sequence uses neg and places standers after their holds (0 bad steps)",
+          "label": "random N=9 (2 standards): 100 sampled paths replay as valid removal orders (0 bad steps, holds and free-nut/movable-partner order checked); assembly sequence uses neg and places standards after their holds (0 bad steps)",
           "passed": true
         },
         {
-          "label": "random N=9 (1 standers): 100 sampled paths replay as valid removal orders (0 bad steps, holds and free-nut/movable-partner order checked); assembly sequence uses neg and places standers after their holds (0 bad steps)",
+          "label": "random N=9 (1 standards): 100 sampled paths replay as valid removal orders (0 bad steps, holds and free-nut/movable-partner order checked); assembly sequence uses neg and places standards after their holds (0 bad steps)",
           "passed": true
         }
       ],
       "notes": [],
-      "seconds": 0.671
+      "seconds": 0.559
     },
     "A11": {
       "passed": true,
@@ -312,7 +312,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.045
+      "seconds": 0.027
     },
     "A12": {
       "passed": true,
@@ -338,7 +338,7 @@
           "passed": true
         },
         {
-          "label": "A, B held only by stander s (holds {A, B}): root is a dead end (V=1)",
+          "label": "A, B held only by standard s (holds {A, B}): root is a dead end (V=1)",
           "passed": true
         },
         {
@@ -363,7 +363,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.208
+      "seconds": 0.173
     },
     "A13": {
       "passed": true,
@@ -418,7 +418,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.141
+      "seconds": 0.132
     }
   }
 }

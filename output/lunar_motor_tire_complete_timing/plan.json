@@ -1,0 +1,555 @@
+{
+ "assembly": "0013-A-0100-A01_3_complete",
+ "levels_independent": true,
+ "level": {
+  "container_id": "_0013_A_0100_A01_3_complete",
+  "label": "0013-A-0100-A01_3_complete",
+  "status": "complete",
+  "locked_parts": [],
+  "total_cost": 0.07872968931671379,
+  "inseparable_pairs": [],
+  "steps": [
+   {
+    "step": 1,
+    "component": 3,
+    "component_id": "_0013_A_0300_A01_3",
+    "component_label": "0013-A-0300-A01_3",
+    "is_stander": false,
+    "edge": 38,
+    "removal_direction_index": 3,
+    "direction_index": 2,
+    "direction": [
+     0.0,
+     1.0,
+     0.0
+    ],
+    "travel": 82.6824099120467,
+    "start_offset": [
+     0.0,
+     -82.6824099120467,
+     0.0
+    ],
+    "gravity_index": 3,
+    "gravity": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "stability_class": 2,
+    "costs": {
+     "travel": 0.004288101815815187,
+     "size_contacts": 0.04081759374236445,
+     "direction_change": 0.0,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.0,
+     "gravity_change": 0.0
+    },
+    "turns": null,
+    "turns_pitch": null,
+    "turns_note": null,
+    "turns_nut_label": null,
+    "kind": "subassembly",
+    "members": {
+     "leaf_ids": [
+      "Part__Feature003",
+      "Part__Feature004",
+      "Part__Feature005",
+      "Part__Feature006",
+      "Part__Feature007"
+     ],
+     "labels": [
+      "0013-P-0301-A01-PP",
+      "0013-P-0302-A01-PP",
+      "0013-P-0303-A01-PP",
+      "0013-P-0304-A01-PP",
+      "0013-P-0104-A01-AM"
+     ]
+    },
+    "processed": true,
+    "auto": false,
+    "sub_plan": {
+     "container_id": "_0013_A_0300_A01_3",
+     "label": "0013-A-0300-A01_3",
+     "status": "complete",
+     "locked_parts": [],
+     "total_cost": 0.1246612202613227,
+     "inseparable_pairs": [],
+     "steps": [
+      {
+       "step": 1,
+       "component": 1,
+       "component_id": "Part__Feature004",
+       "component_label": "0013-P-0302-A01-PP",
+       "is_stander": false,
+       "edge": 11,
+       "removal_direction_index": 2,
+       "direction_index": 3,
+       "direction": [
+        0.0,
+        -1.0,
+        0.0
+       ],
+       "travel": 82.6824099120467,
+       "start_offset": [
+        0.0,
+        82.6824099120467,
+        0.0
+       ],
+       "gravity_index": 0,
+       "gravity": [
+        1.0,
+        0.0,
+        0.0
+       ],
+       "stability_class": 2,
+       "costs": {
+        "travel": 0.011129573589931564,
+        "size_contacts": 0.08861816242052219,
+        "direction_change": 0.0,
+        "tool_change": 0.0,
+        "grouping": 0.0,
+        "stability": 0.0,
+        "gravity_change": 0.0
+       },
+       "turns": null,
+       "turns_pitch": null,
+       "turns_note": null,
+       "turns_nut_label": null,
+       "kind": "part",
+       "sub_plan": null
+      },
+      {
+       "step": 2,
+       "component": 0,
+       "component_id": "Part__Feature003",
+       "component_label": "0013-P-0301-A01-PP",
+       "is_stander": false,
+       "edge": 6,
+       "removal_direction_index": 2,
+       "direction_index": 3,
+       "direction": [
+        0.0,
+        -1.0,
+        0.0
+       ],
+       "travel": 73.32100463273147,
+       "start_offset": [
+        0.0,
+        73.32100463273147,
+        0.0
+       ],
+       "gravity_index": 0,
+       "gravity": [
+        1.0,
+        0.0,
+        0.0
+       ],
+       "stability_class": 2,
+       "costs": {
+        "travel": 0.00986946942663803,
+        "size_contacts": 0.07053523206835008,
+        "direction_change": 0.0,
+        "tool_change": 0.0,
+        "grouping": 0.0,
+        "stability": 0.0,
+        "gravity_change": 0.0
+       },
+       "turns": null,
+       "turns_pitch": null,
+       "turns_note": null,
+       "turns_nut_label": null,
+       "kind": "part",
+       "sub_plan": null
+      },
+      {
+       "step": 3,
+       "component": 2,
+       "component_id": "Part__Feature005",
+       "component_label": "0013-P-0303-A01-PP",
+       "is_stander": false,
+       "edge": 3,
+       "removal_direction_index": 2,
+       "direction_index": 3,
+       "direction": [
+        0.0,
+        -1.0,
+        0.0
+       ],
+       "travel": 6.5,
+       "start_offset": [
+        0.0,
+        6.5,
+        0.0
+       ],
+       "gravity_index": 3,
+       "gravity": [
+        0.0,
+        -1.0,
+        0.0
+       ],
+       "stability_class": 2,
+       "costs": {
+        "travel": 0.0008749409748882394,
+        "size_contacts": 0.03594719988113254,
+        "direction_change": 0.0,
+        "tool_change": 0.0,
+        "grouping": 0.0,
+        "stability": 0.0,
+        "gravity_change": 0.017857142857142856
+       },
+       "turns": null,
+       "turns_pitch": null,
+       "turns_note": null,
+       "turns_nut_label": null,
+       "kind": "part",
+       "sub_plan": null
+      },
+      {
+       "step": 4,
+       "component": 4,
+       "component_id": "Part__Feature007",
+       "component_label": "0013-P-0104-A01-AM",
+       "is_stander": false,
+       "edge": 2,
+       "removal_direction_index": 3,
+       "direction_index": 2,
+       "direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "travel": 20.327168379752674,
+       "start_offset": [
+        0.0,
+        -20.327168379752674,
+        0.0
+       ],
+       "gravity_index": 2,
+       "gravity": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "stability_class": 2,
+       "costs": {
+        "travel": 0.0027361650029074152,
+        "size_contacts": 0.03460455823863057,
+        "direction_change": 0.00510204081632653,
+        "tool_change": 0.0,
+        "grouping": 0.0,
+        "stability": 0.0,
+        "gravity_change": 0.03571428571428571
+       },
+       "turns": null,
+       "turns_pitch": null,
+       "turns_note": null,
+       "turns_nut_label": null,
+       "kind": "part",
+       "sub_plan": null
+      },
+      {
+       "step": 5,
+       "component": 3,
+       "component_id": "Part__Feature006",
+       "component_label": "0013-P-0304-A01-PP",
+       "is_stander": false,
+       "edge": 0,
+       "removal_direction_index": 3,
+       "direction_index": 2,
+       "direction": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "travel": 9.895642179103682,
+       "start_offset": [
+        0.0,
+        -9.895642179103682,
+        0.0
+       ],
+       "gravity_index": 2,
+       "gravity": [
+        0.0,
+        1.0,
+        0.0
+       ],
+       "stability_class": 1,
+       "costs": {
+        "travel": 0.001332015817743101,
+        "size_contacts": 0.017617620590340662,
+        "direction_change": 0.0,
+        "tool_change": 0.0,
+        "grouping": 0.0,
+        "stability": 0.061224489795918366,
+        "gravity_change": 0.0
+       },
+       "turns": null,
+       "turns_pitch": null,
+       "turns_note": null,
+       "turns_nut_label": null,
+       "kind": "part",
+       "sub_plan": null
+      }
+     ]
+    }
+   },
+   {
+    "step": 2,
+    "component": 4,
+    "component_id": "v30013_P_0101_A01_PP_motor_complete",
+    "component_label": "v30013-P-0101-A01-PP-motor-complete038",
+    "is_stander": true,
+    "edge": 34,
+    "removal_direction_index": 2,
+    "direction_index": 3,
+    "direction": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "travel": 148.7000000021893,
+    "start_offset": [
+     0.0,
+     148.7000000021893,
+     0.0
+    ],
+    "gravity_index": 3,
+    "gravity": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "stability_class": 1,
+    "costs": {
+     "travel": 0.007711927370034277,
+     "size_contacts": 0.022390264730273737,
+     "direction_change": 0.00510204081632653,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.061224489795918366,
+     "gravity_change": 0.0
+    },
+    "turns": null,
+    "turns_pitch": null,
+    "turns_note": null,
+    "turns_nut_label": null,
+    "kind": "stander",
+    "members": {
+     "leaf_ids": [
+      "Part__Feature008",
+      "Part__Feature009",
+      "Part__Feature010",
+      "Part__Feature011",
+      "Part__Feature012",
+      "Part__Feature013",
+      "Part__Feature014",
+      "Part__Feature015",
+      "Part__Feature016",
+      "Part__Feature017",
+      "Part__Feature018",
+      "Part__Feature019",
+      "Part__Feature020",
+      "Part__Feature021",
+      "Part__Feature022",
+      "Part__Feature023",
+      "Part__Feature024",
+      "Part__Feature025",
+      "Part__Feature026",
+      "Part__Feature027",
+      "Part__Feature028",
+      "Part__Feature029",
+      "Part__Feature030",
+      "Part__Feature031",
+      "Part__Feature032",
+      "Part__Feature033",
+      "Part__Feature034",
+      "Part__Feature035",
+      "Part__Feature036",
+      "Part__Feature037",
+      "Part__Feature038",
+      "Part__Feature039",
+      "Part__Feature040",
+      "Part__Feature041",
+      "Part__Feature042",
+      "Part__Feature043",
+      "Part__Feature044",
+      "Part__Feature045"
+     ],
+     "labels": [
+      "v30013-P-0101-A01-PP-motor-complete",
+      "v30013-P-0101-A01-PP-motor-complete001",
+      "v30013-P-0101-A01-PP-motor-complete002",
+      "v30013-P-0101-A01-PP-motor-complete003",
+      "v30013-P-0101-A01-PP-motor-complete004",
+      "v30013-P-0101-A01-PP-motor-complete005",
+      "v30013-P-0101-A01-PP-motor-complete006",
+      "v30013-P-0101-A01-PP-motor-complete007",
+      "v30013-P-0101-A01-PP-motor-complete008",
+      "v30013-P-0101-A01-PP-motor-complete009",
+      "v30013-P-0101-A01-PP-motor-complete010",
+      "v30013-P-0101-A01-PP-motor-complete011",
+      "v30013-P-0101-A01-PP-motor-complete012",
+      "v30013-P-0101-A01-PP-motor-complete013",
+      "v30013-P-0101-A01-PP-motor-complete014",
+      "v30013-P-0101-A01-PP-motor-complete015",
+      "v30013-P-0101-A01-PP-motor-complete016",
+      "v30013-P-0101-A01-PP-motor-complete017",
+      "v30013-P-0101-A01-PP-motor-complete018",
+      "v30013-P-0101-A01-PP-motor-complete019",
+      "v30013-P-0101-A01-PP-motor-complete020",
+      "v30013-P-0101-A01-PP-motor-complete021",
+      "v30013-P-0101-A01-PP-motor-complete022",
+      "v30013-P-0101-A01-PP-motor-complete023",
+      "v30013-P-0101-A01-PP-motor-complete024",
+      "v30013-P-0101-A01-PP-motor-complete025",
+      "v30013-P-0101-A01-PP-motor-complete026",
+      "v30013-P-0101-A01-PP-motor-complete027",
+      "v30013-P-0101-A01-PP-motor-complete028",
+      "v30013-P-0101-A01-PP-motor-complete029",
+      "v30013-P-0101-A01-PP-motor-complete030",
+      "v30013-P-0101-A01-PP-motor-complete031",
+      "v30013-P-0101-A01-PP-motor-complete032",
+      "v30013-P-0101-A01-PP-motor-complete033",
+      "v30013-P-0101-A01-PP-motor-complete034",
+      "v30013-P-0101-A01-PP-motor-complete035",
+      "v30013-P-0101-A01-PP-motor-complete036",
+      "v30013-P-0101-A01-PP-motor-complete037"
+     ]
+    },
+    "processed": false,
+    "auto": false,
+    "sub_plan": null
+   },
+   {
+    "step": 3,
+    "component": 1,
+    "component_id": "Part__Feature001",
+    "component_label": "0013-P-0103-A02-AM",
+    "is_stander": false,
+    "edge": 20,
+    "removal_direction_index": 2,
+    "direction_index": 3,
+    "direction": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "travel": 148.70000000217402,
+    "start_offset": [
+     0.0,
+     148.70000000217402,
+     0.0
+    ],
+    "gravity_index": 3,
+    "gravity": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "stability_class": 2,
+    "costs": {
+     "travel": 0.007711927370033484,
+     "size_contacts": 0.018243286254298552,
+     "direction_change": 0.0,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.0,
+     "gravity_change": 0.0
+    },
+    "turns": null,
+    "turns_pitch": null,
+    "turns_note": null,
+    "turns_nut_label": null,
+    "kind": "part",
+    "sub_plan": null
+   },
+   {
+    "step": 4,
+    "component": 2,
+    "component_id": "Part__Feature002",
+    "component_label": "0013-P-0105-A01-PP",
+    "is_stander": false,
+    "edge": 8,
+    "removal_direction_index": 2,
+    "direction_index": 3,
+    "direction": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "travel": 135.70000000217402,
+    "start_offset": [
+     0.0,
+     135.70000000217402,
+     0.0
+    ],
+    "gravity_index": 3,
+    "gravity": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "stability_class": 2,
+    "costs": {
+     "travel": 0.007037717176294617,
+     "size_contacts": 0.02337726079101455,
+     "direction_change": 0.0,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.0,
+     "gravity_change": 0.0
+    },
+    "turns": null,
+    "turns_pitch": null,
+    "turns_note": null,
+    "turns_nut_label": null,
+    "kind": "part",
+    "sub_plan": null
+   },
+   {
+    "step": 5,
+    "component": 0,
+    "component_id": "Part__Feature",
+    "component_label": "0013-P-0102-A02-PP",
+    "is_stander": false,
+    "edge": 0,
+    "removal_direction_index": 2,
+    "direction_index": 3,
+    "direction": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "travel": 139.70000000217402,
+    "start_offset": [
+     0.0,
+     139.70000000217402,
+     0.0
+    ],
+    "gravity_index": 3,
+    "gravity": [
+     0.0,
+     -1.0,
+     0.0
+    ],
+    "stability_class": 2,
+    "costs": {
+     "travel": 0.0072451664666758064,
+     "size_contacts": 0.013383378977219104,
+     "direction_change": 0.0,
+     "tool_change": 0.0,
+     "grouping": 0.0,
+     "stability": 0.0,
+     "gravity_change": 0.0
+    },
+    "turns": null,
+    "turns_pitch": null,
+    "turns_note": null,
+    "turns_nut_label": null,
+    "kind": "part",
+    "sub_plan": null
+   }
+  ]
+ }
+}

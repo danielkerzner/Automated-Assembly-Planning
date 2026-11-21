@@ -1,0 +1,94 @@
+{
+ "cache_key": "4dc5f743a95d6c5f23932af1c7042cbfcf0e183be7c8973f2f153fb569386db9",
+ "component_ids": [
+  "Part__Feature012",
+  "Part__Feature013"
+ ],
+ "component_labels": [
+  "1603-0032-0032",
+  "1601-0039-00032"
+ ],
+ "pair_info": {
+  "0,1": {
+   "kind": "normal",
+   "V0": 0.0,
+   "threshold": 1e-06
+  }
+ },
+ "exception_cells": [],
+ "caught_exceptions": [],
+ "outcome_detail": {
+  "0,1,0": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 485.4308868761076
+  },
+  "0,1,1": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 485.4308868695678
+  },
+  "0,1,2": {
+   "phase": "step",
+   "iterations": 2,
+   "t_block": null,
+   "volume": 0.0
+  },
+  "0,1,3": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 216.93443412750878
+  },
+  "0,1,4": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 485.4308868702536
+  },
+  "0,1,5": {
+   "phase": "step",
+   "iterations": 1,
+   "t_block": 5.0,
+   "volume": 485.4308868687503
+  }
+ },
+ "config": {
+  "step": 5.0,
+  "volume_epsilon": 1e-06,
+  "overlap_tol": 1.0,
+  "margin": 1.0,
+  "gap_skip": false,
+  "use_broad_phase": true
+ },
+ "contact_threshold": 0.1,
+ "contact_pairs": [
+  [
+   "Part__Feature012",
+   "Part__Feature013"
+  ]
+ ],
+ "stats": {
+  "tests": 6,
+  "broad_phase_settled": 0,
+  "broad_phase_share": 0.0,
+  "stepped_tests": 6,
+  "mean_test_time_s": 0.48297986666633125,
+  "max_test_time_s": 0.8286167000187561,
+  "iterations": 7,
+  "mean_iterations": 1.1666666666666667,
+  "max_iterations": 2,
+  "common_calls": 7,
+  "distToShape_calls": 0,
+  "gap_travel_share": 0.0,
+  "pair_times_s": {
+   "0,1": 2.903958600014448
+  },
+  "matrix_time_s": 2.903958600014448,
+  "total_time_s": 3.845526200020686
+ },
+ "freecad_version": "1.1.0",
+ "date": "2026-11-19T14:06:17"
+}

@@ -52,7 +52,7 @@ log = logging.getLogger("aap.interference")
 REPO_ROOT = Path(__file__).resolve().parent.parent
 NEG_TOL = 1e-6  # tolerance when matching a direction with its negative in the candidate list
 # Static gap (mm) up to which two movable parts count as touching. Larger than Preprocessing's
-# stander contact_threshold (0.01) so clearance fits count: industrial_fastner's part1 sits in
+# standard contact_threshold (0.01) so clearance fits count: industrial_fastner's part1 sits in
 # part2/part3 with a 0.075 mm gap.
 CONTACT_THRESHOLD = 0.1
 
@@ -492,7 +492,7 @@ def _classify_all(ids, labels, shapes, config) -> dict[tuple[int, int], dict]:
         listing = "; ".join(f"{a} / {b} (V0={v:.4f} mm^3)" for a, b, v in hard)
         raise HardOverlapError(
             f"{len(hard)} pair(s) overlap statically by more than overlap_tol={config.overlap_tol} mm^3 "
-            f"(fix the model or mark the part as stander): {listing}"
+            f"(fix the model or mark the part as standard): {listing}"
         )
     return pair_info
 
@@ -703,6 +703,6 @@ def _log_contacts(result: InterferenceResult) -> None:
              ", ".join(f"{a}/{b}" for a, b in pairs) or "none")
     for i in range(n):
         if not result.contact[i].any():
-            log.warning("%s touches no other movable component (it may only be held by standers)", labels[i])
+            log.warning("%s touches no other movable component (it may only be held by standards)", labels[i])
     if not result.is_connected(range(n)):
-        log.info("Movable components alone are not one connected group (the AoG also uses stander contacts)")
+        log.info("Movable components alone are not one connected group (the AoG also uses standard contacts)")

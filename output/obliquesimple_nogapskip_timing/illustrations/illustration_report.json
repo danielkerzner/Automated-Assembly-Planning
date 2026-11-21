@@ -1,0 +1,204 @@
+{
+  "frames": [
+    {
+      "step": 1,
+      "steps": [
+        1
+      ],
+      "component_id": "Part__Feature006",
+      "component_label": "base",
+      "component_ids": [
+        "Part__Feature006"
+      ],
+      "component_labels": [
+        "base"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\obliquesimple_nogapskip_timing\\illustrations\\step_01_base.png",
+      "view": {
+        "azimuth": 315.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.39390618108034225,
+      "in_frame": true,
+      "footnote": [
+        "Step 1 / 7   base   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 2,
+      "steps": [
+        2
+      ],
+      "component_id": "Part__Feature",
+      "component_label": "cube",
+      "component_ids": [
+        "Part__Feature"
+      ],
+      "component_labels": [
+        "cube"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\obliquesimple_nogapskip_timing\\illustrations\\step_02_cube.png",
+      "view": {
+        "azimuth": 315.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.4874538745387454,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.4874538745387454,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.3464709900848665,
+      "in_frame": true,
+      "footnote": [
+        "Step 2 / 7   cube   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 3,
+      "steps": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "component_id": "Part__Feature005",
+      "component_label": "plug004",
+      "component_ids": [
+        "Part__Feature005",
+        "Part__Feature004",
+        "Part__Feature003",
+        "Part__Feature002",
+        "Part__Feature001"
+      ],
+      "component_labels": [
+        "plug004",
+        "plug003",
+        "plug002",
+        "plug001",
+        "plug"
+      ],
+      "group": "plug",
+      "is_stander": false,
+      "png": "output\\obliquesimple_nogapskip_timing\\illustrations\\step_03-07_plug.png",
+      "view": {
+        "azimuth": 315.0,
+        "elevation": 50.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.9424320827943079,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.9424320827943079,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.1104108841118024,
+      "in_frame": true,
+      "footnote": [
+        "Steps 3-7 / 7   plug   Tool: by hand",
+        "Parts: plug004, plug003, plug002, plug001, plug",
+        "Re-orient assembly: gravity along (0, 0, -1)"
+      ],
+      "reorient": true,
+      "hold": false,
+      "warnings": []
+    }
+  ],
+  "manual_path": "output\\obliquesimple_nogapskip_timing\\illustrations\\manual.pdf",
+  "global_view": [
+    315.0,
+    50.0
+  ],
+  "config_hash": "35d3e1cacb3e343fc2bae086f7a46d4c04c0573a2093832b84139d84dda14fc6",
+  "stats": {
+    "layers_rasterized": 518,
+    "raster_s": 6.558508599642664,
+    "views_evaluated": 73,
+    "view_search_s": 5.036724800011143,
+    "render_s": 4.780958199989982,
+    "total_s": 9.817686900030822
+  },
+  "config": {
+    "image_size": [
+      1600,
+      1200
+    ],
+    "search_size": [
+      480,
+      360
+    ],
+    "dpi": 200,
+    "tess_tolerance_rel": 0.002,
+    "default_view": [
+      -35.0,
+      30.0
+    ],
+    "azimuths": [
+      0,
+      15,
+      30,
+      45,
+      60,
+      75,
+      90,
+      105,
+      120,
+      135,
+      150,
+      165,
+      180,
+      195,
+      210,
+      225,
+      240,
+      255,
+      270,
+      285,
+      300,
+      315,
+      330,
+      345
+    ],
+    "elevations": [
+      20,
+      35,
+      50
+    ],
+    "vis_min_end": 0.35,
+    "vis_min_start": 0.35,
+    "min_trajectory_px_frac": 0.1,
+    "xray_alpha": 0.25,
+    "placed_color": "#bdbdbd",
+    "new_color": "#f28e2b",
+    "stander_color": "#3b75af",
+    "ghost_alpha": 0.35,
+    "show_gravity": true,
+    "mark_unstable": true,
+    "footnote_show_vector": false,
+    "group_frames": true,
+    "title": "Assembly",
+    "language": "en"
+  }
+}

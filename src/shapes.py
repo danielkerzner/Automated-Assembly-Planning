@@ -4,15 +4,15 @@ Used by: Optimization, Illustration Generator and Levels (per-level orchestratio
 
 Inputs
     - A `PreprocessingResult` (`prep`): its `reduced_assembly` is the reduced FreeCAD document that holds the
-      movable parts at their global placement; the original document must still be open for standers.
-    - A list of component ids and a parallel list of stander flags.
+      movable parts at their global placement; the original document must still be open for standards.
+    - A list of component ids and a parallel list of standard flags.
 Outputs
     - `component_shapes`: one FreeCAD `Part.Shape` per component id, in the same order, all at global placement.
     - `shape_geometry_hash`: a hex string that identifies a shape's geometry across sessions (cache keys).
 
 What this module does
-    The later stages need the final geometry of every component, but movable parts and standers live in
-    different documents (standers are removed from the reduced document by Preprocessing). This module hides
+    The later stages need the final geometry of every component, but movable parts and standards live in
+    different documents (standards are removed from the reduced document by Preprocessing). This module hides
     that split and provides a session-independent geometry hash for caches.
 """
 
@@ -42,10 +42,10 @@ def shape_geometry_hash(shape) -> str:
     return h.hexdigest()
 
 
-def component_shapes(component_ids, is_stander, prep) -> list:
+def component_shapes(component_ids, is_standard, prep) -> list:
     """[AUX] Return the global shape of each component, in the order given.
 
-    Movable parts are read from the reduced document (already stored at global placement). Standers were
+    Movable parts are read from the reduced document (already stored at global placement). Standards were
     removed from the reduced document by Preprocessing, so they are read from the original document
     (run_preprocessing names the reduced doc '<doc>_reduced'; the original must still be open) and placed
     with their global placement. Raises ValueError if a component cannot be found.
@@ -61,8 +61,8 @@ def component_shapes(component_ids, is_stander, prep) -> list:
         except Exception:  # noqa: BLE001
             original = None
     shapes = []
-    for cid, stander in zip(component_ids, is_stander):
-        if not stander:
+    for cid, standard in zip(component_ids, is_standard):
+        if not standard:
             obj = reduced.getObject(cid)
             shape = None if obj is None else obj.Shape  # stored at global placement
         else:
@@ -72,6 +72,6 @@ def component_shapes(component_ids, is_stander, prep) -> list:
                 shape = obj.Shape.copy()
                 shape.Placement = obj.getGlobalPlacement()
         if obj is None:
-            raise ValueError(f"Component {cid} not found (stander shapes need the original document open)")
+            raise ValueError(f"Component {cid} not found (standard shapes need the original document open)")
         shapes.append(shape)
     return shapes

@@ -24,7 +24,7 @@ for the sequence the robot loop chose. The `robot` block is added next to it:
   robot.loop                 iterations, stop_reason, chosen_iteration, blocked_edges (with the iteration
                              that pruned each and why), sequences (every recorded sequence with its
                              per-step results and metrics; `chosen` marks the chosen one)
-  robot.alone_scores         label -> S_alone (non-stander components)
+  robot.alone_scores         label -> S_alone (non-standard components)
   robot.subassembly_scores   optional sub-assembly check (RobotConfig.check_subassembly_grasp), else null:
                              state mask -> {score, feasible, n_components, components, best}. Each step then
                              also has part_feasible, subassembly_after, subassembly_before, and `feasible`

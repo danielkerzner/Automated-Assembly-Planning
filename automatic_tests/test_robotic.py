@@ -142,7 +142,7 @@ class RotEngine:
 
 
 class NoTools:
-    """[SUPP] Fake tool checker: every stander step is feasible and unchecked."""
+    """[SUPP] Fake tool checker: every standard step is feasible and unchecked."""
 
     def step(self, state, c, senses, preferred=None):
         return SimpleNamespace(feasible=True, tool=None, checked=False, senses={}, contact_with={}, sense=preferred,
@@ -226,7 +226,7 @@ def test_r4(rec, args):
     eng = FakeEngine([0.9, 0.8, 0.7, 0.95])
     clouds = [toy_cloud(c) for c in range(4)]
     an = GripperAnalysis(eng, clouds, [f"k{c}" for c in range(4)], [f"c{c}" for c in range(4)], RobotConfig())
-    prep = SimpleNamespace(stander_records={})
+    prep = SimpleNamespace(standard_records={})
     res = run_robot_loop(aog, None, prep, an, NoTools(), RobotConfig(), optimize_fn=real_optimizer(aog, tables, cfg_opt))
     rec.note(f"{res.iterations} iteration(s), stop: {res.stop_reason}, {len(res.blocked)} blocked, engine calls {eng.calls}")
     rec.check(res.iterations == len(res.records) == len(res.sequences), "record count equals iterations run")
@@ -361,7 +361,7 @@ def test_r8(rec, args):
     cfg = only("use_travel", n_iterations=20)
     an = GripperAnalysis(FakeEngine([0.9, 0.8, 0.6]), [toy_cloud(c) for c in range(3)], ["a", "b", "c"],
                          list(aog.component_labels), RobotConfig())
-    loop = run_robot_loop(aog, None, SimpleNamespace(stander_records={}), an, NoTools(), RobotConfig(),
+    loop = run_robot_loop(aog, None, SimpleNamespace(standard_records={}), an, NoTools(), RobotConfig(),
                           optimize_fn=real_optimizer(aog, tables, cfg))
     root = Container(id="root", label="Toy", parent=None, leaf_ids=list(aog.component_ids), child_ids=[],
                      processed=True, all_leaf_ids=list(aog.component_ids))
@@ -419,7 +419,7 @@ def test_r13(rec, args):
     cfg_opt = only("use_travel", "use_direction_change", n_iterations=40)
     clouds = [toy_cloud(c) for c in range(4)]
     keys, labels = [f"k{c}" for c in range(4)], [f"c{c}" for c in range(4)]
-    prep = SimpleNamespace(stander_records={})
+    prep = SimpleNamespace(standard_records={})
     seq = op.optimize(aog, tables, cfg_opt)
 
     # off (default): no node calls, no node fields, identical feasibility
@@ -552,7 +552,7 @@ def test_r10(rec, args):
     for cat, expect, what in ((1, 22.0, "screw: no overlap, tool face on the head (z 22)"),
                               (2, 16.0, "nut: tool face 6 mm into the 12 mm nut (z 16)"),
                               (3, 16.0, "bushing: tool face half its extent into it (z 16)")):
-        tcx = ToolChecker([plate2, nut], ["plate", "stander"], [False, True], {1: cat}, dirs, cfg)
+        tcx = ToolChecker([plate2, nut], ["plate", "standard"], [False, True], {1: cat}, dirs, cfg)
         low = min(s.optimalBoundingBox().ZMin for s in tcx._tool_solids(1, 0))  # BoundBox is loose here
         rec.check(abs(low - expect) < 0.05, f"{what}; placed tool lowest z = {low:.2f}")
     tcn = ToolChecker([plate2, nut, lid], ["plate", "nut", "lid"], [False, True, False], {1: 2}, dirs, cfg)

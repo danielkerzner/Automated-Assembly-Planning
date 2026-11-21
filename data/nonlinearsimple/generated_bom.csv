@@ -1,4 +1,4 @@
-label,is_stander,tool,group,processed,subassembly
+label,is_standard,tool,group,processed,subassembly
 Assembly,False,,Assembly,true,
 component,False,,component,,Assembly
 component001,False,,component001,,Assembly

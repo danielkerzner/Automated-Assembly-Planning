@@ -1,0 +1,79 @@
+{
+ "schema_version": 2,
+ "cache_key": "b6ca0c407220f19328bb853f84e7caf7297b461ce2fc940a78d44a3979ec1ff6",
+ "component_ids": [
+  "Part__Feature",
+  "Part__Feature001",
+  "Part__Feature002",
+  "Part__Feature003",
+  "Part__Feature004",
+  "Part__Feature005",
+  "Part__Feature006"
+ ],
+ "component_labels": [
+  "cube",
+  "plug",
+  "plug001",
+  "plug002",
+  "plug003",
+  "plug004",
+  "base"
+ ],
+ "config": {
+  "margin": 1.0,
+  "group_consecutive": true,
+  "group_one_order": true
+ },
+ "stats": {
+  "group_rule": true,
+  "group_one_order": true,
+  "groups": {
+   "plug": [
+    "plug",
+    "plug001",
+    "plug002",
+    "plug003",
+    "plug004"
+   ]
+  },
+  "group_order_pruned_edges": 20,
+  "N": 7,
+  "n_movable": 7,
+  "n_standers": 0,
+  "D": 14,
+  "D_prime": 14,
+  "V": 14,
+  "E": 15,
+  "nodes_per_level": [
+   1,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   1
+  ],
+  "connectivity_rule": true,
+  "disconnected_dropped": 0,
+  "dead_ends": 0,
+  "live_nodes": 14,
+  "complete": true,
+  "time_s": 0.020813300041481853,
+  "array_bytes": 1826
+ },
+ "complete": true,
+ "root": 0,
+ "terminal": 13,
+ "dead_ends": [],
+ "component_groups": [
+  "cube",
+  "plug",
+  "plug",
+  "plug",
+  "plug",
+  "plug",
+  "base"
+ ],
+ "date": "2026-11-19T14:25:24"
+}

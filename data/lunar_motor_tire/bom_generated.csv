@@ -1,4 +1,4 @@
-label,is_stander,tool,group,processed,subassembly
+label,is_standard,tool,group,processed,subassembly
 0013-A-0100-A01_3,False,,0013-A-0100-A01_3,true,
 0013-P-0101-A01-PP-motor038,False,,0013-P-0101-A01-PP-motor038,,0013-A-0100-A01_3
 0013-P-0102-A02-PP,False,,0013-P-0102-A02-PP,,0013-A-0100-A01_3

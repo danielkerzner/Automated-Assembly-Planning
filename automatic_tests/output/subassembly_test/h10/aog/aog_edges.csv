@@ -1,4 +1,4 @@
-﻿edge,src,dst,component,is_stander,direction_indices,directions,distances_mm
+﻿edge,src,dst,component,is_standard,direction_indices,directions,distances_mm
 0,0,5,industrial_fastner_part1,False,5,"(0.000000, 0.000000, -1.000000)",46.500
 1,0,4,industrial_fastner_part5,False,1,"(-1.000000, 0.000000, 0.000000)",43.000
 2,0,3,industrial_fastner_part6,False,0,"(1.000000, 0.000000, 0.000000)",71.244

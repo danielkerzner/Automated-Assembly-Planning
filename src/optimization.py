@@ -4,7 +4,7 @@ Cost terms M1-M8 and the ACO search; also computes the screw turn counts.
 
 Inputs
     - An `AoG` (graph of all feasible disassembly sequences, from aog_generator.py).
-    - The `InterferenceResult` (contacts, cache key) and `PreprocessingResult` (stander records, reduced
+    - The `InterferenceResult` (contacts, cache key) and `PreprocessingResult` (standard records, reduced
       assembly, BOM path), used on the FreeCAD side to build the per-component data.
     - The BOM CSV: `tool` (M3), `group` (M7) and `pitch` (screw turns) columns.
     - An `OptimizationConfig` (which cost terms are on, weights, ACO parameters).
@@ -111,7 +111,7 @@ class OptimizationConfig:
     # Criterion flags, all bool. Recommended: all True when the BOM has the needed columns.
     use_travel: bool = True  # M1: total travel distance.
     use_direction_change: bool = True  # M2: changes of insertion direction between consecutive steps.
-    use_tool_change: bool = True  # M3: tool changes between consecutive standers. Needs the BOM `tool` column.
+    use_tool_change: bool = True  # M3: tool changes between consecutive standards. Needs the BOM `tool` column.
     use_size_contacts: bool = True  # M6: big/highly connected parts should go in early.
     use_grouping: bool = True  # M7: members of one BOM group should be consecutive. Needs the `group` column.
     use_stability: bool = True  # M8: class-1 penalty (part not supported when inserted).
@@ -219,7 +219,7 @@ class TermTables:
     area: np.ndarray  # (N,) float, mm^2. Component surface area (M6 size score).
     contact: np.ndarray  # (N, N) bool, symmetric. Touching pairs; Nb_i = contact[i].sum() (M6).
     cog: np.ndarray  # (N, 3) float, mm. Centre of gravity (M8 stability).
-    tool: list[str | None]  # BOM `tool` per component (standers; None if blank or absent). M3.
+    tool: list[str | None]  # BOM `tool` per component (standards; None if blank or absent). M3.
     group: list[str | None]  # BOM `group` per component. M7. A component with no BOM group gets its own label.
     pitch: list[float | None]  # BOM `pitch`, mm/turn (screw/nut rows only; None if blank, non-positive or absent). Display of turns.
     has_tool_column: bool  # bool. The BOM has a `tool` column (validation of use_tool_change).
@@ -387,8 +387,8 @@ class CostModel:
         self.N = N
         self.weights = resolve_weights(config)
         w = self.weights
-        self.is_stander = np.asarray(aog.is_stander, dtype=bool)
-        self.n_standers = int(self.is_stander.sum())
+        self.is_standard = np.asarray(aog.is_standard, dtype=bool)
+        self.n_standards = int(self.is_standard.sum())
         self.travel = np.asarray(aog.travel, dtype=float)
         self.neg = np.asarray(aog.neg, dtype=np.int64)
         self.directions = np.asarray(aog.directions, dtype=float)
@@ -415,12 +415,12 @@ class CostModel:
         self.move_ptr = np.concatenate(([0], np.cumsum(np.bitwise_count(self.edge_dirs)))).astype(np.int64)
         self.n_moves = int(self.move_ptr[-1])
 
-        # Input checks: M3 needs a tool on every stander, M7 a group on every part.
-        if self.n_standers and config.use_tool_change:
-            missing = [aog.component_labels[c] for c in np.flatnonzero(self.is_stander)
+        # Input checks: M3 needs a tool on every standard, M7 a group on every part.
+        if self.n_standards and config.use_tool_change:
+            missing = [aog.component_labels[c] for c in np.flatnonzero(self.is_standard)
                        if not tables.tool[c]]
             if missing:
-                raise ValueError(f"use_tool_change=True but these standers have no 'tool' in the BOM: {missing}")
+                raise ValueError(f"use_tool_change=True but these standards have no 'tool' in the BOM: {missing}")
         if config.use_grouping:
             missing = [aog.component_labels[c] for c in range(N) if not tables.group[c]]
             if missing:
@@ -449,15 +449,15 @@ class CostModel:
         self.c_travel = per_unit("travel", self.travel_hi - self.travel_lo)
         self.c_size = per_unit("size_contacts", self.size_hi - self.size_lo)
         self.c_dir = per_unit("direction_change", n1)
-        self.c_tool = per_unit("tool_change", max(self.n_standers - 1, 1))
+        self.c_tool = per_unit("tool_change", max(self.n_standards - 1, 1))
         self.c_group = per_unit("grouping", n1)
         self.c_stab = per_unit("stability", n1)  # per class-1 insertion
         self.c_grav = per_unit("gravity_change", n1)  # per 180 degrees of gravity change
         self.offset = self.c_travel * self.travel_lo + self.c_size * self.size_lo
 
         # Key ids for the generic "consecutive steps share a key" term (M3, M7).
-        tools = sorted({t for c, t in enumerate(tables.tool) if t and self.is_stander[c]})
-        self.tool_id = np.array([tools.index(tables.tool[c]) if self.is_stander[c] and tables.tool[c]
+        tools = sorted({t for c, t in enumerate(tables.tool) if t and self.is_standard[c]})
+        self.tool_id = np.array([tools.index(tables.tool[c]) if self.is_standard[c] and tables.tool[c]
                                  else -1 for c in range(N)], dtype=np.int64)
         keys = [g if g else f"#{c}" for c, g in enumerate(tables.group)]  # blanks only when M7 is off
         groups = sorted(set(keys))
@@ -629,9 +629,9 @@ class CostModel:
         # M2: direction change relative to the ant's previous move.
         if self.c_dir:
             c += self.c_dir * self._dir_levels(prev_dir, ks)
-        # M3: tool change between consecutive standers.
+        # M3: tool change between consecutive standards.
         if self.c_tool:
-            c += self.c_tool * (self.is_stander[comp] & (last_tool >= 0) & (self.tool_id[comp] != last_tool))
+            c += self.c_tool * (self.is_standard[comp] & (last_tool >= 0) & (self.tool_id[comp] != last_tool))
         if self.c_group:
             # Penalty for step t + 1 (prev): key changes while step t's group is unfinished after t.
             has = prev_comp >= 0
@@ -727,11 +727,11 @@ class CostModel:
             steps["direction_change"] = self.c_dir * v
         if "tool_change" in self.weights:
             v = np.zeros(N)
-            idx = np.flatnonzero(self.is_stander[comp])
+            idx = np.flatnonzero(self.is_standard[comp])
             tid = self.tool_id[comp[idx]]
             v[idx[1:]] = (tid[1:] != tid[:-1])
             raw["tool_change"] = float(v.sum())
-            norm["tool_change"] = raw["tool_change"] / max(self.n_standers - 1, 1)
+            norm["tool_change"] = raw["tool_change"] / max(self.n_standards - 1, 1)
             steps["tool_change"] = self.c_tool * v
         if "grouping" in self.weights:
             v = np.zeros(N)
@@ -846,7 +846,7 @@ def _walk(model: CostModel, n_ants: int, tau=None, rng=None, alpha=1.0, beta=3.0
         path_e[:, step], path_k[:, step] = e_pick, k_pick
         node = aog.edge_dst[e_pick].astype(np.int64)
         prev_comp, prev_dir = comp, k_pick
-        last_tool = np.where(model.is_stander[comp], model.tool_id[comp], last_tool)
+        last_tool = np.where(model.is_standard[comp], model.tool_id[comp], last_tool)
     return path_e, path_k
 
 
@@ -937,7 +937,7 @@ def run_aco(model: CostModel) -> tuple[np.ndarray, np.ndarray, dict, dict]:
 class OptimizationResult:
     """The optimised assembly sequence (output of `optimize` / `optimize_sequence`; input of the Illustration Generator)."""
 
-    # list of dicts, assembly order. Per step: component, ids and labels, is_stander, AoG edge, insertion
+    # list of dicts, assembly order. Per step: component, ids and labels, is_standard, AoG edge, insertion
     # direction (index and vector), travel (mm), start_offset (final position + offset = start point),
     # gravity and stability class (None if stability is off), per-term costs, and, added later,
     # turns/turns_pitch/turns_note/turns_nut_label for screws and nuts.
@@ -965,7 +965,7 @@ def _build_result(model: CostModel, edges, ks, ev: dict, history: dict, config_h
             "component": c,
             "component_id": aog.component_ids[c],
             "component_label": aog.component_labels[c],
-            "is_stander": bool(model.is_stander[c]),
+            "is_standard": bool(model.is_standard[c]),
             "edge": e,
             "removal_direction_index": k,
             "direction_index": int(model.neg[k]),  # insertion direction
@@ -1013,7 +1013,7 @@ def _apply_turns(aog, prep, tables: TermTables, steps: list[dict]) -> None:
     partner_groups: dict[int, list[tuple[int, float]]] = {}
 
     for c, cid in enumerate(aog.component_ids):
-        rec = prep.stander_records.get(cid)
+        rec = prep.standard_records.get(cid)
         if rec is None or c not in step_of:
             continue
         if rec.category == 1:  # screw: own step, own pitch (row 1)
@@ -1035,7 +1035,7 @@ def _apply_turns(aog, prep, tables: TermTables, steps: list[dict]) -> None:
                 steps[i]["turns_pitch"] = nut_pitch
             else:  # row 3: the partner rotates -- unless it's a screw, which already got its own
                    # turns above (12.2: "the nut then only matters when the nut comes after the screw").
-                partner_rec = prep.stander_records.get(rec.partner)
+                partner_rec = prep.standard_records.get(rec.partner)
                 if partner_rec is not None and partner_rec.category == 1:
                     continue
                 partner_groups.setdefault(partner_bit, []).append((c, nut_pitch))
@@ -1131,7 +1131,7 @@ def _fmt_turns_text(s: dict, decimals: int) -> str:
 
 
 def _read_bom(bom_path) -> tuple[list[str], dict[str, dict], bytes]:
-    """[AUX] Read the BOM: (column names, {label: row dict}, raw bytes for the cache key). Needs `label` and `is_stander` columns."""
+    """[AUX] Read the BOM: (column names, {label: row dict}, raw bytes for the cache key). Needs `label` and `is_standard` columns."""
     data = Path(bom_path).read_bytes()
     with open(bom_path, newline="", encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
@@ -1141,8 +1141,8 @@ def _read_bom(bom_path) -> tuple[list[str], dict[str, dict], bytes]:
             row = {(k or "").strip(): (v or "").strip() for k, v in row.items()}
             if row.get("label"):
                 rows[row["label"]] = row
-    if "label" not in columns or "is_stander" not in columns:
-        raise ValueError(f"BOM {bom_path} needs the columns 'label' and 'is_stander'")
+    if "label" not in columns or "is_standard" not in columns:
+        raise ValueError(f"BOM {bom_path} needs the columns 'label' and 'is_standard'")
     return columns, rows, data
 
 
@@ -1150,7 +1150,7 @@ def _component_shapes(aog, prep) -> list:
     """[AUX] Global shapes in AoG order (shared helper in shapes.py)."""
     from shapes import component_shapes
 
-    return component_shapes(aog.component_ids, aog.is_stander, prep)
+    return component_shapes(aog.component_ids, aog.is_standard, prep)
 
 
 def _center_of_mass(shape) -> list[float]:
@@ -1166,7 +1166,7 @@ def _center_of_mass(shape) -> list[float]:
 def _contact_matrix(aog, interference_result, prep) -> np.ndarray:
     """[AUX] (N, N) contact matrix in AoG order: the same contact graph as the AoG connectivity rule.
 
-    Interference contacts between movable parts plus `StanderRecord.contact_neighbors`.
+    Interference contacts between movable parts plus `StandardRecord.contact_neighbors`.
     """
     if getattr(interference_result, "contact", None) is None:
         raise ValueError("InterferenceResult has no contact matrix; re-run identify_interferences")
@@ -1175,7 +1175,7 @@ def _contact_matrix(aog, interference_result, prep) -> np.ndarray:
     contact = np.zeros((N, N), dtype=bool)
     mov = [index[c] for c in interference_result.component_ids]
     contact[np.ix_(mov, mov)] = np.asarray(interference_result.contact, dtype=bool)
-    for sid, rec in prep.stander_records.items():
+    for sid, rec in prep.standard_records.items():
         for g in rec.contact_neighbors:
             contact[index[sid], index[g]] = contact[index[g], index[sid]] = True
     contact |= contact.T
@@ -1323,7 +1323,7 @@ def collect_tables(aog, interference_result, prep, config: OptimizationConfig, c
                    force: bool = False) -> TermTables:
     """[MAIN] Build the `TermTables` for the pipeline objects (the FreeCAD side of the optimisation).
 
-    Inputs: the AoG, the InterferenceResult, the PreprocessingResult (stander records, BOM path,
+    Inputs: the AoG, the InterferenceResult, the PreprocessingResult (standard records, BOM path,
     `auto_group_override`), the config and the cache folder. Output: a `TermTables` with volume, area,
     centre of gravity and contacts per component (geometry, cached as JSON), the BOM `tool`, `group` and
     `pitch` columns, and, when stability is on, the contact patches of every touching pair.
@@ -1363,7 +1363,7 @@ def collect_tables(aog, interference_result, prep, config: OptimizationConfig, c
         tool.append(row.get("tool") or None)
         # Pitch is read for screw/nut rows only; blank,
         # unparsable or non-positive gives None and (for an actual screw/nut) a warning naming the label.
-        rec = prep.stander_records.get(cid)
+        rec = prep.standard_records.get(cid)
         p = None
         raw_pitch = row.get("pitch")
         if raw_pitch:
@@ -1374,7 +1374,7 @@ def collect_tables(aog, interference_result, prep, config: OptimizationConfig, c
             if p is not None and p <= 0:
                 p = None
         if p is None and "pitch" in columns and rec is not None and rec.category in (1, 2):
-            log.warning("Stander %r has no usable 'pitch' in the BOM; no turn count will be shown for it", label)
+            log.warning("Standard %r has no usable 'pitch' in the BOM; no turn count will be shown for it", label)
         pitch.append(p)
         if cid in auto_group_override:
             group.append(auto_group_override[cid])
@@ -1467,7 +1467,7 @@ def save_result(result: OptimizationResult, cache_dir: Path) -> None:
     _write_json_atomic(cache_dir / RESULT_NAME, data)
     lines = [f"Assembly sequence (total cost {result.total_cost:.4f})", ""]
     for s in result.steps:
-        lines.append(f"{s['step']:>3}. {s['component_label']}{' [stander]' if s['is_stander'] else ''}: "
+        lines.append(f"{s['step']:>3}. {s['component_label']}{' [standard]' if s['is_standard'] else ''}: "
                      f"insert along {_fmt_vec(s['direction'])}, travel {s['travel']:.2f} mm, start offset "
                      f"{_fmt_vec(s['start_offset'])}"
                      + _fmt_turns_text(s, decimals=2)

@@ -63,67 +63,57 @@
   },
   {
    "task": 6,
-   "component": "industrial_fastner_part3",
-   "direction_index": 6,
+   "component": "industrial_fastner_part2",
+   "direction_index": 0,
    "direction": [
-    0.5611782045143711,
-    -0.8276950058916791,
+    1.0,
+    0.0,
     0.0
    ]
   },
   {
    "task": 7,
-   "component": "industrial_fastner_part3",
-   "direction_index": 7,
+   "component": "industrial_fastner_part2",
+   "direction_index": 1,
    "direction": [
-    -0.5611782045143711,
-    0.8276950058916791,
-    -0.0
-   ]
-  },
-  {
-   "task": 8,
-   "component": "industrial_fastner_part3",
-   "direction_index": 8,
-   "direction": [
-    -0.9635906658544288,
-    -0.2673818031920249,
+    -1.0,
+    0.0,
     0.0
    ]
   },
   {
-   "task": 9,
-   "component": "industrial_fastner_part3",
-   "direction_index": 9,
+   "task": 8,
+   "component": "industrial_fastner_part2",
+   "direction_index": 4,
    "direction": [
-    0.9635906658544288,
-    0.2673818031920249,
-    -0.0
+    0.0,
+    0.0,
+    1.0
+   ]
+  },
+  {
+   "task": 9,
+   "component": "industrial_fastner_part1",
+   "direction_index": 0,
+   "direction": [
+    1.0,
+    0.0,
+    0.0
    ]
   },
   {
    "task": 10,
-   "component": "industrial_fastner_part2",
-   "direction_index": 0,
+   "component": "industrial_fastner_part1",
+   "direction_index": 1,
    "direction": [
-    1.0,
+    -1.0,
     0.0,
     0.0
    ]
   },
   {
    "task": 11,
-   "component": "industrial_fastner_part2",
-   "direction_index": 1,
-   "direction": [
-    -1.0,
-    0.0,
-    0.0
-   ]
-  },
-  {
-   "task": 12,
-   "component": "industrial_fastner_part2",
+   "component": "industrial_fastner_part1",
    "direction_index": 2,
    "direction": [
     0.0,
@@ -132,8 +122,8 @@
    ]
   },
   {
-   "task": 13,
-   "component": "industrial_fastner_part2",
+   "task": 12,
+   "component": "industrial_fastner_part1",
    "direction_index": 3,
    "direction": [
     0.0,
@@ -142,8 +132,8 @@
    ]
   },
   {
-   "task": 14,
-   "component": "industrial_fastner_part2",
+   "task": 13,
+   "component": "industrial_fastner_part1",
    "direction_index": 4,
    "direction": [
     0.0,
@@ -152,8 +142,8 @@
    ]
   },
   {
-   "task": 15,
-   "component": "industrial_fastner_part2",
+   "task": 14,
+   "component": "industrial_fastner_part1",
    "direction_index": 5,
    "direction": [
     0.0,
@@ -162,347 +152,107 @@
    ]
   },
   {
-   "task": 16,
-   "component": "industrial_fastner_part2",
-   "direction_index": 6,
+   "task": 15,
+   "component": "industrial_fastner_part5",
+   "direction_index": 1,
    "direction": [
-    0.5611782045143711,
-    -0.8276950058916791,
+    -1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "task": 16,
+   "component": "industrial_fastner_part5",
+   "direction_index": 3,
+   "direction": [
+    0.0,
+    -1.0,
     0.0
    ]
   },
   {
    "task": 17,
-   "component": "industrial_fastner_part2",
-   "direction_index": 7,
+   "component": "industrial_fastner_part5",
+   "direction_index": 4,
    "direction": [
-    -0.5611782045143711,
-    0.8276950058916791,
-    -0.0
+    0.0,
+    0.0,
+    1.0
    ]
   },
   {
    "task": 18,
-   "component": "industrial_fastner_part2",
-   "direction_index": 8,
+   "component": "industrial_fastner_part5",
+   "direction_index": 5,
    "direction": [
-    -0.9635906658544288,
-    -0.2673818031920249,
-    0.0
+    0.0,
+    0.0,
+    -1.0
    ]
   },
   {
    "task": 19,
-   "component": "industrial_fastner_part2",
-   "direction_index": 9,
+   "component": "industrial_fastner_part6",
+   "direction_index": 0,
    "direction": [
-    0.9635906658544288,
-    0.2673818031920249,
-    -0.0
+    1.0,
+    0.0,
+    0.0
    ]
   },
   {
    "task": 20,
-   "component": "industrial_fastner_part1",
-   "direction_index": 0,
+   "component": "industrial_fastner_part6",
+   "direction_index": 1,
    "direction": [
-    1.0,
+    -1.0,
     0.0,
     0.0
    ]
   },
   {
    "task": 21,
-   "component": "industrial_fastner_part1",
-   "direction_index": 1,
+   "component": "industrial_fastner_part6",
+   "direction_index": 2,
    "direction": [
-    -1.0,
     0.0,
+    1.0,
     0.0
    ]
   },
   {
    "task": 22,
-   "component": "industrial_fastner_part1",
-   "direction_index": 2,
+   "component": "industrial_fastner_part6",
+   "direction_index": 3,
    "direction": [
     0.0,
-    1.0,
+    -1.0,
     0.0
    ]
   },
   {
    "task": 23,
-   "component": "industrial_fastner_part1",
-   "direction_index": 3,
+   "component": "industrial_fastner_part6",
+   "direction_index": 4,
    "direction": [
     0.0,
-    -1.0,
-    0.0
+    0.0,
+    1.0
    ]
   },
   {
    "task": 24,
-   "component": "industrial_fastner_part1",
-   "direction_index": 4,
+   "component": "industrial_fastner_part6",
+   "direction_index": 5,
    "direction": [
     0.0,
     0.0,
-    1.0
+    -1.0
    ]
   },
   {
    "task": 25,
-   "component": "industrial_fastner_part1",
-   "direction_index": 5,
-   "direction": [
-    0.0,
-    0.0,
-    -1.0
-   ]
-  },
-  {
-   "task": 26,
-   "component": "industrial_fastner_part1",
-   "direction_index": 6,
-   "direction": [
-    0.5611782045143711,
-    -0.8276950058916791,
-    0.0
-   ]
-  },
-  {
-   "task": 27,
-   "component": "industrial_fastner_part1",
-   "direction_index": 7,
-   "direction": [
-    -0.5611782045143711,
-    0.8276950058916791,
-    -0.0
-   ]
-  },
-  {
-   "task": 28,
-   "component": "industrial_fastner_part1",
-   "direction_index": 8,
-   "direction": [
-    -0.9635906658544288,
-    -0.2673818031920249,
-    0.0
-   ]
-  },
-  {
-   "task": 29,
-   "component": "industrial_fastner_part1",
-   "direction_index": 9,
-   "direction": [
-    0.9635906658544288,
-    0.2673818031920249,
-    -0.0
-   ]
-  },
-  {
-   "task": 30,
-   "component": "industrial_fastner_part5",
-   "direction_index": 0,
-   "direction": [
-    1.0,
-    0.0,
-    0.0
-   ]
-  },
-  {
-   "task": 31,
-   "component": "industrial_fastner_part5",
-   "direction_index": 1,
-   "direction": [
-    -1.0,
-    0.0,
-    0.0
-   ]
-  },
-  {
-   "task": 32,
-   "component": "industrial_fastner_part5",
-   "direction_index": 2,
-   "direction": [
-    0.0,
-    1.0,
-    0.0
-   ]
-  },
-  {
-   "task": 33,
-   "component": "industrial_fastner_part5",
-   "direction_index": 3,
-   "direction": [
-    0.0,
-    -1.0,
-    0.0
-   ]
-  },
-  {
-   "task": 34,
-   "component": "industrial_fastner_part5",
-   "direction_index": 4,
-   "direction": [
-    0.0,
-    0.0,
-    1.0
-   ]
-  },
-  {
-   "task": 35,
-   "component": "industrial_fastner_part5",
-   "direction_index": 5,
-   "direction": [
-    0.0,
-    0.0,
-    -1.0
-   ]
-  },
-  {
-   "task": 36,
-   "component": "industrial_fastner_part5",
-   "direction_index": 6,
-   "direction": [
-    0.5611782045143711,
-    -0.8276950058916791,
-    0.0
-   ]
-  },
-  {
-   "task": 37,
-   "component": "industrial_fastner_part5",
-   "direction_index": 7,
-   "direction": [
-    -0.5611782045143711,
-    0.8276950058916791,
-    -0.0
-   ]
-  },
-  {
-   "task": 38,
-   "component": "industrial_fastner_part5",
-   "direction_index": 8,
-   "direction": [
-    -0.9635906658544288,
-    -0.2673818031920249,
-    0.0
-   ]
-  },
-  {
-   "task": 39,
-   "component": "industrial_fastner_part5",
-   "direction_index": 9,
-   "direction": [
-    0.9635906658544288,
-    0.2673818031920249,
-    -0.0
-   ]
-  },
-  {
-   "task": 40,
-   "component": "industrial_fastner_part6",
-   "direction_index": 0,
-   "direction": [
-    1.0,
-    0.0,
-    0.0
-   ]
-  },
-  {
-   "task": 41,
-   "component": "industrial_fastner_part6",
-   "direction_index": 1,
-   "direction": [
-    -1.0,
-    0.0,
-    0.0
-   ]
-  },
-  {
-   "task": 42,
-   "component": "industrial_fastner_part6",
-   "direction_index": 2,
-   "direction": [
-    0.0,
-    1.0,
-    0.0
-   ]
-  },
-  {
-   "task": 43,
-   "component": "industrial_fastner_part6",
-   "direction_index": 3,
-   "direction": [
-    0.0,
-    -1.0,
-    0.0
-   ]
-  },
-  {
-   "task": 44,
-   "component": "industrial_fastner_part6",
-   "direction_index": 4,
-   "direction": [
-    0.0,
-    0.0,
-    1.0
-   ]
-  },
-  {
-   "task": 45,
-   "component": "industrial_fastner_part6",
-   "direction_index": 5,
-   "direction": [
-    0.0,
-    0.0,
-    -1.0
-   ]
-  },
-  {
-   "task": 46,
-   "component": "industrial_fastner_part6",
-   "direction_index": 6,
-   "direction": [
-    0.5611782045143711,
-    -0.8276950058916791,
-    0.0
-   ]
-  },
-  {
-   "task": 47,
-   "component": "industrial_fastner_part6",
-   "direction_index": 7,
-   "direction": [
-    -0.5611782045143711,
-    0.8276950058916791,
-    -0.0
-   ]
-  },
-  {
-   "task": 48,
-   "component": "industrial_fastner_part6",
-   "direction_index": 8,
-   "direction": [
-    -0.9635906658544288,
-    -0.2673818031920249,
-    0.0
-   ]
-  },
-  {
-   "task": 49,
-   "component": "industrial_fastner_part6",
-   "direction_index": 9,
-   "direction": [
-    0.9635906658544288,
-    0.2673818031920249,
-    -0.0
-   ]
-  },
-  {
-   "task": 50,
    "component": "industrial_fastner_part7",
    "direction_index": 0,
    "direction": [
@@ -512,7 +262,17 @@
    ]
   },
   {
-   "task": 51,
+   "task": 26,
+   "component": "industrial_fastner_part4",
+   "direction_index": 2,
+   "direction": [
+    0.0,
+    1.0,
+    0.0
+   ]
+  },
+  {
+   "task": 27,
    "component": "industrial_fastner_part4",
    "direction_index": 3,
    "direction": [
@@ -522,7 +282,17 @@
    ]
   },
   {
-   "task": 52,
+   "task": 28,
+   "component": "industrial_fastner_part001",
+   "direction_index": 2,
+   "direction": [
+    0.0,
+    1.0,
+    0.0
+   ]
+  },
+  {
+   "task": 29,
    "component": "industrial_fastner_part001",
    "direction_index": 3,
    "direction": [

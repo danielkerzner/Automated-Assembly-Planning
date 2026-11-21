@@ -1,0 +1,383 @@
+{
+  "frames": [
+    {
+      "step": 1,
+      "steps": [
+        1
+      ],
+      "component_id": "Part__Feature",
+      "component_label": "industrial_fastner_part3",
+      "component_ids": [
+        "Part__Feature"
+      ],
+      "component_labels": [
+        "industrial_fastner_part3"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\industrial_fastner_nogapskip_timing\\illustrations\\step_01_industrial_fastner_part3.png",
+      "view": {
+        "azimuth": 285.0,
+        "elevation": 20.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 1.0,
+      "vis_start": 1.0,
+      "vis_end_occluded": 1.0,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.26838124672199204,
+      "in_frame": true,
+      "footnote": [
+        "Step 1 / 8   industrial_fastner_part3   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 2,
+      "steps": [
+        2
+      ],
+      "component_id": "Part__Feature002",
+      "component_label": "industrial_fastner_part1",
+      "component_ids": [
+        "Part__Feature002"
+      ],
+      "component_labels": [
+        "industrial_fastner_part1"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\industrial_fastner_nogapskip_timing\\illustrations\\step_02_industrial_fastner_part1.png",
+      "view": {
+        "azimuth": 285.0,
+        "elevation": 20.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.4370820668693009,
+      "vis_start": 0.6559270516717325,
+      "vis_end_occluded": 0.4370820668693009,
+      "vis_start_occluded": 0.6559270516717325,
+      "trajectory_px_frac": 0.27918854524770975,
+      "in_frame": true,
+      "footnote": [
+        "Step 2 / 8   industrial_fastner_part1   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 3,
+      "steps": [
+        3
+      ],
+      "component_id": "Part__Feature001",
+      "component_label": "industrial_fastner_part2",
+      "component_ids": [
+        "Part__Feature001"
+      ],
+      "component_labels": [
+        "industrial_fastner_part2"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\industrial_fastner_nogapskip_timing\\illustrations\\step_03_industrial_fastner_part2.png",
+      "view": {
+        "azimuth": 285.0,
+        "elevation": 20.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.7263246425567704,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.7263246425567704,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.22695326904007374,
+      "in_frame": true,
+      "footnote": [
+        "Step 3 / 8   industrial_fastner_part2   Tool: by hand",
+        "Hold in place"
+      ],
+      "reorient": false,
+      "hold": true,
+      "warnings": []
+    },
+    {
+      "step": 4,
+      "steps": [
+        4
+      ],
+      "component_id": "Part__Feature006",
+      "component_label": "industrial_fastner_part5",
+      "component_ids": [
+        "Part__Feature006"
+      ],
+      "component_labels": [
+        "industrial_fastner_part5"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\industrial_fastner_nogapskip_timing\\illustrations\\step_04_industrial_fastner_part5.png",
+      "view": {
+        "azimuth": 285.0,
+        "elevation": 20.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.9122328331059573,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.9122328331059573,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.22723766725873737,
+      "in_frame": true,
+      "footnote": [
+        "Step 4 / 8   industrial_fastner_part5   Tool: by hand"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 5,
+      "steps": [
+        5
+      ],
+      "component_id": "Part__Feature003",
+      "component_label": "industrial_fastner_part7",
+      "component_ids": [
+        "Part__Feature003"
+      ],
+      "component_labels": [
+        "industrial_fastner_part7"
+      ],
+      "group": null,
+      "is_stander": true,
+      "png": "output\\industrial_fastner_nogapskip_timing\\illustrations\\step_05_industrial_fastner_part7.png",
+      "view": {
+        "azimuth": 285.0,
+        "elevation": 20.0,
+        "is_global": true
+      },
+      "view_kind": "global",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.3718674211802749,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.3718674211802749,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.21223045305835908,
+      "in_frame": true,
+      "footnote": [
+        "Step 5 / 8   industrial_fastner_part7   Tool: by_hand",
+        "Re-orient assembly: gravity along (-1, 0, 0)"
+      ],
+      "reorient": true,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 6,
+      "steps": [
+        6
+      ],
+      "component_id": "Part__Feature007",
+      "component_label": "industrial_fastner_part6",
+      "component_ids": [
+        "Part__Feature007"
+      ],
+      "component_labels": [
+        "industrial_fastner_part6"
+      ],
+      "group": null,
+      "is_stander": false,
+      "png": "output\\industrial_fastner_nogapskip_timing\\illustrations\\step_06_industrial_fastner_part6.png",
+      "view": {
+        "azimuth": 0.0,
+        "elevation": 20.0,
+        "is_global": false
+      },
+      "view_kind": "candidate",
+      "visible": true,
+      "xray": false,
+      "vis_end": 0.39315525876460766,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.39315525876460766,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.15820209037918143,
+      "in_frame": true,
+      "footnote": [
+        "Step 6 / 8   industrial_fastner_part6   Tool: by hand   Turns: 40.7 (clockwise)"
+      ],
+      "reorient": false,
+      "hold": false,
+      "warnings": []
+    },
+    {
+      "step": 7,
+      "steps": [
+        7
+      ],
+      "component_id": "Part__Feature005",
+      "component_label": "industrial_fastner_part001",
+      "component_ids": [
+        "Part__Feature005"
+      ],
+      "component_labels": [
+        "industrial_fastner_part001"
+      ],
+      "group": null,
+      "is_stander": true,
+      "png": "output\\industrial_fastner_nogapskip_timing\\illustrations\\step_07_industrial_fastner_part001.png",
+      "view": {
+        "azimuth": 120.0,
+        "elevation": 35.0,
+        "is_global": false
+      },
+      "view_kind": "stander",
+      "visible": false,
+      "xray": false,
+      "vis_end": 0.15625,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.15625,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.1034631481466333,
+      "in_frame": true,
+      "footnote": [
+        "Step 7 / 8   industrial_fastner_part001   Tool: wrenchA",
+        "Hold in place"
+      ],
+      "reorient": false,
+      "hold": true,
+      "warnings": [
+        "step 7: stander not fully visible in any main view; drawn without x-ray at az 120.0 el 35.0"
+      ]
+    },
+    {
+      "step": 8,
+      "steps": [
+        8
+      ],
+      "component_id": "Part__Feature004",
+      "component_label": "industrial_fastner_part4",
+      "component_ids": [
+        "Part__Feature004"
+      ],
+      "component_labels": [
+        "industrial_fastner_part4"
+      ],
+      "group": null,
+      "is_stander": true,
+      "png": "output\\industrial_fastner_nogapskip_timing\\illustrations\\step_08_industrial_fastner_part4.png",
+      "view": {
+        "azimuth": 120.0,
+        "elevation": 35.0,
+        "is_global": false
+      },
+      "view_kind": "stander",
+      "visible": false,
+      "xray": false,
+      "vis_end": 0.14465408805031446,
+      "vis_start": 1.0,
+      "vis_end_occluded": 0.14465408805031446,
+      "vis_start_occluded": 1.0,
+      "trajectory_px_frac": 0.1034631481466333,
+      "in_frame": true,
+      "footnote": [
+        "Step 8 / 8   industrial_fastner_part4   Tool: wrenchA",
+        "Hold in place"
+      ],
+      "reorient": false,
+      "hold": true,
+      "warnings": [
+        "step 8: stander not fully visible in any main view; drawn without x-ray at az 120.0 el 35.0"
+      ]
+    }
+  ],
+  "manual_path": "output\\industrial_fastner_nogapskip_timing\\illustrations\\manual.pdf",
+  "global_view": [
+    285.0,
+    20.0
+  ],
+  "config_hash": "6642fbb9a52fb4a21b37474d1fb709e4c7c660711977960bd468afe61bc26524",
+  "stats": {
+    "layers_rasterized": 606,
+    "raster_s": 18.630006500636227,
+    "views_evaluated": 73,
+    "view_search_s": 17.29093889996875,
+    "render_s": 11.035512599977665,
+    "total_s": 28.326459799951408
+  },
+  "config": {
+    "image_size": [
+      1600,
+      1200
+    ],
+    "search_size": [
+      480,
+      360
+    ],
+    "dpi": 200,
+    "tess_tolerance_rel": 0.002,
+    "default_view": [
+      -35.0,
+      30.0
+    ],
+    "azimuths": [
+      0,
+      15,
+      30,
+      45,
+      60,
+      75,
+      90,
+      105,
+      120,
+      135,
+      150,
+      165,
+      180,
+      195,
+      210,
+      225,
+      240,
+      255,
+      270,
+      285,
+      300,
+      315,
+      330,
+      345
+    ],
+    "elevations": [
+      20,
+      35,
+      50
+    ],
+    "vis_min_end": 0.35,
+    "vis_min_start": 0.35,
+    "min_trajectory_px_frac": 0.1,
+    "xray_alpha": 0.25,
+    "placed_color": "#bdbdbd",
+    "new_color": "#f28e2b",
+    "stander_color": "#3b75af",
+    "ghost_alpha": 0.35,
+    "show_gravity": true,
+    "mark_unstable": true,
+    "footnote_show_vector": false,
+    "group_frames": true,
+    "title": "industrial_fastner",
+    "language": "en"
+  }
+}

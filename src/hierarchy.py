@@ -4,7 +4,7 @@ Inputs
     - A FreeCAD document (anything exposing `RootObjects`, and per object `TypeId`, `Name`, `Label`,
       `Group`; tests use fakes, so no FreeCAD is needed here).
     - The BOM rows as plain dicts (the caller reads the CSV): columns `label`, `processed`,
-      `subassembly`, `is_stander` are used here.
+      `subassembly`, `is_standard` are used here.
 Outputs
     - A `Hierarchy`: the tree of `Container`s (one per App::Part, plus a virtual root when the document
       has no single top-level part), with the leaves (solid components) of every container and each
@@ -159,37 +159,37 @@ def _resolve_bom(containers: dict[str, Container], leaf_label: dict[str, str], l
     """[MAIN] Resolve the BOM columns against the tree: sets `Container.processed` and checks BOM/STEP consistency.
 
     Why: the BOM is where the user decides which sub-assemblies are expanded (`processed`) or fused
-    (stander), and the BOM must describe the same tree as the STEP, otherwise a decision would be
+    (standard), and the BOM must describe the same tree as the STEP, otherwise a decision would be
     silently lost, so inconsistencies raise ValueError instead of being guessed around.
     """
     by_label = _index_bom_rows(bom_rows)
     used_labels: set[str] = set()
     mismatches: list[str] = []
 
-    # Containers: processed flag from the BOM row, plus the stander and subassembly consistency checks.
+    # Containers: processed flag from the BOM row, plus the standard and subassembly consistency checks.
     for cid, c in containers.items():
         row = by_label.get(c.label) if c.label else None
         if row is not None:
             used_labels.add(c.label)
-            is_stander = (row.get("is_stander") or "").strip().lower() in _TRUE
-            if is_stander and cid == root_id:
+            is_standard = (row.get("is_standard") or "").strip().lower() in _TRUE
+            if is_standard and cid == root_id:
                 raise ValueError(
-                    f"BOM row for the root container {c.label!r} [{cid}] sets is_stander=true, but "
-                    "the root cannot be a stander"
+                    f"BOM row for the root container {c.label!r} [{cid}] sets is_standard=true, but "
+                    "the root cannot be a standard"
                 )
             raw_processed = (row.get("processed") or "").strip()
-            if is_stander and raw_processed and _parse_processed(raw_processed, f"container {c.label!r} [{cid}]"):
+            if is_standard and raw_processed and _parse_processed(raw_processed, f"container {c.label!r} [{cid}]"):
                 raise ValueError(
-                    f"BOM row for container {c.label!r} [{cid}] sets is_stander=true and "
-                    "processed=true; a stander subassembly is fused into one rigid component "
+                    f"BOM row for container {c.label!r} [{cid}] sets is_standard=true and "
+                    "processed=true; a standard subassembly is fused into one rigid component "
                     "('other' category) and cannot also be "
                     "recursively processed as its own level -- set processed=false or leave it blank"
                 )
-            if is_stander:
-                # A stander subassembly is always fused as a single rigid component: unlike a plain
+            if is_standard:
+                # A standard subassembly is always fused as a single rigid component: unlike a plain
                 # container, blank 'processed' here defaults to false, not true.
                 if not raw_processed:
-                    log.info("Container %r [%s] sets is_stander=true with 'processed' blank; "
+                    log.info("Container %r [%s] sets is_standard=true with 'processed' blank; "
                              "defaulting to processed=false", c.label, cid)
                 processed = False
             else:

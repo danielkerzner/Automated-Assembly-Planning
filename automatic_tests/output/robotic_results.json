@@ -1,4 +1,270 @@
 {
+ "R1": {
+  "passed": true,
+  "checks": [
+   {
+    "label": "defaults: rel 0.5, floor 0.5, rotation step 90 deg",
+    "passed": true
+   },
+   {
+    "label": "S_rel clips at 1",
+    "passed": true
+   },
+   {
+    "label": "S_rel = S_context / S_alone",
+    "passed": true
+   },
+   {
+    "label": "S_alone = 0 -> infeasible",
+    "passed": true
+   },
+   {
+    "label": "boundary inclusive: S_rel = 0.5 and S = 0.5 is feasible",
+    "passed": true
+   },
+   {
+    "label": "exclusive boundary rejects it",
+    "passed": true
+   },
+   {
+    "label": "S_rel 0.9 but S 0.45 below the floor -> infeasible",
+    "passed": true
+   },
+   {
+    "label": "S_rel 0.6 below 0.7 -> infeasible",
+    "passed": true
+   },
+   {
+    "label": "part1-like S_alone 0.488 fails alone at floor 0.5, 0.551 does not",
+    "passed": true
+   }
+  ],
+  "notes": []
+ },
+ "R2": {
+  "passed": true,
+  "checks": [
+   {
+    "label": "0.9/0.8/0.7/0.6 -> only the 0.6 edge pruned ([(103, 3)])",
+    "passed": true
+   },
+   {
+    "label": "max(1, floor(N/4)): N=3 -> 1, N=1 -> 1, N=8 -> 2, N=0 -> 0",
+    "passed": true
+   },
+   {
+    "label": "every infeasible edge (gripper and tool) pruned ([(11, 1), (12, 2), (13, 3)])",
+    "passed": true
+   },
+   {
+    "label": "intrinsically infeasible steps are not pruned nor counted ([(12, 2)])",
+    "passed": true
+   },
+   {
+    "label": "infeasible ranks below any feasible step regardless of S_rel",
+    "passed": true
+   }
+  ],
+  "notes": []
+ },
+ "R3": {
+  "passed": true,
+  "checks": [
+   {
+    "label": "(1) fewer infeasible wins",
+    "passed": true
+   },
+   {
+    "label": "(2) bottleneck before sum",
+    "passed": true
+   },
+   {
+    "label": "(3) sum before cost",
+    "passed": true
+   },
+   {
+    "label": "(4) lower cost last",
+    "passed": true
+   }
+  ],
+  "notes": []
+ },
+ "R4": {
+  "passed": true,
+  "checks": [
+   {
+    "label": "record count equals iterations run",
+    "passed": true
+   },
+   {
+    "label": "runs 10 iterations unless no path remains / nothing new to prune",
+    "passed": true
+   },
+   {
+    "label": "blocked edges only grow",
+    "passed": true
+   },
+   {
+    "label": "no sequence uses an edge blocked in an earlier iteration",
+    "passed": true
+   },
+   {
+    "label": "engine calls = distinct (state, component) with obstacles + 4 alone (15)",
+    "passed": true
+   },
+   {
+    "label": "chosen record follows the ranking",
+    "passed": true
+   },
+   {
+    "label": "a repeated sequence is not re-evaluated (engine calls 7 = 4 alone + 3 steps with obstacles)",
+    "passed": true
+   },
+   {
+    "label": "stops once nothing new can be pruned (2, no new pruning after iteration 2 (the next candidate would repeat it))",
+    "passed": true
+   },
+   {
+    "label": "early exit when no path (2, no path left after pruning (The 2 blocked edge(s) disconnect the root from the terminal))",
+    "passed": true
+   }
+  ],
+  "notes": [
+   "4 iteration(s), stop: no path left after pruning (The 4 blocked edge(s) disconnect the root from the terminal), 4 blocked, engine calls 15"
+  ]
+ },
+ "R5": {
+  "passed": true,
+  "checks": [
+   {
+    "label": "matching keeps grasps present at every angle, lowest score",
+    "passed": true
+   },
+   {
+    "label": "same TCP but flipped axes does not match",
+    "passed": true
+   },
+   {
+    "label": "non-rotating step: alone + one call, best 0.9 (2 calls)",
+    "passed": true
+   },
+   {
+    "label": "rotating step: 3 more calls at 90/180/270 (angle 0 shared) (5)",
+    "passed": true
+   },
+   {
+    "label": "angles tested [0.0, 90.0, 180.0, 270.0]",
+    "passed": true
+   },
+   {
+    "label": "only B (0.8) survives every angle; S_rel = 0.8/0.9 (0.8)",
+    "passed": true
+   },
+   {
+    "label": "repeated rotating step is served from the cache",
+    "passed": true
+   },
+   {
+    "label": "partner of a present nut rotates about its axis",
+    "passed": true
+   },
+   {
+    "label": "nut already removed -> no rotation",
+    "passed": true
+   }
+  ],
+  "notes": []
+ },
+ "R6": {
+  "passed": true,
+  "checks": [
+   {
+    "label": "blocked_edges None/empty reproduces the result",
+    "passed": true
+   },
+   {
+    "label": "blocked_edges None/empty keeps the cache key",
+    "passed": true
+   },
+   {
+    "label": "a blocked edge never appears in the chosen sequence",
+    "passed": true
+   },
+   {
+    "label": "the cache key differs with blocked edges",
+    "passed": true
+   },
+   {
+    "label": "blocking every root edge raises NoPathError",
+    "passed": true
+   }
+  ],
+  "notes": []
+ },
+ "R7": {
+  "passed": true,
+  "checks": [
+   {
+    "label": "flag wins over the prompt",
+    "passed": true
+   },
+   {
+    "label": "no flag: asks (robot)",
+    "passed": true
+   },
+   {
+    "label": "no flag: Enter = manual",
+    "passed": true
+   },
+   {
+    "label": "invalid answer asks again",
+    "passed": true
+   },
+   {
+    "label": "no flag and no terminal: manual",
+    "passed": true
+   },
+   {
+    "label": "invalid flag value raises",
+    "passed": true
+   },
+   {
+    "label": "CLI rejects --mode auto",
+    "passed": true
+   }
+  ],
+  "notes": []
+ },
+ "R8": {
+  "passed": true,
+  "checks": [
+   {
+    "label": "every manual key present and unchanged",
+    "passed": true
+   },
+   {
+    "label": "robot block has ['alone_scores', 'config', 'failing_steps', 'feasible', 'loop', 'mode', 'steps', 'thresholds']",
+    "passed": true
+   },
+   {
+    "label": "gripper step fields present",
+    "passed": true
+   },
+   {
+    "label": "robot steps align with level steps",
+    "passed": true
+   },
+   {
+    "label": "every recorded sequence listed, exactly one chosen",
+    "passed": true
+   },
+   {
+    "label": "plan.json written with the robot block",
+    "passed": true
+   }
+  ],
+  "notes": []
+ },
  "R13": {
   "passed": true,
   "checks": [

@@ -1,0 +1,15 @@
+﻿node,level,mask,live,dead_end,components
+0,0,127,True,False,cube; plug; plug001; plug002; plug003; plug004; base
+1,1,125,True,False,cube; plug001; plug002; plug003; plug004; base
+2,1,126,True,False,plug; plug001; plug002; plug003; plug004; base
+3,2,121,True,False,cube; plug002; plug003; plug004; base
+4,2,124,True,False,plug001; plug002; plug003; plug004; base
+5,3,113,True,False,cube; plug003; plug004; base
+6,3,120,True,False,plug002; plug003; plug004; base
+7,4,97,True,False,cube; plug004; base
+8,4,112,True,False,plug003; plug004; base
+9,5,65,True,False,cube; base
+10,5,96,True,False,plug004; base
+11,6,1,True,False,cube
+12,6,64,True,False,base
+13,7,0,True,False,(empty)
