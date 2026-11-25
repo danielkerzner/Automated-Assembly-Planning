@@ -1,4 +1,4 @@
-"""Acceptance tests for the AoG generator (A1-A13).
+"""Acceptance tests for the AoG generator (A1-A14).
 
 [SUPP] Automatic test file: not needed to run the pipeline. Module under test: `src/aog_generator.py`
 (`generate_aog`, `collect_inputs`, `build_aog`, the travel table, the direction extension, the cache and
@@ -1081,6 +1081,88 @@ def test_a13(rec, args):
                   f"real run reads the same groups from the BOM and gives the same graph ({real.stats['groups']})")
 
 
+def test_a14(rec, args):
+    """A14 - Noncoherent escape (D14): relax D11 only at an otherwise-dead-end state.
+
+    Tests: `AoGConfig.allow_noncoherent` in `generate_aog`.
+    What: (1) a minimal "bridge" case (Bridge touching two otherwise-unconnected singletons X, Y; X and Y
+    have zero free directions while Bridge is present) is a dead end under strict D11 (Bridge's only move
+    leads to the disconnected state {X, Y}) but complete with the escape on, with exactly the expected nodes/
+    edges and the right `connected`/stats; the strict result with `allow_noncoherent` explicitly False is
+    identical to the default-config result (regression pin). (2) a bigger case (Bridge bridging an {X1, X2}
+    cluster and a {Y1, Y2, W} cluster) shows the escape stays off through a run of disconnected states and
+    resumes once a single group re-forms: after X1 and X2 are both gone, state {Y1, Y2, W} is connected again
+    and its move that would re-disconnect it (removing Y1, the only part touching both Y2 and W) is dropped
+    while its two moves to connected states are kept -- confirmed independently against `_disconnected_nodes`.
+    """
+    # (1) Minimal bridge: Bridge=0, X=1, Y=2. X and Y are blocked by Bridge in every direction (zero free
+    # directions while it is present) and do not block each other; Bridge is never blocked. Contact: only
+    # Bridge-X and Bridge-Y touch -- X and Y never touch directly.
+    Bridge, X, Y = 0, 1, 2
+    free = np.ones((3, 3, 6), dtype=bool)
+    free[X, Bridge, :] = False
+    free[Y, Bridge, :] = False
+    contact = contact_from_pairs(3, [(Bridge, X), (Bridge, Y)])
+    inputs = make_inputs(free, ids=["Bridge", "X", "Y"], contact=contact)
+
+    with LogCapture() as cap:
+        strict = ag.generate_aog(inputs, AoGConfig(allow_noncoherent=False))
+    rec.check(strict.n_nodes == 1 and list(strict.dead_ends) == [0] and not strict.complete,
+              f"strict D11: Bridge's only move leads to the disconnected {{X, Y}}, so the root is a dead "
+              f"end (V={strict.n_nodes}, dead_ends={list(strict.dead_ends)}, complete={strict.complete})")
+    rec.check(any("dead-end" in r.getMessage() for r in cap.records), "dead end reported, not resolved")
+    rec.check(module_sets(strict) == module_sets(ag.generate_aog(inputs)),
+              "allow_noncoherent=False explicitly matches the default config (regression pin)")
+
+    nc = ag.generate_aog(inputs, AoGConfig(allow_noncoherent=True))
+    rec.check(nc.complete and len(nc.dead_ends) == 0,
+              f"D14 on: the escape completes the graph (complete={nc.complete}, dead_ends={list(nc.dead_ends)})")
+    rec.check(nc.n_nodes == 5 and nc.n_edges == 5,
+              f"V=5 (root, {{X,Y}}, {{X}}, {{Y}}, terminal), E=5 (got V={nc.n_nodes}, E={nc.n_edges})")
+    disconnected_masks = {int(nc.node_mask[v]) for v in range(nc.n_nodes) if not nc.connected[v]}
+    rec.check(disconnected_masks == {0b110},
+              f"only {{X, Y}} (mask 0b110) is disconnected in the final graph (got {disconnected_masks})")
+    rec.check(nc.stats["noncoherent_escapes"] == 1 and nc.stats["noncoherent_states"] == 1,
+              f"stats: 1 escaping state (the root), 1 disconnected node in the result "
+              f"(got escapes={nc.stats['noncoherent_escapes']}, states={nc.stats['noncoherent_states']})")
+
+    # (2) Bridge=0 joins cluster {X1=1, X2=2} to cluster {Y1=3, Y2=4, W=5}; Y1 touches both Y2 and W, which
+    # do not touch each other. All five non-Bridge parts are blocked by Bridge in every direction and by
+    # nothing else, so Bridge must leave first, same mechanism as (1), but now the escaped state goes
+    # through several further disconnected states before {Y1, Y2, W} reconnects.
+    X1, X2, Y1, Y2, W = 1, 2, 3, 4, 5
+    free2 = np.ones((6, 6, 6), dtype=bool)
+    for c in (X1, X2, Y1, Y2, W):
+        free2[c, Bridge, :] = False
+    contact2 = contact_from_pairs(6, [(Bridge, X1), (X1, X2), (Bridge, Y1), (Y1, Y2), (Y1, W)])
+    inputs2 = make_inputs(free2, ids=["Bridge", "X1", "X2", "Y1", "Y2", "W"], contact=contact2)
+    big = ag.generate_aog(inputs2, AoGConfig(allow_noncoherent=True))
+    rec.check(big.complete and len(big.dead_ends) == 0,
+              f"bigger bridge case also completes with the escape (complete={big.complete})")
+
+    mask_y_group = (1 << Y1) | (1 << Y2) | (1 << W)  # {Y1, Y2, W}, reached once both X1 and X2 are gone
+    v_y_group = [v for v in range(big.n_nodes) if int(big.node_mask[v]) == mask_y_group]
+    rec.check(len(v_y_group) == 1 and bool(big.connected[v_y_group[0]]),
+              "{Y1, Y2, W} is reached and is connected again (X-cluster fully removed)")
+    if v_y_group:
+        v = v_y_group[0]
+        dest_masks = {int(big.node_mask[big.edge_dst[e]]): int(big.edge_comp[e]) for e in big.out_edges(v)}
+        mask_no_y1 = mask_y_group & ~(1 << Y1)   # {Y2, W}: they do not touch each other -- disconnected
+        mask_no_y2 = mask_y_group & ~(1 << Y2)   # {Y1, W}: touch -- connected
+        mask_no_w = mask_y_group & ~(1 << W)     # {Y1, Y2}: touch -- connected
+        rec.check(mask_no_y1 not in dest_masks,
+                  "D11 resumes once reconnected: removing Y1 (the only move that would re-disconnect "
+                  "{Y1, Y2, W}) is dropped, since removing Y2 or W instead stays connected")
+        rec.check(mask_no_y2 in dest_masks and mask_no_w in dest_masks,
+                  "both of {Y1, Y2, W}'s connected-destination moves (removing Y2 or removing W) are kept")
+    # Independent cross-check: every node `big.connected` calls connected is confirmed by the brute-force
+    # DFS used elsewhere in this file (_disconnected_nodes), and vice versa.
+    bad = _disconnected_nodes(big, contact2)
+    rec.check({int(big.node_mask[v]) for v in bad} == {int(m) for m in big.node_mask[~big.connected]},
+              f"`AoG.connected` agrees with the independent brute-force check on every node ({len(bad)} "
+              f"disconnected by brute force)")
+
+
 # ---------------------------------------------------------------------------
 # Runner
 # ---------------------------------------------------------------------------
@@ -1088,7 +1170,7 @@ def test_a13(rec, args):
 TESTS = [
     ("A1", test_a1), ("A2", test_a2), ("A2b", test_a2b), ("A3", test_a3), ("A4", test_a4), ("A5", test_a5),
     ("A6", test_a6), ("A7", test_a7), ("A8", test_a8), ("A9", test_a9), ("A10", test_a10), ("A11", test_a11),
-    ("A12", test_a12), ("A13", test_a13),
+    ("A12", test_a12), ("A13", test_a13), ("A14", test_a14),
 ]
 
 

@@ -21,10 +21,15 @@ What this module does
     assembly and needs no change. `solve_level` runs the per-level pipeline on that document and recurses
     into every child container marked `processed` in the BOM.
 
-    Phase 2: if the AoG of a level is not complete, `_solve_pipeline` finds groups of parts that block
-    each other (`aog_generator.find_candidate_groups`), merges the best group into a virtual `auto_<n>`
-    container (`_pick_winner`, `_commit_merge`), rebuilds the AoG and repeats. Each `auto_<n>` group is
-    then planned on its own as a child level. If no group can be found the level ends "locked".
+    If the AoG of a level is not complete, `_solve_pipeline` first retries once with the AoG generator's D14
+    noncoherent escape on (`AoGConfig.allow_noncoherent`, `docs/aog-spec.md`): this relaxes the no-floating-
+    parts rule (D11) only at what would otherwise be a dead end, letting a disassembly order pass through an
+    intermediate state where the remaining parts are not all mutually touching. If that retry completes, it
+    is used directly (no merging). Only if it is *also* incomplete does Phase 2 run: `_solve_pipeline` finds
+    groups of parts that block each other (`aog_generator.find_candidate_groups`), merges the best group into
+    a virtual `auto_<n>` container (`_pick_winner`, `_commit_merge`), rebuilds the (strict) AoG and repeats.
+    Each `auto_<n>` group is then planned on its own as a child level. If neither mechanism resolves it the
+    level ends "locked".
 """
 
 from __future__ import annotations
@@ -498,7 +503,8 @@ def _level_output_dir(output_dir: Path, hier: Hierarchy, container_id: str) -> P
 
 def _solve_pipeline(hier: Hierarchy, container_id: str, label: str, prep_L, interf, level_dir: Path,
                     illustration_config=None, optimization_config=None) -> LevelPlan:
-    """[MAIN] AoG -> Phase 2 merge loop (if needed) -> Optimization -> Illustrations for one level.
+    """[MAIN] AoG -> D14 noncoherent retry -> Phase 2 merge loop (if needed) -> Optimization -> Illustrations
+    for one level.
 
     Input: a level that already has its Preprocessing and Interference results (a real container or a
     Phase 2 group), plus the output folder and the optional Optimization / Illustration configs. Output:
@@ -517,6 +523,18 @@ def _solve_pipeline(hier: Hierarchy, container_id: str, label: str, prep_L, inte
     # tests that fake build_aog to always be complete) never needs it.
     doc_L = getattr(prep_L, "reduced_assembly", None)
     aog = build_aog(interf, prep_L, config=aog_config, cache_dir=level_dir / "aog")
+
+    # D14 retry: if the strict AoG is incomplete, try once more with the no-floating-parts rule (D11)
+    # relaxed at dead ends only (docs/aog-spec.md D14). If that completes, use it directly and skip the
+    # Phase 2 merge loop entirely; otherwise fall through to Phase 2 on the strict `aog`/`interf`, unchanged.
+    if not aog.complete:
+        aog_nc = build_aog(interf, prep_L, config=replace(aog_config, allow_noncoherent=True),
+                           cache_dir=level_dir / "aog_noncoherent")
+        if aog_nc.complete:
+            log.info("Level %r [%s]: strict AoG was incomplete; the D14 noncoherent retry completed it "
+                     "(%d disconnected state(s) used)", label, container_id,
+                     int((~aog_nc.connected).sum()))
+            aog = aog_nc
 
     status = "complete"
     locked_parts: list[str] = []

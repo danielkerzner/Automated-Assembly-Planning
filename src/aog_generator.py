@@ -28,9 +28,15 @@ What this module does
     present while it leaves; a nut's `nut_rule` orders it against its `partner` (standard or movable). All of
     this is encoded as blocker masks, not as a single gate. Travel distances are measured to
     the constant whole-assembly box. States whose components do not form one group through physical
-    contacts (parts floating apart) are dropped, with the edges leading to them. Members of one BOM group are
-    removed consecutively, in one order per group block (D12, D13). There is no node limit; the only size
-    limit is MAX_COMPONENTS (one uint64 bitmask per state).
+    contacts (parts floating apart) are dropped, with the edges leading to them (D11). Members of one BOM
+    group are removed consecutively, in one order per group block (D12, D13). There is no node limit; the
+    only size limit is MAX_COMPONENTS (one uint64 bitmask per state).
+
+    D14 (noncoherent escape, off by default, `AoGConfig.allow_noncoherent`): when on, D11 is relaxed exactly
+    at what would otherwise be a dead end -- a connected state with no move into another connected state
+    keeps its moves into disconnected states instead, and an already-disconnected state is not filtered at
+    all until a connected state re-forms. `levels.py` turns this on only as a retry when the strict (D11)
+    AoG is incomplete, so it never changes the graph of an assembly that already completes under D11 alone.
 
 `generate_aog` is pure numpy on `AoGInputs`, so tests need no FreeCAD. `collect_inputs` and `build_aog`
 connect it to the pipeline objects.
@@ -78,6 +84,12 @@ class AoGConfig:
     # state, only the lowest-index member is kept (removes the k! orderings). Needs group_consecutive.
     # Recommended: True.
     group_one_order: bool = True
+    # bool. D14: relax D11 (no-floating-parts) at an otherwise-dead-end state -- allow a move into a
+    # disconnected state only from a connected state that has no connected alternative, and allow any move
+    # from an already-disconnected state (no filtering), until a connected state re-forms. Off by default
+    # (byte-identical to the pre-D14 graph); `levels.py` turns it on only as a retry when the strict AoG is
+    # incomplete.
+    allow_noncoherent: bool = False
 
 
 @dataclass
@@ -143,6 +155,7 @@ class AoG:
     out_ptr: np.ndarray  # (V+1,) int64; CSR offsets, out-edges of v are out_ptr[v]..out_ptr[v+1].
     live: np.ndarray  # (V,) bool; the node can reach the terminal (a full disassembly exists from it).
     dead_ends: np.ndarray  # (k,) int64; node ids that are non-terminal and have no out-edge.
+    connected: np.ndarray  # (V,) bool; D14 -- the node's state is one group through contacts (always True if adj is None).
     complete: bool  # bool. The root is live: at least one full sequence exists.
     root: int  # int. Node id of the root (all components present), always 0.
     terminal: int | None  # int or None. Node id of the fully disassembled state, None if never reached.
@@ -457,10 +470,11 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
     Method: a state is a bitmask of the components still present. For a movable part c in state S, the
     bit k of its direction set is 1 iff no part present in S blocks it along k, i.e. (S & blocker_mask[c, k])
     == 0; a standard has one blocker mask per removal option. Every move c -> S without c is kept only if the
-    resulting state is valid (screw holds present, parts still connected, BOM group order respected). Each
-    level of the graph is the set of unique resulting states of the previous level. Finally the live nodes
-    are found by propagating reachability of the terminal backwards, and the dead ends are the non-terminal
-    nodes without out-edge.
+    resulting state is valid (screw holds present, BOM group order respected) and connected through physical
+    contacts (D11), unless `config.allow_noncoherent` relaxes D11 at a would-be dead end (D14, see the module
+    docstring). Each level of the graph is the set of unique resulting states of the previous level. Finally
+    the live nodes are found by propagating reachability of the terminal backwards, and the dead ends are the
+    non-terminal nodes without out-edge.
     """
     config = config or AoGConfig()
     t0 = time.perf_counter()
@@ -585,6 +599,10 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
     offset = 0
     dropped_per_level = [0]
     order_pruned = 0
+    noncoherent_escapes = 0
+    # D14: per-state connectivity of the current level (None when the rule is off, i.e. config.allow_noncoherent
+    # is False or adj is None -- the strict path below never reads it).
+    level_connected = connected_states(level, adj) if (adj is not None and config.allow_noncoherent) else None
 
     # For each level (L components removed), expand every state once by removing one present component.
     for L in range(N):
@@ -641,13 +659,31 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
         # Drop states whose parts would float apart (not one group through contacts), together
         # with every edge leading to them. Checked once per unique state.
         dropped = 0
-        if adj is not None:
+        if adj is not None and not config.allow_noncoherent:
             conn = connected_states(nxt, adj)
             dropped = int((~conn).sum())
             if dropped:
                 keep = conn[np.searchsorted(nxt, dst_mask)]
                 src_local, comp, dset, dst_mask = src_local[keep], comp[keep], dset[keep], dst_mask[keep]
                 nxt = nxt[conn]
+        elif adj is not None:
+            # D14: drop a move into a disconnected state only when its source is connected AND the source
+            # has another move into a connected state; an already-disconnected source is never filtered
+            # (the rule stays off until a connected state re-forms), and a connected source stuck with only
+            # disconnected options keeps them all (the escape -- this is exactly what would otherwise be a
+            # dead end).
+            dest_conn = connected_states(nxt, adj)[np.searchsorted(nxt, dst_mask)]
+            src_conn = level_connected[src_local]
+            any_connected_option = np.zeros(len(S), dtype=bool)
+            np.logical_or.at(any_connected_option, src_local, dest_conn)
+            escaping = src_conn & ~any_connected_option[src_local]
+            keep = (~src_conn) | dest_conn | escaping
+            dropped = int((~keep).sum())
+            if escaping.any():
+                noncoherent_escapes += len(np.unique(src_local[escaping]))
+            if dropped:
+                src_local, comp, dset, dst_mask = src_local[keep], comp[keep], dset[keep], dst_mask[keep]
+                nxt = np.unique(dst_mask)
         dropped_per_level.append(dropped)
 
         # D13: of the feasible moves that remove members of the same group from the same state, keep
@@ -680,6 +716,11 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
         level_sizes.append(len(nxt))
         offset = next_offset
         level = nxt
+        # D14: recompute per-state connectivity for the final (post-D13) node set of this level, for the
+        # next iteration's filtering. D13 can remove states from `nxt` beyond plain dedup, so this is not
+        # simply inherited from the D11/D14 step above.
+        if adj is not None and config.allow_noncoherent:
+            level_connected = connected_states(nxt, adj)
 
     # Assemble the node arrays: masks, level offsets and the level of every node.
     node_mask = np.concatenate(node_chunks).astype(U64)
@@ -716,6 +757,9 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
     has_out = out_ptr[1:] > out_ptr[:-1]
     dead_ends = np.flatnonzero((node_mask != 0) & ~has_out).astype(np.int64)
 
+    # D14 bookkeeping: connectivity of every node in the final graph (all True if the rule is off).
+    connected = connected_states(node_mask, adj) if adj is not None else np.ones(V, dtype=bool)
+
     # Travel table: the distance each component must move along each direction to leave the assembly box,
     # plus the margin.
     travel = compute_travel_table(inputs.bbox_lo, inputs.bbox_hi, inputs.assembly_lo,
@@ -746,6 +790,7 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
         out_ptr=out_ptr,
         live=live,
         dead_ends=dead_ends,
+        connected=connected,
         complete=bool(live[root]),
         root=root,
         terminal=terminal,
@@ -763,6 +808,8 @@ def generate_aog(inputs: AoGInputs, config: AoGConfig | None = None) -> AoG:
         "N": N, "n_movable": n, "n_standards": N - n, "D": D, "D_prime": Dp,
         "V": V, "E": len(edge_src), "nodes_per_level": sizes,
         "connectivity_rule": adj is not None, "disconnected_dropped": int(sum(dropped_per_level)),
+        "allow_noncoherent": config.allow_noncoherent, "noncoherent_escapes": int(noncoherent_escapes),
+        "noncoherent_states": int((~connected).sum()),
         "dead_ends": len(dead_ends), "live_nodes": int(live.sum()), "complete": aog.complete,
         "time_s": time.perf_counter() - t0, "array_bytes": _array_bytes(aog),
     }
@@ -1030,12 +1077,12 @@ NPZ_NAME = "aog.npz"  # numpy arrays of the AoG
 JSON_NAME = "aog.json"  # metadata, statistics and the cache key
 _ARRAY_FIELDS = ("is_standard", "directions", "neg", "node_mask", "node_level", "level_offsets",
                  "edge_src", "edge_dst", "edge_comp", "edge_dirs", "out_ptr", "live", "dead_ends",
-                 "travel")  # AoG fields saved in the .npz
+                 "connected", "travel")  # AoG fields saved in the .npz
 # Bump whenever a cached AoG's on-disk meaning could change
 # without its cache_key necessarily changing (e.g. a loader/field rename) -- rejects old caches
 # outright rather than risking a silent misread. 2 = the standard_options/holds/nut_links model
-# (was 1, implicitly, under standard_dir/standard_gate).
-AOG_SCHEMA_VERSION = 2
+# (was 1, implicitly, under standard_dir/standard_gate). 3 = AoG.connected added (D14 noncoherent escape).
+AOG_SCHEMA_VERSION = 3
 
 
 def save_aog(aog: AoG, cache_dir: str | Path) -> None:
@@ -1163,6 +1210,9 @@ def _log_summary(aog: AoG) -> None:
                  "(%d edges removed)", s["groups"], s["group_one_order"], s["group_order_pruned_edges"])
     if s.get("connectivity_rule"):
         log.info("AoG dropped %d disconnected state(s) (parts floating apart)", s["disconnected_dropped"])
+        if s.get("allow_noncoherent") and s.get("noncoherent_escapes"):
+            log.info("AoG D14 noncoherent escape: %d state(s) escaped the connectivity rule, %d node(s) in "
+                     "the final graph are disconnected", s["noncoherent_escapes"], s["noncoherent_states"])
     else:
         log.info("AoG connectivity rule off (no contact data in the inputs)")
     if len(aog.dead_ends):

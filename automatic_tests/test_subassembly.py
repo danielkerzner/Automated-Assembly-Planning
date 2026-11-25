@@ -1105,6 +1105,93 @@ def test_r8(rec, args):
              "cache_key (confirmed by source inspection)")
 
 
+def test_r9(rec, args):
+    """D14 noncoherent retry in `_solve_pipeline` (core -- pure numpy, no FreeCAD): a level whose
+    strict AoG is incomplete purely because of the no-floating-parts rule (D11) -- same minimal
+    "Bridge touching two otherwise-unconnected singletons X, Y" case as test_aog.py's A14 -- is
+    completed by the D14 retry alone, without ever entering the Phase 2 merge loop: no `auto_<n>`
+    is created, `plan.children` stays empty, and optimize_sequence/generate_illustrations are each
+    called exactly once (normal completion, not locked). `fake_build_aog` forwards to the real
+    `generate_aog` with whatever `AoGConfig` `_solve_pipeline` passes it, so both the strict and the
+    retry call go through the real D11/D14 logic, only `optimize_sequence`/`generate_illustrations`
+    are faked (as in R3/R7), since this test is about the orchestration, not the ACO/illustration
+    stages. The other half of the ordering -- both the strict AoG *and* the D14 retry incomplete,
+    falling through to Phase 2 / locked exactly as before -- needs no new test: R3's and R7's
+    fixtures have no connectivity-caused dead end at all (their blocking is purely interference-
+    based), so the D14 retry is a no-op for them and their continuing to pass after this change is
+    itself the regression confirmation."""
+    from test_aog import AXES, AXES_NEG, contact_from_pairs, make_inputs
+
+    from aog_generator import AoGConfig, generate_aog
+    from collision import CollisionConfig
+    from interference_identification import InterferenceResult
+    from preprocessing import PreprocessingResult
+
+    Bridge, X, Y = 0, 1, 2
+    free = np.ones((3, 3, 6), dtype=bool)
+    free[X, Bridge, :] = False
+    free[Y, Bridge, :] = False
+    contact = contact_from_pairs(3, [(Bridge, X), (Bridge, Y)])
+    ids = ["Bridge", "X", "Y"]
+    inputs = make_inputs(free, ids=ids, contact=contact)
+    rec.check(not generate_aog(inputs).complete, "setup: the bridge case is a genuine dead end under strict D11")
+
+    interf = InterferenceResult(
+        component_ids=ids, component_labels=ids, directions=np.asarray(AXES, dtype=float),
+        neg=np.asarray(AXES_NEG), free=free,
+        pair_info={}, exception_cells=[], caught_exceptions=[], outcome_detail={},
+        config=CollisionConfig(), stats={}, cache_key="r9",
+        contact=contact, contact_threshold=0.1, gaps=np.zeros((3, 3)),
+    )
+    prep = PreprocessingResult(reduced_assembly=None, standard_records={}, candidate_directions=[],
+                               level_id="root", level_label="Assembly")
+
+    calls = {"optimize": 0, "illustrate": 0}
+    real_build_aog, real_optimize, real_illustrate = ag_mod.build_aog, opt_mod.optimize_sequence, ig_mod.generate_illustrations
+
+    def fake_build_aog(interference_result, p, config=None, cache_dir=None, force=None):
+        from aog_generator import AoGInputs
+
+        n = len(interference_result.component_ids)
+        built = AoGInputs(
+            component_ids=list(interference_result.component_ids),
+            component_labels=list(interference_result.component_labels),
+            n_movable=n, free=interference_result.free, directions=interference_result.directions,
+            neg=interference_result.neg, standard_options={}, standard_holds={}, nut_links={},
+            bbox_lo=np.zeros((n, 3)), bbox_hi=np.ones((n, 3)),
+            assembly_lo=np.zeros(3), assembly_hi=np.ones(3),
+            cache_key=interference_result.cache_key, contact=interference_result.contact, group=None,
+        )
+        return generate_aog(built, config or AoGConfig())
+
+    def fake_optimize_sequence(*a, **k):
+        calls["optimize"] += 1
+        return SimpleNamespace(steps=[], total_cost=0.0)
+
+    def fake_generate_illustrations(*a, **k):
+        calls["illustrate"] += 1
+
+    ag_mod.build_aog, opt_mod.optimize_sequence, ig_mod.generate_illustrations = (
+        fake_build_aog, fake_optimize_sequence, fake_generate_illustrations)
+    try:
+        hier = build_hierarchy(flat_tree(3), is_leaf=leaf_is)
+        scratch = fresh_dir("r9")
+        with LogCapture("aap.levels") as cap:
+            plan = levels_mod._solve_pipeline(hier, hier.root, "Assembly", prep, interf, scratch)
+    finally:
+        ag_mod.build_aog, opt_mod.optimize_sequence, ig_mod.generate_illustrations = (
+            real_build_aog, real_optimize, real_illustrate)
+
+    rec.check(plan.status == "complete", f"the D14 retry alone completes the level (got {plan.status!r})")
+    rec.check(plan.aog.complete and len(plan.aog.dead_ends) == 0,
+             f"the level's AoG is the completed (noncoherent) one (complete={plan.aog.complete})")
+    rec.check(not plan.children, f"no auto_<n> group was created (got {list(plan.children)})")
+    rec.check(calls == {"optimize": 1, "illustrate": 1},
+             f"optimize_sequence/generate_illustrations each run once, normal completion (got {calls})")
+    rec.check(any("D14 noncoherent retry completed it" in r.getMessage() for r in cap.records),
+             "the retry is logged")
+
+
 def test_r2(rec, args):
     """industrial_fastner's AoG is complete with no dead end at all (reconciled 2026-11-15): the
     {part3, part6, part7} dead end this test used to check for is obsolete -- since the three-class
@@ -1404,7 +1491,7 @@ TESTS = [
     ("H7", test_h7, "real"), ("H10", test_h10, "real"), ("H11", test_h11, "real"), ("H1b", test_h1b, "real"),
     ("H12", test_h12, "real"),
     ("R2", test_r2, "real"), ("R3", test_r3, "core"), ("R4", test_r4, "core"), ("R5", test_r5, "core"),
-    ("R6", test_r6, "real"), ("R7", test_r7, "real"), ("R8", test_r8, "core"),
+    ("R6", test_r6, "real"), ("R7", test_r7, "real"), ("R8", test_r8, "core"), ("R9", test_r9, "core"),
 ]
 
 

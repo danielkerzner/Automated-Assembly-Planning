@@ -157,11 +157,11 @@
   "config_hash": "0d6e7c5f08b2d9f7e4686f69c7a8026525fa77c9935ec3b7352c15b25581cb77",
   "stats": {
     "layers_rasterized": 296,
-    "raster_s": 0.21931370010133833,
+    "raster_s": 0.27090350004436914,
     "views_evaluated": 73,
-    "view_search_s": 0.3132763000030536,
-    "render_s": 0.5016783000028227,
-    "total_s": 0.8149592999980086
+    "view_search_s": 0.37759550000191666,
+    "render_s": 0.755587599996943,
+    "total_s": 1.1331893000024138
   },
   "config": {
     "image_size": [

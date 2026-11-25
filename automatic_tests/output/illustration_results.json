@@ -88,7 +88,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.88
+      "seconds": 1.547
     },
     "L2": {
       "passed": true,
@@ -127,7 +127,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.035
+      "seconds": 0.071
     },
     "L3": {
       "passed": true,
@@ -178,7 +178,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.063
+      "seconds": 0.128
     },
     "L4": {
       "passed": true,
@@ -193,7 +193,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.324
+      "seconds": 0.826
     },
     "L5": {
       "passed": true,
@@ -216,7 +216,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.025
+      "seconds": 0.04
     },
     "L6": {
       "passed": true,
@@ -241,7 +241,7 @@
       "notes": [
         "visible counts: [3, 4], 4 view(s) tied on count"
       ],
-      "seconds": 0.132
+      "seconds": 0.12
     },
     "L7": {
       "passed": true,
@@ -296,7 +296,7 @@
         }
       ],
       "notes": [],
-      "seconds": 1.647
+      "seconds": 2.193
     },
     "L8": {
       "passed": true,
@@ -323,7 +323,7 @@
         }
       ],
       "notes": [],
-      "seconds": 1.041
+      "seconds": 1.262
     },
     "L9": {
       "passed": true,
@@ -342,7 +342,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.89
+      "seconds": 1.267
     },
     "L10": {
       "passed": true,
@@ -377,7 +377,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.605
+      "seconds": 1.0
     },
     "L11": {
       "passed": true,
@@ -424,7 +424,7 @@
         }
       ],
       "notes": [],
-      "seconds": 2.777
+      "seconds": 6.55
     },
     "L13": {
       "passed": true,
@@ -434,7 +434,7 @@
           "passed": true
         },
         {
-          "label": "N = 8 within 60 s (12.3 s: search 6.1 s, render 6.2 s)",
+          "label": "N = 8 within 60 s (36.5 s: search 18.5 s, render 17.9 s)",
           "passed": true
         },
         {
@@ -447,7 +447,7 @@
         "views evaluated 73, layers rasterized 592, kinds ['global', 'global', 'global', 'global', 'global', 'global', 'global', 'global']",
         "N = 20 skipped (run with --groups scale)"
       ],
-      "seconds": 12.735
+      "seconds": 37.748
     },
     "L14": {
       "passed": true,
@@ -510,7 +510,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.7
+      "seconds": 1.664
     },
     "cache": {
       "passed": true,

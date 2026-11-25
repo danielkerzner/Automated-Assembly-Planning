@@ -235,6 +235,7 @@ Note: with the default step of 5.0 a default run writes into `output/industrial_
 | `visualize_grasps.py <output_dir> <step>` | Interactive 3D viewer of a robot-mode `plan.json` (arrow keys step through the sequence). |
 | `grasp_tree.py <output_dir> <step>` | Draw the explored robot-loop steps as an AND/OR disassembly tree. |
 | `visualize_tool.py <output_dir> <step> <standard label>` | Show how a robot tool is placed on a standard and what it touches. |
+| `weight_sensitivity.py <output_dir> <seeds> <output_dir>` | Pefrorm a sensitivity analyses for the industrial fastener on the weights of the optimization criteria. |
 
 ## Conventions and limits
 

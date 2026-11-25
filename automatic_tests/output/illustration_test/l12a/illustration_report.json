@@ -157,10 +157,10 @@
   "config_hash": "95cd398031d30a65de9790744b3c60ceac0b79c5636ff5017555d0bf75d9fe2a",
   "stats": {
     "views_cached": true,
-    "view_search_s": 0.00988080000388436,
+    "view_search_s": 0.010923300011199899,
     "layers_loaded": 4,
-    "render_s": 0.4294558999972651,
-    "total_s": 0.4393394999933662
+    "render_s": 1.1945711000007577,
+    "total_s": 1.2054984999995213
   },
   "config": {
     "image_size": [

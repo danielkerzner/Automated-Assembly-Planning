@@ -1,0 +1,61 @@
+{
+ "schema_version": 3,
+ "cache_key": "f7919463cf94a0431d4831826ccc463c0a0ffc7f3637364253b75be8f51f3951",
+ "component_ids": [
+  "Part__Feature",
+  "Part__Feature001",
+  "Part__Feature002"
+ ],
+ "component_labels": [
+  "component3",
+  "component2",
+  "component1"
+ ],
+ "config": {
+  "margin": 1.0,
+  "group_consecutive": true,
+  "group_one_order": true,
+  "allow_noncoherent": false
+ },
+ "stats": {
+  "group_rule": false,
+  "group_one_order": false,
+  "groups": {},
+  "group_order_pruned_edges": 0,
+  "N": 3,
+  "n_movable": 3,
+  "n_standards": 0,
+  "D": 6,
+  "D_prime": 6,
+  "V": 1,
+  "E": 0,
+  "nodes_per_level": [
+   1,
+   0,
+   0,
+   0
+  ],
+  "connectivity_rule": true,
+  "disconnected_dropped": 1,
+  "allow_noncoherent": false,
+  "noncoherent_escapes": 0,
+  "noncoherent_states": 0,
+  "dead_ends": 1,
+  "live_nodes": 0,
+  "complete": false,
+  "time_s": 0.015779499997734092,
+  "array_bytes": 414
+ },
+ "complete": false,
+ "root": 0,
+ "terminal": null,
+ "dead_ends": [
+  0
+ ],
+ "component_groups": [
+  "component3",
+  "component2",
+  "component1"
+ ],
+ "date": "2026-11-21T20:56:14"
+}

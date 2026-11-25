@@ -18,7 +18,7 @@
       "notes": [
         "random cases: V from 1 to 524, 131 non-trivial"
       ],
-      "seconds": 7.455
+      "seconds": 657.467
     },
     "A2": {
       "passed": true,
@@ -33,7 +33,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.157
+      "seconds": 1.293
     },
     "A2b": {
       "passed": true,
@@ -51,7 +51,7 @@
         "root out-edge: industrial_fastner_part001 (Part__Feature005) [(0.0, 1.0, 0.0), (0.0, -1.0, 0.0)]",
         "V=61, E=141, per level [1, 5, 10, 12, 12, 10, 5, 5, 1], dead ends 0, complete=True"
       ],
-      "seconds": 0.0
+      "seconds": 0.001
     },
     "A3": {
       "passed": true,
@@ -82,7 +82,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.002
+      "seconds": 0.013
     },
     "A4": {
       "passed": true,
@@ -101,7 +101,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.001
+      "seconds": 0.062
     },
     "A5": {
       "passed": true,
@@ -116,11 +116,11 @@
         }
       ],
       "notes": [
-        "N=12: 0.22 s, arrays 0.5 MB, peak traced 1.2 MB",
-        "N=16: 0.50 s, arrays 10.1 MB, peak traced 23.7 MB",
+        "N=12: 1.08 s, arrays 0.5 MB, peak traced 1.2 MB",
+        "N=16: 1.78 s, arrays 10.2 MB, peak traced 23.7 MB",
         "N = 20 skipped (run with --groups scale)"
       ],
-      "seconds": 0.722
+      "seconds": 2.866
     },
     "A6": {
       "passed": true,
@@ -147,7 +147,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.002
+      "seconds": 0.013
     },
     "A7": {
       "passed": true,
@@ -174,7 +174,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.002
+      "seconds": 0.006
     },
     "A8": {
       "passed": true,
@@ -223,7 +223,7 @@
       "notes": [
         "industrial_fastner assembly-box check skipped (run with --groups real)"
       ],
-      "seconds": 0.004
+      "seconds": 0.036
     },
     "A9": {
       "passed": true,
@@ -274,7 +274,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.054
+      "seconds": 0.389
     },
     "A10": {
       "passed": true,
@@ -297,7 +297,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.559
+      "seconds": 16.476
     },
     "A11": {
       "passed": true,
@@ -312,7 +312,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.027
+      "seconds": 0.135
     },
     "A12": {
       "passed": true,
@@ -363,7 +363,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.173
+      "seconds": 1.299
     },
     "A13": {
       "passed": true,
@@ -418,7 +418,62 @@
         }
       ],
       "notes": [],
-      "seconds": 0.132
+      "seconds": 1.212
+    },
+    "A14": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "strict D11: Bridge's only move leads to the disconnected {X, Y}, so the root is a dead end (V=1, dead_ends=[np.int64(0)], complete=False)",
+          "passed": true
+        },
+        {
+          "label": "dead end reported, not resolved",
+          "passed": true
+        },
+        {
+          "label": "allow_noncoherent=False explicitly matches the default config (regression pin)",
+          "passed": true
+        },
+        {
+          "label": "D14 on: the escape completes the graph (complete=True, dead_ends=[])",
+          "passed": true
+        },
+        {
+          "label": "V=5 (root, {X,Y}, {X}, {Y}, terminal), E=5 (got V=5, E=5)",
+          "passed": true
+        },
+        {
+          "label": "only {X, Y} (mask 0b110) is disconnected in the final graph (got {6})",
+          "passed": true
+        },
+        {
+          "label": "stats: 1 escaping state (the root), 1 disconnected node in the result (got escapes=1, states=1)",
+          "passed": true
+        },
+        {
+          "label": "bigger bridge case also completes with the escape (complete=True)",
+          "passed": true
+        },
+        {
+          "label": "{Y1, Y2, W} is reached and is connected again (X-cluster fully removed)",
+          "passed": true
+        },
+        {
+          "label": "D11 resumes once reconnected: removing Y1 (the only move that would re-disconnect {Y1, Y2, W}) is dropped, since removing Y2 or W instead stays connected",
+          "passed": true
+        },
+        {
+          "label": "both of {Y1, Y2, W}'s connected-destination moves (removing Y2 or removing W) are kept",
+          "passed": true
+        },
+        {
+          "label": "`AoG.connected` agrees with the independent brute-force check on every node (22 disconnected by brute force)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.067
     }
   }
 }

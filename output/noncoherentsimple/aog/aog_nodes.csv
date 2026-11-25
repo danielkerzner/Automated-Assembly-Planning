@@ -1,0 +1,2 @@
+﻿node,level,mask,live,dead_end,components
+0,0,7,False,True,component3; component2; component1

@@ -1,0 +1,278 @@
+{
+  "results": {
+    "S1": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "gap=0.3: stays category 1 (screw), got 1",
+          "passed": true
+        },
+        {
+          "label": "gap=0.3: one removal option (got 1)",
+          "passed": true
+        },
+        {
+          "label": "gap=0.3: plate in holds=True (expected True), holds={'plate'}",
+          "passed": true
+        },
+        {
+          "label": "gap=0.8: stays category 1 (screw), got 1",
+          "passed": true
+        },
+        {
+          "label": "gap=0.8: one removal option (got 1)",
+          "passed": true
+        },
+        {
+          "label": "gap=0.8: plate in holds=False (expected False), holds=set()",
+          "passed": true
+        }
+      ],
+      "notes": [
+        "gap=0.3: direction=Vector (0.0, 0.0, 1.0), blockers=set()",
+        "gap=0.8: direction=Vector (0.0, 0.0, 1.0), blockers=set()"
+      ],
+      "seconds": 1.722
+    },
+    "S2": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "stays category 1 (got 1)",
+          "passed": true
+        },
+        {
+          "label": "seat is a hold (got {'seat'})",
+          "passed": true
+        },
+        {
+          "label": "seat is not a blocker (got set())",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.726
+    },
+    "S3": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "stays category 1 (got 1)",
+          "passed": true
+        },
+        {
+          "label": "cover is not a hold (got set())",
+          "passed": true
+        },
+        {
+          "label": "cover is a blocker (got {'cover'})",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.374
+    },
+    "S4": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "both free: category 3 (got 3)",
+          "passed": true
+        },
+        {
+          "label": "both free: warning logged",
+          "passed": true
+        },
+        {
+          "label": "both blocked: category 3 (got 3)",
+          "passed": true
+        },
+        {
+          "label": "both blocked: warning logged",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.083
+    },
+    "S5": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "stays category 2 (nut) (got StandardRecord(category=2, options=[RemovalOption(direction=Vector (-0.0, -0.0, -1.0), exit_point=Vector (0.0, 0.0, 0.0), blockers=set(), max_travel=None)], holds=set(), contact_neighbors={'cap'}, bbox=(Vector (-5.000000000000002, -5.773502691896258, 10.0), Vector (5.000000000000002, 5.773502691896258, 16.0)), partner='screw', nut_rule='locked'))",
+          "passed": true
+        },
+        {
+          "label": "partner = screw (got screw)",
+          "passed": true
+        },
+        {
+          "label": "nut_rule = locked (got locked)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 1.707
+    },
+    "S6": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "stays category 2 (nut) (got StandardRecord(category=2, options=[RemovalOption(direction=Vector (-0.0, -0.0, -1.0), exit_point=Vector (0.0, 0.0, 0.0), blockers=set(), max_travel=None)], holds=set(), contact_neighbors={'cap'}, bbox=(Vector (-5.000000000000002, -5.773502691896258, 10.0), Vector (5.000000000000002, 5.773502691896258, 16.0)), partner='screw', nut_rule='free'))",
+          "passed": true
+        },
+        {
+          "label": "partner = screw (got screw)",
+          "passed": true
+        },
+        {
+          "label": "nut_rule = free (got free)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 1.138
+    },
+    "S7": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "demoted to category 3 (got 3)",
+          "passed": true
+        },
+        {
+          "label": "demotion logged (P7)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.015
+    },
+    "S8": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "category 3, two options (got category=3, 2 option(s))",
+          "passed": true
+        },
+        {
+          "label": "one option blocked only by 'below', the other only by 'above' (got [{'above'}, {'below'}])",
+          "passed": true
+        },
+        {
+          "label": "shaft is not a blocker on either option (got [{'above'}, {'below'}])",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.575
+    },
+    "S9": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "washer: category 3, two options (got StandardRecord(category=3, options=[RemovalOption(direction=Vector (0.0, 0.0, 1.0), exit_point=Vector (0.0, 0.0, 18.0), blockers={'nut'}, max_travel=None), RemovalOption(direction=Vector (-0.0, -0.0, -1.0), exit_point=Vector (0.0, 0.0, -4.0), blockers={'screw'}, max_travel=None)], holds=set(), contact_neighbors=set(), bbox=(Vector (-6.0, -6.0, 10.0), Vector (6.0, 6.0, 14.0)), partner=None, nut_rule=None))",
+          "passed": true
+        },
+        {
+          "label": "one option blocked only by the screw, the other only by the nut (got [{'nut'}, {'screw'}])",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.163
+    },
+    "S10": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "error message matches (got: BOM row 's1' sets both 'screw' and 'nut' true; a standard can only be one category)",
+          "passed": true
+        },
+        {
+          "label": "flag on a non-standard row: no entry in the result (got {})",
+          "passed": true
+        },
+        {
+          "label": "flag on a non-standard row: warning logged",
+          "passed": true
+        },
+        {
+          "label": "no screw/nut columns: category None (got {'s1': None})",
+          "passed": true
+        },
+        {
+          "label": "end-to-end: lands in category 3 (got 3)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.028
+    },
+    "S11": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "pocket=False: stays category 2 (got StandardRecord(category=2, options=[RemovalOption(direction=Vector (-0.0, -0.0, -1.0), exit_point=Vector (0.0, 0.0, 0.0), blockers=set(), max_travel=None)], holds=set(), contact_neighbors={'cap'}, bbox=(Vector (-5.000000000000002, -5.773502691896258, 10.0), Vector (5.000000000000002, 5.773502691896258, 16.0)), partner='stud', nut_rule='free'))",
+          "passed": true
+        },
+        {
+          "label": "pocket=False: partner = stud (got stud)",
+          "passed": true
+        },
+        {
+          "label": "pocket=False: nut_rule = free (got free)",
+          "passed": true
+        },
+        {
+          "label": "pocket=True: stays category 2 (got StandardRecord(category=2, options=[RemovalOption(direction=Vector (-0.0, -0.0, -1.0), exit_point=Vector (0.0, 0.0, 0.0), blockers=set(), max_travel=None)], holds=set(), contact_neighbors={'cap'}, bbox=(Vector (-5.000000000000002, -5.773502691896258, 10.0), Vector (5.000000000000002, 5.773502691896258, 16.0)), partner='stud', nut_rule='locked'))",
+          "passed": true
+        },
+        {
+          "label": "pocket=True: partner = stud (got stud)",
+          "passed": true
+        },
+        {
+          "label": "pocket=True: nut_rule = locked (got locked)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.735
+    },
+    "S12": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "stays category 2 (got StandardRecord(category=2, options=[RemovalOption(direction=Vector (-0.0, -0.0, -1.0), exit_point=Vector (0.0, 0.0, 0.0), blockers=set(), max_travel=None)], holds=set(), contact_neighbors={'cap'}, bbox=(Vector (-8.0, -8.0, 10.0), Vector (7.969557584733989, 8.0, 16.0)), partner='screw', nut_rule='locked'))",
+          "passed": true
+        },
+        {
+          "label": "partner = screw, found via the inner bore face (got screw)",
+          "passed": true
+        },
+        {
+          "label": "nut_rule = locked, via the partner's own hex collar (got locked)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 0.91
+    },
+    "S13": {
+      "passed": true,
+      "checks": [
+        {
+          "label": "stays category 2 (got StandardRecord(category=2, options=[RemovalOption(direction=Vector (-0.0, -0.0, -1.0), exit_point=Vector (0.0, 0.0, 0.0), blockers=set(), max_travel=None)], holds=set(), contact_neighbors=set(), bbox=(Vector (-5.000000000000002, -5.773502691896258, 10.0), Vector (5.000000000000002, 5.773502691896258, 16.0)), partner='screw', nut_rule='free'))",
+          "passed": true
+        },
+        {
+          "label": "partner is still the screw, not the washer (got screw)",
+          "passed": true
+        }
+      ],
+      "notes": [],
+      "seconds": 1.253
+    }
+  }
+}

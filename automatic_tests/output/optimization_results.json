@@ -40,7 +40,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.06
+      "seconds": 0.348
     },
     "O2": {
       "passed": true,
@@ -71,7 +71,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.0
+      "seconds": 0.001
     },
     "O3": {
       "passed": true,
@@ -98,7 +98,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.889
+      "seconds": 1.781
     },
     "O4": {
       "passed": true,
@@ -144,7 +144,7 @@
         "travel only (not asserted), use_cost_to_go=False: optimum 0.000000 found on 10/10 seeds",
         "travel only (not asserted), use_cost_to_go=True: optimum 0.000000 found on 10/10 seeds"
       ],
-      "seconds": 21.543
+      "seconds": 26.579
     },
     "O5": {
       "passed": true,
@@ -191,7 +191,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.009
+      "seconds": 0.005
     },
     "O6": {
       "passed": true,
@@ -214,7 +214,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.007
+      "seconds": 0.005
     },
     "O7": {
       "passed": true,
@@ -237,7 +237,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.012
+      "seconds": 0.005
     },
     "O8": {
       "passed": true,
@@ -260,7 +260,7 @@
         }
       ],
       "notes": [],
-      "seconds": 0.206
+      "seconds": 0.063
     },
     "O9": {
       "passed": true,
@@ -373,7 +373,7 @@
       "notes": [
         "FreeCAD geometry variant skipped (run with --groups real)"
       ],
-      "seconds": 0.145
+      "seconds": 0.08
     },
     "O10": {
       "passed": true,
@@ -384,7 +384,7 @@
         }
       ],
       "notes": [],
-      "seconds": 5.543
+      "seconds": 4.222
     },
     "O11": {
       "passed": true,
@@ -415,7 +415,7 @@
         }
       ],
       "notes": [],
-      "seconds": 6.424
+      "seconds": 6.262
     },
     "O12": {
       "passed": true,
@@ -446,7 +446,7 @@
         }
       ],
       "notes": [],
-      "seconds": 1.199
+      "seconds": 1.167
     },
     "O13": {
       "passed": true,
@@ -471,21 +471,21 @@
       "notes": [
         "pipeline caching variant skipped (run with --groups real)"
       ],
-      "seconds": 3.164
+      "seconds": 2.33
     },
     "O14": {
       "passed": true,
       "checks": [
         {
-          "label": "N=12: 13.8 s < 60 s and 6.5 MB < 32.2 MB",
+          "label": "N=12: 13.4 s < 60 s and 6.5 MB < 32.2 MB",
           "passed": true
         }
       ],
       "notes": [
-        "N=12: V=587, E=1540, moves=6610, 91 iterations, 13.8 s, peak traced 6.5 MB (estimate 32.2 MB), cost 0.3297 (greedy 0.3367)",
+        "N=12: V=587, E=1540, moves=6610, 91 iterations, 13.4 s, peak traced 6.5 MB (estimate 32.2 MB), cost 0.3297 (greedy 0.3367)",
         "N = 20 skipped (run with --groups scale)"
       ],
-      "seconds": 13.827
+      "seconds": 13.472
     },
     "O15": {
       "passed": true,

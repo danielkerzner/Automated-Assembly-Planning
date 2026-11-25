@@ -1,0 +1,5 @@
+label,is_standard,screw,nut,pitch,tool,group,processed,subassembly
+Assembly,False,False,False,,By_hand,Assembly,true,
+component3,False,False,False,,By_hand,component3,,Assembly
+component2,False,False,False,,By_hand,component2,,Assembly
+component1,False,False,False,,By_hand,component1,,Assembly
